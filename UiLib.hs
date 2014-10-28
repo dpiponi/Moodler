@@ -1,0 +1,277 @@
+{-# LANGUAGE DeriveDataTypeable, DeriveFunctor #-}
+
+module UiLib(module UiLib, module Symbols) where
+
+import Data.Typeable hiding (Proxy)
+import Symbols
+--import Graphics.Gloss.Data.Picture
+
+data Ui a = Return a
+          | Echo String (Ui a)
+          | New String String (Ui a)
+          | Run String [String] (Ui a)
+          | Load String (Ui a)
+          | PlugIn UiId String (Float, Float) UiId (UiId -> Ui a)
+          | PlugOut UiId String (Float, Float) UiId (UiId -> Ui a)
+          | Knob UiId String (Float, Float) UiId (UiId -> Ui a)
+          | Proxy UiId String (Float, Float) UiId (UiId -> Ui a)
+          | Image UiId String (Float, Float) UiId (UiId -> Ui a)
+          | Container UiId String (Float, Float) UiId (UiId -> Ui a)
+          | Label UiId String (Float, Float) UiId (UiId -> Ui a)
+          | Selector UiId String (Float, Float)
+                                [String] UiId (UiId -> Ui a)
+          | Connect String String (Ui a)
+          | Cable UiId UiId (Ui a)
+          | Mouse ((Float, Float) -> Ui a)
+          | Args ([String] -> Ui a)
+          | NewId String (UiId -> Ui a)
+          | Set UiId Float (Ui a)
+          | SetLow UiId (Maybe Float) (Ui a)
+          | SetHigh UiId (Maybe Float) (Ui a)
+          | Value String Float (Ui a)
+          | GetValue UiId (Float -> Ui a)
+          | Save String (Ui a)
+          | Write String (Ui a)
+          | Selection ([UiId] -> Ui a)
+          | Hide UiId Bool (Ui a)
+          | Delete UiId (Ui a)
+          | Bind Char String (Ui a)
+          | Location UiId (Maybe (Float, Float) -> Ui a)
+          | Name UiId (Maybe String -> Ui a)
+          | Move UiId (Float, Float) (Ui a)
+          | Switch UiId (Ui a)
+          | CurrentPlane (UiId -> Ui a)
+          | GetParent UiId (UiId -> Ui a)
+          | GetRoot (UiId -> Ui a)
+          | Recompile (Ui a)
+          | Quit (Ui a)
+          | Parent UiId UiId (Ui a)
+          | Rename String UiId (Ui a)
+          | Unparent UiId (Ui a)
+          | Input String (Maybe String -> Ui a)
+          deriving (Typeable, Functor)
+
+instance Monad Ui where
+    return = Return
+    Return a >>= f = f a
+    Echo t cont >>= f = Echo t (cont >>= f)
+    New s1 s2 cont >>= f = New s1 s2 (cont >>= f)
+    Run t ss cont >>= f = Run t ss (cont >>= f)
+    Load t cont >>= f = Load t (cont >>= f)
+    PlugIn s1 s2 p q cont >>= f = PlugIn s1 s2 p q ((>>= f) . cont)
+    PlugOut s1 s2 p q cont >>= f = PlugOut s1 s2 p q ((>>= f) . cont)
+    Knob s1 s2 p q cont >>= f = Knob s1 s2 p q ((>>= f) . cont)
+    Selector s1 s2 p opts q cont >>= f = Selector
+                                s1 s2 p opts q ((>>= f) . cont)
+    Proxy s1 s2 p q cont >>= f = Proxy s1 s2 p q ((>>= f) . cont)
+    Image s1 s2 p q cont >>= f = Image s1 s2 p q ((>>= f) . cont)
+    Container s1 s2 p q cont >>= f = Container s1 s2 p q ((>>= f) . cont)
+    Label s1 s2 p q cont >>= f = Label s1 s2 p q ((>>= f) . cont)
+    Connect s1 s2 cont >>= f = Connect s1 s2 (cont >>= f)
+    Cable s1 s2 cont >>= f = Cable s1 s2 (cont >>= f)
+    Mouse cont >>= f = Mouse ((>>= f) . cont)
+    Args cont >>= f = Args ((>>= f) . cont)
+    GetValue s1 cont >>= f = GetValue s1 ((>>= f) . cont)
+    GetParent s1 cont >>= f = GetParent s1 ((>>= f) . cont)
+    GetRoot cont >>= f = GetRoot ((>>= f) . cont)
+    NewId s1 cont >>= f = NewId s1 ((>>= f) . cont)
+    Set t v cont >>= f = Set t v (cont >>= f)
+    SetLow t v cont >>= f = SetLow t v (cont >>= f)
+    SetHigh t v cont >>= f = SetHigh t v (cont >>= f)
+    Value t v cont >>= f = Value t v (cont >>= f)
+    Save t cont >>= f = Save t (cont >>= f)
+    Write t cont >>= f = Write t (cont >>= f)
+    Selection cont >>= f = Selection ((>>= f) . cont)
+    Hide t h cont >>= f = Hide t h (cont >>= f)
+    Delete t cont >>= f = Delete t (cont >>= f)
+    Bind c t cont >>= f = Bind c t (cont >>= f)
+    Location s1 cont >>= f = Location s1 ((>>= f) . cont)
+    Name s1 cont >>= f = Name s1 ((>>= f) . cont)
+    Move c p cont >>= f = Move c p (cont >>= f)
+    --NewPlane cont >>= f = NewPlane ((>>= f) . cont)
+    CurrentPlane cont >>= f = CurrentPlane ((>>= f) . cont)
+    Switch p cont >>= f = Switch p (cont >>= f)
+    Recompile cont >>= f = Recompile (cont >>= f)
+    Quit cont >>= f = Quit (cont >>= f)
+    Parent s0 s1 cont >>= f = Parent s0 s1 (cont >>= f)
+    Rename s0 s1 cont >>= f = Rename s0 s1 (cont >>= f)
+    Unparent s0 cont >>= f = Unparent s0 (cont >>= f)
+    Input s0 cont >>= f = Input s0 ((>>= f) . cont)
+
+new :: String -> String -> Ui ()
+new s1 s2 = New s1 s2 (return ())
+
+new' :: String -> Ui String
+new' s1 = do
+    s2 <- newId s1 -- kludge until we have SynthIds
+    New s1 (unUiId s2) (return ())
+    return (unUiId s2)
+
+echo :: String -> Ui ()
+echo t = Echo t (return ())
+
+r, ru, run :: String -> [String] -> Ui ()
+run t ss = Run t ss (return ())
+r = run
+ru = run
+
+l, lo, loa, load :: String -> Ui ()
+load t = Load t (return ())
+l = load
+lo = load
+loa = load
+
+plugin :: UiId -> String -> (Float, Float) -> UiId -> Ui UiId
+plugin s1 s2 p creationParent = PlugIn s1 s2 p creationParent return
+
+plugin' :: String -> (Float, Float) -> UiId -> Ui UiId
+plugin' s2 p creationParent = do
+    s1 <- newId "in"
+    PlugIn s1 s2 p creationParent return
+
+plugout :: UiId -> String -> (Float, Float) -> UiId -> Ui UiId
+plugout s1 s2 p creationParent = PlugOut s1 s2 p creationParent return
+
+plugout' :: String -> (Float, Float) -> UiId -> Ui UiId
+plugout' s2 p creationParent = do
+    s1 <- newId "out"
+    PlugOut s1 s2 p creationParent return
+
+knob :: UiId -> String -> (Float, Float) -> UiId -> Ui UiId
+knob s1 s2 p creationParent = Knob s1 s2 p creationParent return
+
+proxy' :: (Float, Float) -> UiId -> Ui UiId
+proxy' pos creationParent = do
+    nodeId <- newId "proxy"
+    Proxy nodeId (unUiId nodeId) pos creationParent return
+
+knob' :: String -> (Float, Float) -> UiId -> Ui UiId
+knob' s2 p creationParent = do
+    s1 <- newId "knob"
+    Knob s1 s2 p creationParent return
+
+selector' :: String -> (Float, Float) -> [String] -> UiId -> Ui UiId
+selector' s2 p opts creationParent = do
+    s1 <- newId "selector"
+    Selector s1 s2 p opts creationParent return
+
+image :: UiId -> String -> (Float, Float) -> UiId -> Ui UiId
+image s1 s2 p creationParent = Image s1 s2 p creationParent return
+
+parent :: UiId -> UiId -> Ui ()
+parent s1 s2 = Parent s1 s2 (return ())
+
+rename :: String -> UiId -> Ui ()
+rename s1 s2 = Rename s1 s2 (return ())
+
+unparent :: UiId -> Ui ()
+unparent s1 = Unparent s1 (return ())
+
+image' :: String -> (Float, Float) -> UiId -> Ui UiId
+image' s2 p creationParent = do
+    s1 <- newId "image"
+    Image s1 s2 p creationParent return
+
+container' :: String -> (Float, Float) -> UiId -> Ui UiId
+container' bmpName p creationParent = do
+    nodeId <- newId "container"
+    Container nodeId bmpName p creationParent return
+
+label' :: String -> (Float, Float) -> UiId -> Ui UiId
+label' labelText p creationParent = do
+    nodeId <- newId "label"
+    Label nodeId labelText p creationParent return
+
+connect :: String -> String -> Ui ()
+connect s1 s2 = Connect s1 s2 (return ())
+
+cable :: UiId -> UiId -> Ui ()
+cable s1 s2 = Cable s1 s2 (return ())
+
+mouse :: Ui (Float, Float)
+mouse = Mouse return
+
+args :: Ui [String]
+args = Args return
+
+getValue :: UiId -> Ui Float 
+getValue s1 = GetValue s1 return
+
+--getPlane :: UiId -> Ui UiId 
+--getPlane s1 = GetPlane s1 return
+
+input :: String -> Ui (Maybe String)
+input s1 = Input s1 return
+
+getParent :: UiId -> Ui UiId
+getParent s1 = GetParent s1 return
+
+getRoot :: Ui UiId
+getRoot = GetRoot return
+
+newId :: String -> Ui UiId
+newId s1 = NewId s1 return
+
+set :: UiId -> Float -> Ui ()
+set t v = Set t v (return ())
+
+setLow :: UiId -> Maybe Float -> Ui ()
+setLow t v = SetLow t v (return ())
+
+setHigh :: UiId -> Maybe Float -> Ui ()
+setHigh t v = SetHigh t v (return ())
+
+value :: String -> Float -> Ui ()
+value t v = Value t v (return ())
+
+s, sa, sav, save :: String -> Ui ()
+save s' = Save s' (return ())
+s = save
+sa = save
+sav = save
+
+w, wr, wri, writ, write :: String -> Ui ()
+write s' = Write s' (return ())
+w = write
+wr = write
+wri = write
+writ = write
+
+selection :: Ui [UiId]
+selection = Selection return
+
+hide :: UiId -> Ui ()
+hide t = Hide t True (return ())
+
+recompile :: Ui ()
+recompile = Recompile (return ())
+
+quit :: Ui ()
+quit = Quit (return ())
+
+unhide :: UiId -> Ui ()
+unhide t = Hide t False (return ())
+
+delete :: UiId -> Ui ()
+delete t = Delete t (return ())
+
+bind :: Char -> String -> Ui ()
+bind c t = Bind c t (return ())
+
+location :: UiId -> Ui (Maybe (Float, Float))
+location s1 = Location s1 return
+
+name :: UiId -> Ui (Maybe String)
+name s1 = Name s1 return
+
+move :: UiId -> (Float, Float) -> Ui ()
+move c p = Move c p (return ())
+
+--newPlane :: Ui Plane
+--newPlane = NewPlane return
+
+currentPlane :: Ui UiId
+currentPlane = CurrentPlane return
+
+switch :: UiId -> Ui ()
+switch p = Switch p (return ())

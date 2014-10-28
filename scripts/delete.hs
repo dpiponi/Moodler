@@ -1,0 +1,1 @@
+selection >>= mapM_ delete
