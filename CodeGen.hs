@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, ForeignFunctionInterface #-}
 
 module CodeGen where
 
