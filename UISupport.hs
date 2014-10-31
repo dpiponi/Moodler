@@ -2,22 +2,19 @@
 
 module UISupport where
 
-import qualified Data.Map as M
-import Graphics.Gloss.Interface.IO.Game
 import Control.Lens
 import Control.Monad.State
+import Graphics.Gloss.Interface.IO.Game
 import qualified Data.Foldable as F
+import qualified Data.Map as M
 import qualified Data.Set as S
---import Debug.Trace
---import qualified Data.List as L
 
---import Utils
-import UIElement
 import Cable
-import World
 import Comms
-import Symbols
 import ContainerTree
+import Symbols
+import UIElement
+import World
 
 highlightElement :: MonadState GlossWorld m => UiId -> m ()
 highlightElement i = (inner . uiElements) . ix i . highlighted .= True
@@ -84,9 +81,9 @@ visitElements' e elt@Container { _contents = cts } = do
             return $ concat childElements ++ [e]
 visitElements' e elt = do
     showHiddenElements <- use (inner . showHidden)
-    if not showHiddenElements && (elt ^. hidden)
-        then return []
-        else return [e]
+    return $ if not showHiddenElements && (elt ^. hidden)
+        then []
+        else [e]
     
 visitElements :: MonadState GlossWorld m => m [UiId]
 visitElements = do
@@ -125,11 +122,12 @@ selectedByPoint selectionPlane (x, y) = do
     poss <- flip filterM parentsFirst $ \e -> do
         elt <- getElementById "UISupport.hs" e
         return $ pointNearUIElement (x, y) elt
-    if null poss
-        then return Nothing
-        else return (Just (head poss))
+    return $ if null poss
+        then Nothing
+        else Just (head poss)
 
-deleteCable :: (Functor m, MonadIO m, MonadState GlossWorld m) => UiId -> m (Maybe Cable)
+deleteCable :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+               UiId -> m (Maybe Cable)
 deleteCable selectedIn = do
     outPoint <- getElementById "UISupport.hs" selectedIn
     case outPoint ^. cables of
@@ -168,8 +166,10 @@ newNameLike s m = if s `M.member` m
     then newNameLike (s ++ "'") m
     else s
 
+{-
 quantize :: Float -> Float -> Float
 quantize q x = q*fromIntegral (floor (x/q) :: Int)
+-}
 
 anOut :: UiId -> GlossWorld -> Bool
 anOut n = evalState $ do
@@ -215,7 +215,7 @@ everythingInRegion selectionPlane p0 p1 = do
         return $ uiElementWithinBox (p0, p1) elt
 
 addPlane :: MonadState GlossWorld m => UiId -> m ()
-addPlane plane = inner . planes %= (plane :)
+addPlane plane = inner . planes .= plane
 
 -- When we make a group we may have to remove elements from their parents.
 -- We only remove them if the parents aren't also in the newly formed group.
@@ -229,12 +229,6 @@ makeGroup p sel proxyLocation = do
     newPlaneName <- use (inner . newName)
     inner . newName %= (+ 1) -- kludge XXX
 
-    -- Make plane for newly formed group with given name.
-    {-
-    groupPlane <- newUIElement (\_ -> Proxy p False False
-                               proxyLocation ("plane" ++ show newPlaneName)
-                               S.empty)
-    -}
     let proxyName = "proxy" ++ show newPlaneName
     let groupPlane = UiId proxyName
     let e = UIElement.Proxy p False False proxyLocation proxyName S.empty

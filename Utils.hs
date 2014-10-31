@@ -3,6 +3,10 @@ module Utils where
 import qualified Data.Map as M
 import qualified Data.Set as S
 
+withJust :: Monad m => Maybe a -> (a -> m ()) -> m ()
+withJust Nothing _ = return ()
+withJust (Just a) f = f a
+
 -- Find the key of an element of a map whose value
 -- satisfies some property.
 findByValue :: (value -> Bool) -> M.Map key value -> Maybe key

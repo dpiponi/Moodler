@@ -1,7 +1,8 @@
-module UiLibWrapper where
+module UiLibWrapper (module X, module UIElement) where
 
-import Control.Monad
-import Control.Monad.State
-import Debug.Trace
+import Control.Monad as X
+import Control.Monad.State as X
+import Debug.Trace as X
 
-import UiLib 
+import UiLib as X
+import UIElement(ElementType(..))

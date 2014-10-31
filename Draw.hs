@@ -2,19 +2,17 @@ module Draw where
 
 import Graphics.Gloss.Interface.IO.Game
 
-import World
 import Cable
+import Control.Lens
+import Control.Monad.State
+import Control.Monad.Writer
+import Symbols
 import UIElement
---import Numeric
+import Utils
+import World
+import qualified Box as B
 import qualified Data.Map as M
 import qualified Data.Set as S
-import Control.Lens
-import Control.Monad.Writer
-import Control.Monad.State
-import Symbols
---import Data.Maybe
-import qualified Box as B
---import Debug.Trace
 
 import UISupport
 
@@ -34,7 +32,7 @@ knobColour = makeColor 0.2 0.2 0.2 1
 cableColour = makeColor 0.8 0.6 0.2 0.9
 panelColour = makeColor 0.98 0.98 0.95 1.0
 proxyColour, inertCableColour :: Color
-proxyColour = makeColor 0.4 0.4 1.0 1.0
+proxyColour = makeColor 0.4 0.6 1.0 1.0
 inertCableColour = makeColor 0.7 0.7 0.7 1
     
 drawCable :: GlossWorld -> Bool -> Cable -> Writer Picture ()
@@ -59,11 +57,11 @@ drawUIElement showingHidden world (Container { _parent = _
                                              , _highlighted = highlit
                                              , _imageWidth = iw
                                              , _imageHeight = ih }) = do
-        tell $ translate x y $ case M.lookup pic' (world ^. inner . pics) of
-            Nothing -> blank
-            Just (x', _, _) -> x'
+        withJust (M.lookup pic' (world ^. inner . pics)) $
+            \(x', _, _) -> tell $ translate x y x'
         when highlit $ apply (translate x y . color red) $
-            tell $ rect (-fromIntegral iw/2, -fromIntegral ih/2) (fromIntegral iw/2, fromIntegral ih/2)
+            tell $ rect (-fromIntegral iw/2, -fromIntegral ih/2)
+                        (fromIntegral iw/2, fromIntegral ih/2)
         forM_ (S.toList c) $ \i -> do
             let elts = world ^. (inner . uiElements)
             case M.lookup i elts of
@@ -74,6 +72,8 @@ drawUIElement _ _ (Proxy _ wasSelected _ (x, y) n _) =
         apply (translate x y . color
                     (selectColor wasSelected proxyColour)) $ do
               tell $ rect (-20, -20) (20, 20)
+              tell $ rect (-18, -18) (18, 18)
+              tell $ thickCircle 2 16
               tell $ translate 15 (-5) $ scale 0.1 0.1 $ text n
 
 drawUIElement _ world (Image _ _ _ (x, y) _ picture _ _) =
@@ -85,21 +85,18 @@ drawUIElement _ _ (Out _ wasSelected _ (x, y) _displayName) =
         apply (translate x y . color (selectColor wasSelected outColour)) $ do
               tell $ circleSolid 10
               tell $ color black $ circleSolid 5
-              --tell $ translate 15 (-5) $ scale 0.1 0.1 $ text displayName
 
-drawUIElement _ world (In _ wasSelected _ (x, y) _ _ cables) = do
+drawUIElement _ world (In _ wasSelected _ (x, y) _ _ cableList) = do
         apply (translate x y . color (selectColor wasSelected inColour)) $ do
                         tell $ circleSolid 10
                         tell $ color black $ circleSolid 5
-                        --tell $ translate 15 (-5) $ scale 0.1 0.1 $
-                        --                color black $ text displayName
-        forM_ (zip (True : repeat False) cables) $
+        forM_ (zip (True : repeat False) cableList) $
                                 uncurry (drawCable world)
 
-drawUIElement _ _ (Label _ wasSelected _ (x, y) displayName) =
+drawUIElement _ _ (Label _ wasSelected _ (x, y) dispName) =
         tell $ translate x y $
             color (selectColor wasSelected $ makeColor 0.7 0.7 0.5 1) $
-                scale 0.15 0.15 $ color black $ text displayName
+                scale 0.15 0.15 $ color black $ text dispName
 
 drawUIElement _ _ (Selector _ wasSelected _ (x, y) _ v opts) =
         apply (translate x y) $ do
@@ -114,11 +111,8 @@ drawUIElement _ _ (Knob _ wasSelected _ (x, y) _ _ v lo hi) =
                     color (selectColor wasSelected knobColour)) $ do
             tell $ circle 20
             tell $ circleSolid 14
-            --let angle = 3.0*clamp (-1) 1 (tanh v)
             let angle = uiAngle lo hi v
             tell $ color white $ line [(0, 0), (16*sin angle, 16*cos angle)]
-            --tell $ translate 25 8 $ scale 0.1 0.1 $ text $ showGFloat (Just 3) v ""
-            --tell $ translate 25 (-16) $ scale 0.1 0.1 $ color black $ text displayName
 
 renderPanel :: Writer Picture ()
 renderPanel = return ()
@@ -144,11 +138,10 @@ renderPlaneName :: String -> Picture
 renderPlaneName firstPlane =
     let width = estimateTextWidth firstPlane
     in translate (-550) 300 (
-        (color (B.transparentBlack 0.8) $ translate (0.5*width-5) 15 $ rectangleSolid width 40)
+        color (B.transparentBlack 0.8)
+              (translate (0.5*width-5) 15 (rectangleSolid width 40))
         <>
-        (color white $ scale 0.25 0.25 $
-                    text $ firstPlane)
-        )
+        color white (scale 0.25 0.25 (text firstPlane)))
 
 renderWorld :: GlossWorld -> IO Picture
 renderWorld w@GlossWorld { _inner = World { _showHidden = showingHidden
@@ -157,11 +150,11 @@ renderWorld w@GlossWorld { _inner = World { _showHidden = showingHidden
     return $ execWriter $ do
         apply (pictureTransformer rootXform) $ do
             renderPanel
-            let thingsToDraw = evalState (rootElementsOnPlane (head wplanes)) w :: [UiId]
+            let thingsToDraw = evalState (rootElementsOnPlane wplanes) w :: [UiId]
             void $ mapM (\i -> do
                 let e = evalState (getElementById "Draw.hs" i) w
                 drawUIElement'' showingHidden w e) thingsToDraw
-        let firstPlane = evalState (getElementById "Draw.hs" (head wplanes)) w
+        let firstPlane = evalState (getElementById "Draw.hs" wplanes) w
         tell $ renderPlaneName (_name firstPlane)
         --apply (pictureTransformer rootXform) $ do
         let gadgetPicture = w ^. inner . gadget

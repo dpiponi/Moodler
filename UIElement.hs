@@ -83,6 +83,25 @@ elementRadius (Proxy {}) = 20
 elementRadius (Image {}) = 0
 elementRadius (Selector {}) = 10
 
+data ElementType = ContainerType
+                 | InType
+                 | OutType
+                 | KnobType
+                 | LabelType
+                 | ProxyType
+                 | ImageType
+                 | SelectorType deriving (Eq, Show)
+
+elementType :: UIElement -> ElementType
+elementType (Container {}) = ContainerType
+elementType (In {})    = InType
+elementType (Out {})   = OutType
+elementType (Knob {})  = KnobType
+elementType (Label {}) = LabelType
+elementType (Proxy {}) = ProxyType
+elementType (Image {}) = ImageType
+elementType (Selector {}) = SelectorType
+
 pointNearUIElement :: Point -> UIElement -> Bool
 pointNearUIElement p Image { _loc = q
                            , _imageWidth = w

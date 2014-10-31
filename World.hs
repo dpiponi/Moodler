@@ -5,25 +5,20 @@ module World where
 
 import Control.Lens
 import Control.Monad.State
+import Control.Monad.Trans.Free
+import Data.Monoid
 import Graphics.Gloss.Interface.IO.Game
 import qualified Data.Map as M
---import qualified Data.Set as S
-import Control.Monad.Trans.Free
---import Debug.Trace
-import Data.Monoid
 
---import Utils
 import Text
 import UIElement
 import Symbols
 import qualified Box as B
 
 data MoodlerF a = GetEvent (Event -> a)
-                | SendConnectMessage String String a
 
 instance Functor MoodlerF where
     fmap f (GetEvent c) = GetEvent (f . c)
-    fmap f (SendConnectMessage s1 s2 c) = SendConnectMessage s1 s2 (f c)
 
 data Zero
 
@@ -40,7 +35,7 @@ data World = World { _uiElements :: M.Map UiId UIElement
                    , _pics :: M.Map String (Picture, Int, Int)
                    , _connections :: [(String, String)]
                    , _values :: [(String, Float)]
-                   , _planes :: [UiId]
+                   , _planes :: UiId
                    , _rootPlane :: UiId
                    , _gadget :: B.Transform -> Picture
                    , _rootTransform :: B.Transform }
@@ -83,12 +78,12 @@ handleGetString inputString prompt = do
 
 handleGetString' :: String -> String -> Event -> MoodlerM (Maybe String)
 -- Actually execute command XXX
-handleGetString' inputString prompt (EventKey (SpecialKey KeyEnter)
+handleGetString' inputString _ (EventKey (SpecialKey KeyEnter)
                                               Down _ _) = do
     inner . gadget .= const blank
     return (Just inputString)
 
-handleGetString' inputString prompt (EventKey (SpecialKey KeyEsc)
+handleGetString' _ _ (EventKey (SpecialKey KeyEsc)
                                               Down _ _) = do
     inner . gadget .= const blank
     return Nothing
@@ -121,13 +116,13 @@ instance InputHandler MoodlerM where
     getInput = handleGetString
 
 stringGadget :: String -> String -> B.Transform -> Picture
-stringGadget inputString prompt xform =
+stringGadget inputString prompt _ =
     translate 0 20 (color (B.transparentBlack 0.8) (rectangleSolid 500 60)) <>
-              translate (-250) 0 (scale 0.4 0.4 $
-                color white $ text (prompt ++ inputString))
+    translate (-250) 0 (scale 0.4 0.4 (color white $ text (prompt ++ inputString)))
 
 locById :: GlossWorld -> UiId -> (Float, Float)
-locById w e = let elt = M.findWithDefault (error "locById") e
+locById w e =
+    let elt = M.findWithDefault (error "locById") e
                                           (_uiElements (_inner w))
     in _loc elt
 
@@ -145,6 +140,11 @@ getElementById msg i = do
     case l of
         Just elt -> return elt
         Nothing -> error $ msg ++ ": can't find:" ++ show i
+
+getElementTypeById :: MonadState GlossWorld m => UiId -> m ElementType
+getElementTypeById i = do
+    elt <- getElementById "getElementTypeById" i
+    return $ elementType elt
 
 getElementsById :: MonadState GlossWorld m => String -> [UiId] -> m [UIElement]
 getElementsById msg = mapM (getElementById msg)

@@ -34,27 +34,23 @@ removeCablesFrom _ elt = elt
 
 -- Need to recurse here too XXX
 removeAllCablesFrom :: (MonadIO m, MonadState GlossWorld m) => UiId -> m ()
-removeAllCablesFrom i = (inner . uiElements) . each %= removeCablesFrom i
+removeAllCablesFrom i = inner . uiElements . each %= removeCablesFrom i
+
+withContaining :: Monad m => UIElement -> (S.Set UiId -> m ()) -> m ()
+withContaining elt f = 
+    case elt of
+        Container { _contents = cts } -> f cts
+        Proxy { _contents = cts } -> f cts
+        _ -> return () -- XXX Come back to this. Be explicit.
 
 deleteElement :: (MonadIO m, MonadState GlossWorld m) => UiId -> m ()
 deleteElement t = do
-    liftIO $ putStrLn $ "deleting " ++ show t
-    --elts <- use (inner . uiElements)
     removeAllCablesFrom t
     elt <- getElementById "UISupport.hs" t
-    liftIO $ putStrLn $ "elt = " ++ show elt
-    --- XXX Use lens/prism???
-    case elt of
-        Container { _contents = cts } ->
-            mapM_ deleteElement (S.toList cts)
-        Proxy { _contents = cts } ->
-            mapM_ deleteElement (S.toList cts)
-        _ -> return () -- XXX Come back to this. Be explicit.
-    liftIO $ putStrLn $ "Removing uiid " ++ show t
+    withContaining elt $ \ids -> mapM_ deleteElement (S.toList ids)
     removeFromParent t
-    (inner . uiElements) %= M.delete t
+    inner . uiElements %= M.delete t
     inner . currentSelection %= L.delete t
-    liftIO $ putStrLn $ "Removed uiid " ++ show t
 
 isContainer :: UiId -> MoodlerM Bool
 isContainer i = do
@@ -65,7 +61,7 @@ isContainer i = do
 
 unparent :: MonadState GlossWorld m => UiId -> m ()
 unparent childId = do
-    currentPlane : _ <- use (inner . planes)
+    currentPlane <- use (inner . planes)
     reparent currentPlane childId
 
 reparent :: MonadState GlossWorld m => UiId -> UiId -> m ()
@@ -84,7 +80,6 @@ removeFromParent childId = do
     let currentParentId = _parent childElt
     (inner . uiElements) . ix currentParentId . contents %= S.delete childId
 
---
 -- Includes argument in result
 getDescendants :: MonadState GlossWorld w =>
                   (UIElement -> [UiId]) -> UiId -> w [UiId]
@@ -98,7 +93,6 @@ getAllDescendants :: (Functor w, MonadState GlossWorld w) =>
                      (UIElement -> [UiId]) -> [UiId] -> w [UiId]
 getAllDescendants getChildren = fmap (uniq . concat) .
                                     mapM (getDescendants getChildren)
-
 
 getContainerProxyChildren :: UIElement -> [UiId]
 getContainerProxyChildren (Container { _contents = cts }) = S.toList cts
@@ -128,4 +122,3 @@ getMinimalParents everything sel = do
     selElts <- getElementsById "getMinimalParents" sel
     return [item | (item, elt) <- zip sel selElts,
                    elt ^. parent `notElem` everything]
-
