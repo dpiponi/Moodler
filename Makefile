@@ -32,7 +32,8 @@ UI_SOURCE_FILES = ui.hs \
 		  Utils.hs \
 		  Music.hs \
 		  Multi.hs \
-		  ContainerTree.hs
+		  ContainerTree.hs \
+		  Check.hs
 
 ui: $(UI_SOURCE_FILES)
 	#ghc -threaded -hide-package free -o ui ui.hs

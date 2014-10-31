@@ -19,6 +19,8 @@ do
     bind 'a' "addknob"
     bind 'm' "relocate"
     bind 'n' "rename"
+    bind 'z' "check"
+    bind 'p' "up"
 
     bind 'A' "noteA"
     bind 'B' "noteB"

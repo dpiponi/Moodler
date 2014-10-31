@@ -2,25 +2,24 @@
 
 module Save where
 
-import Data.Tuple
+import Control.Applicative
 import Control.Lens
 import Control.Monad.State
-import Control.Applicative
+import Control.Monad.Writer
+import Data.Tuple
 import Graphics.Gloss.Interface.IO.Game
+import qualified Data.List as L
 import qualified Data.Map as M
 import qualified Data.Set as S
-import qualified Data.List as L
-import Control.Monad.Writer
 
-import UIElement
 import Cable
-import Text
-import Symbols
-import World
---import UISupport
-import Multi
-import Utils
 import ContainerTree
+import Multi
+import Symbols
+import Text
+import UIElement
+import Utils
+import World
 
 synthUsedInElement :: UIElement -> S.Set String
 synthUsedInElement In { _name = n } = S.singleton (base n)
@@ -51,24 +50,34 @@ relativeShow Nothing p = show p
 relativeShow (Just (x0, y0)) (x, y) =
         "(x+(" ++ show (x-x0) ++ "), y+(" ++ show (y-y0) ++ "))"
 
+saveCable :: MonadWriter (Multi String String) m =>
+                            S.Set UiId -> Cable -> m ()
+saveCable everythingSaved (Cable src dst) = 
+    when (src `S.member` everythingSaved &&
+          dst `S.member` everythingSaved) $
+            multiTellLn "cables" 4 $ unwords ["cable",
+                                   unUiId src, unUiId dst]
+
 elementLine :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+               S.Set UiId ->
                String ->
                Maybe Point -> UiId -> UIElement ->
                StateT (S.Set UiId) (WriterT (Multi String String) m) ()
-elementLine parentId maybeMouseLocn eltName Image { _name = _
-                                                  , _loc = p
-                                                  , _pic = picture} =
+elementLine _ parentId maybeMouseLocn eltName
+    Image { _name = _
+          , _loc = p
+          , _pic = picture} =
     multiTellLn "module" 4 $ unwords [unUiId eltName,
                              "<- image'", show picture,
                              relativeShow maybeMouseLocn p, parentId]
 
-elementLine parentId maybeMouseLocn eltName Label { _name = n
+elementLine _ parentId maybeMouseLocn eltName Label { _name = n
                                                   , _loc = p } =
     multiTellLn "module" 4 $ unwords [unUiId eltName,
                                       "<-", "label'", show n,
                                       relativeShow maybeMouseLocn p, parentId]
 
-elementLine parentId maybeMouseLocn eltName Knob { _name = n
+elementLine _ parentId maybeMouseLocn eltName Knob { _name = n
                                                  , _displayName = d
                                                  , _loc = p
                                                  , _setting = s
@@ -81,108 +90,113 @@ elementLine parentId maybeMouseLocn eltName Knob { _name = n
                                                   "(" ++ show s ++ ")"]
     when (d /= n) $ multiTellLn "module" 4 $
                         unwords ["rename", show d, unUiId eltName]
-    case a of
-        Nothing -> return ()
-        Just a' ->
+    withJust a $ \a' ->
             multiTellLn "module" 4 $ "setLow " ++ unUiId eltName ++
                                      " (Just (" ++ show a' ++ "))"
-    case b of
-        Nothing -> return ()
-        Just b' ->
+    withJust b $ \b' ->
             multiTellLn "module" 4 $
                 unwords ["setHigh ", unUiId eltName,
                   paren (unwords ["Just", paren (show b')])]
 
-elementLine parentId maybeMouseLocn eltName Selector { _name = n
+elementLine _ parentId maybeMouseLocn eltName Selector { _name = n
                                                      , _loc = p
                                                      , _options = opts
                                                      , _setting = s} = do
     multiTellLn "module" 4 $ unwords [unUiId eltName, "<-", "selector'",
-                             rewriteConnection n, relativeShow maybeMouseLocn p, show opts,
+                             rewriteConnection n,
+                             relativeShow maybeMouseLocn p, show opts,
                              parentId]
     multiTellLn "settings" 4 $ unwords ["set", unUiId eltName,
                                         "(" ++ show s ++ ")"]
 
-elementLine parentId maybeMouseLocn eltName In { _name = n
-                                               , _loc = p
-                                               , _cables = c
-                                               , _displayName = d } = do
+elementLine everythingSaved parentId maybeMouseLocn eltName
+    In { _name = n
+       , _loc = p
+       , _cables = c
+       , _displayName = d } = do
     multiTellLn "module" 4 $ unwords [unUiId eltName,
                                       "<-", "plugin'", rewriteConnection n,
-                                      relativeShow maybeMouseLocn p, parentId]
+                                      relativeShow maybeMouseLocn p,
+                                      parentId]
     when (d /= n) $ multiTellLn "module" 4 $
                         unwords ["rename", show d, unUiId eltName]
-    unless (null c) $
-          let Cable src dst : _ = c
-          in multiTellLn "cables" 4 $ unwords ["cable",
-                                               unUiId src, unUiId dst]
+    unless (null c) $ saveCable everythingSaved (head c)
 
-elementLine parentId maybeMouseLocn eltName Out { _name = n
-                                        , _loc = p } =
-    multiTell "module" $ "    " ++ unUiId eltName ++
-              " <- plugout' " ++ rewriteConnection n ++
-              " " ++ relativeShow maybeMouseLocn p ++ " " ++ parentId ++ "\n"
+elementLine _ parentId maybeMouseLocn eltName
+    Out { _name = n
+        , _loc = p } =
+    multiTellLn "module" 4 $ unwords [unUiId eltName,
+              "<- plugout'", rewriteConnection n,
+              relativeShow maybeMouseLocn p,
+              parentId]
 
-elementLine parentId maybeMouseLocn eltName Container { _name = _
+elementLine _ parentId maybeMouseLocn eltName Container { _name = _
                                                       , _loc = p
                                                       , _pic = picture} =
     multiTellLn "module" 4 $ unwords [unUiId eltName,
-                  "<-", "container'", show picture,
-                  relativeShow maybeMouseLocn p, parentId]
+                              "<-", "container'", show picture,
+                              relativeShow maybeMouseLocn p, parentId]
 
-elementLine parentId maybeMouseLocn eltName Proxy { _name = _
-                                                  , _loc = p } =
+elementLine _ parentId maybeMouseLocn eltName
+    Proxy { _name = _
+          , _loc = p } =
     multiTellLn "module" 4 $ unwords [unUiId eltName,
-                              "<-", "proxy'", relativeShow maybeMouseLocn p,
+                              "<-", "proxy'",
+                              relativeShow maybeMouseLocn p,
                               parentId]
 
 saveElement :: (Functor m, MonadIO m, MonadState GlossWorld m)
-                  => String -> Maybe Point ->
+                  => String -> S.Set UiId -> Maybe Point ->
                      UiId -> UIElement ->
-                     StateT (S.Set UiId) (WriterT (Multi String String) m) ()
-saveElement parentId maybeMouseLocn eltName elt = do
-    elementLine parentId maybeMouseLocn eltName elt
+                     StateT (S.Set UiId)
+                            (WriterT (Multi String String) m) ()
+saveElement parentId everythingSaved maybeMouseLocn eltName elt = do
+    elementLine everythingSaved parentId maybeMouseLocn eltName elt
     when (elt ^. hidden) $ multiTellLn "module" 4 $
-                    unwords ["hide", unUiId eltName]
+                        unwords ["hide", unUiId eltName]
 
 saveItem :: (Functor m, MonadIO m, MonadState GlossWorld m)
-                  => String -> Maybe Point -> UiId -> StateT (S.Set UiId) (
-                                      WriterT (Multi String String) m) ()
-saveItem parentId maybeMouseLocn item = do
+                  => String -> S.Set UiId -> Maybe Point -> UiId ->
+                                        StateT (S.Set UiId) (
+                                          WriterT (Multi String String) m) ()
+saveItem parentId everythingSaved maybeMouseLocn item = do
     liftIO $ putStrLn $ "Saving: " ++ show item
     modify (S.insert item)
     itemElt <- lift $ getElementById "saveItem" item
-    saveElement parentId maybeMouseLocn item itemElt -- Relativeshow xxx
+    saveElement parentId everythingSaved maybeMouseLocn item itemElt -- Relativeshow xxx
     case itemElt of
         Container { _contents = cts } ->
-            saveItems (unUiId item) maybeMouseLocn (S.toList cts)
+            saveItems (unUiId item) everythingSaved maybeMouseLocn (S.toList cts)
         Proxy { _contents = cts } ->
-            saveItems (unUiId item) Nothing (S.toList cts)
+            saveItems (unUiId item) everythingSaved Nothing (S.toList cts)
         _ -> return ()
-    return ()
 
+-- Shouldn't need doneAlready test. XXX
 saveItems :: (Functor m, MonadIO m, MonadState GlossWorld m)
-                  => String -> Maybe Point -> [UiId] -> StateT (S.Set UiId) (
+                  => String -> S.Set UiId -> Maybe Point -> [UiId] ->
+                                StateT (S.Set UiId) (
                                       WriterT (Multi String String) m) ()
-saveItems parentId mouseLocn curSel = do
+saveItems parentId everythingSaved mouseLocn curSel =
     forM_ curSel $ \item -> do
         doneAlready <- get
         when (item `S.notMember` doneAlready) $
-            saveItem parentId mouseLocn item
-    return ()
+            saveItem parentId everythingSaved mouseLocn item
 
 saveSelection' :: (Functor m, MonadIO m, MonadState GlossWorld m)
-                  => Maybe Point -> [UiId] -> StateT (S.Set UiId) (
-                                      WriterT (Multi String String) m) ()
-saveSelection' maybeMouseLocn curSel = do
+                  => S.Set UiId -> Maybe Point -> [UiId] ->
+                      StateT (S.Set UiId) ( WriterT (Multi String String) m) ()
+saveSelection' everythingSaved maybeMouseLocn curSel = do
     multiTellLn "postamble" 4 "return ()"
     multiTellLn "midamble" 4 "recompile"
-    saveItems "root" maybeMouseLocn curSel
+    saveItems "root" everythingSaved maybeMouseLocn curSel
 
 selectionCode :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                  Maybe Point -> [UiId] -> StateT (S.Set UiId) (
                                       WriterT (Multi String String) m) ()
 selectionCode maybeMouseLocn sel = do
+    multiTellLn "preamble" 0 "do"
+    multiTellLn "preamble" 4 "(x, y) <- mouse"
+    multiTellLn "preamble" 4 "root <- currentPlane" -- XXX getPlane ??
     everythingSaved <- lift $ getAllContainerProxyDescendants sel
     needsSaving <- lift $ getMinimalParents everythingSaved sel
     synths <- lift $ synthsUsedInItems everythingSaved
@@ -194,10 +208,7 @@ selectionCode maybeMouseLocn sel = do
         multiTellLn "synth" 4 $
                 unwords [synthName,
                 " <- ", "new'", show synthType]
-    multiTellLn "preamble" 0 "do"
-    multiTellLn "preamble" 4 "(x, y) <- mouse"
-    multiTellLn "preamble" 4 "root <- currentPlane" -- XXX getPlane ??
-    saveSelection' maybeMouseLocn needsSaving
+    saveSelection' (S.fromList everythingSaved) maybeMouseLocn needsSaving
 
 saveSelection :: (Functor m, MonadIO m, MonadState GlossWorld m)
                  => Maybe Point -> m String
@@ -206,9 +217,46 @@ saveSelection maybeMouseLocn = do
     sections <- execWriterT (evalStateT (
             selectionCode maybeMouseLocn curSel
         ) S.empty)
-    return $ collate [
-        "preamble", "synth", "module", "cables",
-        "midamble", "settings", "postamble"] sections
+    return $ collate codeSections sections
+
+codeWorld' ::
+    (Functor m, MonadIO m, MonadState GlossWorld m) =>
+    S.Set UiId -> [String] -> [UiId]
+    -> StateT (S.Set UiId) (WriterT (Multi String String) m) ()
+codeWorld' everythingSaved synths needsSaving = do
+        multiTellLn "preamble" 0 "do"
+        --multiTellLn "preamble" 4 "let (x, y) = (0, 0)"
+        multiTellLn "preamble" 4 "root <- getRoot"
+        multiTellLn "preamble" 4 "let out = \"out\""
+        multiTellLn "preamble" 4 "let keyboard = \"keyboard\""
+        multiTellLn "preamble" 4 "let trigger = \"trigger\""
+
+        sList <- lift $ use (inner . synthList)
+
+        forM_ synths $ \synthName -> do
+            let maybeSynthType = lookup synthName (map swap sList)
+            let synthType = unJust ("Don't know synth " ++ show synthName)
+                                        maybeSynthType
+
+            if synthName `elem` ["keyboard", "trigger"]
+                then do
+                    multiTellLn "synth" 4 $
+                        unwords ["new", show synthType,
+                                 show synthName]
+                    multiTellLn "synth" 4 $
+                        unwords ["let", synthName, "=", show synthName]
+                else unless (synthName == "out") $
+                     multiTellLn "synth" 4 $
+                        unwords [synthName, "<-", "new'",
+                                 show synthType]
+
+        saveSelection' everythingSaved Nothing needsSaving
+        saveBindings
+
+codeSections :: [String]
+codeSections = ["preamble", "synth", "module",
+                "cables", "midamble", "settings",
+                "postamble", "bindings"]
 
 codeWorld :: (Functor m, MonadIO m, MonadState GlossWorld m)
                  => m String
@@ -218,50 +266,20 @@ codeWorld = do
     let everythingSaved = L.delete root everything
 
     synths <- synthsUsedInItems everythingSaved
-    sList <- use (inner . synthList)
 
     -- XXX I think this is just a silly long-winded way to get the
     -- contents of root.
     selElts <- getElementsById "codeWorld" everythingSaved
+    let everythingSavedSet = S.fromList everythingSaved
     let needsSaving = [item | (item, elt) <- zip everythingSaved selElts,
-                              (elt ^. parent) `notElem` everythingSaved]
-    sections <- execWriterT (evalStateT (do
-            multiTellLn "preamble" 0 "do"
-            --multiTellLn "preamble" 4 "let (x, y) = (0, 0)"
-            multiTellLn "preamble" 4 "root <- getRoot"
-            multiTellLn "preamble" 4 "let out = \"out\""
-            multiTellLn "preamble" 4 "let keyboard = \"keyboard\""
-            multiTellLn "preamble" 4 "let trigger = \"trigger\""
-
-            forM_ synths $ \synthName -> do
-                let maybeSynthType = lookup synthName (map swap sList)
-                let synthType = unJust ("Don't know synth " ++ show synthName)
-                                            maybeSynthType
-
-                if synthName `elem` ["keyboard", "trigger"]
-                    then do
-                        multiTellLn "synth" 4 $
-                            unwords ["new", show synthType,
-                                     show synthName]
-                        multiTellLn "synth" 4 $
-                            unwords ["let", synthName, "=", show synthName]
-                    else unless (synthName == "out") $
-                         multiTellLn "synth" 4 $
-                            unwords [synthName, "<-", "new'",
-                                     show synthType]
-
-            saveSelection' Nothing needsSaving
-            saveBindings
+                              (elt ^. parent) `S.notMember` everythingSavedSet]
+    sections <- execWriterT (evalStateT (
+            codeWorld' everythingSavedSet synths needsSaving
         ) S.empty)
-    liftIO $ putStrLn $ "sections=" ++ show sections
-    return $ collate [
-        "preamble", "synth", "module",
-        "cables", "midamble", "settings",
-        "postamble", "bindings"] sections
+    return $ collate codeSections sections
 
 saveBindings :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
-                StateT (S.Set UiId)
-                                     (WriterT (Multi String String) m) ()
+                StateT (S.Set UiId) (WriterT (Multi String String) m) ()
 saveBindings = do
     bs <- lift $ use (inner . bindings)
     forM_ (M.toList bs) $ \(key, cmd) ->

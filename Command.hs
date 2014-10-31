@@ -2,30 +2,24 @@
 
 module Command where
 
---import Debug.Trace
-import Control.Monad.Trans
-import Control.Lens
---import System.Eval.Haskell
---import qualified Data.Foldable as F
-import qualified Data.Map as M
-import qualified Data.Set as S
-import Graphics.Gloss.Data.Picture
 import Codec.BMP
 import Control.Applicative
+import Control.Lens
 import Control.Monad.State
+import Graphics.Gloss.Data.Picture
 import Language.Haskell.Interpreter hiding (get, liftIO, MonadIO)
+import qualified Data.Map as M
+import qualified Data.Set as S
 
-import Comms
 import Cable
-import World
+import Check
+import Comms
 import ContainerTree
---import qualified UISupport
-import qualified ContainerTree as T
+import Save
 import UIElement
 import UiLib
---import Symbols
-import Text
-import Save
+import World
+import qualified ContainerTree as T
 
 getPic :: (MonadIO m, MonadState GlossWorld m) => String -> m (Int, Int)
 getPic bmpName = do
@@ -70,22 +64,12 @@ evalUi :: (Functor m, MonadIO m, MonadState GlossWorld m, InputHandler m) => Ui 
 --evalUi :: Ui () -> MoodlerM ()
 evalUi (Return a) = return a
 
-{-
--- Doesn't make actual UI element
-evalUi (NewPlane cfn) = do
-    newN <- use World.newName
-    World.newName %= (+ 1)
-    let newP = Plane ("plane" ++ show newN)
-    planes %= flip (++) [newP]
-    evalUi (cfn newP)
--}
-
 evalUi (CurrentPlane cfn) = do
-    p : _ <- use (inner . planes)
+    p <- use (inner . planes)
     evalUi (cfn p)
 
 evalUi (Switch p cfn) = do
-    inner . planes %= ((p :) . removeFirst p)
+    inner . planes .= p
     evalUi cfn
 
 evalUi (Echo t cfn) = do
@@ -160,7 +144,8 @@ evalUi (UiLib.Image n bmpName p creationPlane cfn) = do
 
 evalUi (UiLib.Container n bmpName p creationPlane cfn) = do
     (width, height) <- getPic bmpName
-    let e = UIElement.Container creationPlane False False p bmpName bmpName width height S.empty
+    let e = UIElement.Container creationPlane False False p
+                                bmpName bmpName width height S.empty
     createdInParent n e creationPlane
     evalUi (cfn n)
 
@@ -215,6 +200,14 @@ evalUi (UiLib.Quit cfn) = do
     evalUi cfn
     --liftIO $ exitImmediately ExitSuccess
 
+evalUi (UiLib.Check cfn) = do
+    liftIO $ putStrLn "Consistency check..."
+    result1 <- checkEverythingAccessibleFromRoot
+    result2 <- checkChildrenHaveCorrectParent
+    liftIO $ putStrLn $ if result1 && result2
+        then "No inconsistency found"
+        else "Consistency problem"
+    evalUi cfn
 
 evalUi (Set t v cfn) = do
     --liftIO $ print "Set"
@@ -264,13 +257,21 @@ evalUi (GetPlane s1 cfn) = do
     evalUi (cfn (a::Plane))
 -}
 
+evalUi (GetType s1 cfn) = do
+    t <- getElementTypeById s1
+    evalUi (cfn t)
+
 evalUi (GetParent s1 cfn) = do
     liftIO $ print "GetParent"
     elts <- use (inner . uiElements)
-    let a = case M.lookup s1 elts of
-            Nothing -> error "No value"
-            Just e -> UIElement._parent (e::UIElement)
-    evalUi (cfn (a::UiId))
+    root <- use (inner . rootPlane)
+    if s1 == root
+        then evalUi (cfn root)
+        else
+            let a = case M.lookup s1 elts of
+                    Nothing -> error "No value"
+                    Just e -> UIElement._parent (e::UIElement)
+            in evalUi (cfn a)
 
 evalUi (GetRoot cfn) = do
     liftIO $ print "GetRoot"
@@ -286,8 +287,8 @@ evalUi (Parent s1 s2 cfn) = do
     T.reparent s1 s2
     evalUi cfn
 
-evalUi (Rename newName toBeNamed cfn) = do
-    inner . uiElements . ix toBeNamed . displayName .= newName
+evalUi (Rename namedTo toBeNamed cfn) = do
+    inner . uiElements . ix toBeNamed . displayName .= namedTo
     evalUi cfn
 
 evalUi (Unparent s1 cfn) = do
@@ -352,10 +353,7 @@ execCommand :: (InputHandler m, Functor m, MonadIO m,
                 MonadState GlossWorld m) => String -> m ()
 execCommand cmd = do
     liftIO $ print $ "cmd = " ++ cmd
-    --x <- liftIO $ eval cmd ["Control.Monad", "Control.Monad.State", "Tree", "UiLib"]
     x <- liftIO $ runInterpreter $ do
-        --putStrLn "Loadin' modules"
-        --setImports ["Control.Monad", "Control.Monad.State"]
         loadModules ["UiLibWrapper.hs"]
         setTopLevelModules ["UiLibWrapper"]
         interpret cmd (as :: Ui ())
@@ -364,8 +362,4 @@ execCommand cmd = do
         Left err -> liftIO $ do
             putStrLn $ cmd ++ " failed1: " ++ show err
             error "Bye!"
-        Right y -> do
-            liftIO $ print "A"
-            evalUi y
-            liftIO $ print "B"
-    liftIO $ putStrLn "----------------------------------------"
+        Right y -> evalUi y

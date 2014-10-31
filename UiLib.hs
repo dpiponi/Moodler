@@ -2,9 +2,9 @@
 
 module UiLib(module UiLib, module Symbols) where
 
-import Data.Typeable hiding (Proxy)
+import Data.Typeable
 import Symbols
---import Graphics.Gloss.Data.Picture
+import UIElement(ElementType)
 
 data Ui a = Return a
           | Echo String (Ui a)
@@ -45,10 +45,12 @@ data Ui a = Return a
           | GetRoot (UiId -> Ui a)
           | Recompile (Ui a)
           | Quit (Ui a)
+          | Check (Ui a)
           | Parent UiId UiId (Ui a)
           | Rename String UiId (Ui a)
           | Unparent UiId (Ui a)
           | Input String (Maybe String -> Ui a)
+          | GetType UiId (ElementType -> Ui a)
           deriving (Typeable, Functor)
 
 instance Monad Ui where
@@ -72,6 +74,7 @@ instance Monad Ui where
     Mouse cont >>= f = Mouse ((>>= f) . cont)
     Args cont >>= f = Args ((>>= f) . cont)
     GetValue s1 cont >>= f = GetValue s1 ((>>= f) . cont)
+    GetType s1 cont >>= f = GetType s1 ((>>= f) . cont)
     GetParent s1 cont >>= f = GetParent s1 ((>>= f) . cont)
     GetRoot cont >>= f = GetRoot ((>>= f) . cont)
     NewId s1 cont >>= f = NewId s1 ((>>= f) . cont)
@@ -93,6 +96,7 @@ instance Monad Ui where
     Switch p cont >>= f = Switch p (cont >>= f)
     Recompile cont >>= f = Recompile (cont >>= f)
     Quit cont >>= f = Quit (cont >>= f)
+    Check cont >>= f = Check (cont >>= f)
     Parent s0 s1 cont >>= f = Parent s0 s1 (cont >>= f)
     Rename s0 s1 cont >>= f = Rename s0 s1 (cont >>= f)
     Unparent s0 cont >>= f = Unparent s0 (cont >>= f)
@@ -224,18 +228,11 @@ setHigh t v = SetHigh t v (return ())
 value :: String -> Float -> Ui ()
 value t v = Value t v (return ())
 
-s, sa, sav, save :: String -> Ui ()
+save :: String -> Ui ()
 save s' = Save s' (return ())
-s = save
-sa = save
-sav = save
 
-w, wr, wri, writ, write :: String -> Ui ()
+write :: String -> Ui ()
 write s' = Write s' (return ())
-w = write
-wr = write
-wri = write
-writ = write
 
 selection :: Ui [UiId]
 selection = Selection return
@@ -248,6 +245,9 @@ recompile = Recompile (return ())
 
 quit :: Ui ()
 quit = Quit (return ())
+
+check :: Ui ()
+check = Check (return ())
 
 unhide :: UiId -> Ui ()
 unhide t = Hide t False (return ())
@@ -263,6 +263,9 @@ location s1 = Location s1 return
 
 name :: UiId -> Ui (Maybe String)
 name s1 = Name s1 return
+
+getType :: UiId -> Ui ElementType
+getType s1 = GetType s1 return
 
 move :: UiId -> (Float, Float) -> Ui ()
 move c p = Move c p (return ())
