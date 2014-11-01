@@ -8,9 +8,9 @@ import Control.Monad.State
 import Control.Monad.Writer
 import Symbols
 import UIElement
-import Text
 import Utils
 import World
+import Text
 import qualified Box as B
 import qualified Data.Map as M
 import qualified Data.Set as S
