@@ -2,7 +2,10 @@
 
 module UiLib(module UiLib, module Symbols) where
 
-import Data.Typeable
+import Data.Typeable hiding (Proxy)
+import Control.Applicative
+import Control.Monad
+
 import Symbols
 import UIElement(ElementType)
 
@@ -101,6 +104,10 @@ instance Monad Ui where
     Rename s0 s1 cont >>= f = Rename s0 s1 (cont >>= f)
     Unparent s0 cont >>= f = Unparent s0 (cont >>= f)
     Input s0 cont >>= f = Input s0 ((>>= f) . cont)
+
+instance Applicative Ui where
+    pure = return
+    (<*>) = ap
 
 new :: String -> String -> Ui ()
 new s1 s2 = New s1 s2 (return ())
