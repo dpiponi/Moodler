@@ -59,7 +59,7 @@ execCommand :: (InputHandler m, Functor m, MonadIO m,
                String -> m ()
 execCommand cmd = do
     x <- liftIO $ I.runInterpreter $ do
-        --I.set [I.searchPath I.:= ["./dist/build/ui/ui-tmp"]]
+        I.set [I.searchPath I.:= ["src"]]
         I.loadModules ["src/UiLibWrapper.hs"]
         I.setTopLevelModules ["UiLibWrapper"]
         I.interpret cmd (I.as :: Ui ())
