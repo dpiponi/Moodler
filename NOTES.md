@@ -7,7 +7,6 @@ To build I installed packages using:
 
 Building requires both of these:
 
-    cabal build
-    make
+    cabal install --enable-shared
 
-I don't fully understand why but I think the hint package needs to see the .hi files that make builds.
+Even though this does a global install you still need to run it from wherever you checked out the source. The install just installs the library used by the runtime interpreter.
