@@ -41,4 +41,4 @@ ui: $(UI_SOURCE_FILES)
 	ghc -isrc --make -Wall -O -threaded -o ui src/ui.hs
 
 clean:
-	rm -rf *.hi *.o *.dyn_hi *.dyn_o gensrc*
+	rm -rf src/*.hi src/*.o src/*.dyn_hi src/*.dyn_o gensrc*
