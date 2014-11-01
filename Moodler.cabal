@@ -1,0 +1,20 @@
+name:               Moodler
+version:            0.1.0.0
+build-type:         Simple
+cabal-version:      >=1.8
+
+executable moodler
+  hs-source-dirs:   src
+  main-is:          moodler.hs
+  ghc-options:      -O -threaded
+  build-depends:    base, language-c, lens, unix, mtl,
+                    pretty, process, hashable, containers,
+                    either, bytestring, array, hosc, syb,
+                    directory
+
+executable ui
+  hs-source-dirs:   src
+  main-is:          ui.hs
+  ghc-options:      -O -threaded
+  build-depends:    base, gloss, containers, lens, mtl, bmp, hint,
+                    hosc, unix, free, either

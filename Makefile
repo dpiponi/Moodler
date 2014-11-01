@@ -1,10 +1,12 @@
-all: audio.so moodler ui UiLib.o moodler_lib.o # Bridge
+all: audio.so moodler ui moodler_lib.o
 
-moodler: Moodler.hs CodeGen.hs Synth.hs Parser.hs Module.hs OSCRecv.hs StandardSynth.hs Text.hs Audio.hs KeyTracker.hs
-	ghc -O3 --make -threaded -o moodler moodler.hs
+#Bridge
 
-UiLib.o: UiLib.hs
-	ghc UiLib.hs
+moodler: src/Moodler.hs src/CodeGen.hs src/Synth.hs src/Parser.hs src/Module.hs src/OSCRecv.hs src/StandardSynth.hs src/Text.hs src/Audio.hs src/KeyTracker.hs
+	ghc -isrc -O3 --make -threaded -o moodler src/moodler.hs
+
+#UiLib.o: UiLib.hs
+#	ghc UiLib.hs
 
 audio.so: audio.c
 	cc -shared -o audio.so audio.c -framework AudioToolbox -framework CoreFoundation
@@ -13,31 +15,30 @@ moodler_lib.o: moodler_lib.h moodler_lib.c
 	gcc -O3 -c moodler_lib.c
 
 Bridge: Bridge.hs
-	ghc -O3 -threaded -o Bridge Bridge.hs
+	ghc -isrc -O3 -threaded -o Bridge Bridge.hs
 
-UI_SOURCE_FILES = ui.hs \
-		  HandleEvent.hs \
-		  Draw.hs \
-		  Command.hs \
-		  UISupport.hs \
-		  World.hs \
-		  UIElement.hs \
-		  Symbols.hs \
-		  Box.hs \
-		  Comms.hs \
-		  Save.hs \
-		  UiLib.hs \
-		  Options.hs \
-		  Cable.hs \
-		  Utils.hs \
-		  Music.hs \
-		  Multi.hs \
-		  ContainerTree.hs \
-		  Check.hs
+UI_SOURCE_FILES = src/ui.hs \
+		  src/HandleEvent.hs \
+		  src/Draw.hs \
+		  src/Command.hs \
+		  src/UISupport.hs \
+		  src/World.hs \
+		  src/UIElement.hs \
+		  src/Symbols.hs \
+		  src/Box.hs \
+		  src/Comms.hs \
+		  src/Save.hs \
+		  src/UiLib.hs \
+		  src/Options.hs \
+		  src/Cable.hs \
+		  src/Utils.hs \
+		  src/Music.hs \
+		  src/Multi.hs \
+		  src/ContainerTree.hs \
+		  src/Check.hs
 
 ui: $(UI_SOURCE_FILES)
-	#ghc -threaded -hide-package free -o ui ui.hs
-	ghc -Wall -O -threaded -o ui ui.hs
+	ghc -isrc --make -Wall -O -threaded -o ui src/ui.hs
 
 clean:
 	rm -rf *.hi *.o *.dyn_hi *.dyn_o gensrc*

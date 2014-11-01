@@ -1,11 +1,13 @@
 {-# LANGUAGE Rank2Types, TemplateHaskell, FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE EmptyDataDecls, DeriveFunctor #-}
 
 module World where
 
 import Control.Lens
 import Control.Monad.State
 import Control.Monad.Trans.Free
+import Control.Applicative
 import Data.Monoid
 import Graphics.Gloss.Interface.IO.Game
 import qualified Data.Map as M
@@ -15,10 +17,10 @@ import UIElement
 import Symbols
 import qualified Box as B
 
-data MoodlerF a = GetEvent (Event -> a)
+data MoodlerF a = GetEvent (Event -> a) deriving Functor
 
-instance Functor MoodlerF where
-    fmap f (GetEvent c) = GetEvent (f . c)
+--instance Functor MoodlerF where
+--    fmap f (GetEvent c) = GetEvent (f . c)
 
 data Zero
 
@@ -48,13 +50,18 @@ $(makeLenses ''GlossWorld)
 
 newtype MoodlerM a = MoodlerM {
                         runMoodlerM :: FreeT MoodlerF (StateT GlossWorld IO) a }
+                        deriving Functor
 
 instance Monad MoodlerM where
     return = MoodlerM . return
     MoodlerM m >>= f = MoodlerM (m >>= (runMoodlerM . f))
 
-instance Functor MoodlerM where
-    fmap f (MoodlerM m) = MoodlerM (fmap f m)
+--instance Functor MoodlerM where
+--    fmap f (MoodlerM m) = MoodlerM (fmap f m)
+
+instance Applicative MoodlerM where
+    pure = return
+    (<*>) = ap
 
 instance MonadState GlossWorld MoodlerM where
     get = MoodlerM (lift get)
@@ -132,6 +139,10 @@ newtype WorldMonad a = WorldMonad { runWorldMonad :: StateT GlossWorld IO a }
 
 instance InputHandler WorldMonad where
     getInput _ _ = return Nothing
+
+instance Applicative WorldMonad where
+    pure = return
+    (<*>) = ap
 
 getElementById :: MonadState GlossWorld m => String -> UiId -> m UIElement
 getElementById msg i = do

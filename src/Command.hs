@@ -9,7 +9,7 @@ import Control.Lens
 import Control.Monad.State
 import Graphics.Gloss.Data.Picture
 import Graphics.Gloss.Data.Color
-import Language.Haskell.Interpreter hiding (get, liftIO, MonadIO)
+import qualified Language.Haskell.Interpreter as I
 import qualified Data.Map as M
 import qualified Data.Set as S
 import Data.Monoid
@@ -58,18 +58,20 @@ execCommand :: (InputHandler m, Functor m, MonadIO m,
                 MonadState GlossWorld m) =>
                String -> m ()
 execCommand cmd = do
-    x <- liftIO $ runInterpreter $ do
-        loadModules ["UiLibWrapper.hs"]
-        setTopLevelModules ["UiLibWrapper"]
-        interpret cmd (as :: Ui ())
+    x <- liftIO $ I.runInterpreter $ do
+        liftIO $ putStrLn $ "path = src"
+        I.set [I.searchPath I.:= ["./src"]]
+        I.loadModules ["src/UiLibWrapper.hs"]
+        I.setTopLevelModules ["UiLibWrapper"]
+        I.interpret cmd (I.as :: Ui ())
     case x of
         Left err -> case err of
-            UnknownError e -> doAlert $ "Unknown error: " ++ e
-            WontCompile es ->
+            I.UnknownError e -> doAlert $ "Unknown error: " ++ e
+            I.WontCompile es ->
                 --forM_ es (putStrLn . errMsg)
-                doAlert $ show (map errMsg es)
-            NotAllowed e -> doAlert $ "Not allowed: " ++ e
-            GhcException e -> doAlert $ "GHC exception: " ++ e
+                doAlert $ show (map I.errMsg es)
+            I.NotAllowed e -> doAlert $ "Not allowed: " ++ e
+            I.GhcException e -> doAlert $ "GHC exception: " ++ e
         Right y -> evalUi y
 
 safeReadFile :: String -> IO (Either String String)
