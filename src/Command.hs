@@ -59,9 +59,10 @@ execCommand :: (InputHandler m, Functor m, MonadIO m,
                String -> m ()
 execCommand cmd = do
     x <- liftIO $ I.runInterpreter $ do
-        I.set [I.searchPath I.:= ["src"]]
-        I.loadModules ["src/UiLibWrapper.hs"]
-        I.setTopLevelModules ["UiLibWrapper"]
+        --I.set [I.searchPath I.:= ["src"]]
+        --I.loadModules ["UiLibWrapper"]
+        --I.setTopLevelModules ["UiLibWrapper"]
+        I.setImports ["Prelude", "UiLibWrapper"]
         I.interpret cmd (I.as :: Ui ())
     case x of
         Left err -> case err of

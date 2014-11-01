@@ -2,11 +2,9 @@
 
 module Cable where
 
---import Graphics.Gloss.Interface.IO.Game
 import qualified Data.Set as S
 import Control.Lens
 
---import UIElement
 import Symbols
 
 data Cable = Cable { _from :: UiId,

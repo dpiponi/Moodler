@@ -18,3 +18,9 @@ executable ui
   ghc-options:      -O -threaded
   build-depends:    base, gloss, containers, lens, mtl, bmp, hint,
                     hosc, unix, free, either
+
+library
+  hs-source-dirs:   src
+  exposed-modules:  UiLibWrapper, UIElement, Symbols, Cable, UiLib
+  build-depends:    base, gloss, containers, lens, mtl, bmp, hint,
+                    hosc, unix, free, either
