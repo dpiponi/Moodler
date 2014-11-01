@@ -1,6 +1,10 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Module where
 
 import Control.Monad.State
+import Control.Monad.Trans.Either
+import Control.Monad.Writer
 import Data.Maybe
 import Language.C.Data.Ident
 import Language.C.Data.Name
@@ -10,10 +14,7 @@ import Language.C.Parser
 import Language.C.Syntax.AST
 import Parser
 import qualified Data.ByteString.Char8 as B
---import qualified Data.Map as M
 import qualified Data.Set as S
-import Control.Monad.Trans.Either
-import Control.Monad.Writer
 
 import Text
 
@@ -38,6 +39,23 @@ xyoffset (x, y) = "(" ++ varoffset "x" x ++ ", " ++ varoffset "y" y ++ ")"
 indent :: Int -> String
 indent n = replicate n ' '
 
+synthPreamble :: MonadWriter String m =>
+                 String -> String -> (Float, Float) -> m ()
+synthPreamble panelName synthName topOffset = do
+    tellLn "do"
+    tellInd 4 "plane <- currentPlane"
+    tellInd 4 "(x, y) <- mouse"
+    tellInd 4 $ unwords ["panel <- container'",
+                         show panelName,
+                         "(x, y) plane"]
+    tellInd 4 $ unwords ["lab <- label'",
+                          show synthName,
+                          xyoffset topOffset,
+                          "plane"]
+    tellInd 4 "parent panel lab"
+    tellInd 4 $ unwords ["name <- new'", show synthName]
+
+-- Auto-generate script for a .spec module
 synthScript :: String -> [String] -> [String] -> String
 synthScript synthName ins outs = do
     let numIns = length ins
@@ -45,21 +63,12 @@ synthScript synthName ins outs = do
     let height = max numIns numOuts
     let inOffset = -25*numIns+25
     let outOffset = -25*numOuts+25
-    let topOffset = (-25, 75 :: Double)
-    let panelName = if height >= 4 then "panel_4x1.bmp" else "panel_3x1.bmp"
+    let topOffset = (-25, 75 :: Float)
+    let panelName = if height >= 4
+        then "panel_4x1.bmp"
+        else "panel_3x1.bmp"
     execWriter $ do
-        tellLn "do"
-        tellInd 4 "plane <- currentPlane"
-        tellInd 4 "(x, y) <- mouse"
-        tellInd 4 $ unwords ["panel <- container'",
-                             show panelName,
-                             "(x, y) plane"]
-        tellInd 4 $ unwords ["lab <- label'",
-                              show synthName,
-                              xyoffset topOffset,
-                              "plane"]
-        tellInd 4 "parent panel lab"
-        tellInd 4 $ unwords ["name <- new'", show synthName]
+        synthPreamble panelName synthName topOffset
         forM_ (zip [inOffset, inOffset+50 ..] ins) $
                                     \(offset, eachInput) -> do
              tellInd 4 $ unwords
@@ -83,7 +92,7 @@ loadNodeType :: String -> String -> EitherT String IO (NodeType NodeInfo)
 loadNodeType dir fileName' = do
     let fileName = dir ++ "/" ++ fileName'
     code <- liftIO $ readFile fileName
-    liftIO $ print "Parsing:"
+    liftIO $ putStrLn "Parsing:"
     liftIO $ putStr code
     let typeNames = [builtinIdent "in", builtinIdent "out"] ++
                         builtinTypeNames
@@ -105,9 +114,9 @@ loadNodeType dir fileName' = do
 
     if isJust e && isJust i
         then return $ NodeType (S.fromList ins)
-                             (S.fromList outs)
-                             states
-                             vs
-                             (fromJust i)
-                             (fromJust e)
+                               (S.fromList outs)
+                               states
+                               vs
+                               (fromJust i)
+                               (fromJust e)
         else left "loadNodeType failed"

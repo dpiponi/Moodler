@@ -1,27 +1,29 @@
 {-# LANGUAGE TemplateHaskell #-}
 
+-- Receive OSC commands and apply them to current synth.
+
 module OSCRecv where
 
+import Control.Applicative
+import Control.Lens
+import Control.Monad
+import Control.Monad.State
+import Control.Monad.Trans.Either
+import Data.Array.IArray
+import Foreign.Ptr
+import GHC.IO.Exception
+import Language.C.Data.Node
 import Sound.OSC
+import System.Posix
 import qualified Data.ByteString.Char8 as C
 import qualified Data.Map as M
 import qualified Data.Set as S
-import Data.Maybe
-import Control.Applicative
-import Language.C.Data.Node
-import Foreign.Ptr
-import Control.Monad
-import Control.Monad.Trans.Either
-import Data.Array.IArray
-import Control.Lens
-import Control.Monad.State
-import GHC.IO.Exception
-import System.Posix
 
-import Synth
-import Module
 import CodeGen
 import KeyTracker
+import Module
+import Synth
+import Utils
 
 data Moodler = Moodler {
         _moodlerSynth :: Synth,
@@ -33,18 +35,15 @@ $(makeLenses ''Moodler)
 keyToFreq :: Int -> Float
 keyToFreq ds' = 0.1*(fromIntegral ds'-13)/12.0
 
-recompile :: MonadIO m => (FunPtr () -> IO ()) -> String ->
-             StateT Moodler m ()
+recompile :: MonadIO m =>
+             (FunPtr () -> IO ()) -> String -> StateT Moodler m ()
 recompile set_fill_buffer msg = do
     newSynth <- use moodlerSynth
-    let output' = fromMaybe undefined $ M.lookup "out" newSynth
+    let output' = unJust "recompile" $ M.lookup "out" newSynth
     Right newDso <- liftIO $ runEitherT $ makeDSOFromSynth
                     msg newSynth output'
     moodlerDSO .= newDso
-    --liftIO $ print "Installing new DSO"
-    --liftIO $ dumpSynth newSynth
     liftIO $ set_fill_buffer (dsoExecuteFn newDso)
-    liftIO $ print "Installed new synth"
 
 setKeyboardState :: DSO -> Array Int (Ptr ()) ->
                     Float -> Int -> Int -> IO ()
@@ -71,8 +70,6 @@ handleInput knobName synthTypes = do
     let newSynth = M.insert knobName newKnob oldSynth
     modify $ moodlerSynth .~ newSynth
 
-    --recompile set_fill_buffer ("added " ++ knobName)
-
 handleSynth :: MonadIO m => String -> String ->
                             M.Map String (NodeType NodeInfo) ->
                             StateT Moodler m ()
@@ -82,8 +79,7 @@ handleSynth synthType synthName synthTypes = do
             "Adding synth " ++ synthType ++ " " ++ synthName
     oldSynth <- use moodlerSynth
     let newNumber = M.size oldSynth
-    let Just modle = M.lookup synthType synthTypes
-    let ins = inNames modle
+    let ins = inNames $ unJust "handleSynth" $ M.lookup synthType synthTypes
     let inputs = M.fromList $
             zip (S.toList ins) (repeat (out "zero.result"))
     -- XXX Deal with M.empty
@@ -91,8 +87,6 @@ handleSynth synthType synthName synthTypes = do
             (getSynth synthTypes synthType) inputs newNumber
     let newSynth = M.insert synthName newKnob oldSynth
     modify $ moodlerSynth .~ newSynth
-
-    --recompile set_fill_buffer ("added " ++ synthName)
 
 handleMessage :: MonadIO m => Int -> Array Int (Ptr ()) ->
                               (FunPtr () -> IO ()) ->
@@ -102,7 +96,7 @@ handleMessage :: MonadIO m => Int -> Array Int (Ptr ()) ->
 handleMessage numVoices dataPtrs set_fill_buffer
               synthTypes msg =
     case msg of
-        Just (Message "/input" [ASCII_String a]) -> -- do
+        Just (Message "/input" [ASCII_String a]) ->
             handleInput (C.unpack a) synthTypes
 
         Just (Message "/synth" [ASCII_String packedSynthType,
@@ -118,29 +112,20 @@ handleMessage numVoices dataPtrs set_fill_buffer
                 forM_ [0..numVoices-1] $ \v ->
                     setStateVar (dsoSetFn dso') (dataPtrs!v) a' b' f
 
-        Just (Message "/recompile" []) -> do
-            liftIO $ putStrLn "Told to recompile!!!!!!!!!!!!!!!!!!!!"
+        Just (Message "/recompile" []) ->
             recompile set_fill_buffer "explicit recompilation"
 
-        Just (Message "/quit" []) -> do
-            liftIO $ putStrLn "Told to quit!!!!!!!!!!!!!!!!!!!!"
+        Just (Message "/quit" []) ->
             liftIO $ exitImmediately ExitSuccess
 
         Just (Message "/connect" [a, b, c, d]) -> do
             let [a', b', c', d'] =
                     (C.unpack . d_ascii_string) <$> [a, b, c, d]
-            liftIO $
-                putStrLn $ "Connecting " ++ a' ++ "." ++ b' ++
-                                        " -> " ++ c' ++ "." ++ d'
-            modify $
-                moodlerSynth %~ connect a' b' c' d'
-
-            --recompile set_fill_buffer ("connected " ++ a' ++ "...")
+            modify $ moodlerSynth %~ connect a' b' c' d'
 
 
         Just (Message ('/':'8':'/':'p':'u':'s':'h':ds) [Float v]) -> do
-            liftIO $ print $ "Key " ++ ds ++ ": " ++ show v
-            --let freq = 261.625565*2**((read ds-13)/12)
+            liftIO $ putStrLn $ "Key " ++ ds ++ ": " ++ show v
             dso' <- use moodlerDSO
             oldTracker <- use keyTracker
             newTracker <- liftIO $ flip execStateT oldTracker $
@@ -153,14 +138,11 @@ handleMessage numVoices dataPtrs set_fill_buffer
 
         Just (Message ('/':'8':'/':'r':'o':'t':'a':'r':'y':ds)
                       [Float v]) -> do
-            --liftIO $ print $ "Rot " ++ ds ++ ": " ++ show v
             let knob = read ds :: Int
             dso' <- use moodlerDSO
             forM_ [0..numVoices-1] $ \i ->
                 liftIO $ setStateVar (dsoSetFn dso') (dataPtrs!i)
-                                ("p8_rotary"++show knob)
+                                ("p8_rotary" ++ show knob)
                                 "result" v
 
-        _ -> do
-            liftIO $ print "Ignored msg"
-            liftIO $ print msg
+        _ -> liftIO $ putStrLn $ "Ignored msg: " ++ show msg

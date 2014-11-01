@@ -14,3 +14,4 @@
 * Don't shove everything in scripts/
 * Undo
 * Store config with bindings separately from actual 'scene'
+* Cable changes aren't all reflected at server.
