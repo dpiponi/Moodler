@@ -4,22 +4,46 @@ module Command where
 
 import Codec.BMP
 import Control.Applicative
+import Control.Exception
 import Control.Lens
 import Control.Monad.State
 import Graphics.Gloss.Data.Picture
+import Graphics.Gloss.Data.Color
 import Language.Haskell.Interpreter hiding (get, liftIO, MonadIO)
 import qualified Data.Map as M
 import qualified Data.Set as S
+import Data.Monoid
 
 import Cable
 import Check
 import Comms
 import ContainerTree
 import Save
+import Text
 import UIElement
 import UiLib
+--import Utils
 import World
 import qualified ContainerTree as T
+import qualified Box as B
+--import Draw
+
+alertGadget :: String -> B.Transform -> Picture
+alertGadget alt _ = 
+    let w = 2.8*0.20*estimateTextWidth alt
+    in translate 0 0 (
+        translate 0 0 (color (makeColor 1.0 0.1 0.1 0.8)
+                              (rectangleSolid w 48))
+        <>
+        translate (-w/2) (-9) (scale 0.20 0.20 (
+                color white (text alt)))
+        )
+
+doAlert :: (MonadIO m, MonadState GlossWorld m) =>
+           String -> m ()
+doAlert alt = do
+    inner . gadget .= alertGadget alt
+    liftIO $ putStrLn alt
 
 getPic :: (MonadIO m, MonadState GlossWorld m) => String -> m (Int, Int)
 getPic bmpName = do
@@ -30,38 +54,50 @@ getPic bmpName = do
     inner . pics %= M.insert bmpName (b, width, height)
     return (width, height)
 
-execScript :: (InputHandler m, Functor m, MonadIO m, MonadState GlossWorld m) =>
-              String -> [String] -> m ()
-execScript cmd arguments = do
-    cmds <- liftIO $ readFile $ "scripts/" ++ cmd ++ ".hs"
-    inner . cmdArgs .= arguments
-    --x <- liftIO $ eval cmds ["Control.Monad", "Control.Monad.State", "UiLib"]
+execCommand :: (InputHandler m, Functor m, MonadIO m,
+                MonadState GlossWorld m) =>
+               String -> m ()
+execCommand cmd = do
     x <- liftIO $ runInterpreter $ do
-        --say "Loadin' modules"
-        --setImports ["Control.Monad", "Control.Monad.State"]
         loadModules ["UiLibWrapper.hs"]
         setTopLevelModules ["UiLibWrapper"]
-        interpret cmds (as :: Ui ())
+        interpret cmd (as :: Ui ())
     case x of
-        Left err -> liftIO $ case err of
-            UnknownError e -> putStrLn $ "Unknown error: " ++ e
-            WontCompile es -> do
-                putStrLn "Won't compile because:"
-                forM_ es (putStrLn . errMsg)
-            NotAllowed e -> putStrLn $ "Not allowed: " ++ e
-            GhcException e -> putStrLn $ "GHC exception: " ++ e
+        Left err -> case err of
+            UnknownError e -> doAlert $ "Unknown error: " ++ e
+            WontCompile es ->
+                --forM_ es (putStrLn . errMsg)
+                doAlert $ show (map errMsg es)
+            NotAllowed e -> doAlert $ "Not allowed: " ++ e
+            GhcException e -> doAlert $ "GHC exception: " ++ e
         Right y -> evalUi y
+
+safeReadFile :: String -> IO (Either String String)
+safeReadFile f = 
+   catch (Right <$> readFile f) $ \e -> do
+        let err = show (e :: IOException)
+        return $ Left err
+
+execScript :: (InputHandler m, Functor m, MonadIO m, MonadState GlossWorld m) =>
+              String -> [String] -> m ()
+execScript f arguments = do
+    cmds <- liftIO $ safeReadFile $ "scripts/" ++ f ++ ".hs"
+    case cmds of
+        Left err -> do
+            liftIO $ putStrLn err
+            inner . gadget .= alertGadget err
+        Right cmd -> do
+            inner . cmdArgs .= arguments
+            execCommand cmd
 
 saveWorld :: (Functor m, MonadIO m, MonadState GlossWorld m) => String -> m ()
 saveWorld t = do
     code <- codeWorld
     liftIO $ writeFile ("scripts/" ++ t ++ ".hs") code
     liftIO $ putStrLn $ "----- save: " ++ t
-    liftIO $ putStrLn code
-    liftIO $ putStrLn "-----"
 
-evalUi :: (Functor m, MonadIO m, MonadState GlossWorld m, InputHandler m) => Ui () -> m ()
---evalUi :: Ui () -> MoodlerM ()
+evalUi :: (Functor m, MonadIO m, MonadState GlossWorld m, InputHandler m) =>
+          Ui () -> m ()
 evalUi (Return a) = return a
 
 evalUi (CurrentPlane cfn) = do
@@ -73,7 +109,8 @@ evalUi (Switch p cfn) = do
     evalUi cfn
 
 evalUi (Echo t cfn) = do
-    liftIO $ putStrLn t
+    --liftIO $ putStrLn t
+    doAlert t
     evalUi cfn
 
 evalUi (Hide t h cfn) = do
@@ -349,17 +386,8 @@ newCommand synthType synthName = do
     sendNewSynthMessage synthType synthName
     inner . synthList %= (++ [(synthType, synthName)])
 
+{-
 execCommand :: (InputHandler m, Functor m, MonadIO m,
                 MonadState GlossWorld m) => String -> m ()
-execCommand cmd = do
-    liftIO $ print $ "cmd = " ++ cmd
-    x <- liftIO $ runInterpreter $ do
-        loadModules ["UiLibWrapper.hs"]
-        setTopLevelModules ["UiLibWrapper"]
-        interpret cmd (as :: Ui ())
-    liftIO $ putStrLn "Evaluated"
-    case x of
-        Left err -> liftIO $ do
-            putStrLn $ cmd ++ " failed1: " ++ show err
-            error "Bye!"
-        Right y -> evalUi y
+execCommand = evalHaskell
+-}

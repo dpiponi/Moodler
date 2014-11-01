@@ -8,6 +8,7 @@ import Control.Monad.State
 import Control.Monad.Writer
 import Symbols
 import UIElement
+import Text
 import Utils
 import World
 import qualified Box as B
@@ -130,9 +131,6 @@ drawUIElement'' showingHidden w e =
     if _hidden e && not showingHidden
         then tell blank
         else drawUIElement showingHidden w e
-
-estimateTextWidth :: String -> Float
-estimateTextWidth s = 20*fromIntegral (length s)
 
 renderPlaneName :: String -> Picture
 renderPlaneName firstPlane =

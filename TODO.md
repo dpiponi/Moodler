@@ -1,7 +1,6 @@
 * Replace planes with single plane.
 * Refactor, refactor, refactor
 * Restart
-* Better looking "proxies"
 * Properly integrate oscilloscope
 * Sort out init
 * Sort out render order

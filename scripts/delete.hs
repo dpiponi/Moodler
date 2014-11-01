@@ -1,1 +1,1 @@
-selection >>= mapM_ delete
+selection >>= mapM_ delete >> recompile

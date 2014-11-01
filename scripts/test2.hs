@@ -286,11 +286,11 @@ do
     proxy237 <- proxy' (-554.0,383.5) container226
     hide proxy237
     container238 <- container' "panel_3x1.bmp" (-1106.0,439.5) proxy237
-    in239 <- plugin' (audio_square10 ++ "." ++ "freq") (-1127.0,489.5) container238
-    in240 <- plugin' (audio_square10 ++ "." ++ "pwm") (-1127.0,439.5) container238
-    in241 <- plugin' (audio_square10 ++ "." ++ "sync") (-1127.0,389.5) container238
+    in239 <- plugin' (audio_square9 ++ "." ++ "freq") (-1127.0,489.5) container238
+    in240 <- plugin' (audio_square9 ++ "." ++ "pwm") (-1127.0,439.5) container238
+    in241 <- plugin' (audio_square9 ++ "." ++ "sync") (-1127.0,389.5) container238
     label242 <- label' "audio_square" (-1131.0,514.5) container238
-    out243 <- plugout' (audio_square10 ++ "." ++ "result") (-1086.0,439.5) container238
+    out243 <- plugout' (audio_square9 ++ "." ++ "result") (-1086.0,439.5) container238
     container244 <- container' "panel_3x1.bmp" (-1095.0,679.5) proxy237
     in245 <- plugin' (sum102 ++ "." ++ "signal2") (-1116.0,654.5) container244
     in246 <- plugin' (sum102 ++ "." ++ "signal1") (-1116.0,704.5) container244
@@ -335,11 +335,11 @@ do
     proxy283 <- proxy' (-367.0,380.5) container272
     hide proxy283
     container284 <- container' "panel_3x1.bmp" (-972.0,523.5) proxy283
-    in285 <- plugin' (audio_square8 ++ "." ++ "freq") (-993.0,573.5) container284
-    in286 <- plugin' (audio_square8 ++ "." ++ "pwm") (-993.0,523.5) container284
-    in287 <- plugin' (audio_square8 ++ "." ++ "sync") (-993.0,473.5) container284
+    in285 <- plugin' (audio_square10 ++ "." ++ "freq") (-993.0,573.5) container284
+    in286 <- plugin' (audio_square10 ++ "." ++ "pwm") (-993.0,523.5) container284
+    in287 <- plugin' (audio_square10 ++ "." ++ "sync") (-993.0,473.5) container284
     label288 <- label' "audio_square" (-997.0,598.5) container284
-    out289 <- plugout' (audio_square8 ++ "." ++ "result") (-952.0,523.5) container284
+    out289 <- plugout' (audio_square10 ++ "." ++ "result") (-952.0,523.5) container284
     container290 <- container' "panel_3x1.bmp" (-961.0,763.5) proxy283
     in291 <- plugin' (sum103 ++ "." ++ "signal2") (-982.0,738.5) container290
     in292 <- plugin' (sum103 ++ "." ++ "signal1") (-982.0,788.5) container290
@@ -384,11 +384,11 @@ do
     proxy329 <- proxy' (-174.0,382.5) container318
     hide proxy329
     container330 <- container' "panel_3x1.bmp" (-968.0,522.5) proxy329
-    in331 <- plugin' (audio_square9 ++ "." ++ "freq") (-989.0,572.5) container330
-    in332 <- plugin' (audio_square9 ++ "." ++ "pwm") (-989.0,522.5) container330
-    in333 <- plugin' (audio_square9 ++ "." ++ "sync") (-989.0,472.5) container330
+    in331 <- plugin' (audio_square8 ++ "." ++ "freq") (-989.0,572.5) container330
+    in332 <- plugin' (audio_square8 ++ "." ++ "pwm") (-989.0,522.5) container330
+    in333 <- plugin' (audio_square8 ++ "." ++ "sync") (-989.0,472.5) container330
     label334 <- label' "audio_square" (-993.0,597.5) container330
-    out335 <- plugout' (audio_square9 ++ "." ++ "result") (-948.0,522.5) container330
+    out335 <- plugout' (audio_square8 ++ "." ++ "result") (-948.0,522.5) container330
     container336 <- container' "panel_3x1.bmp" (-957.0,762.5) proxy329
     in337 <- plugin' (sum104 ++ "." ++ "signal2") (-978.0,737.5) container336
     in338 <- plugin' (sum104 ++ "." ++ "signal1") (-978.0,787.5) container336
@@ -454,36 +454,36 @@ do
     knob393 <- knob' (input80 ++ "." ++ "result") (-128.0,-815.5) container390
     label394 <- label' "vca" (-132.0,-765.5) container390
     out395 <- plugout' (vca112 ++ "." ++ "result") (-87.0,-840.5) container390
-    container396 <- container' "panel_adsr.bmp" (-333.02,-616.7655) proxy203
-    in397 <- plugin' (adsr1 ++ "." ++ "attack") (-362.02,-555.7655) container396
+    container396 <- container' "panel_adsr.bmp" (-283.02,-613.7655) proxy203
+    in397 <- plugin' (adsr1 ++ "." ++ "attack") (-312.02,-552.7655) container396
     hide in397
-    in398 <- plugin' (adsr1 ++ "." ++ "decay") (-309.02,-538.7655) container396
+    in398 <- plugin' (adsr1 ++ "." ++ "decay") (-259.02,-535.7655) container396
     hide in398
-    in399 <- plugin' (adsr1 ++ "." ++ "sustain") (-309.02,-588.7655) container396
+    in399 <- plugin' (adsr1 ++ "." ++ "sustain") (-259.02,-585.7655) container396
     hide in399
-    in400 <- plugin' (adsr1 ++ "." ++ "release") (-309.02,-638.7655) container396
+    in400 <- plugin' (adsr1 ++ "." ++ "release") (-259.02,-635.7655) container396
     hide in400
-    in401 <- plugin' (adsr1 ++ "." ++ "gate") (-303.02,-687.7655) container396
-    knob402 <- knob' (input72 ++ "." ++ "result") (-372.02,-559.7655) container396
-    knob403 <- knob' (input73 ++ "." ++ "result") (-297.02,-562.7655) container396
-    knob404 <- knob' (input75 ++ "." ++ "result") (-371.02,-619.7655) container396
-    knob405 <- knob' (input74 ++ "." ++ "result") (-299.02,-620.7655) container396
-    out406 <- plugout' (adsr1 ++ "." ++ "result") (-303.02,-724.7655) container396
-    container407 <- container' "panel_adsr.bmp" (-385.5,-309.0) proxy203
-    in408 <- plugin' (adsr0 ++ "." ++ "attack") (-414.5,-248.0) container407
+    in401 <- plugin' (adsr1 ++ "." ++ "gate") (-253.01999,-684.7655) container396
+    knob402 <- knob' (input72 ++ "." ++ "result") (-322.02,-556.7655) container396
+    knob403 <- knob' (input73 ++ "." ++ "result") (-247.01999,-559.7655) container396
+    knob404 <- knob' (input75 ++ "." ++ "result") (-321.02,-616.7655) container396
+    knob405 <- knob' (input74 ++ "." ++ "result") (-249.01999,-617.7655) container396
+    out406 <- plugout' (adsr1 ++ "." ++ "result") (-253.01999,-721.7655) container396
+    container407 <- container' "panel_adsr.bmp" (-391.5,-310.0) proxy203
+    in408 <- plugin' (adsr0 ++ "." ++ "attack") (-420.5,-249.0) container407
     hide in408
-    in409 <- plugin' (adsr0 ++ "." ++ "decay") (-361.5,-231.0) container407
+    in409 <- plugin' (adsr0 ++ "." ++ "decay") (-367.5,-232.0) container407
     hide in409
-    in410 <- plugin' (adsr0 ++ "." ++ "sustain") (-428.5,-307.0) container407
+    in410 <- plugin' (adsr0 ++ "." ++ "sustain") (-434.5,-308.0) container407
     hide in410
-    in411 <- plugin' (adsr0 ++ "." ++ "release") (-361.5,-331.0) container407
+    in411 <- plugin' (adsr0 ++ "." ++ "release") (-367.5,-332.0) container407
     hide in411
-    in412 <- plugin' (adsr0 ++ "." ++ "gate") (-355.5,-380.0) container407
-    knob413 <- knob' (input87 ++ "." ++ "result") (-424.5,-252.0) container407
-    knob414 <- knob' (input88 ++ "." ++ "result") (-360.5,-258.0) container407
-    knob415 <- knob' (input93 ++ "." ++ "result") (-431.5,-307.0) container407
-    knob416 <- knob' (input92 ++ "." ++ "result") (-355.5,-310.0) container407
-    out417 <- plugout' (adsr0 ++ "." ++ "result") (-355.5,-417.0) container407
+    in412 <- plugin' (adsr0 ++ "." ++ "gate") (-361.5,-381.0) container407
+    knob413 <- knob' (input87 ++ "." ++ "result") (-429.5,-250.0) container407
+    knob414 <- knob' (input88 ++ "." ++ "result") (-366.5,-259.0) container407
+    knob415 <- knob' (input93 ++ "." ++ "result") (-437.5,-308.0) container407
+    knob416 <- knob' (input92 ++ "." ++ "result") (-361.5,-311.0) container407
+    out417 <- plugout' (adsr0 ++ "." ++ "result") (-361.5,-418.0) container407
     container418 <- container' "panel_3x1.bmp" (-3.0,-297.5) proxy203
     in419 <- plugin' (vca114 ++ "." ++ "cv") (-24.0,-272.5) container418
     in420 <- plugin' (vca114 ++ "." ++ "signal") (-24.0,-322.5) container418
@@ -655,10 +655,8 @@ do
     cable out395 in434
     cable out225 in435
     cable out460 in436
-    cable out234 in440
-    cable out280 in441
-    cable out326 in442
-    cable out451 in443
+    cable out233 in440
+    cable out279 in441
     cable knob449 in447
     cable out431 in448
     cable out219 in453
@@ -692,32 +690,32 @@ do
     set selector172 (7.0)
     set selector173 (0.0)
     set selector174 (0.0)
-    set knob178 (5.055032e-2)
-    set knob184 (1.420102)
+    set knob178 (0.6335113)
+    set knob184 (1.5969293)
     set knob192 (0.5269025)
-    set knob210 (1.3633834)
-    set knob211 (0.16386342)
-    set knob217 (0.14079204)
+    set knob210 (0.0)
+    set knob211 (0.62728864)
+    set knob217 (0.0)
     set knob223 (0.0)
     set knob231 (0.0)
-    set knob232 (0.2827409)
-    set knob277 (6.0151957e-2)
-    set knob278 (0.8738309)
-    set knob323 (2.8997473e-4)
-    set knob324 (0.2540994)
-    set knob367 (18.002008)
-    set knob380 (1.0e-2)
+    set knob232 (0.10265756)
+    set knob277 (5.8333334e-2)
+    set knob278 (0.4631021)
+    set knob323 (0.1)
+    set knob324 (0.5150039)
+    set knob367 (0.0)
+    set knob380 (0.0)
     set knob386 (0.0)
     set knob387 (0.0)
     set knob393 (0.0)
-    set knob402 (0.15525272)
-    set knob403 (0.35999998)
-    set knob404 (0.21)
-    set knob405 (0.12)
-    set knob413 (0.1363402)
-    set knob414 (0.4731545)
-    set knob415 (0.30112305)
-    set knob416 (0.28777784)
+    set knob402 (0.0)
+    set knob403 (0.24703449)
+    set knob404 (4.9999997e-2)
+    set knob405 (4.9999997e-2)
+    set knob413 (1.4592102e-2)
+    set knob414 (6.6724025e-2)
+    set knob415 (0.26112306)
+    set knob416 (0.43997455)
     set knob426 (1.0)
     set knob449 (0.0)
     return ()

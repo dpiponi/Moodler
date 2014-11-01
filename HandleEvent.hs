@@ -2,7 +2,6 @@
 
 module HandleEvent where
 
-
 import Control.Lens hiding (setting)
 import Control.Monad.State
 import Control.Monad.Trans.Free
