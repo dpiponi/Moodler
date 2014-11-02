@@ -10,7 +10,7 @@ the runtime itself.
 I couldn't quite figure out how to make this all work with cabal
 especially as things get installed in different places depending on whether
 you do `cabal build` or `cabal install`.
-So I use cabal just to get the dependencies, and make for the building.
+So I use `cabal` just to get the dependencies, and `make` for the building.
 I was also unable to make things work sandboxed. I don't know how to point
 my own code at the sandbox when it's using hint.
 
@@ -32,3 +32,7 @@ In one window run `./moodler`
 In another run `./ui -a 127.0.0.1 -f test`
 
 The `-f test` runs `scripts/test.hs`
+
+Try grabbing the ends of cables (cables start at red and end at black) and plugging them in elsewhere. Try dragging on knobs. Trying clicking on the circles inside squares, and typing 'p' to get back. 'q' to quit.
+
+This is "research" code. Most things are buggy. It's just a matter of getting time to work on them...
