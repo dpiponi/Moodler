@@ -1,7 +1,6 @@
 do
     plane <- currentPlane
     let upToPlane p = do
-        echo $ "Hello " ++ show p
         parentThing <- getParent p
         t <- getType parentThing
         if t == ProxyType

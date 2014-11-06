@@ -79,7 +79,8 @@ safeReadFile f =
         let err = show (e :: IOException)
         return $ Left err
 
-execScript :: (InputHandler m, Functor m, MonadIO m, MonadState GlossWorld m) =>
+execScript :: (InputHandler m, Functor m, MonadIO m,
+               MonadState GlossWorld m) =>
               String -> [String] -> m ()
 execScript f arguments = do
     cmds <- liftIO $ safeReadFile $ "scripts/" ++ f ++ ".hs"
