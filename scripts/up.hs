@@ -8,5 +8,4 @@ do
             then return parentThing
             else upToPlane parentThing
     parentPlane <- upToPlane plane
-    echo $ "Switching to " ++ show parentPlane
     switch parentPlane

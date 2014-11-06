@@ -2,31 +2,31 @@
 
 module HandleEvent where
 
+import Cable
+import Command
+import Comms
+import ContainerTree
 import Control.Lens hiding (setting)
 import Control.Monad.State
 import Control.Monad.Trans.Free
 import Data.List
 import Data.Monoid
 import Debug.Trace
+import Draw
 import GHC.IO.Exception
 import Graphics.Gloss.Interface.IO.Game
+import Music
 import Numeric
+import Symbols
 import System.Posix
+import UIElement
+import UISupport
+import Utils
+import World
+import qualified Box as B
 import qualified Data.Foldable as F
 import qualified Data.Map as M
 import qualified Data.Set as S
-import Music
-import UIElement
-import World
-import UISupport
-import Cable
-import Command
-import Symbols
-import Comms
-import qualified Box as B
-import Draw
-import Utils
-import ContainerTree
 import qualified UiLib as U
 
 -- Find a container somewhere in a list of ids.
@@ -262,7 +262,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
             Nothing -> return ()
     handleDefault
 
--- The normal/ordinaery mouse down event
+-- The normal/ordinary mouse down event
 handleDefault' (EventKey (MouseButton LeftButton) Down
     (Modifiers {alt = Up, shift = Up, ctrl = Up}) p) = do
     selectionPlane <- use (inner . planes)
@@ -283,7 +283,10 @@ handleDefault' (EventKey (MouseButton RightButton) Down
     case e of
         Just i -> do
             f <- getElementById "HandleEvent.hs" i
-            inner . gadget .= \xform -> pictureTransformer xform $ translate x y (scale 0.05 0.05 (color black (text (show f))))
+            inner . gadget .= \xform ->
+                pictureTransformer xform $
+                    translate x y
+                        (scale 0.05 0.05 (color black (text (show f))))
             handleDefault
         Nothing -> handleDefault
 

@@ -2,7 +2,6 @@ do
     as <- selection
     destination <- input "destination: "
     case destination of
-        pp
         Nothing -> return ()
         Just destination' ->
             forM_ as $ parent (UiId destination')

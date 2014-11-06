@@ -9,7 +9,7 @@ executable moodler
   ghc-options:      -O -threaded
   build-depends:    base, language-c, lens, unix, mtl,
                     pretty, process, hashable, containers,
-                    either, bytestring, array, hosc, syb,
+                    either, bytestring, array, hosc >= 0.14, syb,
                     directory
 
 executable ui
@@ -17,4 +17,4 @@ executable ui
   main-is:          ui.hs
   ghc-options:      -O -threaded
   build-depends:    base, gloss, containers, lens, mtl, bmp, hint,
-                    hosc, unix, free, either
+                    hosc >= 0.14, unix, free, either

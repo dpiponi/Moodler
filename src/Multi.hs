@@ -14,7 +14,8 @@ instance (Ord s, Monoid a) => Monoid (Multi s a) where
         Multi $ M.unionWith mappend a b
 
 collate :: (Ord s, Monoid a) => [s] -> Multi s a -> a
-collate keys (Multi m) = mconcat $ map (\key -> M.findWithDefault mempty key m) keys
+collate keys (Multi m) = mconcat $
+                map (\key -> M.findWithDefault mempty key m) keys
 
 multi :: s -> a -> Multi s a
 multi k a = Multi (M.singleton k a)

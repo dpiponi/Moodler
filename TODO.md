@@ -1,4 +1,3 @@
-* Replace planes with single plane.
 * Refactor, refactor, refactor
 * Restart
 * Properly integrate oscilloscope
@@ -15,3 +14,4 @@
 * Undo
 * Store config with bindings separately from actual 'scene'
 * Cable changes aren't all reflected at server.
+* COmpletion for input

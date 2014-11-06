@@ -11,12 +11,14 @@ void init() {
     state = RELEASE;
 }
 
-void exec(in attack, in decay, in sustain, in release, in gate, out result) {
+void exec(in attack, in decay, in sustain, in release,
+          in gate, out result) {
     {
         attack_rate = attack ? dt/attack : 0.0;
         decay_rate = decay ? dt/decay : 0.0;
         release_rate = release ? dt/release : 0.0;
 
+        if (0) printf("in=%f\n", gate);
         switch (state) {
 
         case ATTACK:
@@ -27,9 +29,11 @@ void exec(in attack, in decay, in sustain, in release, in gate, out result) {
             }
             if (attack == 0 || result >= 1.0) {
                 result = 1.0;
+                printf("ATTACK->DECAY\n");
                 state = DECAY;
             }
             if (gate <= 0) {
+                printf("ATTACK->RELEASE\n");
                 state = RELEASE;
             }
             break;
@@ -45,16 +49,21 @@ void exec(in attack, in decay, in sustain, in release, in gate, out result) {
             }
             if (gate <= 0) {
                 state = RELEASE;
+                printf("DECAY->RELEASE\n");
             }
             break;
 
-        default:
+        case RELEASE:
             result *= exp(-release_rate);
 
             if (gate > 0) {
                 state = ATTACK;
+                printf("RELEASE->ATTACK\n");
             }
             break;
+
+        default:
+            printf("Unknown ADSR state: %d\n", state);
         }
         last_gate = gate;
         if (0) printf("%f\n", result);

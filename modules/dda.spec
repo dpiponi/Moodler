@@ -22,7 +22,7 @@ void exec(in reset,
         if (0) printf("clock=%f\n", clock);
         if (clock > 0.0 && last_clock <= 0.0) {
             y += dy;
-            if (1) { printf("y=%f\n", y); }
+            if (0) { printf("y=%f\n", y); }
             if (y > 1) {
                 y -= 1.0;
                 trigger = 1.0;

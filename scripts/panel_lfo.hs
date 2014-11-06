@@ -11,12 +11,12 @@ do
     parent image5 in7
     knob8 <- knob' (input3++"."++"result") (x+(-2.0), y+(75.0)) main
     parent image5 knob8
-    out10 <- plugout' (lfo4++"."++"saw") (x+(-23.0), y+(-121.0)) main
+    out10 <- plugout' (lfo4++"."++"triangle") (x+(-23.0), y+(-121.0)) main
     parent image5 out10
-    out11 <- plugout' (lfo4++"."++"triangle") (x+(38.0), y+(-119.0)) main
-    parent image5 out11
-    out12 <- plugout' (lfo4++"."++"sin_result") (x+(-23.0), y+(-77.0)) main
+    out12 <- plugout' (lfo4++"."++"saw") (x+(38.0), y+(-119.0)) main
     parent image5 out12
+    out11 <- plugout' (lfo4++"."++"sin_result") (x+(-23.0), y+(-77.0)) main
+    parent image5 out11
     out9 <- plugout' (lfo4++"."++"square_result") (x+(39.0), y+(-78.0)) main
     parent image5 out9
     cable knob8 in7

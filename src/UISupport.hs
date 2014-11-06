@@ -17,17 +17,19 @@ import UIElement
 import World
 
 highlightElement :: MonadState GlossWorld m => UiId -> m ()
-highlightElement i = (inner . uiElements) . ix i . highlighted .= True
+highlightElement i = inner . uiElements . ix i . highlighted .= True
 
 unhighlightElement :: MonadState GlossWorld m => UiId -> m ()
-unhighlightElement i = (inner . uiElements) . ix i . highlighted .= False
+unhighlightElement i = inner . uiElements . ix i . highlighted .= False
 
 unhighlightEverything :: MonadState GlossWorld m => m ()
-unhighlightEverything = (inner . uiElements) . traverse . highlighted .= False
+unhighlightEverything = inner . uiElements . traverse . highlighted .=
+                            False
 
 highlightJust :: MonadState GlossWorld m => UiId -> m ()
 highlightJust i =
-    unhighlightEverything >> (inner . uiElements) . ix i . highlighted .= True
+    unhighlightEverything >> inner . uiElements . ix i . highlighted .=
+        True
 
 doSelection :: MonadState GlossWorld m => UiId -> m ()
 doSelection i = do
@@ -76,7 +78,7 @@ visitElements' e elt@Container { _contents = cts } = do
         then return []
         else do
             childElements <- forM (S.toList cts) $ \c -> do
-                celt <- getElementById "UISupport.hs" c
+                celt <- getElementById "visitElements'" c
                 visitElements' c celt
             return $ concat childElements ++ [e]
 visitElements' e elt = do
@@ -85,6 +87,7 @@ visitElements' e elt = do
         then []
         else [e]
     
+    {-
 visitElements :: MonadState GlossWorld m => m [UiId]
 visitElements = do
     es <- use (inner . uiElements)
@@ -96,19 +99,20 @@ visitElements = do
             then visitElements' e elt
             else return []
     return $ concat lists
+    -}
 
 visitElementsOnPlane :: MonadState GlossWorld m => UiId -> m [UiId]
 visitElementsOnPlane planeId = do
-    p <- getElementById "UISupport.hs" planeId
+    showHiddenElements <- use (inner . showHidden)
+    p <- getElementById "visitElementsOnPlane" planeId
     lists <- forM (S.toList (p ^. contents)) $ \eltId -> do
-        elt <- getElementById "UISupport.hs" eltId
-        if not (elt ^. hidden)
+        elt <- getElementById "visitElementsOnPlane" eltId
+        if showHiddenElements || not (elt ^. hidden)
             then visitElements' eltId elt
             else return []
     return $ concat lists
 
--- Visible root elements
--- Should be able to do better 'cos proxy lists its contents
+-- XXX Visible?
 rootElementsOnPlane :: MonadState GlossWorld m => UiId -> m [UiId]
 rootElementsOnPlane planeId = do
     p <- getElementById "UISupport.hs" planeId
@@ -134,7 +138,8 @@ deleteCable selectedIn = do
         [] -> return Nothing
         [c] -> do
             (inner . uiElements) . ix selectedIn . cables .= []
-            selectedInName <- use ((inner . uiElements) . ix selectedIn . name)
+            selectedInName <-
+                use (inner . uiElements . ix selectedIn . name)
             -- Comms
             sendConnectMessage "zero.result" selectedInName
             -- Comms
@@ -148,7 +153,8 @@ deleteCable selectedIn = do
             sendRecompileMessage
             return (Just c)
 
-rotateCables :: (Functor m, MonadIO m, MonadState GlossWorld m) => UiId -> m ()
+rotateCables :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+                UiId -> m ()
 rotateCables selectedIn = do
     outPoint <- getElementById "UISupport.hs" selectedIn
     case outPoint ^. cables of
@@ -207,7 +213,8 @@ getDirection (SpecialKey KeyLeft) = (-1, 0)
 getDirection (SpecialKey KeyRight) = (1, 0)
 getDirection _ = (0, 0)
 
-everythingInRegion :: MonadState GlossWorld m => UiId -> Point -> Point -> m [UiId]
+everythingInRegion :: MonadState GlossWorld m =>
+                      UiId -> Point -> Point -> m [UiId]
 everythingInRegion selectionPlane p0 p1 = do
     parentsFirst <- visitElementsOnPlane selectionPlane
     flip filterM parentsFirst $ \e -> do
@@ -217,8 +224,9 @@ everythingInRegion selectionPlane p0 p1 = do
 addPlane :: MonadState GlossWorld m => UiId -> m ()
 addPlane plane = inner . planes .= plane
 
--- When we make a group we may have to remove elements from their parents.
--- We only remove them if the parents aren't also in the newly formed group.
+-- When we make a group we may have to remove elements from their parents
+-- We only remove them if the parents aren't also in the newly formed
+-- group.
 makeGroup :: (Functor m, MonadState GlossWorld m, MonadIO m) =>
              UiId -> [UiId] -> Point -> m ()
 makeGroup p sel proxyLocation = do

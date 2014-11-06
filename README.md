@@ -14,17 +14,26 @@ So I use `cabal` just to get the dependencies, and `make` for the building.
 I was also unable to make things work sandboxed. I don't know how to point
 my own code at the sandbox when it's using hint.
 
-Get all the dependencies with
+You'll need alex and happy:
+
+    cabal install alex happy
+
+And then you'll need to build all the libraries Moodler depends on:
 
     cabal install --only-dependencies
+
+You may need to experiment with the above if building alex or happy pulls
+in a library incompatible with one of the Moodler dependencies.
 
 Build with
 
     make
 
 And run the code from wherever you check it out to.
+(Actually `cabal build` should perform `make` as well.)
 
-It runs as two processes. One is the server and the other is the GUI client.
+It runs as two processes.
+One is the server and the other is the GUI client.
 Communication is OSC via UDP.
 
 Typically:
