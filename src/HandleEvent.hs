@@ -174,7 +174,7 @@ handleDefault' (EventKey (Char 'c') Down _ (x, y)) = do
     e <- selectedByPoint selectionPlane (x, y)
     case e of
         Just i -> do
-            elt <- getElementById "HandleEvent.hs" i
+            elt <- getElementById "handleDefault'" i
             case elt of
                 In {} -> do
                     rotateCables i
@@ -518,7 +518,7 @@ justSelect i = do
 wireCable :: UiId -> UiId -> MoodlerM Zero
 wireCable i selectedOut = do
     unhighlightEverything
-    inner . uiElements . ix i . cables %=
+    inner . uiElements . ix i . cablesIn %=
                     (Cable selectedOut i:)
     outName <- use (inner . uiElements . ix selectedOut . name)
     inName <- use (inner . uiElements . ix i . name)
@@ -538,7 +538,8 @@ handleDraggingCable' src start _ (EventMotion (x, y)) = do
             case elt of
                 In {} -> do
                     highlightElement hoveringOver
-                    inner . gadget .= cableGadget start (x, y) <> hoverGadget (_loc elt) elt 
+                    inner . gadget .= cableGadget start (x, y) <>
+                                      hoverGadget (_loc elt) elt 
                 _ -> unhighlightEverything
         Nothing -> unhighlightEverything
     handleDraggingCable src start (x, y)

@@ -112,7 +112,7 @@ elementLine _ parentId maybeMouseLocn eltName Selector { _name = n
 elementLine everythingSaved parentId maybeMouseLocn eltName
     In { _name = n
        , _loc = p
-       , _cables = c
+       , _cablesIn = c
        , _displayName = d } = do
     multiTellLn "module" 4 $ unwords [unUiId eltName,
                                       "<-", "plugin'", rewriteConnection n,

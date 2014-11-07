@@ -66,12 +66,13 @@ installWorld = do
         case elt of
             -- Comms
             Knob { _name = n, _setting = s} -> sendSetMessage n s
-            In { _cables = (Cable src dst : _) } ->
+            In { _cablesIn = Cable src dst : _ } ->
                 -- Comms
                 connectCable src dst
             _ -> return ()
 
-visitElements' :: MonadState GlossWorld m => UiId -> UIElement -> m [UiId]
+visitElements' :: MonadState GlossWorld m =>
+                  UiId -> UIElement -> m [UiId]
 visitElements' e elt@Container { _contents = cts } = do
     showHiddenElements <- use (inner . showHidden)
     if not showHiddenElements && (elt ^. hidden)
@@ -134,10 +135,10 @@ deleteCable :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                UiId -> m (Maybe Cable)
 deleteCable selectedIn = do
     outPoint <- getElementById "UISupport.hs" selectedIn
-    case outPoint ^. cables of
+    case outPoint ^. cablesIn of
         [] -> return Nothing
         [c] -> do
-            (inner . uiElements) . ix selectedIn . cables .= []
+            inner . uiElements . ix selectedIn . cablesIn .= []
             selectedInName <-
                 use (inner . uiElements . ix selectedIn . name)
             -- Comms
@@ -146,7 +147,7 @@ deleteCable selectedIn = do
             sendRecompileMessage
             return (Just c)
         (c : rc@(Cable src dst : _)) -> do
-            (inner . uiElements) . ix selectedIn . cables .= rc
+            inner . uiElements . ix selectedIn . cablesIn .= rc
             -- Comms
             connectCable src dst
             -- Comms
@@ -157,9 +158,9 @@ rotateCables :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                 UiId -> m ()
 rotateCables selectedIn = do
     outPoint <- getElementById "UISupport.hs" selectedIn
-    case outPoint ^. cables of
+    case outPoint ^. cablesIn of
         (c : rc@(Cable src dst : _)) -> do
-            (inner . uiElements) . ix selectedIn . cables .= rc ++ [c]
+            inner . uiElements . ix selectedIn . cablesIn .= rc ++ [c]
             -- Comms
             connectCable src dst
             -- Comms

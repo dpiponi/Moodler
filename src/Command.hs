@@ -92,13 +92,15 @@ execScript f arguments = do
             inner . cmdArgs .= arguments
             execCommand cmd
 
-saveWorld :: (Functor m, MonadIO m, MonadState GlossWorld m) => String -> m ()
+saveWorld :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+             String -> m ()
 saveWorld t = do
     code <- codeWorld
     liftIO $ writeFile ("scripts/" ++ t ++ ".hs") code
     liftIO $ putStrLn $ "----- save: " ++ t
 
-evalUi :: (Functor m, MonadIO m, MonadState GlossWorld m, InputHandler m) =>
+evalUi :: (Functor m, MonadIO m, MonadState GlossWorld m,
+          InputHandler m) =>
           Ui () -> m ()
 evalUi (Return a) = return a
 
@@ -158,7 +160,8 @@ evalUi (PlugOut n t p creationPlane cfn) = do
 
 evalUi (UiLib.Knob n t p creationParent cfn) = do
     --liftIO $ print "Knob"
-    let e = UIElement.Knob creationParent False False p t t 0.0 Nothing Nothing
+    let e = UIElement.Knob creationParent False False
+                                p t t 0.0 Nothing Nothing
     createdInParent n e creationParent
     evalUi (cfn n)
 
@@ -220,7 +223,7 @@ evalUi (UiLib.Cable s1 s2 cfn) = do
             oldOutName <- use (uiElements . ix o1 . UISupport.name)
             sendConnectMessage oldOutName inName
     -}
-    inner . uiElements . ix s2 . cables %= (Cable.Cable s1 s2:)
+    inner . uiElements . ix s2 . cablesIn %= (Cable.Cable s1 s2 :)
     -- XXX Careful. This is using fact that String is a Monoid instance.
     -- Comms
     sendConnectMessage outName inName

@@ -13,8 +13,10 @@ import UIElement
 import Symbols
 import Utils
 import Cable
+import Comms
 
-createdInParent :: MonadState GlossWorld m => UiId -> UIElement -> UiId -> m ()
+createdInParent :: MonadState GlossWorld m =>
+                   UiId -> UIElement -> UiId -> m ()
 createdInParent n e q = do
     (inner . uiElements) %= M.insert n e
     assignElementToPlane n q
@@ -22,19 +24,48 @@ createdInParent n e q = do
 assignElementToPlane :: MonadState GlossWorld m => UiId -> UiId -> m ()
 assignElementToPlane e newPlane' = do
     (inner . uiElements) . ix newPlane' . contents %= S.insert e
-    (inner . uiElements) . ix e . UIElement.parent .= newPlane'
+    inner . uiElements . ix e . UIElement.parent .= newPlane'
 
 cableIsFrom :: UiId -> Cable -> Bool
 cableIsFrom elt (Cable src _) = elt == src
 
 removeCablesFrom :: UiId -> UIElement -> UIElement
 removeCablesFrom i elt@In {} =
-    cables %~ filter (not . cableIsFrom i) $ elt
+    cablesIn %~ filter (not . cableIsFrom i) $ elt
 removeCablesFrom _ elt = elt
 
--- Need to recurse here too XXX
-removeAllCablesFrom :: (MonadIO m, MonadState GlossWorld m) => UiId -> m ()
-removeAllCablesFrom i = inner . uiElements . each %= removeCablesFrom i
+removeAllCablesFromTo :: (Functor m, MonadIO m,
+                         MonadState GlossWorld m) =>
+                         UiId -> UiId -> [Cable] -> m ()
+removeAllCablesFromTo src dst cs = do
+    unless (null cs) $ do
+        let Cable s _ : _ = cs
+        when (s == src) $ do
+            let newCs = filter (not . cableIsFrom src) cs
+            if null newCs
+                then do -- detach cable
+                    dstName <-
+                        use (inner . uiElements . ix dst . name)
+                    -- Comms
+                    sendConnectMessage "zero.result" dstName
+                else do -- attach new cable
+                    let Cable newSrc _ : _ = newCs
+                    -- Comms
+                    connectCable newSrc dst
+            inner . uiElements . ix dst . cablesIn .= newCs
+    inner . uiElements . ix dst %= removeCablesFrom src
+
+removeAllCablesFrom :: (Functor m, MonadIO m,
+                       MonadState GlossWorld m) =>
+                       UiId -> m ()
+removeAllCablesFrom i = do
+    eltIds <- use (inner . uiElements)
+    forM_ (M.toList eltIds) $ \(eltId, elt) ->
+        case elt of
+            In { _cablesIn = cs } -> removeAllCablesFromTo i eltId cs
+            _ -> return ()
+    -- Comms
+    sendRecompileMessage
 
 withContaining :: Monad m => UIElement -> (S.Set UiId -> m ()) -> m ()
 withContaining elt f = 
@@ -43,7 +74,8 @@ withContaining elt f =
         Proxy { _contents = cts } -> f cts
         _ -> return () -- XXX Come back to this. Be explicit.
 
-deleteElement :: (MonadIO m, MonadState GlossWorld m) => UiId -> m ()
+deleteElement :: (Functor m, MonadIO m,
+                 MonadState GlossWorld m) => UiId -> m ()
 deleteElement t = do
     removeAllCablesFrom t
     elt <- getElementById "UISupport.hs" t

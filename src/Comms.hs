@@ -19,9 +19,10 @@ sendOSCMsg :: (MonadIO m, MonadState GlossWorld m) => Message -> m ()
 sendOSCMsg m = do
     ipAddress <- use (inner . ipAddr)
     liftIO $ withTransport (openUDP ipAddress socket) $ sendMessage m
-    --liftIO $ print m
+    liftIO $ print m
 
-sendConnectMessage :: (MonadIO m, MonadState GlossWorld m) => String -> String -> m ()
+sendConnectMessage :: (MonadIO m, MonadState GlossWorld m) =>
+                      String -> String -> m ()
 sendConnectMessage outPoint inPoint = do
     let (a, b) = splitDot outPoint
     let (c, d) = splitDot inPoint
@@ -29,13 +30,15 @@ sendConnectMessage outPoint inPoint = do
     sendOSCMsg msg
     --sendOSCMsg (message "/recompile" [])
 
-sendSetMessage :: (MonadIO m, MonadState GlossWorld m) => String -> Float -> m ()
+sendSetMessage :: (MonadIO m, MonadState GlossWorld m) =>
+                  String -> Float -> m ()
 sendSetMessage knobName value = do
     let (a, b) = splitDot knobName
     let msg = message "/set" [string a, string b, float value]
     sendOSCMsg msg
 
-sendNewInputMessage :: (MonadIO m, MonadState GlossWorld m) => String -> m ()
+sendNewInputMessage :: (MonadIO m, MonadState GlossWorld m) =>
+                       String -> m ()
 sendNewInputMessage knobName = do
     let (a, _) = splitDot knobName
     let msg = message "/input" [string a]
