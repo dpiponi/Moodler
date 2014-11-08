@@ -8,6 +8,8 @@ import Graphics.Gloss.Interface.IO.Game
 import qualified Data.Foldable as F
 import qualified Data.Map as M
 import qualified Data.Set as S
+import System.Directory
+import System.FilePath
 
 import Cable
 import Comms
@@ -253,3 +255,10 @@ makeGroup p sel proxyLocation = do
             liftIO $ print $ "no parent for " ++ show p'
             --unparent movingId
             moveElementToPlane movingId groupPlane
+
+getAllScripts :: IO [String]
+getAllScripts = do
+    scriptFiles <- getDirectoryContents "scripts"
+    let scripts = filter ((== ".hs") . takeExtension) scriptFiles
+    let scriptNames = map dropExtension scripts
+    return scriptNames

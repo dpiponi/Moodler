@@ -3,6 +3,7 @@
 module Text where
 
 import Control.Monad.Writer
+import Data.List
 
 removeFirst :: Eq a => a -> [a] -> [a]
 removeFirst _ [] = []
@@ -31,3 +32,21 @@ deleteLastChar (a : as) = a : deleteLastChar as
 
 estimateTextWidth :: String -> Float
 estimateTextWidth s = 24*fromIntegral (length s)
+
+allEqual :: String -> Bool
+allEqual [] = True
+allEqual [_] = True
+allEqual (a0 : as@(a1 : _)) = a0 == a1 && allEqual as
+
+longestCommonPrefix :: [String] -> String
+longestCommonPrefix [] = ""
+longestCommonPrefix inputs | any null inputs = ""
+longestCommonPrefix inputs =
+    if allEqual (map head inputs)
+        then head (head inputs) : longestCommonPrefix (map tail inputs)
+        else ""
+
+longestMatchingPrefix :: [String] -> String -> String
+longestMatchingPrefix completions input =
+    let matches = filter (isPrefixOf input) completions
+    in longestCommonPrefix matches

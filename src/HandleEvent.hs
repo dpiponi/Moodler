@@ -142,7 +142,8 @@ handleDefault' (EventKey (Char '/') Down _ _) = do
     handleDefault
 
 handleDefault' (EventKey (Char 'l') Down _ _) = do
-    filename <- handleGetString "" "load: "
+    allScripts <- liftIO $ getAllScripts
+    filename <- handleGetString allScripts "" "load: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     case filename of
         Just filename' -> evalUi (U.load filename')
@@ -150,7 +151,7 @@ handleDefault' (EventKey (Char 'l') Down _ _) = do
     handleDefault
 
 handleDefault' (EventKey (Char 's') Down _ _) = do
-    filename <- handleGetString "" "save: "
+    filename <- handleGetString [] "" "save: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     case filename of
         Just filename' -> evalUi (U.save filename')
@@ -158,7 +159,7 @@ handleDefault' (EventKey (Char 's') Down _ _) = do
     handleDefault
 
 handleDefault' (EventKey (Char 'w') Down _ _) = do
-    filename <- handleGetString "" "write: "
+    filename <- handleGetString [] "" "write: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     case filename of
         Just filename' -> evalUi (U.write filename')
@@ -358,46 +359,6 @@ handleDefault' (EventKey (Char key) Down _ _) = do
 handleDefault' _ =
     handleDefault
 
-{-
--- XXX Get rid of 'command' field
-handleEditingCommand :: String
-                       -> MoodlerM Zero
-handleEditingCommand field = do
-    e <- MoodlerM (liftF $ GetEvent id)
-    handleEditingCommand' field e
-
-handleEditingCommand' :: String -> Event -> MoodlerM Zero
--- Actually execute command
-handleEditingCommand' cmd (EventKey (SpecialKey KeyEnter) Down _ _) = do
-    liftIO $ print $ "Going to execute " ++ show cmd
-    execCommand cmd
-    liftIO $ print $ "Executed " ++ show cmd
-    inner . gadget .= const blank
-    handleDefault
-
--- Delete key during command entry
-handleEditingCommand' cmd (EventKey (SpecialKey KeyDelete) Down _ _) = do
-    let cmd' = deleteLastChar cmd
-    inner . gadget .= \xform -> pictureTransformer xform $ translate (-500) (-420) (scale 0.4 0.4 (color black (text (":" ++ cmd'))))
-    handleEditingCommand cmd'
-
--- Space key during command entry
-handleEditingCommand' cmd (EventKey (SpecialKey KeySpace) Down _ _) = do
-    let cmd' = cmd ++ " "
-    inner . gadget .= \xform -> pictureTransformer xform $ translate (-500) (-420) (scale 0.4 0.4 $ color black $ text (":" ++ cmd'))
-    handleEditingCommand cmd'
-
--- Command key entry
-handleEditingCommand' cmd (EventKey (Char c) Down _ _) = do
-    let cmd' = cmd ++ [c]
-    --cmd <- use command
-    inner . gadget .= \_ -> translate (-500) (-420) (scale 0.4 0.4 $ color black $ text (":" ++ cmd'))
-    handleEditingCommand cmd'
-
--- XXX Need to think about this
-handleEditingCommand' x _ = handleEditingCommand x
--}
-
 handleDraggingRoot :: Point -> MoodlerM Zero
 handleDraggingRoot (x0, y0) = do
     e <- MoodlerM (liftF $ GetEvent id)
@@ -432,7 +393,8 @@ dragElement top dx dy sel = forM_ sel $ \s -> do
             -- If you drag a parent and its children then only the
             -- parent needs to be expicitly dragged.
             -- XXX use minimal parent func
-            dragElement top dx dy (filter (not . flip elem top) $ S.toList cts)
+            dragElement top dx dy (filter (not . flip elem top) $
+                                                        S.toList cts)
         _ -> return ()
 
 handleDraggingSelection :: Point ->
@@ -476,7 +438,8 @@ handleDraggingRegion' :: Point -> Point -> Event ->
                            MoodlerM Zero
 handleDraggingRegion' f z (EventMotion (x, y)) = do
     --secondCorner .= (x, y)
-    inner . gadget .= \xform -> pictureTransformer xform $ color black (rect z (x, y))
+    inner . gadget .= \xform -> pictureTransformer xform $
+                                    color black (rect z (x, y))
     selectEverythingInRegion f (x, y)
     handleDraggingRegion f z
 
@@ -591,7 +554,8 @@ handleDraggingKnob' selectedKnob v p0@(x0, y0) (EventMotion p) = do
                     Nothing -> v0
                     Just hi -> min v0 hi
             inner . uiElements . ix selectedKnob . setting .= v1
-            inner . gadget .= \xform -> pictureTransformer xform $ translate x0 y0 (
+            inner . gadget .= \xform -> pictureTransformer xform $
+                                            translate x0 y0 (
                 color (B.transparentBlack 0.8) (rectangleSolid 250 100) <>
                 translate (-80) (-40) (scale 0.27 0.27 $
                     color green $ text (showFFloat (Just 4) v1 "")) <>

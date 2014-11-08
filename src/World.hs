@@ -44,12 +44,14 @@ data World = World { _uiElements :: M.Map UiId UIElement
 
 data GlossWorld = GlossWorld { _inner :: World
                              , _cont :: FreeF MoodlerF Zero
-                                (FreeT MoodlerF (StateT GlossWorld IO) Zero) }
+                                (FreeT MoodlerF (StateT GlossWorld IO)
+                                    Zero) }
 
 $(makeLenses ''GlossWorld)
 
 newtype MoodlerM a = MoodlerM {
-                        runMoodlerM :: FreeT MoodlerF (StateT GlossWorld IO) a }
+                        runMoodlerM :: FreeT MoodlerF
+                                        (StateT GlossWorld IO) a }
                         deriving Functor
 
 instance Monad MoodlerM where
@@ -77,54 +79,67 @@ $(makeLenses ''World)
 
 --innerGadget = inner . gadget
 
-handleGetString :: String -> String -> MoodlerM (Maybe String)
-handleGetString inputString prompt = do
+handleGetString :: [String] -> String -> String -> MoodlerM (Maybe String)
+handleGetString completions inputString prompt = do
     e <- MoodlerM (liftF $ GetEvent id)
-    inner . gadget .= stringGadget inputString prompt
-    handleGetString' inputString prompt e
+    let longestCompletion = longestMatchingPrefix completions inputString
+    inner . gadget .= stringGadget longestCompletion inputString prompt
+    handleGetString' completions inputString prompt e
 
-handleGetString' :: String -> String -> Event -> MoodlerM (Maybe String)
--- Actually execute command XXX
-handleGetString' inputString _ (EventKey (SpecialKey KeyEnter)
+handleGetString' :: [String] -> String -> String -> Event -> MoodlerM (Maybe String)
+handleGetString' _ inputString _ (EventKey (SpecialKey KeyEnter)
                                               Down _ _) = do
     inner . gadget .= const blank
     return (Just inputString)
 
-handleGetString' _ _ (EventKey (SpecialKey KeyEsc)
+handleGetString' _ _ _ (EventKey (SpecialKey KeyEsc)
                                               Down _ _) = do
     inner . gadget .= const blank
     return Nothing
 
 -- Delete key during command entry
-handleGetString' inputString prompt (EventKey (SpecialKey KeyDelete)
+handleGetString' completions inputString prompt (EventKey (SpecialKey KeyDelete)
                                               Down _ _) = do
     let inputString' = deleteLastChar inputString
-    inner . gadget .= stringGadget inputString prompt
-    handleGetString inputString' prompt
+    let longestCompletion = longestMatchingPrefix completions inputString
+    inner . gadget .= stringGadget longestCompletion inputString prompt
+    handleGetString completions inputString' prompt
+
+handleGetString' completions inputString prompt (EventKey (SpecialKey KeyTab)
+                                              Down _ _) = do
+    let longestCompletion = longestMatchingPrefix completions inputString
+    inner . gadget .= stringGadget longestCompletion inputString prompt
+    handleGetString completions longestCompletion prompt
 
 -- Space key during command entry
-handleGetString' inputString prompt (EventKey
+handleGetString' completions inputString prompt (EventKey
                                      (SpecialKey KeySpace)
                                      Down _ _) = do
     let inputString' = inputString ++ " "
-    inner . gadget .= stringGadget inputString prompt
-    handleGetString inputString' prompt
+    let longestCompletion = longestMatchingPrefix completions inputString
+    inner . gadget .= stringGadget longestCompletion inputString prompt
+    handleGetString completions inputString' prompt
 
 -- Command key entry
-handleGetString' inputString prompt (EventKey (Char c) Down _ _) = do
+handleGetString' completions inputString prompt (EventKey (Char c) Down _ _) = do
     let inputString' = inputString ++ [c]
-    inner . gadget .= stringGadget inputString prompt
-    handleGetString inputString' prompt
+    let longestCompletion = longestMatchingPrefix completions inputString
+    inner . gadget .= stringGadget longestCompletion inputString prompt
+    handleGetString completions inputString' prompt
 
 -- XXX Need to think about this
-handleGetString' x y _ = handleGetString x y
+handleGetString' c x y _ = handleGetString c x y
 
 instance InputHandler MoodlerM where
-    getInput = handleGetString
+    getInput = handleGetString []
 
-stringGadget :: String -> String -> B.Transform -> Picture
-stringGadget inputString prompt _ =
+grey50 :: Color
+grey50 = makeColor 0.5 0.5 0.5 1.0
+
+stringGadget :: String -> String -> String -> B.Transform -> Picture
+stringGadget completion inputString prompt _ =
     translate 0 20 (color (B.transparentBlack 0.8) (rectangleSolid 500 60)) <>
+    translate (-250) 0 (scale 0.4 0.4 (color grey50 $ text (prompt ++ completion))) <>
     translate (-250) 0 (scale 0.4 0.4 (color white $ text (prompt ++ inputString)))
 
 locById :: GlossWorld -> UiId -> (Float, Float)
@@ -133,7 +148,8 @@ locById w e =
                                           (_uiElements (_inner w))
     in _loc elt
 
-newtype WorldMonad a = WorldMonad { runWorldMonad :: StateT GlossWorld IO a }
+newtype WorldMonad a = WorldMonad { runWorldMonad ::
+                                            StateT GlossWorld IO a }
                         deriving (Monad, MonadState GlossWorld,
                                   MonadIO, Functor)
 
@@ -157,5 +173,6 @@ getElementTypeById i = do
     elt <- getElementById "getElementTypeById" i
     return $ elementType elt
 
-getElementsById :: MonadState GlossWorld m => String -> [UiId] -> m [UIElement]
+getElementsById :: MonadState GlossWorld m =>
+                   String -> [UiId] -> m [UIElement]
 getElementsById msg = mapM (getElementById msg)
