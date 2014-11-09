@@ -47,7 +47,7 @@ removeAllCablesFromTo src dst cs = do
                     dstName <-
                         use (inner . uiElements . ix dst . name)
                     -- Comms
-                    sendConnectMessage "zero.result" dstName
+                    sendDisconnectMessage dstName
                 else do -- attach new cable
                     let Cable newSrc _ : _ = newCs
                     -- Comms

@@ -1,6 +1,12 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module Comms where
+module Comms(connectCable,
+             sendDisconnectMessage,
+             sendSetMessage,
+             sendNewSynthMessage,
+             sendNewInputMessage,
+             sendRecompileMessage,
+             sendQuitMessage) where
 
 import Control.Monad.State
 import Sound.OSC
@@ -14,6 +20,18 @@ import Symbols
 
 socket :: Int
 socket = 7777
+
+--
+-- Commands that can be sent to server:
+-- 1. Connect A to B
+-- 1a. Disconnect cable
+-- 2. Set input to some value
+-- 3. Create new synth
+-- 3a. (Not implemented yet) Delete synth
+-- 4. Create new input
+-- 4a. (Not implemented yet) Delete input
+-- 5. Recompile
+-- 6. Quit
 
 sendOSCMsg :: (MonadIO m, MonadState GlossWorld m) => Message -> m ()
 sendOSCMsg m = do
@@ -29,6 +47,11 @@ sendConnectMessage outPoint inPoint = do
     let msg = message "/connect" $ string <$> [a, b, c, d]
     sendOSCMsg msg
     --sendOSCMsg (message "/recompile" [])
+
+sendDisconnectMessage :: (MonadIO m, MonadState GlossWorld m) =>
+                      String -> m ()
+sendDisconnectMessage =
+    sendConnectMessage "zero.result"
 
 sendSetMessage :: (MonadIO m, MonadState GlossWorld m) =>
                   String -> Float -> m ()

@@ -23,7 +23,7 @@ data Ui a = Return a
           | Label UiId String (Float, Float) UiId (UiId -> Ui a)
           | Selector UiId String (Float, Float)
                                 [String] UiId (UiId -> Ui a)
-          | Connect String String (Ui a)
+          -- | Connect String String (Ui a)
           | Cable UiId UiId (Ui a)
           | Mouse ((Float, Float) -> Ui a)
           | Args ([String] -> Ui a)
@@ -72,7 +72,7 @@ instance Monad Ui where
     Image s1 s2 p q cont >>= f = Image s1 s2 p q ((>>= f) . cont)
     Container s1 s2 p q cont >>= f = Container s1 s2 p q ((>>= f) . cont)
     Label s1 s2 p q cont >>= f = Label s1 s2 p q ((>>= f) . cont)
-    Connect s1 s2 cont >>= f = Connect s1 s2 (cont >>= f)
+    -- Connect s1 s2 cont >>= f = Connect s1 s2 (cont >>= f)
     Cable s1 s2 cont >>= f = Cable s1 s2 (cont >>= f)
     Mouse cont >>= f = Mouse ((>>= f) . cont)
     Args cont >>= f = Args ((>>= f) . cont)
@@ -193,8 +193,10 @@ label' labelText p creationParent = do
     nodeId <- newId "label"
     Label nodeId labelText p creationParent return
 
+{-
 connect :: String -> String -> Ui ()
 connect s1 s2 = Connect s1 s2 (return ())
+-}
 
 cable :: UiId -> UiId -> Ui ()
 cable s1 s2 = Cable s1 s2 (return ())

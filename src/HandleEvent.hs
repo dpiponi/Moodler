@@ -483,9 +483,10 @@ wireCable i selectedOut = do
     unhighlightEverything
     inner . uiElements . ix i . cablesIn %=
                     (Cable selectedOut i:)
-    outName <- use (inner . uiElements . ix selectedOut . name)
-    inName <- use (inner . uiElements . ix i . name)
-    sendConnectMessage outName inName
+    --outName <- use (inner . uiElements . ix selectedOut . name)
+    --inName <- use (inner . uiElements . ix i . name)
+    --sendConnectMessage outName inName
+    connectCable selectedOut i
     sendRecompileMessage
     justSelect i
 

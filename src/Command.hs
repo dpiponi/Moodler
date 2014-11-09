@@ -196,12 +196,14 @@ evalUi (UiLib.Label n labelText p creationPlane cfn) = do
     createdInParent n e creationPlane
     evalUi (cfn n)
 
+{-
 evalUi (Connect s1 s2 cfn) = do
     liftIO $ print "Connect"
     inner . connections %= ((s1, s2) :)
     -- Comms
     sendConnectMessage s1 s2
     evalUi cfn
+-}
 
 evalUi (Value t v cfn) = do
     liftIO $ print "Value"
@@ -212,8 +214,10 @@ evalUi (Value t v cfn) = do
 
 evalUi (UiLib.Cable s1 s2 cfn) = do
     --liftIO $ print "Cable"
+    {-
     outName <- use (inner . uiElements . ix s1 . UIElement.name)
     inName <- use (inner . uiElements . ix s2 . UIElement.name)
+    -}
     {-
     -- Computing reverse operation
     oldEndPoint <- getElementById s2
@@ -223,10 +227,11 @@ evalUi (UiLib.Cable s1 s2 cfn) = do
             oldOutName <- use (uiElements . ix o1 . UISupport.name)
             sendConnectMessage oldOutName inName
     -}
+    connectCable s1 s2
     inner . uiElements . ix s2 . cablesIn %= (Cable.Cable s1 s2 :)
     -- XXX Careful. This is using fact that String is a Monoid instance.
     -- Comms
-    sendConnectMessage outName inName
+--    sendConnectMessage outName inName
     evalUi cfn
 
 evalUi (UiLib.Recompile cfn) = do

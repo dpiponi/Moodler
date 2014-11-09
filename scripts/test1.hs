@@ -106,6 +106,7 @@ do
     lfo98 <- new' "lfo"
     noise99 <- new' "noise"
     seqq100 <- new' "seqq"
+    seqq100_add <- new' "input"
     sum101 <- new' "sum"
     sum102 <- new' "sum"
     sum103 <- new' "sum"
@@ -125,6 +126,7 @@ do
     vca115 <- new' "vca"
     vca116 <- new' "vca"
     vca117 <- new' "vca"
+    vco464 <- new' "vco"
     container118 <- container' "panel_sequencer.bmp" (-33.0,296.0) root
     in119 <- plugin' (seqq100 ++ "." ++ "freq2") (-184.0,345.0) container118
     hide in119
@@ -172,6 +174,7 @@ do
     hide in140
     in141 <- plugin' (seqq100 ++ "." ++ "gate") (-185.0,146.0) container118
     in142 <- plugin' (seqq100 ++ "." ++ "add") (-184.0,188.0) container118
+    hide in142
     in143 <- plugin' (seqq100 ++ "." ++ "slide_rate") (-11.0,146.0) container118
     hide in143
     in144 <- plugin' (seqq100 ++ "." ++ "length") (-11.0,196.0) container118
@@ -189,6 +192,7 @@ do
     knob153 <- knob' (input60 ++ "." ++ "result") (-14.0,243.0) container118
     knob154 <- knob' (input46 ++ "." ++ "result") (-183.0,390.0) container118
     knob155 <- knob' (input64 ++ "." ++ "result") (-8.0,156.0) container118
+    knob473 <- knob' (seqq100_add ++ "." ++ "result") (-184.0,188.0) container118
     out156 <- plugout' (seqq100 ++ "." ++ "result") (102.0,148.0) container118
     out157 <- plugout' (seqq100 ++ "." ++ "trigger") (102.0,187.0) container118
     selector158 <- selector' (input67 ++ "." ++ "result") (-141.0,340.0) ["1","2","3","4","5","6","7","8"] container118
@@ -286,11 +290,11 @@ do
     proxy237 <- proxy' (-554.0,383.5) container226
     hide proxy237
     container238 <- container' "panel_3x1.bmp" (-1106.0,439.5) proxy237
-    in239 <- plugin' (audio_square8 ++ "." ++ "freq") (-1127.0,489.5) container238
-    in240 <- plugin' (audio_square8 ++ "." ++ "pwm") (-1127.0,439.5) container238
-    in241 <- plugin' (audio_square8 ++ "." ++ "sync") (-1127.0,389.5) container238
+    in239 <- plugin' (audio_square9 ++ "." ++ "freq") (-1127.0,489.5) container238
+    in240 <- plugin' (audio_square9 ++ "." ++ "pwm") (-1127.0,439.5) container238
+    in241 <- plugin' (audio_square9 ++ "." ++ "sync") (-1127.0,389.5) container238
     label242 <- label' "audio_square" (-1131.0,514.5) container238
-    out243 <- plugout' (audio_square8 ++ "." ++ "result") (-1086.0,439.5) container238
+    out243 <- plugout' (audio_square9 ++ "." ++ "result") (-1086.0,439.5) container238
     container244 <- container' "panel_3x1.bmp" (-1095.0,679.5) proxy237
     in245 <- plugin' (sum102 ++ "." ++ "signal2") (-1116.0,654.5) container244
     in246 <- plugin' (sum102 ++ "." ++ "signal1") (-1116.0,704.5) container244
@@ -335,11 +339,11 @@ do
     proxy283 <- proxy' (-367.0,380.5) container272
     hide proxy283
     container284 <- container' "panel_3x1.bmp" (-972.0,523.5) proxy283
-    in285 <- plugin' (audio_square9 ++ "." ++ "freq") (-993.0,573.5) container284
-    in286 <- plugin' (audio_square9 ++ "." ++ "pwm") (-993.0,523.5) container284
-    in287 <- plugin' (audio_square9 ++ "." ++ "sync") (-993.0,473.5) container284
+    in285 <- plugin' (audio_square10 ++ "." ++ "freq") (-993.0,573.5) container284
+    in286 <- plugin' (audio_square10 ++ "." ++ "pwm") (-993.0,523.5) container284
+    in287 <- plugin' (audio_square10 ++ "." ++ "sync") (-993.0,473.5) container284
     label288 <- label' "audio_square" (-997.0,598.5) container284
-    out289 <- plugout' (audio_square9 ++ "." ++ "result") (-952.0,523.5) container284
+    out289 <- plugout' (audio_square10 ++ "." ++ "result") (-952.0,523.5) container284
     container290 <- container' "panel_3x1.bmp" (-961.0,763.5) proxy283
     in291 <- plugin' (sum103 ++ "." ++ "signal2") (-982.0,738.5) container290
     in292 <- plugin' (sum103 ++ "." ++ "signal1") (-982.0,788.5) container290
@@ -384,11 +388,11 @@ do
     proxy329 <- proxy' (-174.0,382.5) container318
     hide proxy329
     container330 <- container' "panel_3x1.bmp" (-968.0,522.5) proxy329
-    in331 <- plugin' (audio_square10 ++ "." ++ "freq") (-989.0,572.5) container330
-    in332 <- plugin' (audio_square10 ++ "." ++ "pwm") (-989.0,522.5) container330
-    in333 <- plugin' (audio_square10 ++ "." ++ "sync") (-989.0,472.5) container330
+    in331 <- plugin' (audio_square8 ++ "." ++ "freq") (-989.0,572.5) container330
+    in332 <- plugin' (audio_square8 ++ "." ++ "pwm") (-989.0,522.5) container330
+    in333 <- plugin' (audio_square8 ++ "." ++ "sync") (-989.0,472.5) container330
     label334 <- label' "audio_square" (-993.0,597.5) container330
-    out335 <- plugout' (audio_square10 ++ "." ++ "result") (-948.0,522.5) container330
+    out335 <- plugout' (audio_square8 ++ "." ++ "result") (-948.0,522.5) container330
     container336 <- container' "panel_3x1.bmp" (-957.0,762.5) proxy329
     in337 <- plugin' (sum104 ++ "." ++ "signal2") (-978.0,737.5) container336
     in338 <- plugin' (sum104 ++ "." ++ "signal1") (-978.0,787.5) container336
@@ -527,6 +531,16 @@ do
     in456 <- plugin' (sum4108 ++ "." ++ "signal4") (90.0,-106.0) container452
     label457 <- label' "sum4" (86.0,44.0) container452
     out458 <- plugout' (sum4108 ++ "." ++ "result") (131.0,-31.0) container452
+    container462 <- container' "panel_4x1.bmp" (-748.0,69.0) proxy203
+    in465 <- plugin' (vco464 ++ "." ++ "sync") (-769.0,144.0) container462
+    in466 <- plugin' (vco464 ++ "." ++ "freq") (-769.0,94.0) container462
+    in467 <- plugin' (vco464 ++ "." ++ "linear_fm") (-769.0,44.0) container462
+    in468 <- plugin' (vco464 ++ "." ++ "pulse_width") (-769.0,-6.0) container462
+    label463 <- label' "vco" (-773.0,144.0) container462
+    out469 <- plugout' (vco464 ++ "." ++ "result") (-728.0,144.0) container462
+    out470 <- plugout' (vco464 ++ "." ++ "square") (-728.0,94.0) container462
+    out471 <- plugout' (vco464 ++ "." ++ "triangle") (-728.0,44.0) container462
+    out472 <- plugout' (vco464 ++ "." ++ "saw") (-728.0,-6.0) container462
     in459 <- plugin' (id25 ++ "." ++ "signal") (296.0,-214.5) proxy203
     out460 <- plugout' (id15 ++ "." ++ "result") (-534.0,-136.5) proxy203
     out461 <- plugout' (id16 ++ "." ++ "result") (-533.0,-259.5) proxy203
@@ -553,6 +567,7 @@ do
     cable selector170 in139
     cable selector171 in140
     cable out188 in141
+    cable knob473 in142
     cable knob155 in143
     cable selector172 in144
     cable selector173 in145
@@ -577,6 +592,7 @@ do
     cable out438 in227
     cable knob231 in228
     cable knob232 in229
+    cable out472 in230
     cable out248 in239
     cable out270 in240
     cable out271 in241
@@ -595,6 +611,7 @@ do
     cable out438 in273
     cable knob277 in274
     cable knob278 in275
+    cable out472 in276
     cable out294 in285
     cable out316 in286
     cable out317 in287
@@ -613,6 +630,7 @@ do
     cable out438 in319
     cable knob323 in320
     cable knob324 in321
+    cable out472 in322
     cable out340 in331
     cable out362 in332
     cable out363 in333
@@ -655,13 +673,13 @@ do
     cable out395 in434
     cable out225 in435
     cable out460 in436
-    cable out234 in440
-    cable out451 in443
+    cable out233 in440
     cable knob449 in447
     cable out431 in448
     cable out219 in453
     cable out389 in454
     cable out428 in455
+    cable out438 in466
     cable out422 in459
     recompile
     set knob147 (0.0)
@@ -673,6 +691,7 @@ do
     set knob153 (-2.5e-2)
     set knob154 (-2.5e-2)
     set knob155 (2.3120196)
+    set knob473 (-0.1)
     set selector158 (0.0)
     set selector159 (0.0)
     set selector160 (0.0)
@@ -693,27 +712,27 @@ do
     set knob178 (0.2505503)
     set knob184 (1.5969293)
     set knob192 (0.5269025)
-    set knob210 (3.3817792)
-    set knob211 (0.2660814)
-    set knob217 (0.14079204)
+    set knob210 (3.2451138)
+    set knob211 (0.3465034)
+    set knob217 (0.0)
     set knob223 (0.0)
-    set knob231 (-0.20000006)
+    set knob231 (0.117852844)
     set knob232 (0.10265756)
-    set knob277 (-0.13984805)
+    set knob277 (0.27656576)
     set knob278 (0.4631021)
-    set knob323 (-0.20000006)
+    set knob323 (0.17999999)
     set knob324 (0.5150039)
-    set knob367 (5.5338984)
-    set knob380 (5.878792e-2)
+    set knob367 (7.2010417)
+    set knob380 (7.517728e-2)
     set knob386 (0.0)
     set knob387 (0.0)
     set knob393 (0.0)
-    set knob402 (0.35935098)
+    set knob402 (0.0)
     set knob403 (0.30080804)
     set knob404 (0.0)
     set knob405 (0.0)
-    set knob413 (0.11608039)
-    set knob414 (0.14980449)
+    set knob413 (0.4970563)
+    set knob414 (0.27980447)
     set knob415 (0.26112306)
     set knob416 (0.43997455)
     set knob426 (1.0)

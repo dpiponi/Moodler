@@ -144,7 +144,7 @@ deleteCable selectedIn = do
             selectedInName <-
                 use (inner . uiElements . ix selectedIn . name)
             -- Comms
-            sendConnectMessage "zero.result" selectedInName
+            sendDisconnectMessage selectedInName
             -- Comms
             sendRecompileMessage
             return (Just c)
