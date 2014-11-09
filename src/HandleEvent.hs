@@ -4,7 +4,6 @@ module HandleEvent where
 
 import Cable
 import Command
-import Comms
 import ContainerTree
 import Control.Lens hiding (setting)
 import Control.Monad.State
@@ -21,6 +20,7 @@ import System.Posix
 import UIElement
 import UISupport
 import Utils
+import Wiring
 import World
 import qualified Box as B
 import qualified Data.Foldable as F
@@ -311,7 +311,7 @@ handleDefault' (EventKey key Down
 -- Use key binding.
 handleDefault' (EventKey (Char key) Down _ _) = do
     binds <- use (inner . bindings)
-    F.forM_ (M.lookup key binds) (\script -> execScript script [])
+    F.forM_ (M.lookup key binds) (\script -> execScript "scripts" script [])
     handleDefault
 
 handleDefault' _ =

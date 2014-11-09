@@ -123,7 +123,7 @@ main = do
           world' <- lift $ case script of
                           Nothing -> return initialWorld
                           Just scr -> execStateT (runWorldMonad
-                                        (execScript scr [])) initialWorld
+                                        (execScript "saves" scr [])) initialWorld
 
           let gui = case showGUI of
                 Nothing -> True

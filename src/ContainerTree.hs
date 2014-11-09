@@ -13,7 +13,7 @@ import UIElement
 import Symbols
 import Utils
 import Cable
-import Comms
+import Wiring
 
 createdInParent :: MonadState GlossWorld m =>
                    UiId -> UIElement -> UiId -> m ()

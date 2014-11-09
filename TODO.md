@@ -9,4 +9,3 @@
 * Remove extraneous stuff from phaser
 * Don't shove everything in scripts/
 * Store config with bindings separately from actual 'scene'
-* Completion for input

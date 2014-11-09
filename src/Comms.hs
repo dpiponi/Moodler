@@ -76,7 +76,8 @@ connectCable src dst = do
     sendConnectMessage srcElt dstElt
     --sendOSCMsg (message "/recompile" [])
 
-sendNewSynthMessage :: (MonadIO m, MonadState GlossWorld m) => String -> String -> m ()
+sendNewSynthMessage :: (MonadIO m, MonadState GlossWorld m) =>
+                       String -> String -> m ()
 sendNewSynthMessage synthType synthName = do
     let msg = message "/synth" [string synthType, string synthName]
     sendOSCMsg msg

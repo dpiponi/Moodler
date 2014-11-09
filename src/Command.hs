@@ -16,7 +16,7 @@ import Data.Monoid
 
 import Cable
 import Check
-import Comms
+import Wiring
 import ContainerTree
 import Save
 import Text
@@ -81,9 +81,9 @@ safeReadFile f =
 
 execScript :: (InputHandler m, Functor m, MonadIO m,
                MonadState GlossWorld m) =>
-              String -> [String] -> m ()
-execScript f arguments = do
-    cmds <- liftIO $ safeReadFile $ "scripts/" ++ f ++ ".hs"
+              String -> String -> [String] -> m ()
+execScript dir f arguments = do -- use proper dir API XXX
+    cmds <- liftIO $ safeReadFile $ dir ++ "/" ++ f ++ ".hs"
     case cmds of
         Left err -> do
             liftIO $ putStrLn err
@@ -96,7 +96,7 @@ saveWorld :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
              String -> m ()
 saveWorld t = do
     code <- codeWorld
-    liftIO $ writeFile ("scripts/" ++ t ++ ".hs") code
+    liftIO $ writeFile ("saves" ++ "/" ++ t ++ ".hs") code
     liftIO $ putStrLn $ "----- save: " ++ t
 
 evalUi :: (Functor m, MonadIO m, MonadState GlossWorld m,
@@ -136,13 +136,13 @@ evalUi (New s1 s2 cfn) = do
 
 evalUi (Run t ss cfn) = do
     liftIO $ print "Run"
-    execScript t ss
+    execScript "scripts" t ss
     liftIO $ print "Ran"
     evalUi cfn
 
 evalUi (Load t cfn) = do
     liftIO $ print $ "Load " ++ show t
-    execScript t []
+    execScript "scripts" t []
     liftIO $ print $ "Command Loaded " ++ show t
     evalUi cfn
 

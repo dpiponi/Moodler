@@ -12,7 +12,7 @@ import System.Directory
 import System.FilePath
 
 import Cable
-import Comms
+import Wiring
 import ContainerTree
 import Symbols
 import UIElement
