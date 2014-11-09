@@ -11,7 +11,6 @@ import Control.Monad.State
 import Control.Monad.Trans.Free
 import Data.List
 import Data.Monoid
-import Debug.Trace
 import Draw
 import GHC.IO.Exception
 import Graphics.Gloss.Interface.IO.Game
@@ -37,9 +36,7 @@ findContainer es = do
     return (head a, b)
 
 handleDefault :: MoodlerM Zero
-handleDefault = do
-    e <- MoodlerM (liftF $ GetEvent id)
-    handleDefault' e
+handleDefault = handleDefault' =<< MoodlerM (liftF $ GetEvent id)
 
 -- Handle ordinary click on an In port.
 -- If there's a cable attached we start dragging it
@@ -66,11 +63,9 @@ defaultClick' p i = do
             doSelection i
             handleDraggingSelection p
         Out {} -> do
-            do
-                highlightJust i
-                inner . gadget .= cableGadget p p
+            highlightJust i
+            inner . gadget .= cableGadget p p
             handleDraggingCable i p p
-
         In {} -> clickOnIn' p i
         Knob {} -> do
             highlightJust i
@@ -113,14 +108,13 @@ hoverGadget (ex, ey) elt xform =
 
 handleDefault' :: Event -> MoodlerM Zero
 handleDefault' (EventMotion (x, y)) = do
-    do
-        selectionPlane <- use (inner . planes)
-        maybeHoveringOver <- selectedByPoint selectionPlane (x, y)
-        case maybeHoveringOver of
-            Just hoveringOver -> do
-                elt <- getElementById "HandleEvent.hs" hoveringOver
-                inner . gadget .= hoverGadget (_loc elt) elt
-            Nothing -> inner . gadget .= const blank
+    selectionPlane <- use (inner . planes)
+    maybeHoveringOver <- selectedByPoint selectionPlane (x, y)
+    case maybeHoveringOver of
+        Just hoveringOver -> do
+            elt <- getElementById "HandleEvent.hs" hoveringOver
+            inner . gadget .= hoverGadget (_loc elt) elt
+        Nothing -> inner . gadget .= const blank
     handleDefault
 
 handleDefault' (EventKey (Char '"') Down _ _) = do
@@ -142,7 +136,7 @@ handleDefault' (EventKey (Char '/') Down _ _) = do
     handleDefault
 
 handleDefault' (EventKey (Char 'l') Down _ _) = do
-    allScripts <- liftIO $ getAllScripts
+    allScripts <- liftIO getAllScripts
     filename <- handleGetString allScripts "" "load: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     case filename of
@@ -195,72 +189,37 @@ handleDefault' (EventKey (Char '?') Down _ (x, y)) = do
         Nothing -> handleDefault
 
 handleDefault' (EventKey (Char 'g') Down _ proxyLocation) = do
-    do
-        sel <- use (inner . currentSelection)
-        p <- use (inner . planes)
-        makeGroup p sel proxyLocation
+    sel <- use (inner . currentSelection)
+    p <- use (inner . planes)
+    makeGroup p sel proxyLocation
     handleDefault
-
-{-
-handleDefault' (EventKey (Char 'k') Down _ knobLocation) = do
-    do
-        p : _ <- use (inner . planes)
-        void $ newUIElement (\n -> UIElement.Knob p False False
-                                      knobLocation (unUiId n) 0.0
-                                      Nothing Nothing)
-    handleDefault
--}
 
 handleDefault' (EventKey (Char 't') Down _ labelLocation) = do
-    do
-        p <- use (inner . planes)
-        void $
-            newUIElement (Label p False False labelLocation .
-                          unUiId)
+    p <- use (inner . planes)
+    void $
+        newUIElement (Label p False False labelLocation .
+                      unUiId)
     handleDefault
-
-{-
-handleDefault' (EventKey (Char 'o') Down _ knobLocation) = do
-    void $ do
-        p : _ <- use (inner . planes)
-        newUIElement (Out p False False knobLocation . unUiId)
-    handleDefault
-
-handleDefault' (EventKey (Char 'i') Down _ knobLocation) = do
-    void $ do
-        p : _ <- use (inner . planes)
-        newUIElement (\n ->
-            In p False False knobLocation (unUiId n) [])
-    handleDefault
--}
-
-{-
-handleDefault' (EventKey (Char ':') Down _ _) = do
-    inner . gadget .= \xform -> pictureTransformer xform $ translate (-500) (-420) (
-                    scale 0.4 0.4 $ color black $ text ":")
-    handleEditingCommand ""
--}
 
 -- Shift mouse down
 -- Starts MultiSelection
 handleDefault' (EventKey (MouseButton LeftButton) Down
                     (Modifiers {alt = Up, shift = Down, ctrl = Up})
                     (x,y)) = do
-    do
-        selectionPlane <- use (inner . planes)
-        e <- selectedByPoint selectionPlane (x, y)
-        case e of
-            Just i -> do
-                --guiState .= MultiSelection (S.singleton i)
-                sel <- use (inner . currentSelection)
-                if i `elem` sel
-                    then do
-                        unhighlightElement i
-                        inner . currentSelection %= delete i
-                    else do
-                        highlightElement i
-                        inner . currentSelection %= (i :)
-            Nothing -> return ()
+    selectionPlane <- use (inner . planes)
+    e <- selectedByPoint selectionPlane (x, y)
+    case e of
+        Just i -> do
+            --guiState .= MultiSelection (S.singleton i)
+            sel <- use (inner . currentSelection)
+            if i `elem` sel
+                then do
+                    unhighlightElement i
+                    inner . currentSelection %= delete i
+                else do
+                    highlightElement i
+                    inner . currentSelection %= (i :)
+        Nothing -> return ()
     handleDefault
 
 -- The normal/ordinary mouse down event
@@ -268,7 +227,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
     (Modifiers {alt = Up, shift = Up, ctrl = Up}) p) = do
     selectionPlane <- use (inner . planes)
     e <- selectedByPoint selectionPlane p
-    trace ("Selected " ++ show e) $ case e of
+    case e of
         Just i -> do
             sel <- use (inner . currentSelection)
             if (length sel > 1) && (i `elem` sel)
@@ -351,9 +310,8 @@ handleDefault' (EventKey key Down
 
 -- Use key binding.
 handleDefault' (EventKey (Char key) Down _ _) = do
-    do
-        binds <- use (inner . bindings)
-        F.forM_ (M.lookup key binds) (\script -> execScript script [])
+    binds <- use (inner . bindings)
+    F.forM_ (M.lookup key binds) (\script -> execScript script [])
     handleDefault
 
 handleDefault' _ =
@@ -445,27 +403,20 @@ handleDraggingRegion' f z (EventMotion (x, y)) = do
 
 -- Finished dragging
 handleDraggingRegion' f _
-    (EventKey (MouseButton LeftButton) Up _ (x, y)) =
+    (EventKey (MouseButton LeftButton) Up _ (x, y)) = do
         if f /= (x, y)
-            then do
-                do
-                    selectEverythingInRegion f (x, y)
-                    inner . gadget .= const blank
-                handleDefault
+            then selectEverythingInRegion f (x, y)
             else do
-                do
-                    unhighlightEverything
-                    inner . currentSelection .= []
-                    inner . gadget .= const blank
-                handleDefault
+                unhighlightEverything
+                inner . currentSelection .= []
+        inner . gadget .= const blank
+        handleDefault
 
 handleDraggingRegion' a b _ = handleDraggingRegion a b
 
-handleDraggingCable :: UiId -> Point -> Point
-                       -> MoodlerM Zero
-handleDraggingCable src start end = do
-    e <- MoodlerM (liftF $ GetEvent id)
-    handleDraggingCable' src start end e
+handleDraggingCable :: UiId -> Point -> Point -> MoodlerM Zero
+handleDraggingCable src start end =
+    handleDraggingCable' src start end =<< MoodlerM (liftF $ GetEvent id)
 
 cableGadget :: Point -> Point -> B.Transform -> Picture
 cableGadget p0 p1 xform = 
@@ -569,9 +520,8 @@ handleDraggingKnob' selectedKnob v p0@(x0, y0) (EventMotion p) = do
 
 handleDraggingKnob' selectedKnob _ _
     (EventKey (MouseButton LeftButton) Up _ _) = do
-    do
-        inner . gadget .= const blank
-        doSelection selectedKnob
+    inner . gadget .= const blank
+    doSelection selectedKnob
     handleDefault
 
 handleDraggingKnob' _ _ _ e = handleDefault' e
