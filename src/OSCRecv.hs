@@ -36,12 +36,12 @@ keyToFreq :: Int -> Float
 keyToFreq ds' = 0.1*(fromIntegral ds'-13)/12.0
 
 recompile :: MonadIO m =>
-             (FunPtr () -> IO ()) -> String -> StateT Moodler m ()
-recompile set_fill_buffer msg = do
+             (FunPtr () -> IO ()) -> StateT Moodler m ()
+recompile set_fill_buffer = do
     newSynth <- use moodlerSynth
     let output' = unJust "recompile" $ M.lookup "out" newSynth
     Right newDso <- liftIO $ runEitherT $ makeDSOFromSynth
-                    msg newSynth output'
+                    newSynth output'
     moodlerDSO .= newDso
     liftIO $ set_fill_buffer (dsoExecuteFn newDso)
 
@@ -68,25 +68,26 @@ handleInput knobName synthTypes = do
                          (getSynth synthTypes "input")
                          M.empty newNumber
     let newSynth = M.insert knobName newKnob oldSynth
-    modify $ moodlerSynth .~ newSynth
+    moodlerSynth .= newSynth
 
-handleSynth :: MonadIO m => String -> String ->
+addNewModule :: MonadIO m => String -> String ->
                             M.Map String (NodeType NodeInfo) ->
                             StateT Moodler m ()
-handleSynth synthType synthName synthTypes = do
+addNewModule synthType synthName synthTypes = do
     -- XXX Make sure name is unique!
     liftIO $ putStrLn $
             "Adding synth " ++ synthType ++ " " ++ synthName
     oldSynth <- use moodlerSynth
     let newNumber = M.size oldSynth
-    let ins = inNames $ unJust "handleSynth" $ M.lookup synthType synthTypes
+    let ins = inNames $ unJust "addNewModule" $
+                        M.lookup synthType synthTypes
     let inputs = M.fromList $
             zip (S.toList ins) (repeat (out "zero.result"))
     -- XXX Deal with M.empty
-    let newKnob = Module synthName
+    let newModule = Module synthName
             (getSynth synthTypes synthType) inputs newNumber
-    let newSynth = M.insert synthName newKnob oldSynth
-    modify $ moodlerSynth .~ newSynth
+    let newSynth = M.insert synthName newModule oldSynth
+    moodlerSynth .= newSynth
 
 handleMessage :: MonadIO m => Int -> Array Int (Ptr ()) ->
                               (FunPtr () -> IO ()) ->
@@ -101,7 +102,7 @@ handleMessage numVoices dataPtrs set_fill_buffer
 
         Just (Message "/synth" [ASCII_String packedSynthType,
                                 ASCII_String packedSynthName]) ->
-                    handleSynth (C.unpack packedSynthType)
+                    addNewModule (C.unpack packedSynthType)
                                 (C.unpack packedSynthName)
                                 synthTypes
 
@@ -113,7 +114,7 @@ handleMessage numVoices dataPtrs set_fill_buffer
                     setStateVar (dsoSetFn dso') (dataPtrs!v) a' b' f
 
         Just (Message "/recompile" []) ->
-            recompile set_fill_buffer "explicit recompilation"
+            recompile set_fill_buffer
 
         Just (Message "/quit" []) ->
             liftIO $ exitImmediately ExitSuccess
@@ -121,7 +122,7 @@ handleMessage numVoices dataPtrs set_fill_buffer
         Just (Message "/connect" [a, b, c, d]) -> do
             let [a', b', c', d'] =
                     (C.unpack . d_ascii_string) <$> [a, b, c, d]
-            modify $ moodlerSynth %~ connect a' b' c' d'
+            moodlerSynth %= connect a' b' c' d'
 
 
         Just (Message ('/':'8':'/':'p':'u':'s':'h':ds) [Float v]) -> do
@@ -134,7 +135,7 @@ handleMessage numVoices dataPtrs set_fill_buffer
                         setKeyboardState dso' dataPtrs v
                     else upKey (read ds::Int) $
                         setKeyboardState dso' dataPtrs v
-            modify $ keyTracker .~ newTracker
+            keyTracker .= newTracker
 
         Just (Message ('/':'8':'/':'r':'o':'t':'a':'r':'y':ds)
                       [Float v]) -> do

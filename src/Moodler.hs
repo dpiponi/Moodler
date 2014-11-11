@@ -49,7 +49,7 @@ main = do
         synthTypes <- loadSynthTypes modulesDirectory
         let synth = standardSynth synthTypes
         output <- maybe (left "No output") right $ M.lookup "out" synth
-        dso <- makeDSOFromSynth "builtin" synth output
+        dso <- makeDSOFromSynth synth output
 
         liftIO $ do
             audioStateList <-

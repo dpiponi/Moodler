@@ -48,15 +48,15 @@ clickOnIn' p i = do
         Nothing -> do
             doSelection i
             handleDraggingSelection p
-        Just (Cable src _) -> do
-            srcElt <- getElementById "HandleEvent.hs" src
-            inner . gadget .= cableGadget (_loc srcElt) p
+        Just (Cable src) -> do
+            srcElt <- getElementById "clickOnIn'" src
+            gadget .= cableGadget (_loc srcElt) p
             handleDraggingCable src (_loc srcElt) p
 
 -- Straightforward click on a UI element
 defaultClick' :: Point -> UiId -> MoodlerM Zero
 defaultClick' p i = do
-    elt <- getElementById "HandleEvent.hs" i
+    elt <- getElementById "defaultClick'" i
     case elt of
         -- XXX Need to select images/containers correctly.
         Container {} -> do
@@ -64,7 +64,7 @@ defaultClick' p i = do
             handleDraggingSelection p
         Out {} -> do
             highlightJust i
-            inner . gadget .= cableGadget p p
+            gadget .= cableGadget p p
             handleDraggingCable i p p
         In {} -> clickOnIn' p i
         Knob {} -> do
@@ -79,16 +79,16 @@ defaultClick' p i = do
         -- Switch plane
         Proxy {} -> do
             --let pl = Plane newPlane
-            inner . planes .= i
+            planes .= i
             handleDefault
-        Selector { _name = selectorName,
-                   _setting = oldSetting,
+        Selector { _setting = oldSetting,
                    _options = opts } -> do
             let newSetting = (floor oldSetting+1) `mod` length opts
-            inner . uiElements . ix i . UIElement.setting .=
-                                            fromIntegral newSetting
+            --inner . uiElements . ix i . UIElement.setting .=
+            --                                fromIntegral newSetting
             -- Comms
-            sendSetMessage selectorName (fromIntegral newSetting)
+            --sendSetMessage selectorName (fromIntegral newSetting)
+            synthSet i (fromIntegral newSetting)
             handleDefault
 
 elementDisplayName :: UIElement -> String
@@ -108,31 +108,31 @@ hoverGadget (ex, ey) elt xform =
 
 handleDefault' :: Event -> MoodlerM Zero
 handleDefault' (EventMotion (x, y)) = do
-    selectionPlane <- use (inner . planes)
+    selectionPlane <- use planes
     maybeHoveringOver <- selectedByPoint selectionPlane (x, y)
     case maybeHoveringOver of
         Just hoveringOver -> do
             elt <- getElementById "HandleEvent.hs" hoveringOver
-            inner . gadget .= hoverGadget (_loc elt) elt
-        Nothing -> inner . gadget .= const blank
+            gadget .= hoverGadget (_loc elt) elt
+        Nothing -> gadget .= const blank
     handleDefault
 
 handleDefault' (EventKey (Char '"') Down _ _) = do
-    inner . showHidden %= not
+    showHidden %= not
     handleDefault
 
 handleDefault' (EventKey (Char 'r') Down _ _) = do
-    es <- use (inner . currentSelection)
+    es <- use currentSelection
     (container, contentss) <- findContainer es
     forM_ contentss $ \content -> reparent container content
     handleDefault
 
 handleDefault' (EventKey (Char '*') Down _ _) = do
-    inner . rootTransform %= (B.Transform (0, 0) 1.5 <>)
+    rootTransform %= (B.Transform (0, 0) 1.5 <>)
     handleDefault
 
 handleDefault' (EventKey (Char '/') Down _ _) = do
-    inner . rootTransform %= (B.Transform (0, 0) (1/1.5) <>)
+    rootTransform %= (B.Transform (0, 0) (1/1.5) <>)
     handleDefault
 
 handleDefault' (EventKey (Char 'l') Down _ _) = do
@@ -165,7 +165,7 @@ handleDefault' (EventKey (Char 'q') Down _ _) = do
     handleDefault
 
 handleDefault' (EventKey (Char 'c') Down _ (x, y)) = do
-    selectionPlane <- use (inner . planes)
+    selectionPlane <- use planes
     e <- selectedByPoint selectionPlane (x, y)
     case e of
         Just i -> do
@@ -178,7 +178,7 @@ handleDefault' (EventKey (Char 'c') Down _ (x, y)) = do
         Nothing -> handleDefault
 
 handleDefault' (EventKey (Char '?') Down _ (x, y)) = do
-    selectionPlane <- use (inner . planes)
+    selectionPlane <- use planes
     e <- selectedByPoint selectionPlane (x, y)
     case e of
         Just i -> do
@@ -189,13 +189,13 @@ handleDefault' (EventKey (Char '?') Down _ (x, y)) = do
         Nothing -> handleDefault
 
 handleDefault' (EventKey (Char 'g') Down _ proxyLocation) = do
-    sel <- use (inner . currentSelection)
-    p <- use (inner . planes)
+    sel <- use currentSelection
+    p <- use planes
     makeGroup p sel proxyLocation
     handleDefault
 
 handleDefault' (EventKey (Char 't') Down _ labelLocation) = do
-    p <- use (inner . planes)
+    p <- use planes
     void $
         newUIElement (Label p False False labelLocation .
                       unUiId)
@@ -206,30 +206,30 @@ handleDefault' (EventKey (Char 't') Down _ labelLocation) = do
 handleDefault' (EventKey (MouseButton LeftButton) Down
                     (Modifiers {alt = Up, shift = Down, ctrl = Up})
                     (x,y)) = do
-    selectionPlane <- use (inner . planes)
+    selectionPlane <- use planes
     e <- selectedByPoint selectionPlane (x, y)
     case e of
         Just i -> do
             --guiState .= MultiSelection (S.singleton i)
-            sel <- use (inner . currentSelection)
+            sel <- use currentSelection
             if i `elem` sel
                 then do
                     unhighlightElement i
-                    inner . currentSelection %= delete i
+                    currentSelection %= delete i
                 else do
                     highlightElement i
-                    inner . currentSelection %= (i :)
+                    currentSelection %= (i :)
         Nothing -> return ()
     handleDefault
 
 -- The normal/ordinary mouse down event
 handleDefault' (EventKey (MouseButton LeftButton) Down
     (Modifiers {alt = Up, shift = Up, ctrl = Up}) p) = do
-    selectionPlane <- use (inner . planes)
+    selectionPlane <- use planes
     e <- selectedByPoint selectionPlane p
     case e of
         Just i -> do
-            sel <- use (inner . currentSelection)
+            sel <- use currentSelection
             if (length sel > 1) && (i `elem` sel)
                 then handleDraggingSelection p
                 else defaultClick' p i
@@ -238,12 +238,12 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
 
 handleDefault' (EventKey (MouseButton RightButton) Down
     (Modifiers {alt = Down, shift = Up, ctrl = Up}) (x,y)) = do
-    selectionPlane <- use (inner . planes)
+    selectionPlane <- use planes
     e <- selectedByPoint selectionPlane (x, y)
     case e of
         Just i -> do
             f <- getElementById "HandleEvent.hs" i
-            inner . gadget .= \xform ->
+            gadget .= \xform ->
                 pictureTransformer xform $
                     translate x y
                         (scale 0.05 0.05 (color black (text (show f))))
@@ -253,9 +253,9 @@ handleDefault' (EventKey (MouseButton RightButton) Down
 -- Start ordinary selection drag to move
 handleDefault' (EventKey (MouseButton LeftButton) Down
     (Modifiers {alt = Down, shift = Up, ctrl = Up}) (x,y)) = do
-    selectionPlane <- use (inner . planes)
+    selectionPlane <- use planes
     e <- selectedByPoint selectionPlane (x, y)
-    sel <- use (inner . currentSelection)
+    sel <- use currentSelection
     case e of
         Just i ->
             if i `elem` sel
@@ -268,7 +268,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
 -- Cable drag with ctrl-mouse
 handleDefault' (EventKey (MouseButton LeftButton) Down
         (Modifiers {alt = Up, ctrl = Down, shift = Up}) (x,y)) = do
-    selectionPlane <- use (inner . planes)
+    selectionPlane <- use planes
     e <- selectedByPoint selectionPlane (x, y)
     case e of
         Just i -> do
@@ -303,14 +303,14 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
 handleDefault' (EventKey key Down
             (Modifiers {shift = Up}) _) | isDirection key = do
     let (dx, dy) = getDirection key
-    sel <- use (inner . currentSelection)
+    sel <- use currentSelection
     forM_ sel $ \e ->
         (inner . uiElements) . ix e .loc %= \(x, y) -> (x+10*dx, y+10*dy)
     handleDefault
 
 -- Use key binding.
 handleDefault' (EventKey (Char key) Down _ _) = do
-    binds <- use (inner . bindings)
+    binds <- use bindings
     F.forM_ (M.lookup key binds) (\script -> execScript "scripts" script [])
     handleDefault
 
@@ -324,7 +324,7 @@ handleDraggingRoot (x0, y0) = do
 
 handleDraggingRoot' :: Point -> Event -> MoodlerM Zero
 handleDraggingRoot' (x0, y0) (EventMotion (x1, y1)) = do
-    inner . rootTransform %= (B.Transform (x1-x0, y1-y0) 1 <>)
+    rootTransform %= (B.Transform (x1-x0, y1-y0) 1 <>)
     -- It's not obvious that the following line is correct.
     -- It's tempting to use (x1, y1).
     -- Remember that mouse coordinates have been transformed
@@ -336,7 +336,7 @@ handleDraggingRoot' (x0, y0) (EventMotion (x1, y1)) = do
 
 handleDraggingRoot' (x0, y0)
     (EventKey (MouseButton LeftButton) Up _ (x1, y1)) = do
-    inner . rootTransform %= (B.Transform (x1-x0, y1-y0) 1 <>)
+    rootTransform %= (B.Transform (x1-x0, y1-y0) 1 <>)
     handleDefault
 
 handleDraggingRoot' a _ = handleDraggingRoot a
@@ -364,13 +364,13 @@ handleDraggingSelection (x0, y0) = do
 -- Don't drag container AND its children XXX
 handleDraggingSelection' :: Point -> Event -> MoodlerM Zero
 handleDraggingSelection' (x0, y0) (EventMotion (x1, y1)) = do
-    sel <- use (inner . currentSelection)
+    sel <- use currentSelection
     dragElement sel (x1-x0) (y1-y0) sel
     handleDraggingSelection (x1, y1)
 
 handleDraggingSelection' (x0, y0)
     (EventKey (MouseButton LeftButton) Up _ (x1, y1)) = do
-    sel <- use (inner . currentSelection)
+    sel <- use currentSelection
     dragElement sel (x1-x0) (y1-y0) sel
     handleDefault
 
@@ -379,9 +379,9 @@ handleDraggingSelection' a _ = handleDraggingSelection a
 selectEverythingInRegion :: (MonadIO m, MonadState GlossWorld m) =>
                             Point -> Point -> m ()
 selectEverythingInRegion p0 p1 = do
-    selectionPlane <- use (inner . planes)
+    selectionPlane <- use planes
     s <- everythingInRegion selectionPlane p0 p1
-    inner . currentSelection .= s
+    currentSelection .= s
     unhighlightEverything
     forM_ s highlightElement
 
@@ -396,7 +396,7 @@ handleDraggingRegion' :: Point -> Point -> Event ->
                            MoodlerM Zero
 handleDraggingRegion' f z (EventMotion (x, y)) = do
     --secondCorner .= (x, y)
-    inner . gadget .= \xform -> pictureTransformer xform $
+    gadget .= \xform -> pictureTransformer xform $
                                     color black (rect z (x, y))
     selectEverythingInRegion f (x, y)
     handleDraggingRegion f z
@@ -408,8 +408,8 @@ handleDraggingRegion' f _
             then selectEverythingInRegion f (x, y)
             else do
                 unhighlightEverything
-                inner . currentSelection .= []
-        inner . gadget .= const blank
+                currentSelection .= []
+        gadget .= const blank
         handleDefault
 
 handleDraggingRegion' a b _ = handleDraggingRegion a b
@@ -426,26 +426,21 @@ cableGadget p0 p1 xform =
 justSelect :: UiId -> MoodlerM Zero
 justSelect i = do
     doSelection i
-    inner . gadget .= const blank
+    gadget .= const blank
     handleDefault
 
 wireCable :: UiId -> UiId -> MoodlerM Zero
 wireCable i selectedOut = do
     unhighlightEverything
-    inner . uiElements . ix i . cablesIn %=
-                    (Cable selectedOut i:)
-    --outName <- use (inner . uiElements . ix selectedOut . name)
-    --inName <- use (inner . uiElements . ix i . name)
-    --sendConnectMessage outName inName
-    connectCable selectedOut i
-    sendRecompileMessage
+    synthConnect selectedOut i
+    synthRecompile
     justSelect i
 
 -- Motion during cable dragging
 handleDraggingCable' :: UiId -> Point -> Point -> Event -> MoodlerM Zero
 handleDraggingCable' src start _ (EventMotion (x, y)) = do
-    inner . gadget .= cableGadget start (x, y)
-    selectionPlane <- use (inner . planes)
+    gadget .= cableGadget start (x, y)
+    selectionPlane <- use planes
     maybeHoveringOver <- selectedByPoint selectionPlane (x, y)
     case maybeHoveringOver of
         Just hoveringOver -> do
@@ -453,7 +448,7 @@ handleDraggingCable' src start _ (EventMotion (x, y)) = do
             case elt of
                 In {} -> do
                     highlightElement hoveringOver
-                    inner . gadget .= cableGadget start (x, y) <>
+                    gadget .= cableGadget start (x, y) <>
                                       hoverGadget (_loc elt) elt 
                 _ -> unhighlightEverything
         Nothing -> unhighlightEverything
@@ -462,7 +457,7 @@ handleDraggingCable' src start _ (EventMotion (x, y)) = do
 -- Deal with the end of cable dragging
 handleDraggingCable' selectedOut _ _
     (EventKey (MouseButton LeftButton) Up _ (x, y)) = do
-    selectionPlane <- use (inner . planes)
+    selectionPlane <- use planes
     maybeElement <- selectedByPoint selectionPlane (x, y)
     case maybeElement of
         Just i -> do
@@ -471,10 +466,10 @@ handleDraggingCable' selectedOut _ _
                 In {} -> wireCable i selectedOut
                 Out {} -> justSelect i
                 _ -> do
-                        inner . gadget .= const blank
+                        gadget .= const blank
                         handleDefault
         Nothing -> do
-                    inner . gadget .= const blank
+                    gadget .= const blank
                     handleDefault
 
 handleDraggingCable' _ _ _ e = handleDefault' e
@@ -505,22 +500,19 @@ handleDraggingKnob' selectedKnob v p0@(x0, y0) (EventMotion p) = do
             let v1 = case highLimit of
                     Nothing -> v0
                     Just hi -> min v0 hi
-            inner . uiElements . ix selectedKnob . setting .= v1
-            inner . gadget .= \xform -> pictureTransformer xform $
+            gadget .= \xform -> pictureTransformer xform $
                                             translate x0 y0 (
                 color (B.transparentBlack 0.8) (rectangleSolid 250 100) <>
                 translate (-80) (-40) (scale 0.27 0.27 $
                     color green $ text (showFFloat (Just 4) v1 "")) <>
                 translate (-80) 0 (scale 0.27 0.27 $
                         color red $ text (showNote v1)))
-            knobName <- use ((inner . uiElements) . ix selectedKnob . name)
-            -- Comms
-            sendSetMessage knobName v1
+            synthSet selectedKnob v1
             handleDraggingKnob selectedKnob v p0
 
 handleDraggingKnob' selectedKnob _ _
     (EventKey (MouseButton LeftButton) Up _ _) = do
-    inner . gadget .= const blank
+    gadget .= const blank
     doSelection selectedKnob
     handleDefault
 

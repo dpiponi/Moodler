@@ -51,8 +51,8 @@ relativeShow (Just (x0, y0)) (x, y) =
         "(x+(" ++ show (x-x0) ++ "), y+(" ++ show (y-y0) ++ "))"
 
 saveCable :: MonadWriter (Multi String String) m =>
-                            S.Set UiId -> Cable -> m ()
-saveCable everythingSaved (Cable src dst) = 
+                            S.Set UiId -> UiId -> Cable -> m ()
+saveCable everythingSaved dst (Cable src) = 
     when (src `S.member` everythingSaved &&
           dst `S.member` everythingSaved) $
             multiTellLn "cables" 4 $ unwords ["cable",
@@ -109,18 +109,19 @@ elementLine _ parentId maybeMouseLocn eltName Selector { _name = n
     multiTellLn "settings" 4 $ unwords ["set", unUiId eltName,
                                         "(" ++ show s ++ ")"]
 
-elementLine everythingSaved parentId maybeMouseLocn eltName
+elementLine everythingSaved parentId maybeMouseLocn eltId
     In { _name = n
        , _loc = p
        , _cablesIn = c
        , _displayName = d } = do
-    multiTellLn "module" 4 $ unwords [unUiId eltName,
-                                      "<-", "plugin'", rewriteConnection n,
+    multiTellLn "module" 4 $ unwords [unUiId eltId,
+                                      "<-", "plugin'",
+                                      rewriteConnection n,
                                       relativeShow maybeMouseLocn p,
                                       parentId]
     when (d /= n) $ multiTellLn "module" 4 $
-                        unwords ["rename", show d, unUiId eltName]
-    unless (null c) $ saveCable everythingSaved (head c)
+                        unwords ["rename", show d, unUiId eltId]
+    unless (null c) $ saveCable everythingSaved eltId (head c)
 
 elementLine _ parentId maybeMouseLocn eltName
     Out { _name = n
@@ -213,7 +214,7 @@ selectionCode maybeMouseLocn sel = do
 saveSelection :: (Functor m, MonadIO m, MonadState GlossWorld m)
                  => Maybe Point -> m String
 saveSelection maybeMouseLocn = do
-    curSel <- use (inner . currentSelection)
+    curSel <- use currentSelection
     sections <- execWriterT (evalStateT (
             selectionCode maybeMouseLocn curSel
         ) S.empty)
@@ -261,7 +262,7 @@ codeSections = ["preamble", "synth", "module",
 codeWorld :: (Functor m, MonadIO m, MonadState GlossWorld m)
                  => m String
 codeWorld = do
-    root <- use (inner . rootPlane)
+    root <- use rootPlane
     everything <- getAllContainerProxyDescendants [root]
     let everythingSaved = L.delete root everything
 
@@ -281,7 +282,7 @@ codeWorld = do
 saveBindings :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                 StateT (S.Set UiId) (WriterT (Multi String String) m) ()
 saveBindings = do
-    bs <- lift $ use (inner . bindings)
+    bs <- lift $ use bindings
     forM_ (M.toList bs) $ \(key, cmd) ->
         multiTellLn "bindings" 4 $
                 unwords ["bind", show key, show cmd]
@@ -290,3 +291,10 @@ rewriteConnection :: String -> String
 rewriteConnection s1 =
     let (a, b) = splitDot s1
     in paren (unwords [a, "++ \".\" ++", show b])
+
+saveWorld :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+             String -> m ()
+saveWorld t = do
+    code <- codeWorld
+    liftIO $ writeFile ("saves" ++ "/" ++ t ++ ".hs") code
+    liftIO $ putStrLn $ "----- save: " ++ t

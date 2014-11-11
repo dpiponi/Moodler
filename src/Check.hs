@@ -14,10 +14,11 @@ import ContainerTree
 import Symbols
 import UIElement
 
-checkEverythingAccessibleFromRoot :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+checkEverythingAccessibleFromRoot :: (Functor m, MonadIO m,
+                                     MonadState GlossWorld m) =>
                                      m Bool
 checkEverythingAccessibleFromRoot = do
-    root <- use (inner . rootPlane)
+    root <- use rootPlane
     everything <- S.fromList <$> getAllContainerProxyDescendants [root]
     elts <- use (inner . uiElements)
     let k = M.keys elts
@@ -53,7 +54,7 @@ checkChildrenHaveCorrectParent' parentId childrenIds = do
 checkChildrenHaveCorrectParent :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                                   m Bool
 checkChildrenHaveCorrectParent = do
-    root <- use (inner . rootPlane)
+    root <- use rootPlane
     rootElt <- getElementById "checkChildrenHaveCorrectParent" root
     case rootElt of
         Container { _contents = cts} ->

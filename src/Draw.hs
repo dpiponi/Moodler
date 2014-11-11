@@ -31,10 +31,9 @@ proxyColour, inertCableColour :: Color
 proxyColour = makeColor 0.4 0.6 1.0 1.0
 inertCableColour = makeColor 0.7 0.7 0.7 1
     
-drawCable :: GlossWorld -> Bool -> Cable -> Picture
-drawCable w active (Cable o i) = 
+drawCable :: GlossWorld -> Point -> Bool -> Cable -> Picture
+drawCable w (x1, y1) active (Cable o) =
     let (x0, y0) = locById w o
-        (x1, y1) = locById w i
     in color (if active then cableColour else inertCableColour) $
             B.curve 0.15 (x0, y0) (x1, y1)
 
@@ -64,7 +63,7 @@ drawUIElement showingHidden world (Container { _parent = _
                                              , _imageWidth = iw
                                              , _imageHeight = ih }) =
         let (x', _, _) = unJust "drawUIElement"
-                            (M.lookup pic' (world ^. inner . pics))
+                            (M.lookup pic' (world ^. pics))
         in translate x y x' <>
            (if highlit
                 then color red (rectAt x y iw ih)
@@ -84,7 +83,7 @@ drawUIElement _ _ (Proxy _ wasSelected _ (x, y) n _) =
 
 drawUIElement _ world (Image _ _ _ (x, y) _ picture _ _) =
     translate x y (
-        case M.lookup picture (world ^. inner . pics) of
+        case M.lookup picture (world ^. pics) of
             Nothing -> blank
             Just (x', _, _) -> x')
 
@@ -97,7 +96,7 @@ drawUIElement _ world (In _ wasSelected _ (x, y) _ _ cableList) =
     translate x y (color (selectColor wasSelected inColour) (
                 circleSolid 10 <>
                 color black (circleSolid 5))) <>
-    mconcat (zipWith (drawCable world)
+    mconcat (zipWith (drawCable world (x, y))
                      (True : repeat False)
                      cableList)
 
@@ -147,15 +146,16 @@ renderPlaneName firstPlane =
         color white (scale 0.25 0.25 (text firstPlane)))
 
 renderWorld :: GlossWorld -> IO Picture
-renderWorld w@GlossWorld { _inner = World { _showHidden = showingHidden
-                                          , _rootTransform = rootXform } } = evalStateT (do
-        wplanes <- use (inner . planes)
+renderWorld w@GlossWorld { _rootTransform = rootXform
+                         , _showHidden = showingHidden } =
+    evalStateT (do
+        wplanes <- use planes
         thingsToDraw <- rootElementsOnPlane wplanes
         elems <- mapM (\i -> do
                 e <- getElementById "Draw.hs" i
                 return $ drawUIElement'' showingHidden w e) thingsToDraw
         firstPlane <- getElementById "Draw.hs" wplanes
-        gadgetPicture <- use (inner . gadget)
+        gadgetPicture <- use gadget
 
         return $ pictureTransformer rootXform (
                      mconcat elems <>

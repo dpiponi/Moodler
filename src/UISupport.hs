@@ -5,14 +5,12 @@ module UISupport where
 import Control.Lens
 import Control.Monad.State
 import Graphics.Gloss.Interface.IO.Game
-import qualified Data.Foldable as F
+--import qualified Data.Foldable as F
 import qualified Data.Map as M
 import qualified Data.Set as S
 import System.Directory
 import System.FilePath
 
-import Cable
-import Wiring
 import ContainerTree
 import Symbols
 import UIElement
@@ -37,12 +35,12 @@ doSelection :: MonadState GlossWorld m => UiId -> m ()
 doSelection i = do
     unhighlightEverything
     highlightJust i
-    (inner . currentSelection) .= [i]
+    currentSelection .= [i]
 
 newUIElement :: MonadState GlossWorld m => (UiId -> UIElement) -> m UiId
 newUIElement elt = do
-    newN <- use (inner . newName)
-    (inner . newName) %= (+ 1)
+    newN <- use newName
+    newName %= (+ 1)
     let n = UiId $ "elt" ++ show newN
     let e = elt n
     (inner . uiElements) %= M.insert n e
@@ -50,33 +48,10 @@ newUIElement elt = do
     --liftIO $ print $ "newUIElement " ++ unUiId n
     return n
 
-installWorld :: WorldMonad ()
-installWorld = do
-    -- Install needed synths
-    synths <- use (inner . synthList)
-    -- Comms
-    F.forM_ synths $ uncurry sendNewSynthMessage
-    elts <- use (inner . uiElements)
-    F.forM_ elts $ \elt ->
-        case elt of
-            Knob { _name = n} ->
-                -- Comms
-                sendNewInputMessage n
-            _ -> return ()
-    -- Connect them up
-    F.forM_ elts $ \elt ->
-        case elt of
-            -- Comms
-            Knob { _name = n, _setting = s} -> sendSetMessage n s
-            In { _cablesIn = Cable src dst : _ } ->
-                -- Comms
-                connectCable src dst
-            _ -> return ()
-
 visitElements' :: MonadState GlossWorld m =>
                   UiId -> UIElement -> m [UiId]
 visitElements' e elt@Container { _contents = cts } = do
-    showHiddenElements <- use (inner . showHidden)
+    showHiddenElements <- use showHidden
     if not showHiddenElements && (elt ^. hidden)
         then return []
         else do
@@ -85,7 +60,7 @@ visitElements' e elt@Container { _contents = cts } = do
                 visitElements' c celt
             return $ concat childElements ++ [e]
 visitElements' e elt = do
-    showHiddenElements <- use (inner . showHidden)
+    showHiddenElements <- use showHidden
     return $ if not showHiddenElements && (elt ^. hidden)
         then []
         else [e]
@@ -106,7 +81,7 @@ visitElements = do
 
 visitElementsOnPlane :: MonadState GlossWorld m => UiId -> m [UiId]
 visitElementsOnPlane planeId = do
-    showHiddenElements <- use (inner . showHidden)
+    showHiddenElements <- use showHidden
     p <- getElementById "visitElementsOnPlane" planeId
     lists <- forM (S.toList (p ^. contents)) $ \eltId -> do
         elt <- getElementById "visitElementsOnPlane" eltId
@@ -132,43 +107,6 @@ selectedByPoint selectionPlane (x, y) = do
     return $ if null poss
         then Nothing
         else Just (head poss)
-
-deleteCable :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
-               UiId -> m (Maybe Cable)
-deleteCable selectedIn = do
-    outPoint <- getElementById "UISupport.hs" selectedIn
-    case outPoint ^. cablesIn of
-        [] -> return Nothing
-        [c] -> do
-            inner . uiElements . ix selectedIn . cablesIn .= []
-            selectedInName <-
-                use (inner . uiElements . ix selectedIn . name)
-            -- Comms
-            sendDisconnectMessage selectedInName
-            -- Comms
-            sendRecompileMessage
-            return (Just c)
-        (c : rc@(Cable src dst : _)) -> do
-            inner . uiElements . ix selectedIn . cablesIn .= rc
-            -- Comms
-            connectCable src dst
-            -- Comms
-            sendRecompileMessage
-            return (Just c)
-
-rotateCables :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
-                UiId -> m ()
-rotateCables selectedIn = do
-    outPoint <- getElementById "UISupport.hs" selectedIn
-    case outPoint ^. cablesIn of
-        (c : rc@(Cable src dst : _)) -> do
-            inner . uiElements . ix selectedIn . cablesIn .= rc ++ [c]
-            -- Comms
-            connectCable src dst
-            -- Comms
-            sendRecompileMessage
-            return ()
-        _ -> return ()
 
 newNameLike :: String -> M.Map String a -> String
 newNameLike s m = if s `M.member` m
@@ -225,7 +163,7 @@ everythingInRegion selectionPlane p0 p1 = do
         return $ uiElementWithinBox (p0, p1) elt
 
 addPlane :: MonadState GlossWorld m => UiId -> m ()
-addPlane plane = inner . planes .= plane
+addPlane plane = planes .= plane
 
 -- When we make a group we may have to remove elements from their parents
 -- We only remove them if the parents aren't also in the newly formed
@@ -237,8 +175,8 @@ makeGroup p sel proxyLocation = do
     everythingThatsMoving <- getAllContainerDescendants sel
 
     -- Make a name for our new group.
-    newPlaneName <- use (inner . newName)
-    inner . newName %= (+ 1) -- kludge XXX
+    newPlaneName <- use newName
+    newName %= (+ 1) -- kludge XXX
 
     let proxyName = "proxy" ++ show newPlaneName
     let groupPlane = UiId proxyName

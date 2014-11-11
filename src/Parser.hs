@@ -69,22 +69,19 @@ extractPartsFromExtDecl :: CExtDecl -> TranslationMonad NodeInfo ()
 extractPartsFromExtDecl (CDeclExt cdecl) = do
     vars %= (cdecl :)
     return ()
+
 extractPartsFromExtDecl (CFDefExt functionDef) = do
-    when (functionDefDefines functionDef == Just "init") $ initFn .= Just functionDef
-    when (functionDefDefines functionDef == Just "exec") $ execFn .= Just functionDef
+    when (functionDefDefines functionDef == Just "init") $
+                                    initFn .= Just functionDef
+    when (functionDefDefines functionDef == Just "exec") $
+                                    execFn .= Just functionDef
     return ()
+
 extractPartsFromExtDecl (CAsmExt _ _) = return ()
 
 extractModuleParts :: CTranslUnit -> TranslationMonad NodeInfo ()
 extractModuleParts (CTranslUnit extDecls _) = 
     mapM_ extractPartsFromExtDecl extDecls
-
-rename :: Ident -> Ident
-rename (Ident name num info) = Ident ("state->"++name) num info
-
-renameVarsIn :: (Data a, Typeable a) => CFunctionDef a -> CFunctionDef a
-renameVarsIn (CFunDef specs decl decls stmt info) = 
-    CFunDef specs decl decls (everywhere (mkT rename) stmt) info
 
 idents :: (Data a, Typeable a) => a -> [String]
 idents = everything (++) ([] `mkQ` (return . identToString))
@@ -119,6 +116,10 @@ dezip (Right b : cs) = let (as, bs) = dezip cs in (as, b:bs)
 varDefinedInDeclaration :: (Data a, Typeable a) => CDeclaration a -> String
 varDefinedInDeclaration (CDecl _ a _) = head $ idents a
 
+identName :: Lens' Ident String
+identName = lens (\(Ident name _ _) -> name)
+                 (\(Ident _ num info) name -> Ident name num info)
+
 {-
  - Rewrite an identifier.
  - If it's a state variable then it needs a "state->" prefix when used
@@ -130,28 +131,39 @@ varDefinedInDeclaration (CDecl _ a _) = head $ idents a
  - Note: should really be rewriting ident but containing variable seeing as
  -   "struct->..." isn't a legal C name.
  -}
-rewriteVar :: Bool -> String -> [String] -> S.Set String ->
-              S.Set String -> M.Map String String ->
+data Vars = Vars { _states :: [String]
+                 , _outs :: S.Set String
+                 , _ins :: S.Set String
+                 , _connections :: M.Map String String
+                 }
+
+rewriteVar :: Bool -> String -> Vars ->
               Ident -> Either String Ident
-rewriteVar inStruct nodeName states outs ins connections (Ident name num info)
+rewriteVar inStruct nodeName
+           _variables@Vars { _states = states
+                           , _outs = outs
+                           , _ins = ins
+                           , _connections = connections }
+           i@(Ident name _ _)
     | name `elem` states || name `S.member` outs
-        = return $ Ident ((if not inStruct then "state->" else "") ++
-                          nodeName ++ "_" ++ name) num info
+        = return $ i & identName %~
+                        (((if not inStruct then "state->" else "") ++
+                         nodeName ++ "_") ++)
     | name `S.member` ins =
             case M.lookup name connections of
-                Nothing -> return $ Ident "error2" num info
-                Just inName -> return $ Ident inName num info
-    | otherwise = return $ Ident name num info
+                Nothing -> Left "error2"
+                Just inName -> return $ i & identName .~ inName
+    | otherwise = return i
 
-
-rewriteVarsEverywhere :: (Data b, Typeable b) => Bool -> String -> [String] ->
-                         S.Set String -> S.Set String -> M.Map String String ->
+rewriteVarsEverywhere :: (Data b, Typeable b) =>
+                         Bool -> String -> Vars ->
                          b -> Either String b
-rewriteVarsEverywhere inStruct nodeName states outs ins connections =
-    everywhereM (mkM (rewriteVar inStruct nodeName states outs ins connections))
+rewriteVarsEverywhere inStruct nodeName variables =
+    everywhereM (mkM (rewriteVar inStruct nodeName variables))
 
-rewriteVars :: (Data a, Typeable a) => Bool -> String -> [String] ->
-                S.Set String -> S.Set String -> M.Map String String ->
+rewriteVars :: (Data a, Typeable a) =>
+                Bool -> String -> Vars -> 
                 CFunctionDef a -> Either String (CStatement a)
-rewriteVars inStruct nodeName states outs ins connections (CFunDef _ _ _ stmt _) = 
-    rewriteVarsEverywhere inStruct nodeName states outs ins connections stmt
+rewriteVars inStruct nodeName variables
+            (CFunDef _ _ _ stmt _) = 
+    rewriteVarsEverywhere inStruct nodeName variables stmt

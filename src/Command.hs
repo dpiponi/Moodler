@@ -14,7 +14,7 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 import Data.Monoid
 
-import Cable
+--import Cable
 import Check
 import Wiring
 import ContainerTree
@@ -22,11 +22,9 @@ import Save
 import Text
 import UIElement
 import UiLib
---import Utils
 import World
 import qualified ContainerTree as T
 import qualified Box as B
---import Draw
 
 alertGadget :: String -> B.Transform -> Picture
 alertGadget alt _ = 
@@ -42,7 +40,7 @@ alertGadget alt _ =
 doAlert :: (MonadIO m, MonadState GlossWorld m) =>
            String -> m ()
 doAlert alt = do
-    inner . gadget .= alertGadget alt
+    gadget .= alertGadget alt
     liftIO $ putStrLn alt
 
 getPic :: (MonadIO m, MonadState GlossWorld m) => String -> m (Int, Int)
@@ -51,7 +49,7 @@ getPic bmpName = do
     let b = bitmapOfBMP bmp
     let (width, height) = bmpDimensions bmp
     --b <- liftIO $ loadBMP bmpName
-    inner . pics %= M.insert bmpName (b, width, height)
+    pics %= M.insert bmpName (b, width, height)
     return (width, height)
 
 execCommand :: (InputHandler m, Functor m, MonadIO m,
@@ -87,17 +85,10 @@ execScript dir f arguments = do -- use proper dir API XXX
     case cmds of
         Left err -> do
             liftIO $ putStrLn err
-            inner . gadget .= alertGadget err
+            gadget .= alertGadget err
         Right cmd -> do
-            inner . cmdArgs .= arguments
+            cmdArgs .= arguments
             execCommand cmd
-
-saveWorld :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
-             String -> m ()
-saveWorld t = do
-    code <- codeWorld
-    liftIO $ writeFile ("saves" ++ "/" ++ t ++ ".hs") code
-    liftIO $ putStrLn $ "----- save: " ++ t
 
 evalUi :: (Functor m, MonadIO m, MonadState GlossWorld m,
           InputHandler m) =>
@@ -105,11 +96,11 @@ evalUi :: (Functor m, MonadIO m, MonadState GlossWorld m,
 evalUi (Return a) = return a
 
 evalUi (CurrentPlane cfn) = do
-    p <- use (inner . planes)
+    p <- use planes
     evalUi (cfn p)
 
 evalUi (Switch p cfn) = do
-    inner . planes .= p
+    planes .= p
     evalUi cfn
 
 evalUi (Echo t cfn) = do
@@ -127,11 +118,7 @@ evalUi (Delete t cfn) = do
 
 -- New synth
 evalUi (New s1 s2 cfn) = do
-    --liftIO $ print "New"
-    inner . synthList %= (++ [(s1, s2)])
-    -- Comms
-    sendNewSynthMessage s1 s2
-    --liftIO $ print "New1"
+    synthNew s1 s2
     evalUi cfn
 
 evalUi (Run t ss cfn) = do
@@ -196,54 +183,20 @@ evalUi (UiLib.Label n labelText p creationPlane cfn) = do
     createdInParent n e creationPlane
     evalUi (cfn n)
 
-{-
-evalUi (Connect s1 s2 cfn) = do
-    liftIO $ print "Connect"
-    inner . connections %= ((s1, s2) :)
-    -- Comms
-    sendConnectMessage s1 s2
-    evalUi cfn
--}
-
-evalUi (Value t v cfn) = do
-    liftIO $ print "Value"
-    inner . values %= ((t, v) :)
-    -- Comms
-    sendSetMessage t v
-    evalUi cfn
-
 evalUi (UiLib.Cable s1 s2 cfn) = do
-    --liftIO $ print "Cable"
-    {-
-    outName <- use (inner . uiElements . ix s1 . UIElement.name)
-    inName <- use (inner . uiElements . ix s2 . UIElement.name)
-    -}
-    {-
-    -- Computing reverse operation
-    oldEndPoint <- getElementById s2
-    case oldEndPoint ^. cables of
-        [] -> void $ deleteCable s2
-        (Cable.Cable o1 _ : _) -> do
-            oldOutName <- use (uiElements . ix o1 . UISupport.name)
-            sendConnectMessage oldOutName inName
-    -}
-    connectCable s1 s2
-    inner . uiElements . ix s2 . cablesIn %= (Cable.Cable s1 s2 :)
-    -- XXX Careful. This is using fact that String is a Monoid instance.
-    -- Comms
---    sendConnectMessage outName inName
+    synthConnect s1 s2
     evalUi cfn
 
 evalUi (UiLib.Recompile cfn) = do
     --liftIO $ print "Recompile"
     -- Comms
-    sendRecompileMessage
+    synthRecompile
     evalUi cfn
 
 evalUi (UiLib.Quit cfn) = do
     --liftIO $ print "Recompile"
     -- Comms
-    sendQuitMessage
+    synthQuit
     evalUi cfn
     --liftIO $ exitImmediately ExitSuccess
 
@@ -258,12 +211,7 @@ evalUi (UiLib.Check cfn) = do
 
 evalUi (Set t v cfn) = do
     --liftIO $ print "Set"
-    inner. uiElements . ix t . UIElement.setting .= v
-    -- Note this is using fact that string is monoid
-    -- Not correct!
-    knobName <- use (inner . uiElements . ix t . UIElement.name)
-    -- Comms
-    sendSetMessage knobName v
+    synthSet t v
     evalUi cfn
 
 evalUi (SetLow t v cfn) = do
@@ -278,12 +226,12 @@ evalUi (SetHigh t v cfn) = do
 
 evalUi (Mouse cfn) = do
     liftIO $ print "Mouse"
-    p <- use (inner . mouseLoc)
+    p <- use mouseLoc
     evalUi (cfn p)
 
 evalUi (Args cfn) = do
     liftIO $ print "Args"
-    a <- use (inner . cmdArgs)
+    a <- use cmdArgs
     evalUi (cfn a)
 
 evalUi (GetValue s1 cfn) = do
@@ -294,16 +242,6 @@ evalUi (GetValue s1 cfn) = do
             Just e -> UIElement._setting (e::UIElement)
     evalUi (cfn (a::Float))
 
-{-
-evalUi (GetPlane s1 cfn) = do
-    liftIO $ print "GetPlane"
-    elts <- use inner . uiElements
-    let a = case M.lookup s1 elts of
-            Nothing -> error "No value"
-            Just e -> UIElement._plane (e::UIElement)
-    evalUi (cfn (a::Plane))
--}
-
 evalUi (GetType s1 cfn) = do
     t <- getElementTypeById s1
     evalUi (cfn t)
@@ -311,7 +249,7 @@ evalUi (GetType s1 cfn) = do
 evalUi (GetParent s1 cfn) = do
     liftIO $ print "GetParent"
     elts <- use (inner . uiElements)
-    root <- use (inner . rootPlane)
+    root <- use rootPlane
     if s1 == root
         then evalUi (cfn root)
         else
@@ -322,7 +260,7 @@ evalUi (GetParent s1 cfn) = do
 
 evalUi (GetRoot cfn) = do
     liftIO $ print "GetRoot"
-    root <- use (inner . rootPlane)
+    root <- use rootPlane
     evalUi (cfn (root::UiId))
 
 -- Should use current project name
@@ -345,7 +283,7 @@ evalUi (Unparent s1 cfn) = do
 
 evalUi (Write t cfn) = do
     liftIO $ print "Write selection"
-    p <- use (inner . mouseLoc)
+    p <- use mouseLoc
     code <- saveSelection (Just p)
     liftIO $ writeFile ("scripts/" ++ t ++ ".hs") code
     liftIO $ putStrLn $ "----- save selection: " ++ t
@@ -355,8 +293,8 @@ evalUi (Write t cfn) = do
 
 -- XXX
 evalUi (NewId s1 cfn) = do
-    newN <- use (inner . newName)
-    inner . newName %= (+ 1)
+    newN <- use newName
+    newName %= (+ 1)
     let n = UiId (s1 ++ show newN)
     elts <- use (inner . uiElements)
     evalUi $ if n `M.member` elts
@@ -364,12 +302,12 @@ evalUi (NewId s1 cfn) = do
         else cfn n
 
 evalUi (Selection cfn) = do
-    a <- use (inner . currentSelection)
+    a <- use currentSelection
     liftIO $ putStrLn $ "selection = " ++ show a
     evalUi (cfn a)
 
 evalUi (Bind c t cfn) = do
-    inner . bindings %= M.insert c t
+    bindings %= M.insert c t
     evalUi cfn
 
 evalUi (Move c p cfn) = do
@@ -385,19 +323,5 @@ evalUi (Location c cfn) = do
     evalUi (cfn (_loc <$> M.lookup c elts))
 
 evalUi (Input prompt cfn) = do
-    --inp <- UISupport.handleGetString prompt ""
     inp <- getInput "" prompt
     evalUi (cfn inp)
-
-newCommand :: String -> String -> WorldMonad ()
-newCommand synthType synthName = do
-    liftIO $ print (synthType, synthName)
-    -- Comms
-    sendNewSynthMessage synthType synthName
-    inner . synthList %= (++ [(synthType, synthName)])
-
-{-
-execCommand :: (InputHandler m, Functor m, MonadIO m,
-                MonadState GlossWorld m) => String -> m ()
-execCommand = evalHaskell
--}

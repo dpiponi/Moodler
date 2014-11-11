@@ -24,28 +24,31 @@ data MoodlerF a = GetEvent (Event -> a) deriving Functor
 
 data Zero
 
+-- World is intended to reflect the state of the synth on the server
 data World = World { _uiElements :: M.Map UiId UIElement
-                   , _previousSelection :: Maybe String
-                   , _newName :: Int
-                   , _ipAddr :: String
-                   , _showHidden :: Bool
                    , _synthList :: [(String, String)]
-                   , _mouseLoc :: (Float, Float)
-                   , _cmdArgs :: [String]
-                   , _currentSelection :: [UiId]
-                   , _bindings :: M.Map Char String
-                   , _pics :: M.Map String (Picture, Int, Int)
-                   , _connections :: [(String, String)]
-                   , _values :: [(String, Float)]
-                   , _planes :: UiId
-                   , _rootPlane :: UiId
-                   , _gadget :: B.Transform -> Picture
-                   , _rootTransform :: B.Transform }
+                   -- XXX What are connections?
+                   -- , _connections :: [(String, String)]
+                   }
 
 data GlossWorld = GlossWorld { _inner :: World
+                             , _previousSelection :: Maybe String
+                             , _mouseLoc :: (Float, Float)
+                             , _planes :: UiId
+                             , _rootPlane :: UiId
+                             , _newName :: Int
+                             , _showHidden :: Bool
+                             , _pics :: M.Map String (Picture, Int, Int)
+                             , _bindings :: M.Map Char String
+                             , _cmdArgs :: [String]
+                             , _currentSelection :: [UiId]
+                             , _gadget :: B.Transform -> Picture
+                             , _ipAddr :: String
+                             , _rootTransform :: B.Transform
                              , _cont :: FreeF MoodlerF Zero
                                 (FreeT MoodlerF (StateT GlossWorld IO)
-                                    Zero) }
+                                    Zero)
+                             }
 
 $(makeLenses ''GlossWorld)
 
@@ -79,53 +82,74 @@ $(makeLenses ''World)
 
 --innerGadget = inner . gadget
 
-handleGetString :: [String] -> String -> String -> MoodlerM (Maybe String)
+handleGetString :: [String] -> String -> String ->
+                   MoodlerM (Maybe String)
 handleGetString completions inputString prompt = do
     e <- MoodlerM (liftF $ GetEvent id)
     let longestCompletion = longestMatchingPrefix completions inputString
-    inner . gadget .= stringGadget longestCompletion inputString prompt
+    gadget .= stringGadget longestCompletion inputString prompt
     handleGetString' completions inputString prompt e
 
-handleGetString' :: [String] -> String -> String -> Event -> MoodlerM (Maybe String)
+continueGetString :: String -> [String] -> String ->
+                     MoodlerM (Maybe String)
+continueGetString prompt completions inputString = do
+    let longestCompletion = longestMatchingPrefix completions inputString
+    gadget .= stringGadget longestCompletion inputString prompt
+    handleGetString completions inputString prompt
+
+handleGetString' :: [String] -> String -> String -> Event ->
+                    MoodlerM (Maybe String)
 handleGetString' _ inputString _ (EventKey (SpecialKey KeyEnter)
                                               Down _ _) = do
-    inner . gadget .= const blank
+    gadget .= const blank
     return (Just inputString)
 
 handleGetString' _ _ _ (EventKey (SpecialKey KeyEsc)
                                               Down _ _) = do
-    inner . gadget .= const blank
+    gadget .= const blank
     return Nothing
 
 -- Delete key during command entry
-handleGetString' completions inputString prompt (EventKey (SpecialKey KeyDelete)
-                                              Down _ _) = do
+handleGetString' completions inputString prompt
+                    (EventKey (SpecialKey KeyDelete)
+                              Down _ _) = do
     let inputString' = deleteLastChar inputString
+    continueGetString prompt completions inputString'
+    {-
     let longestCompletion = longestMatchingPrefix completions inputString
-    inner . gadget .= stringGadget longestCompletion inputString prompt
+    gadget .= stringGadget longestCompletion inputString prompt
     handleGetString completions inputString' prompt
-
-handleGetString' completions inputString prompt (EventKey (SpecialKey KeyTab)
-                                              Down _ _) = do
-    let longestCompletion = longestMatchingPrefix completions inputString
-    inner . gadget .= stringGadget longestCompletion inputString prompt
-    handleGetString completions longestCompletion prompt
+    -}
 
 -- Space key during command entry
 handleGetString' completions inputString prompt (EventKey
                                      (SpecialKey KeySpace)
                                      Down _ _) = do
     let inputString' = inputString ++ " "
+    continueGetString prompt completions inputString'
+    {-
     let longestCompletion = longestMatchingPrefix completions inputString
-    inner . gadget .= stringGadget longestCompletion inputString prompt
+    gadget .= stringGadget longestCompletion inputString prompt
     handleGetString completions inputString' prompt
+    -}
+
+handleGetString' completions inputString prompt
+                    (EventKey (SpecialKey KeyTab)
+                    Down _ _) = do
+    let longestCompletion = longestMatchingPrefix completions inputString
+    gadget .= stringGadget longestCompletion inputString prompt
+    handleGetString completions longestCompletion prompt
 
 -- Command key entry
-handleGetString' completions inputString prompt (EventKey (Char c) Down _ _) = do
+handleGetString' completions inputString prompt
+                        (EventKey (Char c) Down _ _) = do
     let inputString' = inputString ++ [c]
+    continueGetString prompt completions inputString'
+    {-
     let longestCompletion = longestMatchingPrefix completions inputString
-    inner . gadget .= stringGadget longestCompletion inputString prompt
+    gadget .= stringGadget longestCompletion inputString prompt
     handleGetString completions inputString' prompt
+    -}
 
 -- XXX Need to think about this
 handleGetString' c x y _ = handleGetString c x y

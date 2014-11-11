@@ -15,39 +15,49 @@ import Control.Monad.Trans.Either
 import Module
 import Text
 
-data Out = Out { _outModule :: String, _outModuleOut :: String }
-            deriving (Eq, Ord, Show)
-data Module = Module { _getNodeName :: String, _getNodeType :: NodeType NodeInfo,
-                       _inputNodes :: M.Map String Out,
-                       _moduleNumber :: Int } deriving Show
-$( makeLenses ''Out )
-$( makeLenses ''Module )
+data Out = Out { _outModule :: String
+               , _outModuleOut :: String
+               } deriving (Eq, Ord, Show)
+
+-- _moduleNumber used to maintain consistent ordering
+-- as modules are added
+data Module = Module { _getNodeName :: String
+                     , _getNodeType :: NodeType NodeInfo
+                     , _inputNodes :: M.Map String Out
+                     , _moduleNumber :: Int
+                     } deriving Show
+$(makeLenses ''Out)
+$(makeLenses ''Module)
 
 type Synth = M.Map String Module
 
 dumpSynth :: Synth -> IO ()
 dumpSynth synth = do
     putStrLn "Synth:"
-    let underlyingList = M.toList synth :: [(String, Module)]
+    let underlyingList = M.toList synth
     forM_ underlyingList $ \(modName, modl) -> do
         putStrLn $ modName ++ ":"
         print $ _inputNodes modl
 
 connect :: String -> String -> String -> String -> Synth -> Synth
 connect outNode outField inNode inField synth =
-    (ix inNode . inputNodes . ix inField) .~ Out outNode outField $ synth 
+    ix inNode . inputNodes . ix inField .~ Out outNode outField $ synth 
 
 out :: String -> Out
-out os = let (moduleName, outName) = splitDot os in Out moduleName outName
+out os = let (moduleName, outName) = splitDot os
+         in Out moduleName outName
 
 getSynth :: M.Map String (NodeType NodeInfo) -> String -> NodeType NodeInfo
-getSynth synths t = fromMaybe (error $ "no synth " ++ t) $ M.lookup t synths
+getSynth synths t = fromMaybe (error $ "no synth " ++ t) $
+                            M.lookup t synths
 
 type SynthBuilder a = State Synth a
 
-loadSynthTypes :: String -> EitherT String IO (M.Map String (NodeType NodeInfo))
+loadSynthTypes :: String ->
+                  EitherT String IO (M.Map String (NodeType NodeInfo))
 loadSynthTypes dir = do
-    moduleSpecs <- liftIO $ filter (isSuffixOf ".spec") <$> getDirectoryContents dir
+    moduleSpecs <- liftIO $ filter (isSuffixOf ".spec") <$>
+                                            getDirectoryContents dir
     moduleSpecList <- forM moduleSpecs $ \moduleSpec -> do
         loadedModule <- loadNodeType dir moduleSpec
         return (fst $ splitDot moduleSpec, loadedModule)
