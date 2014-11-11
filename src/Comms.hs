@@ -6,7 +6,9 @@ module Comms(sendConnectMessage,
              sendNewSynthMessage,
              sendNewInputMessage,
              sendRecompileMessage,
-             sendQuitMessage) where
+             sendQuitMessage,
+             SendCommand(..),
+             interpretSend) where
 
 import Control.Monad.State
 import Sound.OSC
@@ -32,6 +34,14 @@ socket = 7777
 -- 4a. (Not implemented yet) Delete input
 -- 5. Recompile
 -- 6. Quit
+
+data SendCommand = SendConnectMessage UiId UiId
+                 | SendDisconnectMessage UiId
+                 | SendSetMessage String Float
+                 deriving Show
+
+interpretSend :: (MonadIO m, MonadState GlossWorld m) => SendCommand -> m ()
+interpretSend _ = return () -- XXX finish!
 
 sendOSCMsg :: (MonadIO m, MonadState GlossWorld m) => Message -> m ()
 sendOSCMsg m = do
