@@ -93,7 +93,7 @@ visitElementsOnPlane planeId = do
 -- XXX Visible?
 rootElementsOnPlane :: MonadState GlossWorld m => UiId -> m [UiId]
 rootElementsOnPlane planeId = do
-    p <- getElementById "UISupport.hs" planeId
+    p <- getElementById "rootElementsOnPlane" planeId
     return $ S.toList (p ^. contents)
 
 -- What UI element lies directly under point?
@@ -102,7 +102,7 @@ selectedByPoint :: MonadState GlossWorld m => UiId -> (Float, Float) ->
 selectedByPoint selectionPlane (x, y) = do
     parentsFirst <- visitElementsOnPlane selectionPlane
     poss <- flip filterM parentsFirst $ \e -> do
-        elt <- getElementById "UISupport.hs" e
+        elt <- getElementById "selectedByPoint" e
         return $ pointNearUIElement (x, y) elt
     return $ if null poss
         then Nothing
@@ -118,16 +118,17 @@ quantize :: Float -> Float -> Float
 quantize q x = q*fromIntegral (floor (x/q) :: Int)
 -}
 
+{-
 anOut :: UiId -> GlossWorld -> Bool
 anOut n = evalState $ do
-    possibleOut <- getElementById "UISupport.hs" n
+    possibleOut <- getElementById "anOut" n
     return $ case possibleOut of
         Out {} -> True
         _ -> False
 
 anIn :: UiId -> GlossWorld -> Bool
 anIn n = evalState $ do
-    possibleIn <- getElementById "UISupport.hs" n
+    possibleIn <- getElementById "anIn" n
     return $ case possibleIn of
         In {} -> True
         _ -> False
@@ -139,6 +140,7 @@ oneToMany elts = do
     guard $ S.size outs == 1
     let (ins, _) = S.partition (`anIn` world) rest
     return $ Just (head $ S.toList outs, S.toList ins)
+-}
 
 isDirection :: Key -> Bool
 isDirection (SpecialKey KeyUp) = True
@@ -159,7 +161,7 @@ everythingInRegion :: MonadState GlossWorld m =>
 everythingInRegion selectionPlane p0 p1 = do
     parentsFirst <- visitElementsOnPlane selectionPlane
     flip filterM parentsFirst $ \e -> do
-        elt <- getElementById "UISupport.hs" e
+        elt <- getElementById "everythingInRegion" e
         return $ uiElementWithinBox (p0, p1) elt
 
 addPlane :: MonadState GlossWorld m => UiId -> m ()
@@ -186,7 +188,7 @@ makeGroup p sel proxyLocation = do
 
     forM_ everythingThatsMoving $ \movingId -> do
         liftIO $ print $ "considering " ++ show movingId
-        movingElement <- getElementById "UISupport.hs" movingId
+        movingElement <- getElementById "makeGroup" movingId
         liftIO $ putStrLn $ "parent = " ++ show (movingElement ^. parent)
         let p' = movingElement ^. parent
         unless (p' `elem` everythingThatsMoving) $ do

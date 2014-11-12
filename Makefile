@@ -35,7 +35,8 @@ UI_SOURCE_FILES = src/ui.hs \
 		  src/Music.hs \
 		  src/Multi.hs \
 		  src/ContainerTree.hs \
-		  src/Check.hs
+		  src/Check.hs \
+		  src/Wiring.hs
 
 ui: $(UI_SOURCE_FILES)
 	ghc -isrc --make -Wall -O -threaded -o ui src/ui.hs

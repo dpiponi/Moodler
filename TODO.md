@@ -1,5 +1,5 @@
 * ui
-    * Undo
+    * U̶n̶d̶o̶
     * Refactor, refactor, refactor
     * Restart
     * Properly integrate oscilloscope
@@ -8,6 +8,8 @@
     * Move last clicked to top?
     * Remove extraneous stuff from phaser
     * Store config with bindings separately from actual 'scene'
+    * Automatic rectangles for text
+    * Tooltips for input may be better above or below
 * moodler
     * Sort out init
     * synth delete

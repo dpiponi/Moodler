@@ -20,7 +20,7 @@ import System.Posix
 import UIElement
 import UISupport
 import Utils
-import Wiring
+import qualified Wiring as W
 import World
 import qualified Box as B
 import qualified Data.Foldable as F
@@ -43,7 +43,8 @@ handleDefault = handleDefault' =<< MoodlerM (liftF $ GetEvent id)
 -- Otherwise we select and possibly drag the port itself.
 clickOnIn' :: Point -> UiId -> MoodlerM Zero
 clickOnIn' p i = do
-    d <- deleteCable i
+    W.undoPoint
+    d <- W.deleteCable i
     case d of
         Nothing -> do
             doSelection i
@@ -69,6 +70,7 @@ defaultClick' p i = do
         In {} -> clickOnIn' p i
         Knob {} -> do
             highlightJust i
+            W.undoPoint
             handleDraggingKnob i (_setting elt) p
         Label {} -> do
             doSelection i
@@ -88,7 +90,8 @@ defaultClick' p i = do
             --                                fromIntegral newSetting
             -- Comms
             --sendSetMessage selectorName (fromIntegral newSetting)
-            synthSet i (fromIntegral newSetting)
+            W.undoPoint
+            W.synthSet i (fromIntegral newSetting)
             handleDefault
 
 elementDisplayName :: UIElement -> String
@@ -121,6 +124,15 @@ handleDefault' (EventKey (Char '"') Down _ _) = do
     showHidden %= not
     handleDefault
 
+handleDefault' (EventKey (Char 'z') Down _ _) = do
+    W.performUndo
+    handleDefault
+
+handleDefault' (EventKey (Char 'Z') Down _ _) = do
+    liftIO $ putStrLn "Z was pressed"
+    W.performRedo
+    handleDefault
+
 handleDefault' (EventKey (Char 'r') Down _ _) = do
     es <- use currentSelection
     (container, contentss) <- findContainer es
@@ -140,7 +152,9 @@ handleDefault' (EventKey (Char 'l') Down _ _) = do
     filename <- handleGetString allScripts "" "load: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     case filename of
-        Just filename' -> evalUi (U.load filename')
+        Just filename' -> do
+            W.undoPoint
+            evalUi (U.load filename')
         Nothing -> return ()
     handleDefault
 
@@ -172,7 +186,8 @@ handleDefault' (EventKey (Char 'c') Down _ (x, y)) = do
             elt <- getElementById "handleDefault'" i
             case elt of
                 In {} -> do
-                    rotateCables i
+                    W.undoPoint
+                    W.rotateCables i
                     handleDefault
                 _ -> handleDefault
         Nothing -> handleDefault
@@ -310,8 +325,10 @@ handleDefault' (EventKey key Down
 
 -- Use key binding.
 handleDefault' (EventKey (Char key) Down _ _) = do
+    W.undoPoint
     binds <- use bindings
-    F.forM_ (M.lookup key binds) (\script -> execScript "scripts" script [])
+    F.forM_ (M.lookup key binds) $ \script ->
+            execScript "scripts" script []
     handleDefault
 
 handleDefault' _ =
@@ -404,13 +421,13 @@ handleDraggingRegion' f z (EventMotion (x, y)) = do
 -- Finished dragging
 handleDraggingRegion' f _
     (EventKey (MouseButton LeftButton) Up _ (x, y)) = do
-        if f /= (x, y)
-            then selectEverythingInRegion f (x, y)
-            else do
-                unhighlightEverything
-                currentSelection .= []
-        gadget .= const blank
-        handleDefault
+    if f /= (x, y)
+        then selectEverythingInRegion f (x, y)
+        else do
+            unhighlightEverything
+            currentSelection .= []
+    gadget .= const blank
+    handleDefault
 
 handleDraggingRegion' a b _ = handleDraggingRegion a b
 
@@ -432,8 +449,9 @@ justSelect i = do
 wireCable :: UiId -> UiId -> MoodlerM Zero
 wireCable i selectedOut = do
     unhighlightEverything
-    synthConnect selectedOut i
-    synthRecompile
+    W.undoPoint
+    W.synthConnect selectedOut i
+    W.synthRecompile
     justSelect i
 
 -- Motion during cable dragging
@@ -507,7 +525,7 @@ handleDraggingKnob' selectedKnob v p0@(x0, y0) (EventMotion p) = do
                     color green $ text (showFFloat (Just 4) v1 "")) <>
                 translate (-80) 0 (scale 0.27 0.27 $
                         color red $ text (showNote v1)))
-            synthSet selectedKnob v1
+            W.synthSet selectedKnob v1
             handleDraggingKnob selectedKnob v p0
 
 handleDraggingKnob' selectedKnob _ _

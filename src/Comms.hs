@@ -8,7 +8,9 @@ module Comms(sendConnectMessage,
              sendRecompileMessage,
              sendQuitMessage,
              SendCommand(..),
-             interpretSend) where
+             interpretSend,
+             -- pushSend,
+             recordUndo) where
 
 import Control.Monad.State
 import Sound.OSC
@@ -16,9 +18,9 @@ import Control.Applicative
 import Control.Lens
 
 import World
-import UIElement
+--import UIElement
 import Text
-import Symbols
+--import Symbols
 
 socket :: Int
 socket = 7777
@@ -35,13 +37,30 @@ socket = 7777
 -- 5. Recompile
 -- 6. Quit
 
-data SendCommand = SendConnectMessage UiId UiId
-                 | SendDisconnectMessage UiId
-                 | SendSetMessage String Float
-                 deriving Show
+-- XXX
+-- XXX The undo history needs to be at string, not UiId level
+-- XXX
+interpretSend :: (MonadIO m, MonadState GlossWorld m, Functor m) =>
+                 SendCommand -> m ()
+interpretSend (SendConnect a b) = sendConnectMessage a b
+interpretSend (SendDisconnect a) = sendDisconnectMessage a
+interpretSend (SendSet a b) = sendSetMessage a b
 
-interpretSend :: (MonadIO m, MonadState GlossWorld m) => SendCommand -> m ()
-interpretSend _ = return () -- XXX finish!
+-- SendSet a x * SendSet a x' == SendSet a x'
+pushSend :: SendCommand -> [SendCommand] -> [SendCommand]
+--pushSend (SendSet a _) as@(SendSet a' _ : _) | a == a' = as
+pushSend a as = a : as
+
+reversePushSend :: SendCommand -> [SendCommand] -> [SendCommand]
+--reversePushSend a@(SendSet b _) (SendSet b' _ : cs) | b == b' = a : cs
+reversePushSend a as = a : as
+
+recordUndo :: (MonadIO m, MonadState GlossWorld m) =>
+              SendCommand -> SendCommand -> m ()
+recordUndo undoCmd redoCmd = do
+    undoHistory . _head . _1 %= pushSend undoCmd
+    undoHistory . _head . _2 %= reversePushSend redoCmd
+    liftIO $ putStrLn $ "undo: " ++ show (undoCmd, redoCmd)
 
 sendOSCMsg :: (MonadIO m, MonadState GlossWorld m) => Message -> m ()
 sendOSCMsg m = do
@@ -60,6 +79,7 @@ sendConnectMessage' outPoint inPoint = do
 sendDisconnectMessage :: (MonadIO m, MonadState GlossWorld m) =>
                       String -> m ()
 sendDisconnectMessage =
+    --idName <- use (inner . uiElements . ix i . name)
     sendConnectMessage' "zero.result"
 
 sendSetMessage :: (MonadIO m, MonadState GlossWorld m) =>
@@ -77,11 +97,11 @@ sendNewInputMessage knobName = do
     sendOSCMsg msg
 
 sendConnectMessage :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
-                      UiId -> UiId -> m ()
-sendConnectMessage src dst = do
-    srcElt <- _name <$> getElementById "Comms.hs" src
-    dstElt <- _name <$> getElementById "Comms.hs" dst
-    sendConnectMessage' srcElt dstElt
+                      String -> String -> m ()
+sendConnectMessage =
+    -- srcElt <- _name <$> getElementById "sendConnectMessage1" src
+    -- dstElt <- _name <$> getElementById "sendConnectMessage2" dst
+    sendConnectMessage'
 
 sendNewSynthMessage :: (MonadIO m, MonadState GlossWorld m) =>
                        String -> String -> m ()

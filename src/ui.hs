@@ -87,31 +87,34 @@ emptyGlossWorld =
                      , _contents = S.empty
                      }
         rootID = UiId "root"
-    in GlossWorld { _inner = emptyWorld rootID root
-              , _ipAddr = ""
-              , _showHidden = False
-              , _newName = 0
-              , _mouseLoc = (0, 0)
-              , _planes = rootID
-              , _cmdArgs = []
-              , _rootPlane = rootID
-              , _bindings = M.empty
-              , _pics = M.empty
-              , _gadget = const blank
-              , _currentSelection = []
-              , _previousSelection = Nothing
-              , _rootTransform = Transform (0, 0) 1
-              , _cont = Free (GetEvent (runMoodlerM . handleDefault'))
-              }
+        innerWorld = emptyWorld rootID root
+    in GlossWorld { _inner = innerWorld
+                  , _ipAddr = ""
+                  , _showHidden = False
+                  , _newName = 0
+                  , _mouseLoc = (0, 0)
+                  , _planes = rootID
+                  , _cmdArgs = []
+                  , _rootPlane = rootID
+                  , _bindings = M.empty
+                  , _pics = M.empty
+                  , _gadget = const blank
+                  , _currentSelection = []
+                  , _previousSelection = Nothing
+                  , _rootTransform = Transform (0, 0) 1
+                  , _cont = Free (GetEvent (runMoodlerM . handleDefault'))
+                  , _innerHistory = [innerWorld]
+                  , _undoHistory = [([], [])]
+                  , _innerFuture = []
+                  , _undoFuture = [([], [])]
+                  }
 
 launchGUI :: GlossWorld -> IO ()
 launchGUI world = do
   print "Starting..."
   playIO (InWindow "Moodler"
                    (1200, 1000) (100, 100))
-                   white
-                   1
-                   world
+                   white 1 world
                    renderWorld eventHandler simulate
 
 main :: IO ()

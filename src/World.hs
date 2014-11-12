@@ -31,6 +31,12 @@ data World = World { _uiElements :: M.Map UiId UIElement
                    -- , _connections :: [(String, String)]
                    }
 
+-- Need to make args consistent XXX
+data SendCommand = SendConnect String String
+                 | SendDisconnect String
+                 | SendSet String Float
+                 deriving Show
+
 data GlossWorld = GlossWorld { _inner :: World
                              , _previousSelection :: Maybe String
                              , _mouseLoc :: (Float, Float)
@@ -48,6 +54,12 @@ data GlossWorld = GlossWorld { _inner :: World
                              , _cont :: FreeF MoodlerF Zero
                                 (FreeT MoodlerF (StateT GlossWorld IO)
                                     Zero)
+                             , _innerHistory :: [World]
+                             , _undoHistory ::
+                                        [([SendCommand], [SendCommand])]
+                             , _innerFuture :: [World]
+                             , _undoFuture ::
+                                        [([SendCommand], [SendCommand])]
                              }
 
 $(makeLenses ''GlossWorld)
