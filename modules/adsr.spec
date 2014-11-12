@@ -29,11 +29,11 @@ void exec(in attack, in decay, in sustain, in release,
             }
             if (attack == 0 || result >= 1.0) {
                 result = 1.0;
-                printf("ATTACK->DECAY\n");
+                if (0) printf("ATTACK->DECAY\n");
                 state = DECAY;
             }
             if (gate <= 0) {
-                printf("ATTACK->RELEASE\n");
+                if (0) printf("ATTACK->RELEASE\n");
                 state = RELEASE;
             }
             break;
@@ -49,7 +49,7 @@ void exec(in attack, in decay, in sustain, in release,
             }
             if (gate <= 0) {
                 state = RELEASE;
-                printf("DECAY->RELEASE\n");
+                if (0) printf("DECAY->RELEASE\n");
             }
             break;
 
@@ -58,7 +58,7 @@ void exec(in attack, in decay, in sustain, in release,
 
             if (gate > 0) {
                 state = ATTACK;
-                printf("RELEASE->ATTACK\n");
+                if (0) printf("RELEASE->ATTACK\n");
             }
             break;
 

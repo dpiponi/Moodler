@@ -79,7 +79,7 @@ deleteCable selectedIn = do
             c'Name <- use (inner . uiElements . ix c' . name)
             recordUndo (SendConnect c'Name selectedInName)
                        (SendDisconnect selectedInName)
-            sendRecompileMessage
+            --sendRecompileMessage
             return (Just c)
         (c@(Cable c') : rc@(Cable src : _)) -> do
             inner . uiElements . ix selectedIn . cablesIn .= rc
@@ -89,7 +89,7 @@ deleteCable selectedIn = do
             c'Name <- use (inner . uiElements . ix c' . name)
             recordUndo (SendConnect c'Name selectedInName)
                        (SendConnect srcName selectedInName)
-            sendRecompileMessage
+            --sendRecompileMessage
             return (Just c)
 
 rotateCables :: (Functor m, MonadIO m, MonadState GlossWorld m) =>

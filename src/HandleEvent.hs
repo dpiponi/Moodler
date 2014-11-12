@@ -45,6 +45,7 @@ clickOnIn' :: Point -> UiId -> MoodlerM Zero
 clickOnIn' p i = do
     W.undoPoint
     d <- W.deleteCable i
+    W.synthRecompile
     case d of
         Nothing -> do
             doSelection i

@@ -95,7 +95,8 @@ handleMessage :: MonadIO m => Int -> Array Int (Ptr ()) ->
                               Maybe Message ->
                               StateT Moodler m ()
 handleMessage numVoices dataPtrs set_fill_buffer
-              synthTypes msg =
+              synthTypes msg = do
+    liftIO $ putStrLn $ "received: " ++ show msg
     case msg of
         Just (Message "/input" [ASCII_String a]) ->
             handleInput (C.unpack a) synthTypes
