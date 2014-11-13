@@ -106,7 +106,7 @@ rotateCables selectedIn = do
             {- UNDO -}
             recordUndo (SendConnect c'Name selectedInName)
                        (SendConnect srcName selectedInName)
-            sendRecompileMessage
+            --sendRecompileMessage
             return ()
         _ -> return ()
 
@@ -153,7 +153,7 @@ removeAllCablesFrom i = do
         case elt of
             In { _cablesIn = cs } -> removeAllCablesFromTo i eltId cs
             _ -> return ()
-    sendRecompileMessage
+    -- sendRecompileMessage
 
 synthSet :: (Functor m, MonadIO m,
             MonadState GlossWorld m) =>
@@ -174,8 +174,9 @@ synthQuit :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
 synthQuit = sendQuitMessage
 
 synthRecompile :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
-                  m ()
-synthRecompile = sendRecompileMessage
+                  String -> m ()
+synthRecompile =
+    sendRecompileMessage
 
 undoPoint :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
              m ()
@@ -201,7 +202,7 @@ performUndo = do
         innerFuture %= (currentInner :)
         undoFuture %= (cmds :)
         mapM_ (\a -> interpretSend a >> liftIO (putStrLn $ "Undoing: " ++ show a)) undos
-        synthRecompile
+        synthRecompile "undo"
 
 performRedo :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                m ()
@@ -217,4 +218,4 @@ performRedo = do
         innerHistory %= (currentInner :)
         undoHistory %= (cmds :)
         mapM_ (\a -> interpretSend a >> liftIO (putStrLn $ "Redoing: " ++ show a)) (reverse redos)
-        synthRecompile
+        synthRecompile "redo"

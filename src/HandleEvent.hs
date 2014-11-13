@@ -45,7 +45,7 @@ clickOnIn' :: Point -> UiId -> MoodlerM Zero
 clickOnIn' p i = do
     W.undoPoint
     d <- W.deleteCable i
-    W.synthRecompile
+    W.synthRecompile "click on In"
     case d of
         Nothing -> do
             doSelection i
@@ -149,7 +149,7 @@ handleDefault' (EventKey (Char '/') Down _ _) = do
     handleDefault
 
 handleDefault' (EventKey (Char 'l') Down _ _) = do
-    allScripts <- liftIO getAllScripts
+    allScripts <- liftIO $ getAllScripts "scripts"
     filename <- handleGetString allScripts "" "load: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     case filename of
@@ -160,7 +160,8 @@ handleDefault' (EventKey (Char 'l') Down _ _) = do
     handleDefault
 
 handleDefault' (EventKey (Char 's') Down _ _) = do
-    filename <- handleGetString [] "" "save: "
+    allSaves <- liftIO $ getAllScripts "saves"
+    filename <- handleGetString allSaves "" "save: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     case filename of
         Just filename' -> evalUi (U.save filename')
@@ -168,7 +169,8 @@ handleDefault' (EventKey (Char 's') Down _ _) = do
     handleDefault
 
 handleDefault' (EventKey (Char 'w') Down _ _) = do
-    filename <- handleGetString [] "" "write: "
+    allScripts <- liftIO $ getAllScripts "scripts"
+    filename <- handleGetString allScripts "" "write: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     case filename of
         Just filename' -> evalUi (U.write filename')
@@ -189,6 +191,7 @@ handleDefault' (EventKey (Char 'c') Down _ (x, y)) = do
                 In {} -> do
                     W.undoPoint
                     W.rotateCables i
+                    W.synthRecompile "rotated cables"
                     handleDefault
                 _ -> handleDefault
         Nothing -> handleDefault
@@ -452,7 +455,7 @@ wireCable i selectedOut = do
     unhighlightEverything
     W.undoPoint
     W.synthConnect selectedOut i
-    W.synthRecompile
+    W.synthRecompile "wireCable"
     justSelect i
 
 -- Motion during cable dragging

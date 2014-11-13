@@ -20,7 +20,7 @@ executable moodler
   build-depends:    base >= 4 && < 5, language-c, lens, unix, mtl,
                     pretty, process, hashable, containers,
                     either, bytestring, array, hosc >= 0.14, syb,
-                    directory, temporary
+                    directory, temporary, cpphs
 
 executable ui
   hs-source-dirs:   src

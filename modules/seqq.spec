@@ -1,3 +1,6 @@
+/*
+ * A simple sequencer
+ */
 int pos;
 double last_gate;
 double result;
@@ -7,6 +10,10 @@ double current_mode;
 double current_freq;
 double trigger;
 double target_freq;
+
+#if 0
+IGNORE THIS
+#endif
 
 void init() {
     pos = 0;
@@ -31,6 +38,13 @@ void exec(in gate,
           in mode5, in mode6, in mode7, in mode8,
           out result, out trigger) {
     {
+        /*
+         * modes:
+         * 0: REPEAT
+         * 1: SLIDE
+         * 2: REST
+         * 3: HOLD
+         */
         const double REST = 2.0;
         if (current_mode != 3.0 && current_mode != 1.0) {
             trigger = 0.0;

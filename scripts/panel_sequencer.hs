@@ -27,88 +27,88 @@ do
     input7 <- new' "input"
     input8 <- new' "input"
     input9 <- new' "input"
-    seqq0 <- new' "seqq"
+    sequencer0 <- new' "sequencer"
     image27 <- container' "panel_sequencer.bmp" (x+(3.0), y+(-10.0)) main
-    in28 <- plugin' (seqq0++"."++"freq2") (x+(-148.0), y+(39.0)) main
+    in28 <- plugin' (sequencer0++"."++"freq2") (x+(-148.0), y+(39.0)) main
     hide in28
     parent image27 in28
-    in29 <- plugin' (seqq0++"."++"pulse2") (x+(-105.0), y+(34.0)) main
+    in29 <- plugin' (sequencer0++"."++"pulse2") (x+(-105.0), y+(34.0)) main
     hide in29
     parent image27 in29
-    in30 <- plugin' (seqq0++"."++"mode2") (x+(-69.0), y+(35.0)) main
+    in30 <- plugin' (sequencer0++"."++"mode2") (x+(-69.0), y+(35.0)) main
     hide in30
     parent image27 in30
-    in31 <- plugin' (seqq0++"."++"freq3") (x+(-148.0), y+(-11.0)) main
+    in31 <- plugin' (sequencer0++"."++"freq3") (x+(-148.0), y+(-11.0)) main
     hide in31
     parent image27 in31
-    in32 <- plugin' (seqq0++"."++"pulse3") (x+(-105.0), y+(-16.0)) main
+    in32 <- plugin' (sequencer0++"."++"pulse3") (x+(-105.0), y+(-16.0)) main
     hide in32
     parent image27 in32
-    in34 <- plugin' (seqq0++"."++"mode3") (x+(-69.0), y+(-15.0)) main
+    in34 <- plugin' (sequencer0++"."++"mode3") (x+(-69.0), y+(-15.0)) main
     hide in34
     parent image27 in34
-    in35 <- plugin' (seqq0++"."++"freq4") (x+(-148.0), y+(-61.0)) main
+    in35 <- plugin' (sequencer0++"."++"freq4") (x+(-148.0), y+(-61.0)) main
     hide in35
     parent image27 in35
-    in36 <- plugin' (seqq0++"."++"pulse4") (x+(-105.0), y+(-66.0)) main
+    in36 <- plugin' (sequencer0++"."++"pulse4") (x+(-105.0), y+(-66.0)) main
     hide in36
     parent image27 in36
-    in37 <- plugin' (seqq0++"."++"mode4") (x+(-69.0), y+(-65.0)) main
+    in37 <- plugin' (sequencer0++"."++"mode4") (x+(-69.0), y+(-65.0)) main
     hide in37
     parent image27 in37
-    in38 <- plugin' (seqq0++"."++"freq5") (x+(22.0), y+(87.0)) main
+    in38 <- plugin' (sequencer0++"."++"freq5") (x+(22.0), y+(87.0)) main
     hide in38
     parent image27 in38
-    in39 <- plugin' (seqq0++"."++"pulse5") (x+(67.0), y+(91.0)) main
+    in39 <- plugin' (sequencer0++"."++"pulse5") (x+(67.0), y+(91.0)) main
     hide in39
     parent image27 in39
-    in40 <- plugin' (seqq0++"."++"mode5") (x+(104.0), y+(88.0)) main
+    in40 <- plugin' (sequencer0++"."++"mode5") (x+(104.0), y+(88.0)) main
     hide in40
     parent image27 in40
-    in41 <- plugin' (seqq0++"."++"freq6") (x+(22.0), y+(37.0)) main
+    in41 <- plugin' (sequencer0++"."++"freq6") (x+(22.0), y+(37.0)) main
     hide in41
     parent image27 in41
-    in42 <- plugin' (seqq0++"."++"pulse6") (x+(67.0), y+(41.0)) main
+    in42 <- plugin' (sequencer0++"."++"pulse6") (x+(67.0), y+(41.0)) main
     hide in42
     parent image27 in42
-    in43 <- plugin' (seqq0++"."++"mode6") (x+(104.0), y+(38.0)) main
+    in43 <- plugin' (sequencer0++"."++"mode6") (x+(104.0), y+(38.0)) main
     hide in43
     parent image27 in43
-    in44 <- plugin' (seqq0++"."++"freq1") (x+(-148.0), y+(89.0)) main
+    in44 <- plugin' (sequencer0++"."++"freq1") (x+(-148.0), y+(89.0)) main
     hide in44
     parent image27 in44
-    in45 <- plugin' (seqq0++"."++"freq7") (x+(22.0), y+(-13.0)) main
+    in45 <- plugin' (sequencer0++"."++"freq7") (x+(22.0), y+(-13.0)) main
     hide in45
     parent image27 in45
-    in46 <- plugin' (seqq0++"."++"pulse7") (x+(67.0), y+(-9.0)) main
+    in46 <- plugin' (sequencer0++"."++"pulse7") (x+(67.0), y+(-9.0)) main
     hide in46
     parent image27 in46
-    in47 <- plugin' (seqq0++"."++"mode7") (x+(104.0), y+(-12.0)) main
+    in47 <- plugin' (sequencer0++"."++"mode7") (x+(104.0), y+(-12.0)) main
     hide in47
     parent image27 in47
-    in48 <- plugin' (seqq0++"."++"freq8") (x+(22.0), y+(-63.0)) main
+    in48 <- plugin' (sequencer0++"."++"freq8") (x+(22.0), y+(-63.0)) main
     hide in48
     parent image27 in48
-    in49 <- plugin' (seqq0++"."++"pulse8") (x+(67.0), y+(-59.0)) main
+    in49 <- plugin' (sequencer0++"."++"pulse8") (x+(67.0), y+(-59.0)) main
     hide in49
     parent image27 in49
-    in50 <- plugin' (seqq0++"."++"mode8") (x+(104.0), y+(-62.0)) main
+    in50 <- plugin' (sequencer0++"."++"mode8") (x+(104.0), y+(-62.0)) main
     hide in50
     parent image27 in50
-    in51 <- plugin' (seqq0++"."++"gate") (x+(-149.0), y+(-160.0)) main
+    in51 <- plugin' (sequencer0++"."++"gate") (x+(-149.0), y+(-160.0)) main
     parent image27 in51
-    in52 <- plugin' (seqq0++"."++"add") (x+(-148.0), y+(-118.0)) main
+    in52 <- plugin' (sequencer0++"."++"add") (x+(-148.0), y+(-118.0)) main
     parent image27 in52
-    in53 <- plugin' (seqq0++"."++"slide_rate") (x+(25.0), y+(-160.0)) main
+    in53 <- plugin' (sequencer0++"."++"slide_rate") (x+(25.0), y+(-160.0)) main
     hide in53
     parent image27 in53
-    in54 <- plugin' (seqq0++"."++"length") (x+(25.0), y+(-110.0)) main
+    in54 <- plugin' (sequencer0++"."++"length") (x+(25.0), y+(-110.0)) main
     hide in54
     parent image27 in54
-    in55 <- plugin' (seqq0++"."++"pulse1") (x+(-105.0), y+(84.0)) main
+    in55 <- plugin' (sequencer0++"."++"pulse1") (x+(-105.0), y+(84.0)) main
     hide in55
     parent image27 in55
-    in56 <- plugin' (seqq0++"."++"mode1") (x+(-69.0), y+(85.0)) main
+    in56 <- plugin' (sequencer0++"."++"mode1") (x+(-69.0), y+(85.0)) main
     hide in56
     parent image27 in56
     knob57 <- knob' (input4++"."++"result") (x+(-148.0), y+(35.0)) main
@@ -129,9 +129,9 @@ do
     parent image27 knob64
     knob65 <- knob' (input26++"."++"result") (x+(28.0), y+(-150.0)) main
     parent image27 knob65
-    out68 <- plugout' (seqq0++"."++"result") (x+(138.0), y+(-158.0)) main
+    out68 <- plugout' (sequencer0++"."++"result") (x+(138.0), y+(-158.0)) main
     parent image27 out68
-    out69 <- plugout' (seqq0++"."++"trigger") (x+(138.0), y+(-119.0)) main
+    out69 <- plugout' (sequencer0++"."++"trigger") (x+(138.0), y+(-119.0)) main
     parent image27 out69
     selector70 <- selector' (input5++"."++"result") (x+(-105.0), y+(34.0)) ["1","2","3","4","5","6","7","8"] main
     parent image27 selector70

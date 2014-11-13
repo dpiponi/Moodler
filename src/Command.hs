@@ -190,7 +190,7 @@ evalUi (UiLib.Cable s1 s2 cfn) = do
 evalUi (UiLib.Recompile cfn) = do
     --liftIO $ print "Recompile"
     -- Comms
-    synthRecompile
+    synthRecompile "Recompile command"
     evalUi cfn
 
 evalUi (UiLib.Quit cfn) = do

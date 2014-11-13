@@ -7,12 +7,19 @@ import Control.Lens
 import qualified Data.Set as S
 import qualified Data.Map as M
 import qualified Data.List as L
+import Control.Applicative
 
 import World
 import UIElement
 import Symbols
 import Utils
 import Wiring
+
+-- XXX Could be argued that it should be impossible to
+-- call checkExists and get False back.
+checkExists :: (Functor m, MonadState GlossWorld m) =>
+               UiId -> m Bool
+checkExists i = M.member i <$> use (inner . uiElements)
 
 createdInParent :: MonadState GlossWorld m =>
                    UiId -> UIElement -> UiId -> m ()

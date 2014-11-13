@@ -109,8 +109,10 @@ sendNewSynthMessage synthType synthName = do
     let msg = message "/synth" [string synthType, string synthName]
     sendOSCMsg msg
 
-sendRecompileMessage :: (MonadIO m, MonadState GlossWorld m) => m ()
-sendRecompileMessage =
+sendRecompileMessage :: (MonadIO m, MonadState GlossWorld m) =>
+                        String -> m ()
+sendRecompileMessage reason = do
+    liftIO $ putStrLn $ "sendRecompileMessage: " ++ reason
     sendOSCMsg (message "/recompile" [])
 
 sendQuitMessage :: (MonadIO m, MonadState GlossWorld m) => m ()

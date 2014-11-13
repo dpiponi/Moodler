@@ -17,6 +17,7 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 
 import UISupport
+import ContainerTree
 
 pictureTransformer :: B.Transform -> Picture -> Picture
 pictureTransformer (B.Transform (tx, ty) s) = translate tx ty . scale s s
@@ -149,7 +150,13 @@ renderWorld :: GlossWorld -> IO Picture
 renderWorld w@GlossWorld { _rootTransform = rootXform
                          , _showHidden = showingHidden } =
     evalStateT (do
-        wplanes <- use planes
+        wplanes0 <- use planes
+        -- XXX Don't know if it's wise to have
+        -- uiids pointing no non-existent planes.
+        planeExists <- checkExists wplanes0
+        wplanes <- if planeExists
+            then return wplanes0
+            else use rootPlane
         thingsToDraw <- rootElementsOnPlane wplanes
         elems <- mapM (\i -> do
                 e <- getElementById "Draw.hs" i

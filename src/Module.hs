@@ -15,6 +15,7 @@ import Language.C.Syntax.AST
 import Parser
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Set as S
+import Language.Preprocessor.Cpphs
 
 import Text
 
@@ -91,9 +92,10 @@ synthScript synthName ins outs = do
 loadNodeType :: String -> String -> EitherT String IO (NodeType NodeInfo)
 loadNodeType dir fileName' = do
     let fileName = dir ++ "/" ++ fileName'
-    code <- liftIO $ readFile fileName
+    rawCode <- liftIO $ readFile fileName
+    code <- liftIO $ runCpphs defaultCpphsOptions { boolopts = defaultBoolOptions { locations = False, stripC89 = True } } fileName (rawCode::String)
     liftIO $ putStrLn "Parsing:"
-    liftIO $ putStr code
+    liftIO $ putStr (code::String)
     let typeNames = [builtinIdent "in", builtinIdent "out"] ++
                     builtinTypeNames
     let input = B.pack code

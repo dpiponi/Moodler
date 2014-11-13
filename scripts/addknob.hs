@@ -11,4 +11,3 @@ do
         k <- knob' (n' ++ ".result") (x, y) p
         cable k b
         trace "Hello" $ recompile
-
