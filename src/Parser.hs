@@ -15,6 +15,8 @@ import Language.C.Syntax.AST
 import Language.C.Data.Ident
 import Language.C.Data.Node
 import qualified Data.Map as M
+import Language.C.Pretty
+import Debug.Trace
 
 {-
  - We want three things from a .spec file:
@@ -83,8 +85,11 @@ extractModuleParts (CTranslUnit extDecls _) =
 idents :: (Data a, Typeable a) => a -> [String]
 idents = everything (++) ([] `mkQ` (return . identToString))
 
+-- XXX Note `partitionDeclSpecs`
+-- https://hackage.haskell.org/package/language-c-0.4.7/docs/Language-C-Syntax-AST.html#g:3
 getInOrOut :: CDeclarationSpecifier NodeInfo -> String
 getInOrOut (CTypeSpec (CTypeDef ident _)) = identToString ident
+getInOrOut (CTypeQual (CAttrQual (CAttr ident cexpr _))) = show (identToString ident, map pretty cexpr)
 getInOrOut _ = ""
 
 -- A CDeclaration is a complete C declaration
@@ -92,7 +97,8 @@ getInOrOut _ = ""
 -- I think the variable name is the ident in the first position in one of
 -- the triples.
 getAnInOut :: CDeclaration NodeInfo -> [(CDecl, Either String String)]
-getAnInOut cdecl@(CDecl spec triples _) = if "out" `elem` map getInOrOut spec
+getAnInOut cdecl@(CDecl spec triples _) = let quals = map getInOrOut spec
+                                          in trace (show quals) $ if "out" `elem` quals
                                             then [(cdecl, Right $ head $ idents triples)]
                                             else [(cdecl, Left $ head $ idents triples)]
 

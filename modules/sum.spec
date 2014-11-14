@@ -4,7 +4,7 @@ void init() {
     result = 0.0;
 }
 
-void exec(in signal1, in signal2, out result) {
+void exec(in signal1, in signal2, out __attribute__((alloc_size(2))) result) {
     {
         result = signal1+signal2;
     }

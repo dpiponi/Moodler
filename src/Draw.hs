@@ -88,12 +88,12 @@ drawUIElement _ world (Image _ _ _ (x, y) _ picture _ _) =
             Nothing -> blank
             Just (x', _, _) -> x')
 
-drawUIElement _ _ (Out _ wasSelected _ (x, y) _displayName) =
+drawUIElement _ _ (Out _ wasSelected _ (x, y) _displayName _) =
     translate x y (color (selectColor wasSelected outColour) (
       circleSolid 10 <>
       color black (circleSolid 5)))
 
-drawUIElement _ world (In _ wasSelected _ (x, y) _ _ cableList) =
+drawUIElement _ world (In _ wasSelected _ (x, y) _ _ _ cableList) =
     translate x y (color (selectColor wasSelected inColour) (
                 circleSolid 10 <>
                 color black (circleSolid 5))) <>

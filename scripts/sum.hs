@@ -11,7 +11,7 @@ do
     -- in
     inp <- plugin' (name ++ ".signal2") (x-21, y-25) plane
     parent panel inp
-    -- out
+    -- out __attribute__((alloc_size(2)))
     out <- plugout' (name ++  ".result") (x+20, y) plane
     parent panel out
     recompile

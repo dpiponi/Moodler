@@ -110,12 +110,12 @@ evalUi (Load t cfn) =
     execScript "scripts" t [] >> evalUi cfn
 
 evalUi (PlugIn n t p creationParent cfn) = do
-    let e = In creationParent False False p t t []
+    let e = In creationParent False False p t "" t []
     createdInParent n e creationParent
     evalUi (cfn n)
 
 evalUi (PlugOut n t p creationPlane cfn) = do
-    let e = Out creationPlane False False p t
+    let e = Out creationPlane False False p t "" 
     createdInParent n e creationPlane
     evalUi (cfn n)
 

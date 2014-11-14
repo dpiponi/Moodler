@@ -107,7 +107,7 @@ loadNodeType dir fileName' = do
     let fileName = combine dir fileName'
     rawCode <- liftIO $ readFile fileName
     code <- liftIO $ runCpphs
-                     defaultCpphsOptions
+                     defaultCpphsOptions -- XXX Use `defines` to set "out"
                      { boolopts = defaultBoolOptions { locations = False
                      , stripC89 = True } } fileName rawCode
     liftIO $ putStrLn "Parsing:"

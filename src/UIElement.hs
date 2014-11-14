@@ -30,13 +30,15 @@ data UIElement = Container { _parent :: UiId
                     , _hidden :: Bool
                     , _loc :: Point
                     , _name :: String
+                    , _dataType :: String
                     , _displayName :: String
                     , _cablesIn :: [Cable] }
                | Out { _parent :: UiId
                      , _highlighted :: Bool
                      , _hidden :: Bool
                      , _loc :: Point
-                     , _name :: String }
+                     , _name :: String
+                     , _dataType :: String }
                | Label { _parent :: UiId
                        , _highlighted :: Bool
                        , _hidden :: Bool
