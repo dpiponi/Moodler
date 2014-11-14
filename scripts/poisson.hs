@@ -5,8 +5,10 @@ do
     lab <- label' "poisson" (x-25.0, y+75.0) plane
     parent panel lab
     name <- new' "poisson"
+    -- in rate
     inp <- plugin' (name ++ ".rate") (x-21, y) plane
     parent panel inp
+    -- out trigger
     out <- plugout' (name ++  ".trigger") (x+20, y) plane
     parent panel out
     recompile

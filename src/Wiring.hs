@@ -34,7 +34,6 @@ synthConnect s1 s2 = do
     s2Name <- use (inner . uiElements . ix s2 . name)
     sendConnectMessage s1Name s2Name
     previousCables <- use (inner . uiElements . ix s2 . cablesIn)
-    {- UNDO -}
     if null previousCables -- XXX case
         then recordUndo (SendDisconnect s2Name)
                         (SendConnect s1Name s2Name)
@@ -49,21 +48,8 @@ synthNew :: (Functor m, MonadIO m, MonadState GlossWorld m,
             InputHandler m) =>
             String -> String -> m ()
 synthNew synthType synthName = do
-    {- UNDO Maybe not needed -}
     inner . synthList %= (++ [(synthType, synthName)])
     sendNewSynthMessage synthType synthName
-
-{-
-deleteCable' :: (MonadState GlossWorld m, MonadIO m) =>
-                Cable -> UiId -> m (Maybe Cable)
-deleteCable' c@(Cable c') selectedIn = do
-    {- UNDO -}
-    c'Name <- use (inner . uiElements . ix c' . name)
-    selectedInName <- use (inner . uiElements . ix selectedIn . name)
-    recordUndo (SendConnect c'Name selectedInName)
-    sendRecompileMessage
-    return (Just c)
--}
 
 deleteCable :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                UiId -> m (Maybe Cable)

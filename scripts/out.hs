@@ -5,6 +5,7 @@ do
     lab <- label' "out" (x-25.0, y+75.0) plane
     parent panel lab
     name <- new' "out"
+    -- in value
     inp <- plugin' (name ++ ".value") (x-21, y) plane
     parent panel inp
     recompile

@@ -5,6 +5,7 @@ do
     lab <- label' "noise" (x-25.0, y+75.0) plane
     parent panel lab
     name <- new' "noise"
+    -- out result
     out <- plugout' (name ++  ".result") (x+20, y) plane
     parent panel out
     recompile

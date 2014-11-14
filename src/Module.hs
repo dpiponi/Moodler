@@ -18,6 +18,8 @@ import qualified Data.ByteString.Char8 as B
 import qualified Data.Map as M
 import Language.Preprocessor.Cpphs
 import Data.Tuple
+import System.FilePath.Posix
+import Language.C.Pretty
 
 import Text
 
@@ -73,7 +75,8 @@ synthScript synthName ins outs = do
     execWriter $ do
         synthPreamble panelName synthName topOffset
         forM_ (zip [inOffset, inOffset+50 ..] ins) $
-                                    \(offset, (_, eachInput)) -> do
+                                    \(offset, (inputType, eachInput)) -> do
+             tellInd 4 $ unwords [ "--", show (pretty inputType)]
              tellInd 4 $ unwords
                     [ "inp <- plugin' (name ++",
                       show ("." ++ eachInput) ++ ")",
@@ -81,7 +84,8 @@ synthScript synthName ins outs = do
                       "plane" ]
              tellInd 4 "parent panel inp"
         forM_ (zip [outOffset, outOffset+50 ..] outs) $
-                                    \(offset, (_, eachOutput)) -> do
+                                    \(offset, (outputType, eachOutput)) -> do
+             tellInd 4 $ unwords [ "--", show (pretty outputType)]
              tellInd 4 $ unwords
                     [ "out <- plugout' (name ++ ",
                       show ("." ++ eachOutput) ++ ")",
@@ -93,11 +97,14 @@ synthScript synthName ins outs = do
 
 loadNodeType :: String -> String -> EitherT String IO (NodeType NodeInfo)
 loadNodeType dir fileName' = do
-    let fileName = dir ++ "/" ++ fileName'
+    let fileName = combine dir fileName'
     rawCode <- liftIO $ readFile fileName
-    code <- liftIO $ runCpphs defaultCpphsOptions { boolopts = defaultBoolOptions { locations = False, stripC89 = True } } fileName (rawCode::String)
+    code <- liftIO $ runCpphs
+                     defaultCpphsOptions
+                     { boolopts = defaultBoolOptions { locations = False
+                     , stripC89 = True } } fileName rawCode
     liftIO $ putStrLn "Parsing:"
-    liftIO $ putStr (code::String)
+    liftIO $ putStr code
     let typeNames = [builtinIdent "in", builtinIdent "out"] ++
                     builtinTypeNames
     let input = B.pack code
@@ -119,8 +126,7 @@ loadNodeType dir fileName' = do
     if isJust e && isJust i
         then return $ NodeType (M.fromList $ map swap ins)
                                (M.fromList $ map swap outs)
-                               states
-                               vs
+                               states vs
                                (fromJust i)
                                (fromJust e)
         else left "loadNodeType failed"
