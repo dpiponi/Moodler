@@ -5,10 +5,10 @@ do
     lab <- label' "sinh" (x-25.0, y+75.0) plane
     parent panel lab
     name <- new' "sinh"
-    -- in signal
+    -- in
     inp <- plugin' (name ++ ".signal") (x-21, y) plane
     parent panel inp
-    -- out result
+    -- out
     out <- plugout' (name ++  ".result") (x+20, y) plane
     parent panel out
     recompile

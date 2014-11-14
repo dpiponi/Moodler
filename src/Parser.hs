@@ -89,6 +89,8 @@ getInOrOut _ = ""
 
 -- A CDeclaration is a complete C declaration
 -- spec is CDeclarationSpecifier
+-- I think the variable name is the ident in the first position in one of
+-- the triples.
 getAnInOut :: CDeclaration NodeInfo -> [(CDecl, Either String String)]
 getAnInOut cdecl@(CDecl spec triples _) = if "out" `elem` map getInOrOut spec
                                             then [(cdecl, Right $ head $ idents triples)]

@@ -5,7 +5,7 @@ do
     lab <- label' "input" (x-25.0, y+75.0) plane
     parent panel lab
     name <- new' "input"
-    -- out result
+    -- out
     out <- plugout' (name ++  ".result") (x+20, y) plane
     parent panel out
     recompile

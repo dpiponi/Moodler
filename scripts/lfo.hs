@@ -5,22 +5,22 @@ do
     lab <- label' "lfo" (x-25.0, y+75.0) plane
     parent panel lab
     name <- new' "lfo"
-    -- in sync
+    -- in
     inp <- plugin' (name ++ ".sync") (x-21, y+25) plane
     parent panel inp
-    -- in rate
+    -- in
     inp <- plugin' (name ++ ".rate") (x-21, y-25) plane
     parent panel inp
-    -- out sin_result
+    -- out
     out <- plugout' (name ++  ".sin_result") (x+20, y+75) plane
     parent panel out
-    -- out square_result
+    -- out
     out <- plugout' (name ++  ".square_result") (x+20, y+25) plane
     parent panel out
-    -- out saw
+    -- out
     out <- plugout' (name ++  ".saw") (x+20, y-25) plane
     parent panel out
-    -- out triangle
+    -- out
     out <- plugout' (name ++  ".triangle") (x+20, y-75) plane
     parent panel out
     recompile

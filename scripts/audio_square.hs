@@ -5,16 +5,16 @@ do
     lab <- label' "audio_square" (x-25.0, y+75.0) plane
     parent panel lab
     name <- new' "audio_square"
-    -- in freq
+    -- in
     inp <- plugin' (name ++ ".freq") (x-21, y+50) plane
     parent panel inp
-    -- in pwm
+    -- in
     inp <- plugin' (name ++ ".pwm") (x-21, y) plane
     parent panel inp
-    -- in sync
+    -- in
     inp <- plugin' (name ++ ".sync") (x-21, y-50) plane
     parent panel inp
-    -- out result
+    -- out
     out <- plugout' (name ++  ".result") (x+20, y) plane
     parent panel out
     recompile

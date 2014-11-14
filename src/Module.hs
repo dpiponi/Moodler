@@ -60,6 +60,13 @@ synthPreamble panelName synthName topOffset = do
     tellInd 4 "parent panel lab"
     tellInd 4 $ unwords ["name <- new'", show synthName]
 
+plop :: CDecl -> CDecl
+plop (CDecl as triples nodeinfo) =
+    CDecl as triples' nodeinfo
+    where triples' = filter f triples
+          f (Just (CDeclr (Just _) _ _ _ _), _, _) = False
+          f _ = True
+
 -- Auto-generate script for a .spec module
 synthScript :: String -> [(CDecl, String)] -> [(CDecl, String)] -> String
 synthScript synthName ins outs = do
@@ -76,7 +83,7 @@ synthScript synthName ins outs = do
         synthPreamble panelName synthName topOffset
         forM_ (zip [inOffset, inOffset+50 ..] ins) $
                                     \(offset, (inputType, eachInput)) -> do
-             tellInd 4 $ unwords [ "--", show (pretty inputType)]
+             tellInd 4 $ unwords [ "--", show (pretty (plop inputType))]
              tellInd 4 $ unwords
                     [ "inp <- plugin' (name ++",
                       show ("." ++ eachInput) ++ ")",
@@ -85,7 +92,7 @@ synthScript synthName ins outs = do
              tellInd 4 "parent panel inp"
         forM_ (zip [outOffset, outOffset+50 ..] outs) $
                                     \(offset, (outputType, eachOutput)) -> do
-             tellInd 4 $ unwords [ "--", show (pretty outputType)]
+             tellInd 4 $ unwords [ "--", show (pretty (plop outputType))]
              tellInd 4 $ unwords
                     [ "out <- plugout' (name ++ ",
                       show ("." ++ eachOutput) ++ ")",
