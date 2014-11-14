@@ -31,7 +31,7 @@ deleteLastChar [_] = []
 deleteLastChar (a : as) = a : deleteLastChar as
 
 estimateTextWidth :: String -> Float
-estimateTextWidth s = 24*fromIntegral (length s)
+estimateTextWidth s = 0.7*24*fromIntegral (length s)
 
 allEqual :: String -> Bool
 allEqual [] = True

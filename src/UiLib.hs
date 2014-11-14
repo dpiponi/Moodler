@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable, DeriveFunctor #-}
 
-module UiLib(module UiLib, module Symbols) where
+module UiLib(module UiLib, module Symbols, module UISupport) where
 
 import Data.Typeable hiding (Proxy)
 import Control.Applicative
@@ -8,6 +8,7 @@ import Control.Monad
 
 import Symbols
 import UIElement(ElementType)
+import UISupport(quantise2, quantum)
 
 data Ui a = Return a
           | Echo String (Ui a)
@@ -39,7 +40,7 @@ data Ui a = Return a
           | Hide UiId Bool (Ui a)
           | Delete UiId (Ui a)
           | Bind Char String (Ui a)
-          | Location UiId (Maybe (Float, Float) -> Ui a)
+          | Location UiId ((Float, Float) -> Ui a)
           | Name UiId (Maybe String -> Ui a)
           | Move UiId (Float, Float) (Ui a)
           | Switch UiId (Ui a)
@@ -267,7 +268,7 @@ delete t = Delete t (return ())
 bind :: Char -> String -> Ui ()
 bind c t = Bind c t (return ())
 
-location :: UiId -> Ui (Maybe (Float, Float))
+location :: UiId -> Ui (Float, Float)
 location s1 = Location s1 return
 
 name :: UiId -> Ui (Maybe String)

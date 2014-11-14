@@ -324,7 +324,7 @@ handleDefault' (EventKey key Down
     let (dx, dy) = getDirection key
     sel <- use currentSelection
     forM_ sel $ \e ->
-        (inner . uiElements) . ix e .loc %= \(x, y) -> (x+10*dx, y+10*dy)
+        (inner . uiElements) . ix e .loc %= \(x, y) -> (x+quantum*dx, y+quantum*dy)
     handleDefault
 
 -- Use key binding.
@@ -378,19 +378,22 @@ dragElement top dx dy sel = forM_ sel $ \s -> do
 
 handleDraggingSelection :: Point ->
                            MoodlerM Zero
-handleDraggingSelection (x0, y0) = do
+handleDraggingSelection (x0', y0') = do
+    let (x0, y0) = quantise2 quantum (x0', y0')
     e <- MoodlerM (liftF $ GetEvent id)
     handleDraggingSelection' (x0, y0) e
 
 -- Don't drag container AND its children XXX
 handleDraggingSelection' :: Point -> Event -> MoodlerM Zero
-handleDraggingSelection' (x0, y0) (EventMotion (x1, y1)) = do
+handleDraggingSelection' (x0, y0) (EventMotion (x1', y1')) = do
+    let (x1, y1) = quantise2 quantum (x1', y1')
     sel <- use currentSelection
     dragElement sel (x1-x0) (y1-y0) sel
     handleDraggingSelection (x1, y1)
 
 handleDraggingSelection' (x0, y0)
-    (EventKey (MouseButton LeftButton) Up _ (x1, y1)) = do
+    (EventKey (MouseButton LeftButton) Up _ (x1', y1')) = do
+    let (x1, y1) = quantise2 quantum (x1', y1')
     sel <- use currentSelection
     dragElement sel (x1-x0) (y1-y0) sel
     handleDefault

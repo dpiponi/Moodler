@@ -6,7 +6,12 @@ do
     and0 <- new' "and"
     divider1 <- new' "divider"
     input10 <- new' "input"
+    input11 <- new' "input"
+    input12 <- new' "input"
+    input13 <- new' "input"
+    input14 <- new' "input"
     input2 <- new' "input"
+    input29 <- new' "input"
     input3 <- new' "input"
     input4 <- new' "input"
     input5 <- new' "input"
@@ -16,235 +21,244 @@ do
     input9 <- new' "input"
     new "input" "keyboard"
     let keyboard = "keyboard"
-    ladder11 <- new' "ladder"
-    ladder12 <- new' "ladder"
-    ladder13 <- new' "ladder"
-    ladder14 <- new' "ladder"
-    lfo15 <- new' "lfo"
-    nand16 <- new' "nand"
-    or119 <- new' "or"
-    or17 <- new' "or"
-    sum18 <- new' "sum"
-    sum19 <- new' "sum"
-    sum21 <- new' "sum"
-    sum22 <- new' "sum"
-    sum420 <- new' "sum4"
+    ladder15 <- new' "ladder"
+    ladder16 <- new' "ladder"
+    ladder17 <- new' "ladder"
+    ladder18 <- new' "ladder"
+    lfo19 <- new' "lfo"
+    nand20 <- new' "nand"
+    or21 <- new' "or"
+    or22 <- new' "or"
+    sum23 <- new' "sum"
+    sum24 <- new' "sum"
+    sum25 <- new' "sum"
+    sum26 <- new' "sum"
+    sum427 <- new' "sum4"
     new "input" "trigger"
     let trigger = "trigger"
-    vca112 <- new' "vca"
-    vca112_cv <- new' "input"
-    vca131 <- new' "vca"
-    vca131_cv <- new' "input"
-    vca138 <- new' "vca"
-    vca138_cv <- new' "input"
-    vca145 <- new' "vca"
-    vca145_cv <- new' "input"
-    xnor23 <- new' "xnor"
-    xor125 <- new' "xor"
-    container100 <- container' "panel_4x1.bmp" (487.0,28.0) root
-    in101 <- plugin' (sum420 ++ "." ++ "signal1") (466.0,103.0) container100
-    in102 <- plugin' (sum420 ++ "." ++ "signal2") (466.0,53.0) container100
-    in103 <- plugin' (sum420 ++ "." ++ "signal3") (466.0,3.0) container100
-    in104 <- plugin' (sum420 ++ "." ++ "signal4") (466.0,-47.0) container100
-    label105 <- label' "sum4" (462.0,103.0) container100
-    out106 <- plugout' (sum420 ++ "." ++ "result") (507.0,28.0) container100
-    container110 <- container' "panel_3x1.bmp" (339.0,369.0) root
-    in113 <- plugin' (vca112 ++ "." ++ "cv") (318.0,394.0) container110
-    hide in113
-    in114 <- plugin' (vca112 ++ "." ++ "signal") (318.0,344.0) container110
-    knob116 <- knob' (vca112_cv ++ "." ++ "result") (318.0,394.0) container110
-    label111 <- label' "vca" (314.0,444.0) container110
-    out115 <- plugout' (vca112 ++ "." ++ "result") (359.0,369.0) container110
-    container117 <- container' "panel_3x1.bmp" (-4.0,-402.0) root
-    in120 <- plugin' (or119 ++ "." ++ "signal1") (-25.0,-377.0) container117
-    in121 <- plugin' (or119 ++ "." ++ "signal2") (-25.0,-427.0) container117
-    label118 <- label' "or" (-29.0,-327.0) container117
-    out122 <- plugout' (or119 ++ "." ++ "result") (16.0,-402.0) container117
-    container123 <- container' "panel_3x1.bmp" (27.0,-133.0) root
-    in126 <- plugin' (xor125 ++ "." ++ "signal1") (6.0,-108.0) container123
-    in127 <- plugin' (xor125 ++ "." ++ "signal2") (6.0,-158.0) container123
-    label124 <- label' "xor" (2.0,-58.0) container123
-    out128 <- plugout' (xor125 ++ "." ++ "result") (47.0,-133.0) container123
-    container129 <- container' "panel_3x1.bmp" (327.0,-452.0) root
-    in132 <- plugin' (vca131 ++ "." ++ "cv") (306.0,-427.0) container129
-    hide in132
-    in133 <- plugin' (vca131 ++ "." ++ "signal") (306.0,-477.0) container129
-    knob135 <- knob' (vca131_cv ++ "." ++ "result") (306.0,-427.0) container129
-    label130 <- label' "vca" (302.0,-377.0) container129
-    out134 <- plugout' (vca131 ++ "." ++ "result") (347.0,-452.0) container129
-    container136 <- container' "panel_3x1.bmp" (326.0,-97.0) root
-    in139 <- plugin' (vca138 ++ "." ++ "cv") (305.0,-72.0) container136
-    hide in139
-    in140 <- plugin' (vca138 ++ "." ++ "signal") (305.0,-122.0) container136
-    knob142 <- knob' (vca138_cv ++ "." ++ "result") (305.0,-72.0) container136
-    label137 <- label' "vca" (301.0,-22.0) container136
-    out141 <- plugout' (vca138 ++ "." ++ "result") (346.0,-97.0) container136
-    container143 <- container' "panel_3x1.bmp" (328.0,133.0) root
-    in146 <- plugin' (vca145 ++ "." ++ "cv") (307.0,158.0) container143
-    hide in146
-    in147 <- plugin' (vca145 ++ "." ++ "signal") (307.0,108.0) container143
-    knob149 <- knob' (vca145_cv ++ "." ++ "result") (307.0,158.0) container143
-    label144 <- label' "vca" (303.0,208.0) container143
-    out148 <- plugout' (vca145 ++ "." ++ "result") (348.0,133.0) container143
-    container24 <- container' "panel_lfo.bmp" (-365.0,208.0) root
-    in25 <- plugin' (lfo15 ++ "." ++ "sync") (-362.0,223.0) container24
-    in26 <- plugin' (lfo15 ++ "." ++ "rate") (-363.0,282.0) container24
-    hide in26
-    knob27 <- knob' (input2 ++ "." ++ "result") (-361.0,281.0) container24
-    out28 <- plugout' (lfo15 ++ "." ++ "square_result") (-320.0,128.0) container24
-    out29 <- plugout' (lfo15 ++ "." ++ "triangle") (-382.0,85.0) container24
-    out30 <- plugout' (lfo15 ++ "." ++ "saw") (-321.0,87.0) container24
-    out31 <- plugout' (lfo15 ++ "." ++ "sin_result") (-382.0,129.0) container24
-    container32 <- container' "panel_3x1.bmp" (-174.0,-414.0) root
-    in33 <- plugin' (and0 ++ "." ++ "signal1") (-195.0,-389.0) container32
-    in34 <- plugin' (and0 ++ "." ++ "signal2") (-195.0,-439.0) container32
-    label35 <- label' "and" (-199.0,-339.0) container32
-    out36 <- plugout' (and0 ++ "." ++ "result") (-154.0,-414.0) container32
-    container37 <- container' "panel_ladder.bmp" (160.0,-496.0) root
-    in38 <- plugin' (ladder11 ++ "." ++ "signal") (152.0,-564.0) container37
-    in39 <- plugin' (sum18 ++ "." ++ "signal1") (204.0,-422.0) container37
-    hide in39
-    in40 <- plugin' (sum18 ++ "." ++ "signal2") (155.0,-421.0) container37
-    in41 <- plugin' (ladder11 ++ "." ++ "freq") (178.0,-468.0) container37
-    hide in41
-    in42 <- plugin' (ladder11 ++ "." ++ "res") (201.0,-505.0) container37
+    vca28 <- new' "vca"
+    vca30 <- new' "vca"
+    vca31 <- new' "vca"
+    vca32 <- new' "vca"
+    vca33 <- new' "vca"
+    xnor34 <- new' "xnor"
+    xor35 <- new' "xor"
+    container106 <- container' "panel_ladder.bmp" (168.0,408.0) root
+    in107 <- plugin' (ladder16 ++ "." ++ "signal") (120.0,288.0) container106
+    in108 <- plugin' (sum24 ++ "." ++ "signal1") (217.0,485.0) container106
+    hide in108
+    in109 <- plugin' (sum24 ++ "." ++ "signal2") (168.0,480.0) container106
+    in110 <- plugin' (ladder16 ++ "." ++ "freq") (191.0,439.0) container106
+    hide in110
+    in111 <- plugin' (ladder16 ++ "." ++ "res") (214.0,402.0) container106
+    hide in111
+    knob112 <- knob' (input3 ++ "." ++ "result") (216.0,420.0) container106
+    knob113 <- knob' (input4 ++ "." ++ "result") (216.0,480.0) container106
+    out114 <- plugout' (ladder16 ++ "." ++ "result") (216.0,288.0) container106
+    out115 <- plugout' (sum24 ++ "." ++ "result") (133.0,442.0) container106
+    hide out115
+    container116 <- container' "panel_ladder.bmp" (168.0,108.0) root
+    in117 <- plugin' (ladder17 ++ "." ++ "signal") (120.0,-12.0) container116
+    in118 <- plugin' (sum25 ++ "." ++ "signal1") (206.0,176.0) container116
+    hide in118
+    in119 <- plugin' (sum25 ++ "." ++ "signal2") (168.0,180.0) container116
+    in120 <- plugin' (ladder17 ++ "." ++ "freq") (180.0,130.0) container116
+    hide in120
+    in121 <- plugin' (ladder17 ++ "." ++ "res") (203.0,93.0) container116
+    hide in121
+    knob122 <- knob' (input5 ++ "." ++ "result") (216.0,120.0) container116
+    knob123 <- knob' (input6 ++ "." ++ "result") (216.0,180.0) container116
+    out124 <- plugout' (ladder17 ++ "." ++ "result") (216.0,-12.0) container116
+    out125 <- plugout' (sum25 ++ "." ++ "result") (122.0,133.0) container116
+    hide out125
+    container126 <- container' "panel_3x1.bmp" (-60.0,-192.0) root
+    in127 <- plugin' (nand20 ++ "." ++ "signal1") (-84.0,-168.0) container126
+    in128 <- plugin' (nand20 ++ "." ++ "signal2") (-84.0,-216.0) container126
+    label129 <- label' "nand" (-96.0,-120.0) container126
+    out130 <- plugout' (nand20 ++ "." ++ "result") (-48.0,-192.0) container126
+    container131 <- container' "panel_ladder.bmp" (168.0,-192.0) root
+    in132 <- plugin' (ladder18 ++ "." ++ "signal") (120.0,-312.0) container131
+    in133 <- plugin' (sum26 ++ "." ++ "signal1") (217.0,-120.0) container131
+    hide in133
+    in134 <- plugin' (sum26 ++ "." ++ "signal2") (168.0,-120.0) container131
+    in135 <- plugin' (ladder18 ++ "." ++ "freq") (191.0,-166.0) container131
+    hide in135
+    in136 <- plugin' (ladder18 ++ "." ++ "res") (214.0,-203.0) container131
+    hide in136
+    knob137 <- knob' (input7 ++ "." ++ "result") (216.0,-180.0) container131
+    knob138 <- knob' (input8 ++ "." ++ "result") (216.0,-120.0) container131
+    out139 <- plugout' (ladder18 ++ "." ++ "result") (216.0,-312.0) container131
+    out140 <- plugout' (sum26 ++ "." ++ "result") (133.0,-163.0) container131
+    hide out140
+    container141 <- container' "panel_4x1.bmp" (396.0,108.0) root
+    in142 <- plugin' (sum427 ++ "." ++ "signal1") (372.0,192.0) container141
+    in143 <- plugin' (sum427 ++ "." ++ "signal2") (372.0,132.0) container141
+    in144 <- plugin' (sum427 ++ "." ++ "signal3") (372.0,84.0) container141
+    in145 <- plugin' (sum427 ++ "." ++ "signal4") (372.0,36.0) container141
+    label146 <- label' "sum4" (372.0,192.0) container141
+    out147 <- plugout' (sum427 ++ "." ++ "result") (408.0,108.0) container141
+    container148 <- container' "panel_3x1.bmp" (300.0,408.0) root
+    in149 <- plugin' (vca30 ++ "." ++ "cv") (282.0,430.0) container148
+    hide in149
+    in150 <- plugin' (vca30 ++ "." ++ "signal") (276.0,384.0) container148
+    knob151 <- knob' (input9 ++ "." ++ "result") (276.0,432.0) container148
+    label152 <- label' "vca" (276.0,480.0) container148
+    out153 <- plugout' (vca30 ++ "." ++ "result") (324.0,408.0) container148
+    container154 <- container' "panel_3x1.bmp" (36.0,-492.0) root
+    in155 <- plugin' (or21 ++ "." ++ "signal1") (12.0,-468.0) container154
+    in156 <- plugin' (or21 ++ "." ++ "signal2") (12.0,-528.0) container154
+    label157 <- label' "or" (12.0,-420.0) container154
+    out158 <- plugout' (or21 ++ "." ++ "result") (48.0,-492.0) container154
+    container36 <- container' "panel_3x1.bmp" (36.0,-192.0) root
+    in37 <- plugin' (xor35 ++ "." ++ "signal1") (24.0,-168.0) container36
+    in38 <- plugin' (xor35 ++ "." ++ "signal2") (24.0,-216.0) container36
+    label39 <- label' "xor" (12.0,-120.0) container36
+    out40 <- plugout' (xor35 ++ "." ++ "result") (60.0,-192.0) container36
+    container41 <- container' "panel_3x1.bmp" (300.0,-492.0) root
+    in42 <- plugin' (vca31 ++ "." ++ "cv") (282.0,-463.0) container41
     hide in42
-    knob43 <- knob' (input3 ++ "." ++ "result") (200.0,-508.0) container37
-    knob44 <- knob' (input4 ++ "." ++ "result") (201.0,-420.0) container37
-    out45 <- plugout' (ladder11 ++ "." ++ "result") (152.0,-608.0) container37
-    out46 <- plugout' (sum18 ++ "." ++ "result") (120.0,-465.0) container37
-    hide out46
-    container47 <- container' "panel_3x1.bmp" (12.0,351.0) root
-    in48 <- plugin' (or17 ++ "." ++ "signal1") (-9.0,376.0) container47
-    in49 <- plugin' (or17 ++ "." ++ "signal2") (-9.0,326.0) container47
-    label50 <- label' "or" (-13.0,426.0) container47
-    out51 <- plugout' (or17 ++ "." ++ "result") (32.0,351.0) container47
-    container52 <- container' "panel_3x1.bmp" (14.0,111.0) root
-    in53 <- plugin' (xnor23 ++ "." ++ "signal1") (-7.0,136.0) container52
-    in54 <- plugin' (xnor23 ++ "." ++ "signal2") (-7.0,86.0) container52
-    label55 <- label' "xnor" (-11.0,186.0) container52
-    out56 <- plugout' (xnor23 ++ "." ++ "result") (34.0,111.0) container52
-    container57 <- container' "panel_4x1.bmp" (-213.0,166.0) root
-    in58 <- plugin' (divider1 ++ "." ++ "gate") (-234.0,166.0) container57
-    label59 <- label' "divider" (-238.0,241.0) container57
-    out60 <- plugout' (divider1 ++ "." ++ "div32") (-193.0,66.0) container57
-    out61 <- plugout' (divider1 ++ "." ++ "div02") (-193.0,266.0) container57
-    out62 <- plugout' (divider1 ++ "." ++ "div04") (-193.0,216.0) container57
-    out63 <- plugout' (divider1 ++ "." ++ "div08") (-193.0,166.0) container57
-    out64 <- plugout' (divider1 ++ "." ++ "div16") (-193.0,116.0) container57
-    container65 <- container' "panel_ladder.bmp" (161.0,399.0) root
-    in66 <- plugin' (ladder12 ++ "." ++ "signal") (153.0,331.0) container65
-    in67 <- plugin' (sum19 ++ "." ++ "signal1") (205.0,473.0) container65
-    hide in67
-    in68 <- plugin' (sum19 ++ "." ++ "signal2") (156.0,474.0) container65
-    in69 <- plugin' (ladder12 ++ "." ++ "freq") (179.0,427.0) container65
-    hide in69
-    in70 <- plugin' (ladder12 ++ "." ++ "res") (202.0,390.0) container65
-    hide in70
-    knob71 <- knob' (input5 ++ "." ++ "result") (201.0,387.0) container65
-    knob72 <- knob' (input6 ++ "." ++ "result") (202.0,475.0) container65
-    out73 <- plugout' (ladder12 ++ "." ++ "result") (153.0,287.0) container65
-    out74 <- plugout' (sum19 ++ "." ++ "result") (121.0,430.0) container65
-    hide out74
-    container75 <- container' "panel_ladder.bmp" (162.0,102.0) root
-    in76 <- plugin' (ladder13 ++ "." ++ "signal") (154.0,34.0) container75
-    in77 <- plugin' (sum21 ++ "." ++ "signal1") (206.0,176.0) container75
+    in43 <- plugin' (vca31 ++ "." ++ "signal") (276.0,-516.0) container41
+    knob44 <- knob' (input10 ++ "." ++ "result") (276.0,-468.0) container41
+    label45 <- label' "vca" (276.0,-408.0) container41
+    out46 <- plugout' (vca31 ++ "." ++ "result") (324.0,-492.0) container41
+    container47 <- container' "panel_3x1.bmp" (300.0,-192.0) root
+    in48 <- plugin' (vca32 ++ "." ++ "cv") (281.0,-168.0) container47
+    hide in48
+    in49 <- plugin' (vca32 ++ "." ++ "signal") (276.0,-216.0) container47
+    knob50 <- knob' (input11 ++ "." ++ "result") (276.0,-168.0) container47
+    label51 <- label' "vca" (276.0,-120.0) container47
+    out52 <- plugout' (vca32 ++ "." ++ "result") (324.0,-192.0) container47
+    container53 <- container' "panel_3x1.bmp" (300.0,120.0) root
+    in54 <- plugin' (vca33 ++ "." ++ "cv") (283.0,146.0) container53
+    hide in54
+    in55 <- plugin' (vca33 ++ "." ++ "signal") (276.0,96.0) container53
+    knob56 <- knob' (input13 ++ "." ++ "result") (276.0,144.0) container53
+    label57 <- label' "vca" (276.0,192.0) container53
+    out58 <- plugout' (vca33 ++ "." ++ "result") (324.0,120.0) container53
+    container59 <- container' "panel_lfo.bmp" (-336.0,108.0) root
+    in60 <- plugin' (lfo19 ++ "." ++ "sync") (-324.0,132.0) container59
+    in61 <- plugin' (lfo19 ++ "." ++ "rate") (-339.0,186.0) container59
+    hide in61
+    knob62 <- knob' (input12 ++ "." ++ "result") (-324.0,180.0) container59
+    out63 <- plugout' (lfo19 ++ "." ++ "square_result") (-288.0,24.0) container59
+    out64 <- plugout' (lfo19 ++ "." ++ "triangle") (-348.0,-12.0) container59
+    out65 <- plugout' (lfo19 ++ "." ++ "saw") (-288.0,-12.0) container59
+    out66 <- plugout' (lfo19 ++ "." ++ "sin_result") (-348.0,24.0) container59
+    container67 <- container' "panel_3x1.bmp" (-60.0,-492.0) root
+    in68 <- plugin' (and0 ++ "." ++ "signal1") (-84.0,-468.0) container67
+    in69 <- plugin' (and0 ++ "." ++ "signal2") (-84.0,-528.0) container67
+    label70 <- label' "and" (-96.0,-420.0) container67
+    out71 <- plugout' (and0 ++ "." ++ "result") (-48.0,-492.0) container67
+    container72 <- container' "panel_ladder.bmp" (168.0,-492.0) root
+    in73 <- plugin' (ladder15 ++ "." ++ "signal") (120.0,-612.0) container72
+    in74 <- plugin' (sum23 ++ "." ++ "signal1") (216.0,-422.0) container72
+    hide in74
+    in75 <- plugin' (sum23 ++ "." ++ "signal2") (168.0,-420.0) container72
+    in76 <- plugin' (ladder15 ++ "." ++ "freq") (190.0,-468.0) container72
+    hide in76
+    in77 <- plugin' (ladder15 ++ "." ++ "res") (213.0,-505.0) container72
     hide in77
-    in78 <- plugin' (sum21 ++ "." ++ "signal2") (157.0,177.0) container75
-    in79 <- plugin' (ladder13 ++ "." ++ "freq") (180.0,130.0) container75
-    hide in79
-    in80 <- plugin' (ladder13 ++ "." ++ "res") (203.0,93.0) container75
-    hide in80
-    knob81 <- knob' (input7 ++ "." ++ "result") (202.0,90.0) container75
-    knob82 <- knob' (input8 ++ "." ++ "result") (203.0,178.0) container75
-    out83 <- plugout' (ladder13 ++ "." ++ "result") (154.0,-10.0) container75
-    out84 <- plugout' (sum21 ++ "." ++ "result") (122.0,133.0) container75
-    hide out84
-    container85 <- container' "panel_3x1.bmp" (-78.0,-132.0) root
-    in86 <- plugin' (nand16 ++ "." ++ "signal1") (-99.0,-107.0) container85
-    in87 <- plugin' (nand16 ++ "." ++ "signal2") (-99.0,-157.0) container85
-    label88 <- label' "nand" (-103.0,-57.0) container85
-    out89 <- plugout' (nand16 ++ "." ++ "result") (-58.0,-132.0) container85
-    container90 <- container' "panel_ladder.bmp" (161.0,-194.0) root
-    in91 <- plugin' (ladder14 ++ "." ++ "signal") (153.0,-262.0) container90
-    in92 <- plugin' (sum22 ++ "." ++ "signal1") (205.0,-120.0) container90
-    hide in92
-    in93 <- plugin' (sum22 ++ "." ++ "signal2") (156.0,-119.0) container90
-    in94 <- plugin' (ladder14 ++ "." ++ "freq") (179.0,-166.0) container90
-    hide in94
-    in95 <- plugin' (ladder14 ++ "." ++ "res") (202.0,-203.0) container90
-    hide in95
-    knob96 <- knob' (input9 ++ "." ++ "result") (201.0,-206.0) container90
-    knob97 <- knob' (input10 ++ "." ++ "result") (202.0,-118.0) container90
-    out98 <- plugout' (ladder14 ++ "." ++ "result") (153.0,-306.0) container90
-    out99 <- plugout' (sum22 ++ "." ++ "result") (121.0,-163.0) container90
-    hide out99
-    in107 <- plugin' (out ++ "." ++ "value") (559.0,75.0) root
-    out108 <- plugout' (keyboard ++ "." ++ "result") (-496.0,130.0) root
-    out109 <- plugout' (trigger ++ "." ++ "result") (-495.0,23.0) root
-    cable out115 in101
-    cable out148 in102
-    cable out141 in103
-    cable out134 in104
-    cable knob116 in113
-    cable out73 in114
-    cable out36 in120
-    cable out63 in121
-    cable out89 in126
-    cable out63 in127
-    cable knob135 in132
-    cable out45 in133
-    cable knob142 in139
-    cable out98 in140
-    cable knob149 in146
-    cable out83 in147
-    cable knob27 in26
-    cable out61 in33
-    cable out64 in34
-    cable out122 in38
-    cable knob44 in39
-    cable out46 in41
-    cable knob43 in42
-    cable out61 in48
-    cable out63 in49
-    cable out61 in53
-    cable out64 in54
-    cable out28 in58
-    cable out51 in66
-    cable knob72 in67
-    cable out74 in69
-    cable knob71 in70
-    cable out56 in76
-    cable knob82 in77
-    cable out84 in79
-    cable knob81 in80
-    cable out64 in86
-    cable out61 in87
-    cable out128 in91
-    cable knob97 in92
-    cable out99 in94
-    cable knob96 in95
-    cable out106 in107
+    knob78 <- knob' (input14 ++ "." ++ "result") (216.0,-480.0) container72
+    knob79 <- knob' (input2 ++ "." ++ "result") (216.0,-420.0) container72
+    out80 <- plugout' (ladder15 ++ "." ++ "result") (216.0,-612.0) container72
+    out81 <- plugout' (sum23 ++ "." ++ "result") (132.0,-465.0) container72
+    hide out81
+    container82 <- container' "panel_3x1.bmp" (36.0,408.0) root
+    in83 <- plugin' (or22 ++ "." ++ "signal2") (12.0,384.0) container82
+    in84 <- plugin' (or22 ++ "." ++ "signal1") (12.0,432.0) container82
+    label85 <- label' "or" (12.0,492.0) container82
+    out86 <- plugout' (or22 ++ "." ++ "result") (60.0,408.0) container82
+    container87 <- container' "panel_3x1.bmp" (496.0,100.0) root
+    in88 <- plugin' (vca28 ++ "." ++ "cv") (475.0,125.0) container87
+    hide in88
+    in89 <- plugin' (vca28 ++ "." ++ "signal") (475.0,75.0) container87
+    knob90 <- knob' (input29 ++ "." ++ "result") (475.0,125.0) container87
+    label91 <- label' "vca" (471.0,175.0) container87
+    out92 <- plugout' (vca28 ++ "." ++ "result") (516.0,100.0) container87
+    container93 <- container' "panel_3x1.bmp" (36.0,120.0) root
+    in94 <- plugin' (xnor34 ++ "." ++ "signal1") (12.0,144.0) container93
+    in95 <- plugin' (xnor34 ++ "." ++ "signal2") (12.0,96.0) container93
+    label96 <- label' "xnor" (12.0,204.0) container93
+    out97 <- plugout' (xnor34 ++ "." ++ "result") (60.0,120.0) container93
+    container98 <- container' "panel_4x1.bmp" (-204.0,108.0) root
+    in99 <- plugin' (divider1 ++ "." ++ "gate") (-228.0,108.0) container98
+    label100 <- label' "divider" (-228.0,180.0) container98
+    out101 <- plugout' (divider1 ++ "." ++ "div32") (-180.0,12.0) container98
+    out102 <- plugout' (divider1 ++ "." ++ "div02") (-180.0,204.0) container98
+    out103 <- plugout' (divider1 ++ "." ++ "div04") (-180.0,156.0) container98
+    out104 <- plugout' (divider1 ++ "." ++ "div08") (-180.0,108.0) container98
+    out105 <- plugout' (divider1 ++ "." ++ "div16") (-180.0,60.0) container98
+    in159 <- plugin' (out ++ "." ++ "value") (564.0,72.0) root
+    out160 <- plugout' (keyboard ++ "." ++ "result") (-492.0,132.0) root
+    out161 <- plugout' (trigger ++ "." ++ "result") (-492.0,24.0) root
+    cable out86 in107
+    cable knob113 in108
+    cable out115 in110
+    cable knob112 in111
+    cable out97 in117
+    cable knob123 in118
+    cable out125 in120
+    cable knob122 in121
+    cable out105 in127
+    cable out102 in128
+    cable out40 in132
+    cable knob138 in133
+    cable out140 in135
+    cable knob137 in136
+    cable out153 in142
+    cable out58 in143
+    cable out52 in144
+    cable out46 in145
+    cable knob151 in149
+    cable out114 in150
+    cable out71 in155
+    cable out102 in156
+    cable out130 in37
+    cable out104 in38
+    cable knob44 in42
+    cable out80 in43
+    cable knob50 in48
+    cable out139 in49
+    cable knob56 in54
+    cable out124 in55
+    cable knob62 in61
+    cable out102 in68
+    cable out105 in69
+    cable out158 in73
+    cable knob79 in74
+    cable out81 in76
+    cable knob78 in77
+    cable out104 in83
+    cable out102 in84
+    cable knob90 in88
+    cable out147 in89
+    cable out102 in94
+    cable out105 in95
+    cable out63 in99
+    cable out92 in159
     recompile
-    set knob116 (1.5579202)
-    set knob135 (2.419338)
-    set knob142 (2.9508028)
-    set knob149 (1.5588576)
-    set knob27 (8.991741)
-    set knob43 (3.913875)
-    set knob44 (5.8333337e-2)
-    set knob71 (3.870865)
-    set knob72 (2.5000002e-2)
-    set knob81 (3.9645429)
-    set knob82 (-6.666666e-2)
-    set knob96 (3.900417)
-    set knob97 (5.8333337e-2)
+    set knob112 (3.870865)
+    set knob113 (2.5000002e-2)
+    set knob122 (3.9645429)
+    set knob123 (-6.666666e-2)
+    set knob137 (3.900417)
+    set knob138 (5.8333337e-2)
+    set knob151 (1.5579202)
+    set knob44 (2.419338)
+    set knob50 (2.9508028)
+    set knob56 (1.5588576)
+    set knob62 (8.991741)
+    set knob78 (3.9035707)
+    set knob79 (5.8333337e-2)
+    set knob90 (1.8498626)
     return ()
     bind '#' "sharpen"
     bind '-' "setmin"
     bind '0' "setzero"
     bind '1' "setone"
-    bind '=' "setmax"
+    bind '<' "setmin"
+    bind '=' "setvalue"
+    bind '>' "setmax"
     bind 'A' "noteA"
     bind 'B' "noteB"
     bind 'C' "noteC"
@@ -264,3 +278,4 @@ do
     bind 'p' "up"
     bind 'u' "hide"
     bind 'z' "check"
+    bind '|' "quantise"

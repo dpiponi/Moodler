@@ -21,6 +21,9 @@ do
     bind 'n' "rename"
     bind 'z' "check"
     bind 'p' "up"
+    bind '=' "setvalue"
+    bind '|' "quantise"
+    bind '!' "alert"
 
     bind 'A' "noteA"
     bind 'B' "noteB"

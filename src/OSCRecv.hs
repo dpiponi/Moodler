@@ -17,7 +17,7 @@ import Sound.OSC
 import System.Posix
 import qualified Data.ByteString.Char8 as C
 import qualified Data.Map as M
-import qualified Data.Set as S
+--import qualified Data.Set as S
 
 import CodeGen
 import KeyTracker
@@ -81,8 +81,9 @@ addNewModule synthType synthName synthTypes = do
     let newNumber = M.size oldSynth
     let ins = inNames $ unJust "addNewModule" $
                         M.lookup synthType synthTypes
+    -- Throws away CDecl
     let inputs = M.fromList $
-            zip (S.toList ins) (repeat (out "zero.result"))
+            zip (map fst $ M.toList ins) (repeat (out "zero.result"))
     -- XXX Deal with M.empty
     let newModule = Module synthName
             (getSynth synthTypes synthType) inputs newNumber

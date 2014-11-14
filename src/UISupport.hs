@@ -113,10 +113,14 @@ newNameLike s m = if s `M.member` m
     then newNameLike (s ++ "'") m
     else s
 
-{-
-quantize :: Float -> Float -> Float
-quantize q x = q*fromIntegral (floor (x/q) :: Int)
--}
+quantum :: Float
+quantum = 12
+
+quantise :: Float -> Float -> Float
+quantise q x = q*fromIntegral (floor (x/q+0.5) :: Int)
+
+quantise2 :: Float -> Point -> Point
+quantise2 q (x, y) = (quantise q x, quantise q y)
 
 {-
 anOut :: UiId -> GlossWorld -> Bool

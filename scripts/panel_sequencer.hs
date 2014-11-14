@@ -1,223 +1,168 @@
 do
-    (x, y) <- mouse
-    main <- currentPlane
-    input1 <- new' "input"
-    input10 <- new' "input"
-    input11 <- new' "input"
-    input12 <- new' "input"
-    input13 <- new' "input"
-    input14 <- new' "input"
-    input15 <- new' "input"
-    input16 <- new' "input"
-    input17 <- new' "input"
-    input18 <- new' "input"
-    input19 <- new' "input"
-    input2 <- new' "input"
-    input20 <- new' "input"
-    input21 <- new' "input"
-    input22 <- new' "input"
-    input23 <- new' "input"
-    input24 <- new' "input"
-    input25 <- new' "input"
-    input26 <- new' "input"
-    input3 <- new' "input"
-    input4 <- new' "input"
-    input5 <- new' "input"
-    input6 <- new' "input"
-    input7 <- new' "input"
-    input8 <- new' "input"
-    input9 <- new' "input"
-    sequencer0 <- new' "sequencer"
-    image27 <- container' "panel_sequencer.bmp" (x+(3.0), y+(-10.0)) main
-    in28 <- plugin' (sequencer0++"."++"freq2") (x+(-148.0), y+(39.0)) main
-    hide in28
-    parent image27 in28
-    in29 <- plugin' (sequencer0++"."++"pulse2") (x+(-105.0), y+(34.0)) main
-    hide in29
-    parent image27 in29
-    in30 <- plugin' (sequencer0++"."++"mode2") (x+(-69.0), y+(35.0)) main
-    hide in30
-    parent image27 in30
-    in31 <- plugin' (sequencer0++"."++"freq3") (x+(-148.0), y+(-11.0)) main
-    hide in31
-    parent image27 in31
-    in32 <- plugin' (sequencer0++"."++"pulse3") (x+(-105.0), y+(-16.0)) main
-    hide in32
-    parent image27 in32
-    in34 <- plugin' (sequencer0++"."++"mode3") (x+(-69.0), y+(-15.0)) main
-    hide in34
-    parent image27 in34
-    in35 <- plugin' (sequencer0++"."++"freq4") (x+(-148.0), y+(-61.0)) main
-    hide in35
-    parent image27 in35
-    in36 <- plugin' (sequencer0++"."++"pulse4") (x+(-105.0), y+(-66.0)) main
-    hide in36
-    parent image27 in36
-    in37 <- plugin' (sequencer0++"."++"mode4") (x+(-69.0), y+(-65.0)) main
-    hide in37
-    parent image27 in37
-    in38 <- plugin' (sequencer0++"."++"freq5") (x+(22.0), y+(87.0)) main
-    hide in38
-    parent image27 in38
-    in39 <- plugin' (sequencer0++"."++"pulse5") (x+(67.0), y+(91.0)) main
-    hide in39
-    parent image27 in39
-    in40 <- plugin' (sequencer0++"."++"mode5") (x+(104.0), y+(88.0)) main
-    hide in40
-    parent image27 in40
-    in41 <- plugin' (sequencer0++"."++"freq6") (x+(22.0), y+(37.0)) main
-    hide in41
-    parent image27 in41
-    in42 <- plugin' (sequencer0++"."++"pulse6") (x+(67.0), y+(41.0)) main
-    hide in42
-    parent image27 in42
-    in43 <- plugin' (sequencer0++"."++"mode6") (x+(104.0), y+(38.0)) main
-    hide in43
-    parent image27 in43
-    in44 <- plugin' (sequencer0++"."++"freq1") (x+(-148.0), y+(89.0)) main
-    hide in44
-    parent image27 in44
-    in45 <- plugin' (sequencer0++"."++"freq7") (x+(22.0), y+(-13.0)) main
-    hide in45
-    parent image27 in45
-    in46 <- plugin' (sequencer0++"."++"pulse7") (x+(67.0), y+(-9.0)) main
-    hide in46
-    parent image27 in46
-    in47 <- plugin' (sequencer0++"."++"mode7") (x+(104.0), y+(-12.0)) main
-    hide in47
-    parent image27 in47
-    in48 <- plugin' (sequencer0++"."++"freq8") (x+(22.0), y+(-63.0)) main
-    hide in48
-    parent image27 in48
-    in49 <- plugin' (sequencer0++"."++"pulse8") (x+(67.0), y+(-59.0)) main
-    hide in49
-    parent image27 in49
-    in50 <- plugin' (sequencer0++"."++"mode8") (x+(104.0), y+(-62.0)) main
-    hide in50
-    parent image27 in50
-    in51 <- plugin' (sequencer0++"."++"gate") (x+(-149.0), y+(-160.0)) main
-    parent image27 in51
-    in52 <- plugin' (sequencer0++"."++"add") (x+(-148.0), y+(-118.0)) main
-    parent image27 in52
-    in53 <- plugin' (sequencer0++"."++"slide_rate") (x+(25.0), y+(-160.0)) main
-    hide in53
-    parent image27 in53
-    in54 <- plugin' (sequencer0++"."++"length") (x+(25.0), y+(-110.0)) main
-    hide in54
-    parent image27 in54
-    in55 <- plugin' (sequencer0++"."++"pulse1") (x+(-105.0), y+(84.0)) main
-    hide in55
-    parent image27 in55
-    in56 <- plugin' (sequencer0++"."++"mode1") (x+(-69.0), y+(85.0)) main
-    hide in56
-    parent image27 in56
-    knob57 <- knob' (input4++"."++"result") (x+(-148.0), y+(35.0)) main
-    parent image27 knob57
-    knob58 <- knob' (input7++"."++"result") (x+(-148.0), y+(-11.0)) main
-    parent image27 knob58
-    knob59 <- knob' (input10++"."++"result") (x+(-148.0), y+(-61.0)) main
-    parent image27 knob59
-    knob60 <- knob' (input13++"."++"result") (x+(22.0), y+(87.0)) main
-    parent image27 knob60
-    knob61 <- knob' (input16++"."++"result") (x+(22.0), y+(37.0)) main
-    parent image27 knob61
-    knob62 <- knob' (input19++"."++"result") (x+(22.0), y+(-13.0)) main
-    parent image27 knob62
-    knob63 <- knob' (input22++"."++"result") (x+(22.0), y+(-63.0)) main
-    parent image27 knob63
-    knob64 <- knob' (input1++"."++"result") (x+(-147.0), y+(84.0)) main
-    parent image27 knob64
-    knob65 <- knob' (input26++"."++"result") (x+(28.0), y+(-150.0)) main
-    parent image27 knob65
-    out68 <- plugout' (sequencer0++"."++"result") (x+(138.0), y+(-158.0)) main
-    parent image27 out68
-    out69 <- plugout' (sequencer0++"."++"trigger") (x+(138.0), y+(-119.0)) main
-    parent image27 out69
-    selector70 <- selector' (input5++"."++"result") (x+(-105.0), y+(34.0)) ["1","2","3","4","5","6","7","8"] main
-    parent image27 selector70
-    selector71 <- selector' (input6++"."++"result") (x+(-69.0), y+(35.0)) ["repeat","slide","rest","hold"] main
-    parent image27 selector71
-    selector72 <- selector' (input8++"."++"result") (x+(-105.0), y+(-16.0)) ["1","2","3","4","5","6","7","8"] main
-    parent image27 selector72
-    selector73 <- selector' (input9++"."++"result") (x+(-69.0), y+(-15.0)) ["repeat","slide","rest","hold"] main
-    parent image27 selector73
-    selector74 <- selector' (input11++"."++"result") (x+(-105.0), y+(-66.0)) ["1","2","3","4","5","6","7","8"] main
-    parent image27 selector74
-    selector75 <- selector' (input12++"."++"result") (x+(-69.0), y+(-65.0)) ["repeat","slide","rest","hold"] main
-    parent image27 selector75
-    selector76 <- selector' (input14++"."++"result") (x+(67.0), y+(91.0)) ["1","2","3","4","5","6","7","8"] main
-    parent image27 selector76
-    selector77 <- selector' (input15++"."++"result") (x+(104.0), y+(88.0)) ["repeat","slide","rest","hold"] main
-    parent image27 selector77
-    selector78 <- selector' (input17++"."++"result") (x+(67.0), y+(41.0)) ["1","2","3","4","5","6","7","8"] main
-    parent image27 selector78
-    selector79 <- selector' (input18++"."++"result") (x+(104.0), y+(38.0)) ["repeat","slide","rest","hold"] main
-    parent image27 selector79
-    selector80 <- selector' (input20++"."++"result") (x+(67.0), y+(-9.0)) ["1","2","3","4","5","6","7","8"] main
-    parent image27 selector80
-    selector81 <- selector' (input21++"."++"result") (x+(104.0), y+(-12.0)) ["repeat","slide","rest","hold"] main
-    parent image27 selector81
-    selector82 <- selector' (input23++"."++"result") (x+(67.0), y+(-59.0)) ["1","2","3","4","5","6","7","8"] main
-    parent image27 selector82
-    selector83 <- selector' (input24++"."++"result") (x+(104.0), y+(-62.0)) ["repeat","slide","rest","hold"] main
-    parent image27 selector83
-    selector84 <- selector' (input25++"."++"result") (x+(25.0), y+(-110.0)) ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"] main
-    parent image27 selector84
-    selector85 <- selector' (input2++"."++"result") (x+(-105.0), y+(84.0)) ["1","2","3","4","5","6","7","8"] main
-    parent image27 selector85
-    selector86 <- selector' (input3++"."++"result") (x+(-69.0), y+(85.0)) ["repeat","slide","rest","hold"] main
-    parent image27 selector86
-    cable knob57 in28
-    cable selector70 in29
-    cable selector71 in30
-    cable knob58 in31
-    cable selector72 in32
-    cable selector73 in34
-    cable knob59 in35
-    cable selector74 in36
-    cable selector75 in37
-    cable knob60 in38
-    cable selector76 in39
-    cable selector77 in40
-    cable knob61 in41
-    cable selector78 in42
-    cable selector79 in43
-    cable knob64 in44
-    cable knob62 in45
-    cable selector80 in46
-    cable selector81 in47
-    cable knob63 in48
-    cable selector82 in49
-    cable selector83 in50
-    cable knob65 in53
-    cable selector84 in54
-    cable selector85 in55
-    cable selector86 in56
+    (x0, y0) <- mouse
+    let (x, y) = quantise2 quantum (x0, y0)
+    root <- currentPlane
+    input100  <-  new' "input"
+    input101  <-  new' "input"
+    input102  <-  new' "input"
+    input103  <-  new' "input"
+    input104  <-  new' "input"
+    input105  <-  new' "input"
+    input106  <-  new' "input"
+    input107  <-  new' "input"
+    input108  <-  new' "input"
+    input109  <-  new' "input"
+    input110  <-  new' "input"
+    input111  <-  new' "input"
+    input112  <-  new' "input"
+    input113  <-  new' "input"
+    input114  <-  new' "input"
+    input115  <-  new' "input"
+    input78  <-  new' "input"
+    input79  <-  new' "input"
+    input80  <-  new' "input"
+    input83  <-  new' "input"
+    input94  <-  new' "input"
+    input95  <-  new' "input"
+    input96  <-  new' "input"
+    input97  <-  new' "input"
+    input98  <-  new' "input"
+    input99  <-  new' "input"
+    sequencer128  <-  new' "sequencer"
+    container157 <- container' "panel_sequencer.bmp" (x+(0.0), y+(-12.0)) root
+    in158 <- plugin' (sequencer128 ++ "." ++ "freq2") (x+(-144.0), y+(41.0)) container157
+    hide in158
+    in159 <- plugin' (sequencer128 ++ "." ++ "pulse2") (x+(-101.0), y+(36.0)) container157
+    hide in159
+    in160 <- plugin' (sequencer128 ++ "." ++ "mode2") (x+(-65.0), y+(37.0)) container157
+    hide in160
+    in161 <- plugin' (sequencer128 ++ "." ++ "freq3") (x+(-144.0), y+(-9.0)) container157
+    hide in161
+    in162 <- plugin' (sequencer128 ++ "." ++ "pulse3") (x+(-101.0), y+(-14.0)) container157
+    hide in162
+    in163 <- plugin' (sequencer128 ++ "." ++ "mode3") (x+(-65.0), y+(-13.0)) container157
+    hide in163
+    in164 <- plugin' (sequencer128 ++ "." ++ "freq4") (x+(-144.0), y+(-59.0)) container157
+    hide in164
+    in165 <- plugin' (sequencer128 ++ "." ++ "pulse4") (x+(-101.0), y+(-64.0)) container157
+    hide in165
+    in166 <- plugin' (sequencer128 ++ "." ++ "mode4") (x+(-65.0), y+(-63.0)) container157
+    hide in166
+    in167 <- plugin' (sequencer128 ++ "." ++ "freq5") (x+(26.0), y+(89.0)) container157
+    hide in167
+    in168 <- plugin' (sequencer128 ++ "." ++ "pulse5") (x+(71.0), y+(93.0)) container157
+    hide in168
+    in169 <- plugin' (sequencer128 ++ "." ++ "mode5") (x+(108.0), y+(90.0)) container157
+    hide in169
+    in170 <- plugin' (sequencer128 ++ "." ++ "freq6") (x+(26.0), y+(39.0)) container157
+    hide in170
+    in171 <- plugin' (sequencer128 ++ "." ++ "pulse6") (x+(71.0), y+(43.0)) container157
+    hide in171
+    in172 <- plugin' (sequencer128 ++ "." ++ "mode6") (x+(108.0), y+(40.0)) container157
+    hide in172
+    in173 <- plugin' (sequencer128 ++ "." ++ "freq1") (x+(-144.0), y+(91.0)) container157
+    hide in173
+    in174 <- plugin' (sequencer128 ++ "." ++ "freq7") (x+(26.0), y+(-11.0)) container157
+    hide in174
+    in175 <- plugin' (sequencer128 ++ "." ++ "pulse7") (x+(71.0), y+(-7.0)) container157
+    hide in175
+    in176 <- plugin' (sequencer128 ++ "." ++ "mode7") (x+(108.0), y+(-10.0)) container157
+    hide in176
+    in177 <- plugin' (sequencer128 ++ "." ++ "freq8") (x+(26.0), y+(-61.0)) container157
+    hide in177
+    in178 <- plugin' (sequencer128 ++ "." ++ "pulse8") (x+(71.0), y+(-57.0)) container157
+    hide in178
+    in179 <- plugin' (sequencer128 ++ "." ++ "mode8") (x+(108.0), y+(-60.0)) container157
+    hide in179
+    in180 <- plugin' (sequencer128 ++ "." ++ "gate") (x+(-132.0), y+(-144.0)) container157
+    in181 <- plugin' (sequencer128 ++ "." ++ "add") (x+(-132.0), y+(-108.0)) container157
+    in182 <- plugin' (sequencer128 ++ "." ++ "slide_rate") (x+(29.0), y+(-158.0)) container157
+    hide in182
+    in183 <- plugin' (sequencer128 ++ "." ++ "length") (x+(29.0), y+(-108.0)) container157
+    hide in183
+    in184 <- plugin' (sequencer128 ++ "." ++ "pulse1") (x+(-101.0), y+(86.0)) container157
+    hide in184
+    in185 <- plugin' (sequencer128 ++ "." ++ "mode1") (x+(-65.0), y+(87.0)) container157
+    hide in185
+    knob186 <- knob' (input110 ++ "." ++ "result") (x+(-144.0), y+(36.0)) container157
+    knob187 <- knob' (input113 ++ "." ++ "result") (x+(-144.0), y+(-12.0)) container157
+    knob188 <- knob' (input79 ++ "." ++ "result") (x+(-144.0), y+(-60.0)) container157
+    knob189 <- knob' (input94 ++ "." ++ "result") (x+(24.0), y+(84.0)) container157
+    knob190 <- knob' (input97 ++ "." ++ "result") (x+(24.0), y+(36.0)) container157
+    knob191 <- knob' (input100 ++ "." ++ "result") (x+(24.0), y+(-12.0)) container157
+    knob192 <- knob' (input104 ++ "." ++ "result") (x+(24.0), y+(-60.0)) container157
+    knob193 <- knob' (input78 ++ "." ++ "result") (x+(-144.0), y+(84.0)) container157
+    knob194 <- knob' (input108 ++ "." ++ "result") (x+(12.0), y+(-144.0)) container157
+    out195 <- plugout' (sequencer128 ++ "." ++ "result") (x+(156.0), y+(-144.0)) container157
+    out196 <- plugout' (sequencer128 ++ "." ++ "trigger") (x+(156.0), y+(-108.0)) container157
+    selector197 <- selector' (input111 ++ "." ++ "result") (x+(-108.0), y+(36.0)) ["1","2","3","4","5","6","7","8"] container157
+    selector198 <- selector' (input112 ++ "." ++ "result") (x+(-72.0), y+(36.0)) ["repeat","slide","rest","hold"] container157
+    selector199 <- selector' (input114 ++ "." ++ "result") (x+(-108.0), y+(-12.0)) ["1","2","3","4","5","6","7","8"] container157
+    selector200 <- selector' (input115 ++ "." ++ "result") (x+(-72.0), y+(-12.0)) ["repeat","slide","rest","hold"] container157
+    selector201 <- selector' (input80 ++ "." ++ "result") (x+(-108.0), y+(-60.0)) ["1","2","3","4","5","6","7","8"] container157
+    selector202 <- selector' (input83 ++ "." ++ "result") (x+(-72.0), y+(-60.0)) ["repeat","slide","rest","hold"] container157
+    selector203 <- selector' (input95 ++ "." ++ "result") (x+(60.0), y+(84.0)) ["1","2","3","4","5","6","7","8"] container157
+    selector204 <- selector' (input96 ++ "." ++ "result") (x+(96.0), y+(84.0)) ["repeat","slide","rest","hold"] container157
+    selector205 <- selector' (input98 ++ "." ++ "result") (x+(60.0), y+(36.0)) ["1","2","3","4","5","6","7","8"] container157
+    selector206 <- selector' (input99 ++ "." ++ "result") (x+(96.0), y+(36.0)) ["repeat","slide","rest","hold"] container157
+    selector207 <- selector' (input102 ++ "." ++ "result") (x+(60.0), y+(-12.0)) ["1","2","3","4","5","6","7","8"] container157
+    selector208 <- selector' (input103 ++ "." ++ "result") (x+(96.0), y+(-12.0)) ["repeat","slide","rest","hold"] container157
+    selector209 <- selector' (input105 ++ "." ++ "result") (x+(60.0), y+(-60.0)) ["1","2","3","4","5","6","7","8"] container157
+    selector210 <- selector' (input106 ++ "." ++ "result") (x+(96.0), y+(-60.0)) ["repeat","slide","rest","hold"] container157
+    selector211 <- selector' (input107 ++ "." ++ "result") (x+(12.0), y+(-108.0)) ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"] container157
+    selector212 <- selector' (input101 ++ "." ++ "result") (x+(-108.0), y+(84.0)) ["1","2","3","4","5","6","7","8"] container157
+    selector213 <- selector' (input109 ++ "." ++ "result") (x+(-72.0), y+(84.0)) ["repeat","slide","rest","hold"] container157
+    cable knob186 in158
+    cable selector197 in159
+    cable selector198 in160
+    cable knob187 in161
+    cable selector199 in162
+    cable selector200 in163
+    cable knob188 in164
+    cable selector201 in165
+    cable selector202 in166
+    cable knob189 in167
+    cable selector203 in168
+    cable selector204 in169
+    cable knob190 in170
+    cable selector205 in171
+    cable selector206 in172
+    cable knob193 in173
+    cable knob191 in174
+    cable selector207 in175
+    cable selector208 in176
+    cable knob192 in177
+    cable selector209 in178
+    cable selector210 in179
+    cable knob194 in182
+    cable selector211 in183
+    cable selector212 in184
+    cable selector213 in185
     recompile
-    set knob57 (0.0)
-    set knob58 (0.0)
-    set knob59 (0.0)
-    set knob60 (0.0)
-    set knob61 (0.0)
-    set knob62 (0.0)
-    set knob63 (0.0)
-    set knob64 (0.0)
-    set knob65 (0.0)
-    set selector70 (0.0)
-    set selector71 (0.0)
-    set selector72 (0.0)
-    set selector73 (0.0)
-    set selector74 (0.0)
-    set selector75 (0.0)
-    set selector76 (0.0)
-    set selector77 (0.0)
-    set selector78 (0.0)
-    set selector79 (0.0)
-    set selector80 (0.0)
-    set selector81 (0.0)
-    set selector82 (0.0)
-    set selector83 (0.0)
-    set selector84 (7.0)
-    set selector85 (0.0)
-    set selector86 (0.0)
+    set knob186 (0.0)
+    set knob187 (5.8333334e-2)
+    set knob188 (5.8333334e-2)
+    set knob189 (0.0)
+    set knob190 (5.8333334e-2)
+    set knob191 (4.1666668e-2)
+    set knob192 (4.1666668e-2)
+    set knob193 (-4.1666664e-2)
+    set knob194 (2.3120196)
+    set selector197 (0.0)
+    set selector198 (0.0)
+    set selector199 (5.0)
+    set selector200 (1.0)
+    set selector201 (0.0)
+    set selector202 (2.0)
+    set selector203 (0.0)
+    set selector204 (0.0)
+    set selector205 (0.0)
+    set selector206 (0.0)
+    set selector207 (5.0)
+    set selector208 (1.0)
+    set selector209 (7.0)
+    set selector210 (2.0)
+    set selector211 (7.0)
+    set selector212 (0.0)
+    set selector213 (0.0)
     return ()

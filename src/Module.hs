@@ -14,14 +14,16 @@ import Language.C.Parser
 import Language.C.Syntax.AST
 import Parser
 import qualified Data.ByteString.Char8 as B
-import qualified Data.Set as S
+--import qualified Data.Set as S
+import qualified Data.Map as M
 import Language.Preprocessor.Cpphs
+import Data.Tuple
 
 import Text
 
 data NodeType a = NodeType {
-    inNames :: S.Set String,
-    outNames :: S.Set String,
+    inNames :: M.Map String CDecl,
+    outNames :: M.Map String CDecl,
     stateNames :: [String],
     stateDecls :: [CDeclaration a],
     initCode :: CFunctionDef a,
@@ -57,7 +59,7 @@ synthPreamble panelName synthName topOffset = do
     tellInd 4 $ unwords ["name <- new'", show synthName]
 
 -- Auto-generate script for a .spec module
-synthScript :: String -> [String] -> [String] -> String
+synthScript :: String -> [(CDecl, String)] -> [(CDecl, String)] -> String
 synthScript synthName ins outs = do
     let numIns = length ins
     let numOuts = length outs
@@ -71,7 +73,7 @@ synthScript synthName ins outs = do
     execWriter $ do
         synthPreamble panelName synthName topOffset
         forM_ (zip [inOffset, inOffset+50 ..] ins) $
-                                    \(offset, eachInput) -> do
+                                    \(offset, (_, eachInput)) -> do
              tellInd 4 $ unwords
                     [ "inp <- plugin' (name ++",
                       show ("." ++ eachInput) ++ ")",
@@ -79,10 +81,10 @@ synthScript synthName ins outs = do
                       "plane" ]
              tellInd 4 "parent panel inp"
         forM_ (zip [outOffset, outOffset+50 ..] outs) $
-                                    \(offset, eachInput) -> do
+                                    \(offset, (_, eachOutput)) -> do
              tellInd 4 $ unwords
                     [ "out <- plugout' (name ++ ",
-                      show ("." ++ eachInput) ++ ")",
+                      show ("." ++ eachOutput) ++ ")",
                       xyoffset (20, -offset),
                       "plane" ]
              tellInd 4 "parent panel out"
@@ -115,8 +117,8 @@ loadNodeType dir fileName' = do
     liftIO $ writeFile ("scripts/" ++ synthName ++ ".hs") script
 
     if isJust e && isJust i
-        then return $ NodeType (S.fromList ins)
-                               (S.fromList outs)
+        then return $ NodeType (M.fromList $ map swap ins)
+                               (M.fromList $ map swap outs)
                                states
                                vs
                                (fromJust i)

@@ -13,11 +13,8 @@ import Control.Lens
 import Control.Monad.State
 import Language.C.Syntax.AST
 import Language.C.Data.Ident
---import Language.C.Parser
 import Language.C.Data.Node
---import qualified Data.ByteString.Char8 as B
 import qualified Data.Map as M
-import qualified Data.Set as S
 
 {-
  - We want three things from a .spec file:
@@ -46,20 +43,20 @@ type TranslationMonad a = StateT (Extracted a) IO
  -
  - This function extracts just the underlying symbol as a string.
  -}
-declaratorDefines :: CDeclarator a -> Maybe String
+declaratorDefines :: CDeclarator NodeInfo -> Maybe String
 declaratorDefines (CDeclr ident _ _ _ _) = fmap identToString ident
 
-functionBody :: CFunctionDef a -> CStatement a
+functionBody :: CFunctionDef NodeInfo -> CStatement NodeInfo
 functionBody (CFunDef _ _ _ body _) = body
 
-splitCompound :: CStatement a -> [CCompoundBlockItem a]
+splitCompound :: CStatement NodeInfo -> [CCompoundBlockItem NodeInfo]
 splitCompound (CCompound _ ss _) = ss
 splitCompound _ = error "Weird compound"
 
 {-
  - Extracts name of function being defined in a definition.
  -}
-functionDefDefines :: CFunctionDef a -> Maybe String
+functionDefDefines :: CFunctionDef NodeInfo -> Maybe String
 functionDefDefines (CFunDef _ decl _ _ _) = declaratorDefines decl
 
 {-
@@ -86,34 +83,39 @@ extractModuleParts (CTranslUnit extDecls _) =
 idents :: (Data a, Typeable a) => a -> [String]
 idents = everything (++) ([] `mkQ` (return . identToString))
 
-getInOrOut :: CDeclarationSpecifier a -> String
+getInOrOut :: CDeclarationSpecifier NodeInfo -> String
 getInOrOut (CTypeSpec (CTypeDef ident _)) = identToString ident
 getInOrOut _ = ""
 
-getAnInOut :: (Data a, Typeable a) => CDeclaration a -> [Either String String]
-getAnInOut (CDecl spec triples _) = if map getInOrOut spec == ["out"]
-                                        then [Right $ head $ idents triples]
-                                        else [Left $ head $ idents triples]
+-- A CDeclaration is a complete C declaration
+-- spec is CDeclarationSpecifier
+getAnInOut :: CDeclaration NodeInfo -> [(CDecl, Either String String)]
+getAnInOut cdecl@(CDecl spec triples _) = if "out" `elem` map getInOrOut spec
+                                            then [(cdecl, Right $ head $ idents triples)]
+                                            else [(cdecl, Left $ head $ idents triples)]
 
-getInOut :: (Data a, Typeable a) => CDerivedDeclarator a -> [Either String String]
+getInOut :: CDerivedDeclarator NodeInfo -> [(CDecl, Either String String)]
 getInOut (CFunDeclr (Right (as, _)) _ _) = concatMap getAnInOut as
 getInOut _ = []
 
-getArgs :: (Data a, Typeable a) => CDeclarator a -> [Either String String]
+getArgs :: CDeclarator NodeInfo -> [(CDecl, Either String String)]
 getArgs (CDeclr _ ds _ _ _) = concatMap getInOut ds
 
-
-getInsAndOuts :: (Data a, Typeable a) => CFunctionDef a -> ([String], [String])
-getInsAndOuts (CFunDef _ decl _ _ _) = dezip $ getArgs decl
-{-
--}
+-- Throws away arg type
+getInsAndOuts :: CFunctionDef NodeInfo -> ([(CDecl, String)], [(CDecl, String)])
+getInsAndOuts (CFunDef _ decl _ _ _) = dezip' $ getArgs decl
 
 dezip :: [Either a b] -> ([a], [b])
 dezip [] = ([], [])
 dezip (Left a : cs) = let (as, bs) = dezip cs in (a:as, bs)
 dezip (Right b : cs) = let (as, bs) = dezip cs in (as, b:bs)
 
-varDefinedInDeclaration :: (Data a, Typeable a) => CDeclaration a -> String
+dezip' :: [(c, Either a b)] -> ([(c, a)], [(c, b)])
+dezip' [] = ([], [])
+dezip' ((d, Left a) : cs) = let (as, bs) = dezip' cs in ((d, a) : as, bs)
+dezip' ((d, Right b) : cs) = let (as, bs) = dezip' cs in (as, (d, b) : bs)
+
+varDefinedInDeclaration :: CDeclaration NodeInfo -> String
 varDefinedInDeclaration (CDecl _ a _) = head $ idents a
 
 identName :: Lens' Ident String
@@ -132,8 +134,8 @@ identName = lens (\(Ident name _ _) -> name)
  -   "struct->..." isn't a legal C name.
  -}
 data Vars = Vars { _states :: [String]
-                 , _outs :: S.Set String
-                 , _ins :: S.Set String
+                 , _outs :: M.Map String CDecl
+                 , _ins :: M.Map String CDecl
                  , _connections :: M.Map String String
                  }
 
@@ -145,11 +147,11 @@ rewriteVar inStruct nodeName
                            , _ins = ins
                            , _connections = connections }
            i@(Ident name _ _)
-    | name `elem` states || name `S.member` outs
+    | name `elem` states || name `M.member` outs
         = return $ i & identName %~
                         (((if not inStruct then "state->" else "") ++
                          nodeName ++ "_") ++)
-    | name `S.member` ins =
+    | name `M.member` ins =
             case M.lookup name connections of
                 Nothing -> Left "error2"
                 Just inName -> return $ i & identName .~ inName
@@ -161,9 +163,8 @@ rewriteVarsEverywhere :: (Data b, Typeable b) =>
 rewriteVarsEverywhere inStruct nodeName variables =
     everywhereM (mkM (rewriteVar inStruct nodeName variables))
 
-rewriteVars :: (Data a, Typeable a) =>
-                Bool -> String -> Vars -> 
-                CFunctionDef a -> Either String (CStatement a)
+rewriteVars :: Bool -> String -> Vars -> 
+               CFunctionDef NodeInfo -> Either String (CStatement NodeInfo)
 rewriteVars inStruct nodeName variables
             (CFunDef _ _ _ stmt _) = 
     rewriteVarsEverywhere inStruct nodeName variables stmt

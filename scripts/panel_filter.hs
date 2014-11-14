@@ -1,110 +1,93 @@
 do
-    (x, y) <- mouse
-    main <- currentPlane
-    knob60 <- proxy' (x+(43.0), y+(117.0)) main
-    let plane59 = knob60
-    butterbp2 <- new' "butterbp"
-    butterhp1 <- new' "butterhp"
-    butterlp0 <- new' "butterlp"
-    id15 <- new' "id"
-    input10 <- new' "input"
-    input11 <- new' "input"
-    input12 <- new' "input"
-    input13 <- new' "input"
-    input14 <- new' "input"
-    input16 <- new' "input"
-    input9 <- new' "input"
-    sum3 <- new' "sum"
-    sum4 <- new' "sum"
-    sum5 <- new' "sum"
-    vca6 <- new' "vca"
-    vca7 <- new' "vca"
-    vca8 <- new' "vca"
-    image61 <- container' "panel_filter.bmp" (x+(-2.0), y+(0.0)) main
-    in27 <- plugin' (vca6++"."++"cv") (x+(-15.0), y+(124.0)) main
-    hide in27
-    parent image61 in27
-    in28 <- plugin' (vca6++"."++"signal") (x+(-62.0), y+(68.0)) main
-    parent image61 in28
-    in29 <- plugin' (vca7++"."++"cv") (x+(-20.0), y+(2.0)) main
-    hide in29
-    parent image61 in29
-    in30 <- plugin' (vca7++"."++"signal") (x+(-61.0), y+(17.0)) main
-    parent image61 in30
-    in31 <- plugin' (vca8++"."++"cv") (x+(-22.0), y+(-114.0)) main
-    hide in31
-    parent image61 in31
-    in32 <- plugin' (vca8++"."++"signal") (x+(-62.0), y+(-34.0)) main
-    parent image61 in32
-    in34 <- plugin' (id15++"."++"signal") (x+(-60.0), y+(122.0)) main
-    parent image61 in34
-    knob39 <- knob' (input9++"."++"result") (x+(18.0), y+(67.0)) main
-    parent image61 knob39
-    knob40 <- knob' (input10++"."++"result") (x+(-26.0), y+(67.0)) main
-    parent image61 knob40
-    knob41 <- knob' (input11++"."++"result") (x+(-24.0), y+(14.0)) main
-    parent image61 knob41
-    knob42 <- knob' (input12++"."++"result") (x+(18.0), y+(15.0)) main
-    parent image61 knob42
-    knob43 <- knob' (input13++"."++"result") (x+(-24.0), y+(-35.0)) main
-    parent image61 knob43
-    knob44 <- knob' (input14++"."++"result") (x+(19.0), y+(-38.0)) main
-    parent image61 knob44
-    knob45 <- knob' (input16++"."++"result") (x+(19.0), y+(-86.0)) main
-    parent image61 knob45
-    parent image61 knob60
-    out48 <- plugout' (butterbp2++"."++"result") (x+(59.0), y+(-41.0)) main
-    parent image61 out48
-    out56 <- plugout' (butterlp0++"."++"result") (x+(53.0), y+(72.0)) main
-    parent image61 out56
-    out57 <- plugout' (butterhp1++"."++"result") (x+(53.0), y+(21.0)) main
-    parent image61 out57
-    in18 <- plugin' (butterbp2++"."++"bandwidth") (x+(15.0), y+(-157.0)) plane59
-    hide in18
-    in19 <- plugin' (butterbp2++"."++"signal") (x+(15.0), y+(-207.0)) plane59
-    in20 <- plugin' (sum3++"."++"signal1") (x+(-59.0), y+(128.0)) plane59
-    in21 <- plugin' (sum3++"."++"signal2") (x+(-59.0), y+(78.0)) plane59
-    hide in21
-    in22 <- plugin' (sum4++"."++"signal1") (x+(-64.0), y+(7.0)) plane59
-    in23 <- plugin' (sum4++"."++"signal2") (x+(-64.0), y+(-43.0)) plane59
-    hide in23
-    in24 <- plugin' (sum5++"."++"signal1") (x+(-70.0), y+(-106.0)) plane59
-    in26 <- plugin' (sum5++"."++"signal2") (x+(-70.0), y+(-156.0)) plane59
-    hide in26
-    in33 <- plugin' (butterlp0++"."++"freq") (x+(27.0), y+(126.0)) plane59
-    in35 <- plugin' (butterlp0++"."++"signal") (x+(27.0), y+(76.0)) plane59
-    in36 <- plugin' (butterhp1++"."++"freq") (x+(23.0), y+(6.0)) plane59
-    in37 <- plugin' (butterhp1++"."++"signal") (x+(23.0), y+(-44.0)) plane59
-    in38 <- plugin' (butterbp2++"."++"freq") (x+(15.0), y+(-107.0)) plane59
-    out49 <- plugout' (sum3++"."++"result") (x+(-9.0), y+(128.0)) plane59
-    out50 <- plugout' (sum4++"."++"result") (x+(-14.0), y+(7.0)) plane59
-    out51 <- plugout' (sum5++"."++"result") (x+(-20.0), y+(-106.0)) plane59
-    out52 <- plugout' (vca6++"."++"result") (x+(-130.0), y+(130.0)) plane59
-    out53 <- plugout' (vca7++"."++"result") (x+(-135.0), y+(8.0)) plane59
-    out54 <- plugout' (vca8++"."++"result") (x+(-137.0), y+(-108.0)) plane59
-    out55 <- plugout' (id15++"."++"result") (x+(-93.0), y+(213.0)) plane59
-    cable knob40 in27
-    cable knob41 in29
-    cable knob43 in31
-    cable knob45 in18
-    cable out55 in19
-    cable out52 in20
-    cable knob39 in21
-    cable out53 in22
-    cable knob42 in23
-    cable out54 in24
-    cable knob44 in26
-    cable out49 in33
-    cable out55 in35
-    cable out50 in36
-    cable out55 in37
-    cable out51 in38
+    (x0, y0) <- mouse
+    let (x, y) = quantise2 quantum (x0, y0)
+    root <- currentPlane
+    butterbp4  <-  new' "butterbp"
+    butterhp5  <-  new' "butterhp"
+    butterlp6  <-  new' "butterlp"
+    id14  <-  new' "id"
+    input17  <-  new' "input"
+    input18  <-  new' "input"
+    input19  <-  new' "input"
+    input20  <-  new' "input"
+    input21  <-  new' "input"
+    input23  <-  new' "input"
+    input24  <-  new' "input"
+    sum25  <-  new' "sum"
+    sum26  <-  new' "sum"
+    sum27  <-  new' "sum"
+    vca29  <-  new' "vca"
+    vca30  <-  new' "vca"
+    vca31  <-  new' "vca"
+    container32 <- container' "panel_filter.bmp" (x+(0.0), y+(0.0)) root
+    in33 <- plugin' (vca29 ++ "." ++ "cv") (x+(-12.0), y+(120.0)) container32
+    hide in33
+    in34 <- plugin' (vca29 ++ "." ++ "signal") (x+(-60.0), y+(60.0)) container32
+    in35 <- plugin' (vca30 ++ "." ++ "cv") (x+(-17.0), y+(-2.0)) container32
+    hide in35
+    in36 <- plugin' (vca30 ++ "." ++ "signal") (x+(-60.0), y+(0.0)) container32
+    in37 <- plugin' (vca31 ++ "." ++ "cv") (x+(-19.0), y+(-118.0)) container32
+    hide in37
+    in38 <- plugin' (vca31 ++ "." ++ "signal") (x+(-60.0), y+(-60.0)) container32
+    in39 <- plugin' (id14 ++ "." ++ "signal") (x+(-60.0), y+(120.0)) container32
+    knob40 <- knob' (input19 ++ "." ++ "result") (x+(24.0), y+(60.0)) container32
+    knob41 <- knob' (input20 ++ "." ++ "result") (x+(-24.0), y+(60.0)) container32
+    knob42 <- knob' (input21 ++ "." ++ "result") (x+(-24.0), y+(0.0)) container32
+    knob43 <- knob' (input23 ++ "." ++ "result") (x+(24.0), y+(0.0)) container32
+    knob44 <- knob' (input24 ++ "." ++ "result") (x+(-24.0), y+(-60.0)) container32
+    knob45 <- knob' (input17 ++ "." ++ "result") (x+(24.0), y+(-60.0)) container32
+    knob46 <- knob' (input18 ++ "." ++ "result") (x+(24.0), y+(-108.0)) container32
+    out47 <- plugout' (butterbp4 ++ "." ++ "result") (x+(60.0), y+(-60.0)) container32
+    out48 <- plugout' (butterlp6 ++ "." ++ "result") (x+(60.0), y+(60.0)) container32
+    out49 <- plugout' (butterhp5 ++ "." ++ "result") (x+(60.0), y+(0.0)) container32
+    proxy50 <- proxy' (x+(49.0), y+(110.0)) container32
+    hide proxy50
+    in51 <- plugin' (butterbp4 ++ "." ++ "bandwidth") (-55.0,-91.0) proxy50
+    hide in51
+    in52 <- plugin' (butterbp4 ++ "." ++ "signal") (-55.0,-141.0) proxy50
+    in53 <- plugin' (sum25 ++ "." ++ "signal1") (-129.0,194.0) proxy50
+    in54 <- plugin' (sum25 ++ "." ++ "signal2") (-129.0,144.0) proxy50
+    hide in54
+    in55 <- plugin' (sum26 ++ "." ++ "signal1") (-134.0,73.0) proxy50
+    in56 <- plugin' (sum26 ++ "." ++ "signal2") (-134.0,23.0) proxy50
+    hide in56
+    in57 <- plugin' (sum27 ++ "." ++ "signal1") (-140.0,-40.0) proxy50
+    in58 <- plugin' (sum27 ++ "." ++ "signal2") (-140.0,-90.0) proxy50
+    hide in58
+    in59 <- plugin' (butterlp6 ++ "." ++ "freq") (-43.0,192.0) proxy50
+    in60 <- plugin' (butterlp6 ++ "." ++ "signal") (-43.0,142.0) proxy50
+    in61 <- plugin' (butterhp5 ++ "." ++ "freq") (-47.0,72.0) proxy50
+    in62 <- plugin' (butterhp5 ++ "." ++ "signal") (-47.0,22.0) proxy50
+    in63 <- plugin' (butterbp4 ++ "." ++ "freq") (-55.0,-41.0) proxy50
+    out64 <- plugout' (sum25 ++ "." ++ "result") (-79.0,194.0) proxy50
+    out65 <- plugout' (sum26 ++ "." ++ "result") (-84.0,73.0) proxy50
+    out66 <- plugout' (sum27 ++ "." ++ "result") (-90.0,-40.0) proxy50
+    out67 <- plugout' (vca29 ++ "." ++ "result") (-200.0,196.0) proxy50
+    out68 <- plugout' (vca30 ++ "." ++ "result") (-205.0,74.0) proxy50
+    out69 <- plugout' (vca31 ++ "." ++ "result") (-207.0,-42.0) proxy50
+    out70 <- plugout' (id14 ++ "." ++ "result") (-163.0,279.0) proxy50
+    cable knob41 in33
+    cable knob42 in35
+    cable knob44 in37
+    cable knob46 in51
+    cable out70 in52
+    cable out67 in53
+    cable knob40 in54
+    cable out68 in55
+    cable knob43 in56
+    cable out69 in57
+    cable knob45 in58
+    cable out64 in59
+    cable out70 in60
+    cable out65 in61
+    cable out70 in62
+    cable out66 in63
     recompile
-    set knob39 (-9.9999994e-2)
-    set knob40 (0.0)
-    set knob41 (0.0)
-    set knob42 (0.32372063)
-    set knob43 (0.0)
-    set knob44 (0.19999999)
-    set knob45 (54.08988)
+    set knob40 (-9.9999994e-2)
+    set knob41 (0.14140703)
+    set knob42 (0.0)
+    set knob43 (0.32372063)
+    set knob44 (0.0)
+    set knob45 (0.19999999)
+    set knob46 (54.08988)
     return ()

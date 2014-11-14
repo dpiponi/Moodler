@@ -11,7 +11,7 @@ import Data.Monoid
 import UIElement
 import Utils
 import World
-import Text
+--import Text
 import qualified Box as B
 import qualified Data.Map as M
 import qualified Data.Set as S
@@ -108,7 +108,7 @@ drawUIElement _ _ (Label _ wasSelected _ (x, y) dispName) =
 
 drawUIElement _ _ (Selector _ wasSelected _ (x, y) _ v opts) =
         translate x y (
-            color black (circleSolid 5 <>
+            color black (circleSolid 6 <>
             translate 10 (-5) (
                 color (selectColor wasSelected (
                     makeColor 0.7 0.7 0.5 1)) (
@@ -118,7 +118,7 @@ drawUIElement _ _ (Selector _ wasSelected _ (x, y) _ v opts) =
 drawUIElement _ _ (Knob _ wasSelected _ (x, y) _ _ v lo hi) =
         translate x y $
                     color (selectColor wasSelected knobColour) $
-            circle 18 <>
+            circle 16 <>
             circleSolid 12 <>
             let angle = uiAngle lo hi v
             in color white $ line [(0, 0), (16*sin angle, 16*cos angle)]
@@ -139,12 +139,8 @@ drawUIElement'' showingHidden w e =
 
 renderPlaneName :: String -> Picture
 renderPlaneName firstPlane =
-    let width = estimateTextWidth firstPlane
-    in translate (-550) 300 (
-        color (B.transparentBlack 0.8)
-              (translate (0.5*width-5) 15 (rectangleSolid width 40))
-        <>
-        color white (scale 0.25 0.25 (text firstPlane)))
+    translate (-550) 300 $ B.textInBox (B.transparentBlack 0.8)
+                                       white firstPlane
 
 renderWorld :: GlossWorld -> IO Picture
 renderWorld w@GlossWorld { _rootTransform = rootXform

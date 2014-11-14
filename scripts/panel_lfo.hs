@@ -1,25 +1,19 @@
 do
-    (x, y) <- mouse
-    main <- currentPlane
-    input3 <- new' "input"
-    lfo4 <- new' "lfo"
-    image5 <- container' "panel_lfo.bmp" (x+(-6.0), y+(2.0)) main
-    in6 <- plugin' (lfo4++"."++"sync") (x+(-3.0), y+(17.0)) main
-    parent image5 in6
-    in7 <- plugin' (lfo4++"."++"rate") (x+(-4.0), y+(76.0)) main
-    hide in7
-    parent image5 in7
-    knob8 <- knob' (input3++"."++"result") (x+(-2.0), y+(75.0)) main
-    parent image5 knob8
-    out10 <- plugout' (lfo4++"."++"triangle") (x+(-23.0), y+(-121.0)) main
-    parent image5 out10
-    out12 <- plugout' (lfo4++"."++"saw") (x+(38.0), y+(-119.0)) main
-    parent image5 out12
-    out11 <- plugout' (lfo4++"."++"sin_result") (x+(-23.0), y+(-77.0)) main
-    parent image5 out11
-    out9 <- plugout' (lfo4++"."++"square_result") (x+(39.0), y+(-78.0)) main
-    parent image5 out9
-    cable knob8 in7
+    (x0, y0) <- mouse
+    let (x, y) = quantise2 quantum (x0, y0)
+    root <- currentPlane
+    input17  <-  new' "input"
+    lfo24  <-  new' "lfo"
+    container82 <- container' "panel_lfo.bmp" (x+(0.0), y+(12.0)) root
+    in83 <- plugin' (lfo24 ++ "." ++ "sync") (x+(12.0), y+(36.0)) container82
+    in84 <- plugin' (lfo24 ++ "." ++ "rate") (x+(-3.0), y+(67.0)) container82
+    hide in84
+    knob85 <- knob' (input17 ++ "." ++ "result") (x+(12.0), y+(84.0)) container82
+    out86 <- plugout' (lfo24 ++ "." ++ "triangle") (x+(-12.0), y+(-108.0)) container82
+    out87 <- plugout' (lfo24 ++ "." ++ "saw") (x+(48.0), y+(-108.0)) container82
+    out88 <- plugout' (lfo24 ++ "." ++ "sin_result") (x+(-12.0), y+(-72.0)) container82
+    out89 <- plugout' (lfo24 ++ "." ++ "square_result") (x+(48.0), y+(-72.0)) container82
+    cable knob85 in84
     recompile
-    set knob8 (0.0)
+    set knob85 (7.1241476e-2)
     return ()

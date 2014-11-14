@@ -52,323 +52,323 @@ do
     input46 <- new' "input"
     input47 <- new' "input"
     input48 <- new' "input"
+    input49 <- new' "input"
     new "input" "keyboard"
     let keyboard = "keyboard"
-    ladder49 <- new' "ladder"
-    lfo50 <- new' "lfo"
-    sequencer51 <- new' "sequencer"
-    sum452 <- new' "sum4"
-    sum53 <- new' "sum"
+    ladder50 <- new' "ladder"
+    lfo51 <- new' "lfo"
+    sequencer52 <- new' "sequencer"
+    sum453 <- new' "sum4"
     sum54 <- new' "sum"
+    sum55 <- new' "sum"
     new "input" "trigger"
     let trigger = "trigger"
-    vca212 <- new' "vca"
-    vca212_cv <- new' "input"
-    vca55 <- new' "vca"
     vca56 <- new' "vca"
-    container127 <- container' "panel_lfo.bmp" (-366.0,259.0) root
-    in128 <- plugin' (lfo50 ++ "." ++ "sync") (-363.0,274.0) container127
-    in129 <- plugin' (lfo50 ++ "." ++ "rate") (-364.0,333.0) container127
-    hide in129
-    knob130 <- knob' (input45 ++ "." ++ "result") (-362.0,332.0) container127
-    out131 <- plugout' (lfo50 ++ "." ++ "saw") (-322.0,138.0) container127
-    out132 <- plugout' (lfo50 ++ "." ++ "sin_result") (-383.0,180.0) container127
-    out133 <- plugout' (lfo50 ++ "." ++ "square_result") (-321.0,179.0) container127
-    out134 <- plugout' (lfo50 ++ "." ++ "triangle") (-383.0,136.0) container127
-    container135 <- container' "panel_3x1.bmp" (357.0,117.0) root
-    in136 <- plugin' (vca56 ++ "." ++ "cv") (336.0,142.0) container135
-    in137 <- plugin' (vca56 ++ "." ++ "signal") (336.0,92.0) container135
-    label138 <- label' "vca" (332.0,192.0) container135
-    out139 <- plugout' (vca56 ++ "." ++ "result") (377.0,117.0) container135
-    container140 <- container' "panel_ladder.bmp" (209.0,-171.0) root
-    in141 <- plugin' (ladder49 ++ "." ++ "signal") (201.0,-239.0) container140
-    in142 <- plugin' (sum53 ++ "." ++ "signal1") (253.0,-97.0) container140
-    hide in142
-    in143 <- plugin' (sum53 ++ "." ++ "signal2") (204.0,-96.0) container140
-    in144 <- plugin' (ladder49 ++ "." ++ "freq") (227.0,-143.0) container140
-    hide in144
-    in145 <- plugin' (ladder49 ++ "." ++ "res") (250.0,-180.0) container140
-    hide in145
-    knob146 <- knob' (input13 ++ "." ++ "result") (249.0,-183.0) container140
-    knob147 <- knob' (input14 ++ "." ++ "result") (250.0,-95.0) container140
-    out148 <- plugout' (ladder49 ++ "." ++ "result") (201.0,-283.0) container140
-    out149 <- plugout' (sum53 ++ "." ++ "result") (169.0,-140.0) container140
-    hide out149
-    container150 <- container' "panel_sequencer.bmp" (-65.0,304.0) root
-    in151 <- plugin' (sequencer51 ++ "." ++ "gate") (-217.0,154.0) container150
-    in152 <- plugin' (sequencer51 ++ "." ++ "add") (-216.0,196.0) container150
-    in153 <- plugin' (sequencer51 ++ "." ++ "slide_rate") (-43.0,154.0) container150
+    vca57 <- new' "vca"
+    vca58 <- new' "vca"
+    container135 <- container' "panel_lfo.bmp" (-372.0,264.0) root
+    in136 <- plugin' (lfo51 ++ "." ++ "sync") (-360.0,288.0) container135
+    in137 <- plugin' (lfo51 ++ "." ++ "rate") (-364.0,333.0) container135
+    hide in137
+    knob138 <- knob' (input45 ++ "." ++ "result") (-360.0,336.0) container135
+    out139 <- plugout' (lfo51 ++ "." ++ "saw") (-324.0,144.0) container135
+    out140 <- plugout' (lfo51 ++ "." ++ "sin_result") (-384.0,180.0) container135
+    out141 <- plugout' (lfo51 ++ "." ++ "square_result") (-324.0,180.0) container135
+    out142 <- plugout' (lfo51 ++ "." ++ "triangle") (-384.0,144.0) container135
+    container143 <- container' "panel_3x1.bmp" (360.0,120.0) root
+    in144 <- plugin' (vca58 ++ "." ++ "cv") (336.0,144.0) container143
+    in145 <- plugin' (vca58 ++ "." ++ "signal") (336.0,96.0) container143
+    label146 <- label' "vca" (336.0,192.0) container143
+    out147 <- plugout' (vca58 ++ "." ++ "result") (384.0,120.0) container143
+    container148 <- container' "panel_ladder.bmp" (216.0,-168.0) root
+    in149 <- plugin' (ladder50 ++ "." ++ "signal") (168.0,-288.0) container148
+    in150 <- plugin' (sum54 ++ "." ++ "signal1") (253.0,-97.0) container148
+    hide in150
+    in151 <- plugin' (sum54 ++ "." ++ "signal2") (216.0,-96.0) container148
+    in152 <- plugin' (ladder50 ++ "." ++ "freq") (227.0,-143.0) container148
+    hide in152
+    in153 <- plugin' (ladder50 ++ "." ++ "res") (250.0,-180.0) container148
     hide in153
-    in154 <- plugin' (sequencer51 ++ "." ++ "length") (-43.0,204.0) container150
-    hide in154
-    in155 <- plugin' (sequencer51 ++ "." ++ "pulse1") (-173.0,398.0) container150
-    hide in155
-    in156 <- plugin' (sequencer51 ++ "." ++ "mode1") (-137.0,399.0) container150
-    hide in156
-    in157 <- plugin' (sequencer51 ++ "." ++ "freq2") (-216.0,353.0) container150
-    hide in157
-    in158 <- plugin' (sequencer51 ++ "." ++ "pulse2") (-173.0,348.0) container150
-    hide in158
-    in159 <- plugin' (sequencer51 ++ "." ++ "mode2") (-137.0,349.0) container150
+    knob154 <- knob' (input13 ++ "." ++ "result") (264.0,-156.0) container148
+    knob155 <- knob' (input14 ++ "." ++ "result") (264.0,-96.0) container148
+    out156 <- plugout' (ladder50 ++ "." ++ "result") (264.0,-288.0) container148
+    out157 <- plugout' (sum54 ++ "." ++ "result") (169.0,-140.0) container148
+    hide out157
+    container158 <- container' "panel_sequencer.bmp" (-60.0,300.0) root
+    in159 <- plugin' (sequencer52 ++ "." ++ "pulse7") (-1.0,305.0) container158
     hide in159
-    in160 <- plugin' (sequencer51 ++ "." ++ "freq3") (-216.0,303.0) container150
+    in160 <- plugin' (sequencer52 ++ "." ++ "mode7") (36.0,302.0) container158
     hide in160
-    in161 <- plugin' (sequencer51 ++ "." ++ "pulse3") (-173.0,298.0) container150
+    in161 <- plugin' (sequencer52 ++ "." ++ "freq8") (-46.0,251.0) container158
     hide in161
-    in162 <- plugin' (sequencer51 ++ "." ++ "mode3") (-137.0,299.0) container150
+    in162 <- plugin' (sequencer52 ++ "." ++ "pulse8") (-1.0,255.0) container158
     hide in162
-    in163 <- plugin' (sequencer51 ++ "." ++ "freq4") (-216.0,253.0) container150
+    in163 <- plugin' (sequencer52 ++ "." ++ "mode8") (36.0,252.0) container158
     hide in163
-    in164 <- plugin' (sequencer51 ++ "." ++ "pulse4") (-173.0,248.0) container150
-    hide in164
-    in165 <- plugin' (sequencer51 ++ "." ++ "mode4") (-137.0,249.0) container150
-    hide in165
-    in166 <- plugin' (sequencer51 ++ "." ++ "freq5") (-46.0,401.0) container150
+    in164 <- plugin' (sequencer52 ++ "." ++ "gate") (-192.0,168.0) container158
+    in165 <- plugin' (sequencer52 ++ "." ++ "add") (-192.0,204.0) container158
+    in166 <- plugin' (sequencer52 ++ "." ++ "slide_rate") (-43.0,154.0) container158
     hide in166
-    in167 <- plugin' (sequencer51 ++ "." ++ "pulse5") (-1.0,405.0) container150
+    in167 <- plugin' (sequencer52 ++ "." ++ "length") (-43.0,204.0) container158
     hide in167
-    in168 <- plugin' (sequencer51 ++ "." ++ "mode5") (36.0,402.0) container150
+    in168 <- plugin' (sequencer52 ++ "." ++ "pulse1") (-173.0,398.0) container158
     hide in168
-    in169 <- plugin' (sequencer51 ++ "." ++ "freq6") (-46.0,351.0) container150
+    in169 <- plugin' (sequencer52 ++ "." ++ "mode1") (-137.0,399.0) container158
     hide in169
-    in170 <- plugin' (sequencer51 ++ "." ++ "pulse6") (-1.0,355.0) container150
+    in170 <- plugin' (sequencer52 ++ "." ++ "freq2") (-216.0,353.0) container158
     hide in170
-    in171 <- plugin' (sequencer51 ++ "." ++ "mode6") (36.0,352.0) container150
+    in171 <- plugin' (sequencer52 ++ "." ++ "pulse2") (-173.0,348.0) container158
     hide in171
-    in172 <- plugin' (sequencer51 ++ "." ++ "freq1") (-216.0,403.0) container150
+    in172 <- plugin' (sequencer52 ++ "." ++ "mode2") (-137.0,349.0) container158
     hide in172
-    in173 <- plugin' (sequencer51 ++ "." ++ "freq7") (-46.0,301.0) container150
+    in173 <- plugin' (sequencer52 ++ "." ++ "freq3") (-216.0,303.0) container158
     hide in173
-    in174 <- plugin' (sequencer51 ++ "." ++ "pulse7") (-1.0,305.0) container150
+    in174 <- plugin' (sequencer52 ++ "." ++ "pulse3") (-173.0,298.0) container158
     hide in174
-    in175 <- plugin' (sequencer51 ++ "." ++ "mode7") (36.0,302.0) container150
+    in175 <- plugin' (sequencer52 ++ "." ++ "mode3") (-137.0,299.0) container158
     hide in175
-    in176 <- plugin' (sequencer51 ++ "." ++ "freq8") (-46.0,251.0) container150
+    in176 <- plugin' (sequencer52 ++ "." ++ "freq4") (-216.0,253.0) container158
     hide in176
-    in177 <- plugin' (sequencer51 ++ "." ++ "pulse8") (-1.0,255.0) container150
+    in177 <- plugin' (sequencer52 ++ "." ++ "pulse4") (-173.0,248.0) container158
     hide in177
-    in178 <- plugin' (sequencer51 ++ "." ++ "mode8") (36.0,252.0) container150
+    in178 <- plugin' (sequencer52 ++ "." ++ "mode4") (-137.0,249.0) container158
     hide in178
-    knob179 <- knob' (input36 ++ "." ++ "result") (-216.0,349.0) container150
-    knob180 <- knob' (input39 ++ "." ++ "result") (-216.0,303.0) container150
-    knob181 <- knob' (input16 ++ "." ++ "result") (-216.0,253.0) container150
-    knob182 <- knob' (input19 ++ "." ++ "result") (-46.0,401.0) container150
-    knob183 <- knob' (input22 ++ "." ++ "result") (-46.0,351.0) container150
-    knob184 <- knob' (input25 ++ "." ++ "result") (-46.0,301.0) container150
-    knob185 <- knob' (input29 ++ "." ++ "result") (-46.0,251.0) container150
-    knob186 <- knob' (input15 ++ "." ++ "result") (-215.0,398.0) container150
-    knob187 <- knob' (input34 ++ "." ++ "result") (-40.0,164.0) container150
-    out188 <- plugout' (sequencer51 ++ "." ++ "result") (70.0,156.0) container150
-    out189 <- plugout' (sequencer51 ++ "." ++ "trigger") (70.0,195.0) container150
-    selector190 <- selector' (input37 ++ "." ++ "result") (-173.0,348.0) ["1","2","3","4","5","6","7","8"] container150
-    selector191 <- selector' (input38 ++ "." ++ "result") (-137.0,349.0) ["repeat","slide","rest","hold"] container150
-    selector192 <- selector' (input40 ++ "." ++ "result") (-173.0,298.0) ["1","2","3","4","5","6","7","8"] container150
-    selector193 <- selector' (input42 ++ "." ++ "result") (-137.0,299.0) ["repeat","slide","rest","hold"] container150
-    selector194 <- selector' (input17 ++ "." ++ "result") (-173.0,248.0) ["1","2","3","4","5","6","7","8"] container150
-    selector195 <- selector' (input18 ++ "." ++ "result") (-137.0,249.0) ["repeat","slide","rest","hold"] container150
-    selector196 <- selector' (input20 ++ "." ++ "result") (-1.0,405.0) ["1","2","3","4","5","6","7","8"] container150
-    selector197 <- selector' (input21 ++ "." ++ "result") (36.0,402.0) ["repeat","slide","rest","hold"] container150
-    selector198 <- selector' (input23 ++ "." ++ "result") (-1.0,355.0) ["1","2","3","4","5","6","7","8"] container150
-    selector199 <- selector' (input24 ++ "." ++ "result") (36.0,352.0) ["repeat","slide","rest","hold"] container150
-    selector200 <- selector' (input27 ++ "." ++ "result") (-1.0,305.0) ["1","2","3","4","5","6","7","8"] container150
-    selector201 <- selector' (input28 ++ "." ++ "result") (36.0,302.0) ["repeat","slide","rest","hold"] container150
-    selector202 <- selector' (input31 ++ "." ++ "result") (-1.0,255.0) ["1","2","3","4","5","6","7","8"] container150
-    selector203 <- selector' (input32 ++ "." ++ "result") (36.0,252.0) ["repeat","slide","rest","hold"] container150
-    selector204 <- selector' (input33 ++ "." ++ "result") (-43.0,204.0) ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"] container150
-    selector205 <- selector' (input26 ++ "." ++ "result") (-173.0,398.0) ["1","2","3","4","5","6","7","8"] container150
-    selector206 <- selector' (input35 ++ "." ++ "result") (-137.0,399.0) ["repeat","slide","rest","hold"] container150
-    container210 <- container' "panel_3x1.bmp" (452.0,51.0) root
-    in213 <- plugin' (vca212 ++ "." ++ "cv") (431.0,76.0) container210
-    hide in213
-    in214 <- plugin' (vca212 ++ "." ++ "signal") (431.0,26.0) container210
-    knob216 <- knob' (vca212_cv ++ "." ++ "result") (431.0,76.0) container210
-    label211 <- label' "vca" (427.0,126.0) container210
-    out215 <- plugout' (vca212 ++ "." ++ "result") (472.0,51.0) container210
-    container57 <- container' "panel_adsr.bmp" (227.0,289.0) root
-    in58 <- plugin' (adsr0 ++ "." ++ "attack") (198.0,350.0) container57
-    hide in58
-    in59 <- plugin' (adsr0 ++ "." ++ "decay") (251.0,367.0) container57
-    hide in59
-    in60 <- plugin' (adsr0 ++ "." ++ "sustain") (251.0,317.0) container57
+    in179 <- plugin' (sequencer52 ++ "." ++ "freq5") (-46.0,401.0) container158
+    hide in179
+    in180 <- plugin' (sequencer52 ++ "." ++ "pulse5") (-1.0,405.0) container158
+    hide in180
+    in181 <- plugin' (sequencer52 ++ "." ++ "mode5") (36.0,402.0) container158
+    hide in181
+    in182 <- plugin' (sequencer52 ++ "." ++ "freq6") (-46.0,351.0) container158
+    hide in182
+    in183 <- plugin' (sequencer52 ++ "." ++ "pulse6") (-1.0,355.0) container158
+    hide in183
+    in184 <- plugin' (sequencer52 ++ "." ++ "mode6") (36.0,352.0) container158
+    hide in184
+    in185 <- plugin' (sequencer52 ++ "." ++ "freq1") (-216.0,403.0) container158
+    hide in185
+    in186 <- plugin' (sequencer52 ++ "." ++ "freq7") (-46.0,301.0) container158
+    hide in186
+    knob187 <- knob' (input36 ++ "." ++ "result") (-204.0,348.0) container158
+    knob188 <- knob' (input39 ++ "." ++ "result") (-204.0,300.0) container158
+    knob189 <- knob' (input16 ++ "." ++ "result") (-204.0,252.0) container158
+    knob190 <- knob' (input19 ++ "." ++ "result") (-36.0,396.0) container158
+    knob191 <- knob' (input22 ++ "." ++ "result") (-36.0,348.0) container158
+    knob192 <- knob' (input25 ++ "." ++ "result") (-36.0,300.0) container158
+    knob193 <- knob' (input29 ++ "." ++ "result") (-36.0,252.0) container158
+    knob194 <- knob' (input15 ++ "." ++ "result") (-204.0,396.0) container158
+    knob195 <- knob' (input34 ++ "." ++ "result") (-48.0,168.0) container158
+    out196 <- plugout' (sequencer52 ++ "." ++ "result") (96.0,168.0) container158
+    out197 <- plugout' (sequencer52 ++ "." ++ "trigger") (96.0,204.0) container158
+    selector198 <- selector' (input37 ++ "." ++ "result") (-168.0,348.0) ["1","2","3","4","5","6","7","8"] container158
+    selector199 <- selector' (input38 ++ "." ++ "result") (-132.0,348.0) ["repeat","slide","rest","hold"] container158
+    selector200 <- selector' (input40 ++ "." ++ "result") (-168.0,300.0) ["1","2","3","4","5","6","7","8"] container158
+    selector201 <- selector' (input42 ++ "." ++ "result") (-132.0,300.0) ["repeat","slide","rest","hold"] container158
+    selector202 <- selector' (input17 ++ "." ++ "result") (-168.0,252.0) ["1","2","3","4","5","6","7","8"] container158
+    selector203 <- selector' (input18 ++ "." ++ "result") (-132.0,252.0) ["repeat","slide","rest","hold"] container158
+    selector204 <- selector' (input20 ++ "." ++ "result") (0.0,396.0) ["1","2","3","4","5","6","7","8"] container158
+    selector205 <- selector' (input21 ++ "." ++ "result") (36.0,396.0) ["repeat","slide","rest","hold"] container158
+    selector206 <- selector' (input23 ++ "." ++ "result") (0.0,348.0) ["1","2","3","4","5","6","7","8"] container158
+    selector207 <- selector' (input24 ++ "." ++ "result") (36.0,348.0) ["repeat","slide","rest","hold"] container158
+    selector208 <- selector' (input27 ++ "." ++ "result") (0.0,300.0) ["1","2","3","4","5","6","7","8"] container158
+    selector209 <- selector' (input28 ++ "." ++ "result") (36.0,300.0) ["repeat","slide","rest","hold"] container158
+    selector210 <- selector' (input31 ++ "." ++ "result") (0.0,252.0) ["1","2","3","4","5","6","7","8"] container158
+    selector211 <- selector' (input32 ++ "." ++ "result") (36.0,252.0) ["repeat","slide","rest","hold"] container158
+    selector212 <- selector' (input33 ++ "." ++ "result") (-48.0,204.0) ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"] container158
+    selector213 <- selector' (input26 ++ "." ++ "result") (-168.0,396.0) ["1","2","3","4","5","6","7","8"] container158
+    selector214 <- selector' (input35 ++ "." ++ "result") (-132.0,396.0) ["repeat","slide","rest","hold"] container158
+    container59 <- container' "panel_3x1.bmp" (456.0,48.0) root
+    in60 <- plugin' (vca56 ++ "." ++ "cv") (431.0,76.0) container59
     hide in60
-    in61 <- plugin' (adsr0 ++ "." ++ "release") (251.0,267.0) container57
-    hide in61
-    in62 <- plugin' (adsr0 ++ "." ++ "gate") (257.0,218.0) container57
-    knob63 <- knob' (input30 ++ "." ++ "result") (188.0,346.0) container57
-    setLow knob63 (Just (0.0))
-    knob64 <- knob' (input41 ++ "." ++ "result") (263.0,343.0) container57
-    knob65 <- knob' (input44 ++ "." ++ "result") (189.0,286.0) container57
-    knob66 <- knob' (input43 ++ "." ++ "result") (261.0,285.0) container57
-    out67 <- plugout' (adsr0 ++ "." ++ "result") (257.0,181.0) container57
-    container68 <- container' "panel_4x1.bmp" (-170.0,-59.0) root
-    in69 <- plugin' (sum452 ++ "." ++ "signal1") (-191.0,16.0) container68
-    in70 <- plugin' (sum452 ++ "." ++ "signal2") (-191.0,-34.0) container68
-    in71 <- plugin' (sum452 ++ "." ++ "signal3") (-191.0,-84.0) container68
-    in72 <- plugin' (sum452 ++ "." ++ "signal4") (-191.0,-134.0) container68
-    label73 <- label' "sum4" (-195.0,16.0) container68
-    out74 <- plugout' (sum452 ++ "." ++ "result") (-150.0,-59.0) container68
-    container75 <- container' "panel_3x1.bmp" (-355.0,-314.0) root
-    in76 <- plugin' (vca55 ++ "." ++ "cv") (-376.0,-289.0) container75
-    hide in76
-    in77 <- plugin' (vca55 ++ "." ++ "signal") (-376.0,-339.0) container75
-    knob78 <- knob' (input47 ++ "." ++ "result") (-376.0,-289.0) container75
-    label79 <- label' "vca" (-380.0,-239.0) container75
-    out80 <- plugout' (vca55 ++ "." ++ "result") (-335.0,-314.0) container75
-    container81 <- container' "panel_vco2.bmp" (-11.0,-298.5) root
-    in82 <- plugin' (id10 ++ "." ++ "signal") (6.0,-257.0) container81
-    in83 <- plugin' (id11 ++ "." ++ "signal") (5.0,-220.0) container81
-    hide in83
-    in84 <- plugin' (id12 ++ "." ++ "signal") (6.0,-295.0) container81
+    in61 <- plugin' (vca56 ++ "." ++ "signal") (432.0,36.0) container59
+    knob62 <- knob' (input49 ++ "." ++ "result") (432.0,84.0) container59
+    label63 <- label' "vca" (432.0,132.0) container59
+    out64 <- plugout' (vca56 ++ "." ++ "result") (468.0,48.0) container59
+    container65 <- container' "panel_adsr.bmp" (228.0,288.0) root
+    in66 <- plugin' (adsr0 ++ "." ++ "attack") (198.0,350.0) container65
+    hide in66
+    in67 <- plugin' (adsr0 ++ "." ++ "decay") (251.0,367.0) container65
+    hide in67
+    in68 <- plugin' (adsr0 ++ "." ++ "sustain") (251.0,317.0) container65
+    hide in68
+    in69 <- plugin' (adsr0 ++ "." ++ "release") (251.0,267.0) container65
+    hide in69
+    in70 <- plugin' (adsr0 ++ "." ++ "gate") (264.0,216.0) container65
+    knob71 <- knob' (input30 ++ "." ++ "result") (192.0,348.0) container65
+    setLow knob71 (Just (0.0))
+    knob72 <- knob' (input41 ++ "." ++ "result") (276.0,348.0) container65
+    knob73 <- knob' (input44 ++ "." ++ "result") (192.0,288.0) container65
+    knob74 <- knob' (input43 ++ "." ++ "result") (276.0,288.0) container65
+    out75 <- plugout' (adsr0 ++ "." ++ "result") (264.0,180.0) container65
+    container76 <- container' "panel_4x1.bmp" (-168.0,-48.0) root
+    in77 <- plugin' (sum453 ++ "." ++ "signal1") (-192.0,24.0) container76
+    in78 <- plugin' (sum453 ++ "." ++ "signal2") (-192.0,-24.0) container76
+    in79 <- plugin' (sum453 ++ "." ++ "signal3") (-192.0,-84.0) container76
+    in80 <- plugin' (sum453 ++ "." ++ "signal4") (-192.0,-132.0) container76
+    label81 <- label' "sum4" (-192.0,24.0) container76
+    out82 <- plugout' (sum453 ++ "." ++ "result") (-144.0,-60.0) container76
+    container83 <- container' "panel_3x1.bmp" (-348.0,-312.0) root
+    in84 <- plugin' (vca57 ++ "." ++ "cv") (-376.0,-289.0) container83
     hide in84
-    in85 <- plugin' (id5 ++ "." ++ "signal") (6.0,-336.0) container81
-    knob86 <- knob' (input48 ++ "." ++ "result") (6.0,-295.0) container81
-    knob87 <- knob' (input46 ++ "." ++ "result") (5.0,-222.0) container81
-    out88 <- plugout' (id9 ++ "." ++ "result") (-32.0,-371.0) container81
-    out89 <- plugout' (id6 ++ "." ++ "result") (25.0,-372.0) container81
-    out90 <- plugout' (id7 ++ "." ++ "result") (-36.0,-417.0) container81
-    out91 <- plugout' (id8 ++ "." ++ "result") (26.0,-414.0) container81
-    proxy92 <- proxy' (-55.0,-218.0) container81
-    hide proxy92
-    container104 <- container' "panel_3x1.bmp" (-589.0,326.0) proxy92
-    in105 <- plugin' (audio_triangle4 ++ "." ++ "freq") (-610.0,351.0) container104
-    in106 <- plugin' (audio_triangle4 ++ "." ++ "sync") (-610.0,301.0) container104
-    label107 <- label' "audio_triangle" (-614.0,401.0) container104
-    out108 <- plugout' (audio_triangle4 ++ "." ++ "result") (-569.0,326.0) container104
-    container109 <- container' "panel_3x1.bmp" (-473.0,197.0) proxy92
-    in110 <- plugin' (audio_saw1 ++ "." ++ "freq") (-494.0,222.0) container109
-    in111 <- plugin' (audio_saw1 ++ "." ++ "sync") (-494.0,172.0) container109
-    label112 <- label' "audio_saw" (-498.0,272.0) container109
-    out113 <- plugout' (audio_saw1 ++ "." ++ "result") (-453.0,197.0) container109
-    container114 <- container' "panel_3x1.bmp" (-846.0,359.0) proxy92
-    in115 <- plugin' (audio_sin2 ++ "." ++ "freq") (-867.0,384.0) container114
-    in116 <- plugin' (audio_sin2 ++ "." ++ "sync") (-867.0,334.0) container114
-    label117 <- label' "audio_sin" (-871.0,434.0) container114
-    out118 <- plugout' (audio_sin2 ++ "." ++ "result") (-826.0,359.0) container114
-    container93 <- container' "panel_3x1.bmp" (-981.0,105.0) proxy92
-    in94 <- plugin' (audio_square3 ++ "." ++ "freq") (-1002.0,155.0) container93
-    in95 <- plugin' (audio_square3 ++ "." ++ "pwm") (-1002.0,105.0) container93
-    in96 <- plugin' (audio_square3 ++ "." ++ "sync") (-1002.0,55.0) container93
-    label97 <- label' "audio_square" (-1006.0,180.0) container93
-    out98 <- plugout' (audio_square3 ++ "." ++ "result") (-961.0,105.0) container93
-    container99 <- container' "panel_3x1.bmp" (-970.0,345.0) proxy92
-    in100 <- plugin' (sum54 ++ "." ++ "signal2") (-991.0,320.0) container99
-    in101 <- plugin' (sum54 ++ "." ++ "signal1") (-991.0,370.0) container99
-    label102 <- label' "sum" (-995.0,420.0) container99
-    out103 <- plugout' (sum54 ++ "." ++ "result") (-950.0,345.0) container99
-    in119 <- plugin' (id6 ++ "." ++ "signal") (-908.0,104.0) proxy92
-    in120 <- plugin' (id7 ++ "." ++ "signal") (-515.0,328.0) proxy92
-    in121 <- plugin' (id8 ++ "." ++ "signal") (-402.0,198.0) proxy92
-    in122 <- plugin' (id9 ++ "." ++ "signal") (-711.0,355.0) proxy92
-    out123 <- plugout' (id10 ++ "." ++ "result") (-1046.0,319.0) proxy92
-    out124 <- plugout' (id11 ++ "." ++ "result") (-1047.0,375.0) proxy92
-    out125 <- plugout' (id12 ++ "." ++ "result") (-1049.0,105.0) proxy92
-    out126 <- plugout' (id5 ++ "." ++ "result") (-1048.0,52.0) proxy92
-    in207 <- plugin' (out ++ "." ++ "value") (493.0,198.0) root
-    out208 <- plugout' (keyboard ++ "." ++ "result") (-496.0,130.0) root
-    out209 <- plugout' (trigger ++ "." ++ "result") (-495.0,23.0) root
-    cable knob130 in129
-    cable out67 in136
-    cable out148 in137
-    cable out91 in141
-    cable knob147 in142
-    cable out74 in143
-    cable out149 in144
-    cable knob146 in145
-    cable out133 in151
-    cable knob187 in153
-    cable selector204 in154
-    cable selector205 in155
-    cable selector206 in156
-    cable knob179 in157
-    cable selector190 in158
-    cable selector191 in159
-    cable knob180 in160
-    cable selector192 in161
-    cable selector193 in162
-    cable knob181 in163
-    cable selector194 in164
-    cable selector195 in165
-    cable knob182 in166
-    cable selector196 in167
-    cable selector197 in168
-    cable knob183 in169
-    cable selector198 in170
-    cable selector199 in171
-    cable knob186 in172
-    cable knob184 in173
+    in85 <- plugin' (vca57 ++ "." ++ "signal") (-372.0,-336.0) container83
+    knob86 <- knob' (input47 ++ "." ++ "result") (-372.0,-288.0) container83
+    label87 <- label' "vca" (-384.0,-240.0) container83
+    out88 <- plugout' (vca57 ++ "." ++ "result") (-324.0,-312.0) container83
+    container89 <- container' "panel_vco2.bmp" (36.0,-312.0) root
+    in90 <- plugin' (id12 ++ "." ++ "signal") (72.0,-276.0) container89
+    in91 <- plugin' (id5 ++ "." ++ "signal") (48.0,-238.0) container89
+    hide in91
+    in92 <- plugin' (id6 ++ "." ++ "signal") (49.0,-313.0) container89
+    hide in92
+    in93 <- plugin' (id7 ++ "." ++ "signal") (72.0,-348.0) container89
+    knob94 <- knob' (input48 ++ "." ++ "result") (72.0,-312.0) container89
+    knob95 <- knob' (input46 ++ "." ++ "result") (72.0,-240.0) container89
+    out96 <- plugout' (id11 ++ "." ++ "result") (12.0,-396.0) container89
+    out97 <- plugout' (id8 ++ "." ++ "result") (84.0,-396.0) container89
+    out98 <- plugout' (id9 ++ "." ++ "result") (12.0,-432.0) container89
+    out99 <- plugout' (id10 ++ "." ++ "result") (84.0,-432.0) container89
+    proxy100 <- proxy' (-12.0,-236.0) container89
+    hide proxy100
+    container101 <- container' "panel_3x1.bmp" (-589.0,326.0) proxy100
+    in102 <- plugin' (audio_triangle4 ++ "." ++ "freq") (-610.0,351.0) container101
+    in103 <- plugin' (audio_triangle4 ++ "." ++ "sync") (-610.0,301.0) container101
+    label104 <- label' "audio_triangle" (-614.0,401.0) container101
+    out105 <- plugout' (audio_triangle4 ++ "." ++ "result") (-569.0,326.0) container101
+    container106 <- container' "panel_3x1.bmp" (-473.0,197.0) proxy100
+    in107 <- plugin' (audio_saw1 ++ "." ++ "freq") (-494.0,222.0) container106
+    in108 <- plugin' (audio_saw1 ++ "." ++ "sync") (-494.0,172.0) container106
+    label109 <- label' "audio_saw" (-498.0,272.0) container106
+    out110 <- plugout' (audio_saw1 ++ "." ++ "result") (-453.0,197.0) container106
+    container111 <- container' "panel_3x1.bmp" (-846.0,359.0) proxy100
+    in112 <- plugin' (audio_sin2 ++ "." ++ "freq") (-867.0,384.0) container111
+    in113 <- plugin' (audio_sin2 ++ "." ++ "sync") (-867.0,334.0) container111
+    label114 <- label' "audio_sin" (-871.0,434.0) container111
+    out115 <- plugout' (audio_sin2 ++ "." ++ "result") (-826.0,359.0) container111
+    container116 <- container' "panel_3x1.bmp" (-981.0,105.0) proxy100
+    in117 <- plugin' (audio_square3 ++ "." ++ "freq") (-1002.0,155.0) container116
+    in118 <- plugin' (audio_square3 ++ "." ++ "pwm") (-1002.0,105.0) container116
+    in119 <- plugin' (audio_square3 ++ "." ++ "sync") (-1002.0,55.0) container116
+    label120 <- label' "audio_square" (-1006.0,180.0) container116
+    out121 <- plugout' (audio_square3 ++ "." ++ "result") (-961.0,105.0) container116
+    container122 <- container' "panel_3x1.bmp" (-970.0,345.0) proxy100
+    in123 <- plugin' (sum55 ++ "." ++ "signal2") (-991.0,320.0) container122
+    in124 <- plugin' (sum55 ++ "." ++ "signal1") (-991.0,370.0) container122
+    label125 <- label' "sum" (-995.0,420.0) container122
+    out126 <- plugout' (sum55 ++ "." ++ "result") (-950.0,345.0) container122
+    in127 <- plugin' (id8 ++ "." ++ "signal") (-908.0,104.0) proxy100
+    in128 <- plugin' (id9 ++ "." ++ "signal") (-515.0,328.0) proxy100
+    in129 <- plugin' (id10 ++ "." ++ "signal") (-402.0,198.0) proxy100
+    in130 <- plugin' (id11 ++ "." ++ "signal") (-711.0,355.0) proxy100
+    out131 <- plugout' (id12 ++ "." ++ "result") (-1046.0,319.0) proxy100
+    out132 <- plugout' (id5 ++ "." ++ "result") (-1047.0,375.0) proxy100
+    out133 <- plugout' (id6 ++ "." ++ "result") (-1049.0,105.0) proxy100
+    out134 <- plugout' (id7 ++ "." ++ "result") (-1048.0,52.0) proxy100
+    in215 <- plugin' (out ++ "." ++ "value") (492.0,204.0) root
+    out216 <- plugout' (keyboard ++ "." ++ "result") (-504.0,132.0) root
+    out217 <- plugout' (trigger ++ "." ++ "result") (-492.0,24.0) root
+    cable knob138 in137
+    cable out75 in144
+    cable out156 in145
+    cable out99 in149
+    cable knob155 in150
+    cable out82 in151
+    cable out157 in152
+    cable knob154 in153
+    cable selector208 in159
+    cable selector209 in160
+    cable knob193 in161
+    cable selector210 in162
+    cable selector211 in163
+    cable out141 in164
+    cable knob195 in166
+    cable selector212 in167
+    cable selector213 in168
+    cable selector214 in169
+    cable knob187 in170
+    cable selector198 in171
+    cable selector199 in172
+    cable knob188 in173
     cable selector200 in174
     cable selector201 in175
-    cable knob185 in176
+    cable knob189 in176
     cable selector202 in177
     cable selector203 in178
-    cable knob216 in213
-    cable out139 in214
-    cable knob63 in58
-    cable knob64 in59
-    cable knob65 in60
-    cable knob66 in61
-    cable out189 in62
-    cable out188 in69
-    cable out80 in71
-    cable knob78 in76
-    cable out67 in77
-    cable out74 in82
-    cable knob87 in83
+    cable knob190 in179
+    cable selector204 in180
+    cable selector205 in181
+    cable knob191 in182
+    cable selector206 in183
+    cable selector207 in184
+    cable knob194 in185
+    cable knob192 in186
+    cable knob62 in60
+    cable out147 in61
+    cable knob71 in66
+    cable knob72 in67
+    cable knob73 in68
+    cable knob74 in69
+    cable out197 in70
+    cable out196 in77
+    cable out88 in79
     cable knob86 in84
-    cable out103 in105
-    cable out126 in106
-    cable out103 in110
-    cable out126 in111
-    cable out103 in115
-    cable out126 in116
-    cable out103 in94
-    cable out125 in95
-    cable out126 in96
-    cable out123 in100
-    cable out124 in101
-    cable out98 in119
-    cable out108 in120
-    cable out113 in121
-    cable out118 in122
-    cable out215 in207
+    cable out75 in85
+    cable out82 in90
+    cable knob95 in91
+    cable knob94 in92
+    cable out126 in102
+    cable out134 in103
+    cable out126 in107
+    cable out134 in108
+    cable out126 in112
+    cable out134 in113
+    cable out126 in117
+    cable out133 in118
+    cable out134 in119
+    cable out131 in123
+    cable out132 in124
+    cable out121 in127
+    cable out105 in128
+    cable out110 in129
+    cable out115 in130
+    cable out64 in215
     recompile
-    set knob130 (4.0)
-    set knob146 (2.0)
-    set knob147 (0.0)
-    set knob179 (0.0)
-    set knob180 (0.0)
-    set knob181 (1.6666668e-2)
-    set knob182 (3.3333335e-2)
-    set knob183 (3.3333335e-2)
-    set knob184 (0.0)
-    set knob185 (-2.5e-2)
-    set knob186 (-2.5e-2)
+    set knob138 (4.0)
+    set knob154 (2.0)
+    set knob155 (0.0)
     set knob187 (0.0)
-    set selector190 (0.0)
-    set selector191 (2.0)
-    set selector192 (2.0)
-    set selector193 (0.0)
-    set selector194 (0.0)
-    set selector195 (0.0)
-    set selector196 (2.0)
-    set selector197 (0.0)
+    set knob188 (0.0)
+    set knob189 (1.6666668e-2)
+    set knob190 (3.3333335e-2)
+    set knob191 (3.3333335e-2)
+    set knob192 (-1.0e-2)
+    set knob193 (-2.5e-2)
+    set knob194 (-2.5e-2)
+    set knob195 (0.0)
     set selector198 (0.0)
     set selector199 (2.0)
     set selector200 (2.0)
     set selector201 (0.0)
     set selector202 (0.0)
     set selector203 (0.0)
-    set selector204 (7.0)
-    set selector205 (2.0)
+    set selector204 (2.0)
+    set selector205 (0.0)
     set selector206 (0.0)
-    set knob216 (9.876422)
-    set knob63 (3.6120382e-3)
-    set knob64 (0.1157063)
-    set knob65 (0.31676778)
-    set knob66 (0.32795224)
-    set knob78 (-3.708566e-2)
-    set knob86 (0.14140703)
-    set knob87 (-0.1)
+    set selector207 (2.0)
+    set selector208 (2.0)
+    set selector209 (0.0)
+    set selector210 (0.0)
+    set selector211 (0.0)
+    set selector212 (7.0)
+    set selector213 (2.0)
+    set selector214 (0.0)
+    set knob62 (9.876422)
+    set knob71 (3.6120382e-3)
+    set knob72 (0.1157063)
+    set knob73 (0.31676778)
+    set knob74 (0.32795224)
+    set knob86 (-3.708566e-2)
+    set knob94 (0.14140703)
+    set knob95 (-0.1)
     return ()
     bind '#' "sharpen"
     bind '0' "setzero"
@@ -393,5 +393,7 @@ do
     bind 'm' "relocate"
     bind 'n' "rename"
     bind 'p' "up"
+    bind 'q' "quantise"
     bind 'u' "hide"
     bind 'z' "check"
+    bind '|' "quantise"

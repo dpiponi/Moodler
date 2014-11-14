@@ -1,37 +1,29 @@
 do
-    (x, y) <- mouse
-    main <- currentPlane
-    input3 <- new' "input"
-    input4 <- new' "input"
-    ladder5 <- new' "ladder"
-    sum6 <- new' "sum"
-    image7 <- container' "panel_ladder.bmp" (x+(1.0), y+(-13.0)) main
-    in10 <- plugin' (ladder5++"."++"signal") (x+(-7.0), y+(-81.0)) main
-    parent image7 in10
-    in11 <- plugin' (sum6++"."++"signal1") (x+(45.0), y+(61.0)) main
-    hide in11
-    parent image7 in11
-    in12 <- plugin' (sum6++"."++"signal2") (x+(-4.0), y+(62.0)) main
-    parent image7 in12
-    in8 <- plugin' (ladder5++"."++"freq") (x+(19.0), y+(15.0)) main
-    hide in8
-    parent image7 in8
-    in9 <- plugin' (ladder5++"."++"res") (x+(42.0), y+(-22.0)) main
-    hide in9
-    parent image7 in9
-    knob13 <- knob' (input3++"."++"result") (x+(41.0), y+(-25.0)) main
-    parent image7 knob13
-    knob14 <- knob' (input4++"."++"result") (x+(42.0), y+(63.0)) main
-    parent image7 knob14
-    out15 <- plugout' (ladder5++"."++"result") (x+(-7.0), y+(-125.0)) main
-    parent image7 out15
-    out16 <- plugout' (sum6++"."++"result") (x+(-39.0), y+(18.0)) main
-    hide out16
-    parent image7 out16
-    cable knob14 in11
-    cable out16 in8
-    cable knob13 in9
+    (x0, y0) <- mouse
+    let (x, y) = quantise2 quantum (x0, y0)
+    root <- currentPlane
+    input242  <-  new' "input"
+    input243  <-  new' "input"
+    ladder244  <-  new' "ladder"
+    sum245  <-  new' "sum"
+    container246 <- container' "panel_ladder.bmp" (x+(0.0), y+(0.0)) root
+    in247 <- plugin' (ladder244 ++ "." ++ "signal") (x+(-48.0), y+(-120.0)) container246
+    in248 <- plugin' (sum245 ++ "." ++ "signal1") (x+(48.0), y+(79.0)) container246
+    hide in248
+    in249 <- plugin' (sum245 ++ "." ++ "signal2") (x+(0.0), y+(72.0)) container246
+    in250 <- plugin' (ladder244 ++ "." ++ "freq") (x+(22.0), y+(33.0)) container246
+    hide in250
+    in251 <- plugin' (ladder244 ++ "." ++ "res") (x+(45.0), y+(-4.0)) container246
+    hide in251
+    knob252 <- knob' (input242 ++ "." ++ "result") (x+(48.0), y+(12.0)) container246
+    knob253 <- knob' (input243 ++ "." ++ "result") (x+(48.0), y+(72.0)) container246
+    out254 <- plugout' (ladder244 ++ "." ++ "result") (x+(48.0), y+(-120.0)) container246
+    out255 <- plugout' (sum245 ++ "." ++ "result") (x+(-36.0), y+(36.0)) container246
+    hide out255
+    cable knob253 in248
+    cable out255 in250
+    cable knob252 in251
     recompile
-    set knob13 (3.7552347)
-    set knob14 (0.3743361)
+    set knob252 (3.7552347)
+    set knob253 (0.3743361)
     return ()
