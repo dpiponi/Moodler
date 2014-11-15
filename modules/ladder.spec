@@ -14,9 +14,11 @@ void init() {
 
 void exec(in control freq, in control res, in sample signal, out sample result) {
     {
+    freq = clamp(-1.0, 0.7, freq);
+    res = clamp(1e-7, 3.999, res);
     double f = signal_to_frequency(freq);
     double x[5][5];
-    fast(x, res+1e-7, 2.0*M_PI*f, dt);
+    fast(x, res, 2.0*M_PI*f, dt);
     double ny0, ny1, ny2, ny3;
     ny0 = x[1][0]*signal+x[1][1]*y0+x[1][2]*y1+x[1][3]*y2+x[1][4]*y3;
     ny1 = x[2][0]*signal+x[2][1]*y0+x[2][2]*y1+x[2][3]*y2+x[2][4]*y3;

@@ -26,6 +26,8 @@ void init() {
 
 void exec(in control freq, in control bandwidth, in sample signal, out sample result) {
     {
+        freq = clamp(-1.0, 0.5, freq);
+        bandwidth = clamp(1.0, 1000.0, bandwidth);
         double w = 2*M_PI*signal_to_frequency(freq);
         double b = 2*M_PI*bandwidth;
         if (fabs(b)<10.0) {
@@ -60,14 +62,14 @@ void exec(in control freq, in control bandwidth, in sample signal, out sample re
         }
         result = y0;
 
-        if (i==0) {
+        /*
             printf("bandwidth=%f dt=%f\n", bandwidth, dt);
             printf("ia0=%f r2=%f bt=%f\n", ia0, r2, bt);
             printf("tantw = %f\n", tantw);
             printf("a=%f %f %f %f\n", a1, a2, a3, a4);
             printf("b=%f %f %f %f %f\n", b0, b1, b2, b3, b4);
             printf("y0 = %f\n", y0);
-        }
+        */
 
         y4 = y3;
         y3 = y2;

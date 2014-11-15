@@ -18,6 +18,7 @@ void init() {
 
 void exec(in control freq, in sample signal, out sample result) {
     {
+        freq = clamp(-1.0, 0.65, freq);
         double w = 2*M_PI*signal_to_frequency(freq);
 
         double a1 = (-4*cos(dt*w))/(2 + sqrt(2)*sin(dt*w));
