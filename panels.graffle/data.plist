@@ -18,13 +18,15 @@
 	<key>GuidesVisible</key>
 	<string>YES</string>
 	<key>ImageCounter</key>
-	<integer>5</integer>
+	<integer>6</integer>
 	<key>ImageLinkBack</key>
 	<array>
+		<dict/>
 		<dict/>
 	</array>
 	<key>ImageList</key>
 	<array>
+		<string>image5.tiff</string>
 		<string>image3.tiff</string>
 	</array>
 	<key>LinksVisible</key>
@@ -34,7 +36,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-11-15 20:25:12 +0000</string>
+	<string>2014-11-15 20:53:28 +0000</string>
 	<key>Modifier</key>
 	<string>Dan Piponi</string>
 	<key>NotesVisible</key>
@@ -610,6 +612,395 @@
 			</array>
 			<key>GraphicsList</key>
 			<array>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1754.5, 113.50001263618469}, {92, 229}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>ID</key>
+					<integer>675</integer>
+					<key>ImageID</key>
+					<integer>5</integer>
+					<key>Opacity</key>
+					<real>0.3568103015422821</real>
+					<key>Rotation</key>
+					<real>90</real>
+					<key>Shape</key>
+					<string>Rectangle</string>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>image fill</key>
+						<dict>
+							<key>Opacity</key>
+							<real>0.3568103015422821</real>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1884, 294}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>674</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1824, 294}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>673</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1764, 294}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>672</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1704, 294}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>671</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1884, 246}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>670</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1824, 246}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>669</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1764, 246}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>668</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1704, 246}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>667</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1884, 198}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>666</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1824, 198}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>665</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1764, 198}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>664</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1704, 198}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>663</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1764, 150}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>662</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{1704, 150}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>21</real>
+					</dict>
+					<key>ID</key>
+					<integer>661</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
 				<dict>
 					<key>Bounds</key>
 					<string>{{2322.3004208789225, 501.6286806096378}, {47.399158477783203, 16.242639541625977}}</string>
@@ -9190,67 +9581,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1899, 198}, {41, 24}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>FitText</key>
-					<string>YES</string>
-					<key>Flow</key>
-					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>b</key>
-							<string>0</string>
-							<key>g</key>
-							<string>0</string>
-							<key>r</key>
-							<string>0</string>
-						</dict>
-						<key>Font</key>
-						<string>AmericanTypewriter</string>
-						<key>Size</key>
-						<real>12</real>
-					</dict>
-					<key>ID</key>
-					<integer>313</integer>
-					<key>Shape</key>
-					<string>Rectangle</string>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-					</dict>
-					<key>Text</key>
-					<dict>
-						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1343\cocoasubrtf140
-\cocoascreenfonts1{\fonttbl\f0\fnil\fcharset0 AmericanTypewriter;}
-{\colortbl;\red255\green255\blue255;}
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
-
-\f0\fs24 \cf0 \uc0\u966 \u8321 -\u966 \u8328 }</string>
-					</dict>
-					<key>Wrap</key>
-					<string>NO</string>
-				</dict>
-				<dict>
-					<key>Bounds</key>
-					<string>{{1746, 102}, {37, 24}}</string>
+					<string>{{1752, 119}, {37, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -9310,7 +9641,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1856, 270}, {31, 24}}</string>
+					<string>{{1875, 312}, {31, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -9370,7 +9701,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1685, 270}, {23, 24}}</string>
+					<string>{{1698, 312}, {23, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -9430,7 +9761,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1690, 102}, {27, 24}}</string>
+					<string>{{1697, 118.5}, {27, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -9490,7 +9821,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1705.5, 72}, {60, 32}}</string>
+					<string>{{1659.5, 76}, {71, 32}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -9543,14 +9874,14 @@
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\f0\fs36 \cf0 \uc0\u966 aser}</string>
+\f0\fs36 \cf0 Phaser}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1647, 63}, {306, 288}}</string>
+					<string>{{1656, 72}, {306, 288}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FontInfo</key>
@@ -9571,34 +9902,27 @@
 							<key>Color</key>
 							<dict>
 								<key>b</key>
-								<string>0</string>
-								<key>g</key>
-								<string>0.501961</string>
-								<key>r</key>
-								<string>0</string>
-							</dict>
-							<key>FillType</key>
-							<integer>3</integer>
-							<key>GradientColor</key>
-							<dict>
-								<key>b</key>
-								<string>0</string>
-								<key>g</key>
-								<string>0.501961</string>
-								<key>r</key>
-								<string>0</string>
-							</dict>
-							<key>MiddleColor</key>
-							<dict>
-								<key>b</key>
-								<string>0.4</string>
+								<string>0.285242</string>
 								<key>g</key>
 								<string>1</string>
 								<key>r</key>
-								<string>0.4</string>
+								<string>0.195034</string>
 							</dict>
-							<key>TrippleBlend</key>
-							<string>YES</string>
+							<key>FillType</key>
+							<integer>3</integer>
+							<key>GradientCenter</key>
+							<string>{0.28571428564285711, 0.28571428564285711}</string>
+							<key>GradientColor</key>
+							<dict>
+								<key>b</key>
+								<string>0.95236</string>
+								<key>g</key>
+								<string>0.878775</string>
+								<key>r</key>
+								<string>0.400167</string>
+							</dict>
+							<key>MiddleFraction</key>
+							<real>0.20814734697341919</real>
 						</dict>
 						<key>shadow</key>
 						<dict>
@@ -17223,7 +17547,7 @@
 		<key>SidebarWidth</key>
 		<integer>120</integer>
 		<key>VisibleRegion</key>
-		<string>{{1331.5, 122}, {897.5, 570}}</string>
+		<string>{{1173.5, 26.5}, {897.5, 570}}</string>
 		<key>Zoom</key>
 		<real>2</real>
 		<key>ZoomValues</key>

@@ -70,6 +70,7 @@ execScript :: (InputHandler m, Functor m, MonadIO m,
                MonadState GlossWorld m) =>
               String -> String -> [String] -> m ()
 execScript dir f arguments = do -- use proper dir API XXX
+    liftIO $ putStrLn $ "Exec: " ++ dir ++ "/" ++ f ++ ".hs"
     cmds <- liftIO $ safeReadFile $ dir ++ "/" ++ f ++ ".hs"
     case cmds of
         Left err  -> do
