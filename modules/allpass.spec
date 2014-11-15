@@ -11,6 +11,7 @@ void init() {
 
 void exec(in control freq, in sample signal, out sample result) {
     {
+        freq = clamp(-1.0, 0.65, freq);
         double f = signal_to_frequency(freq);
 
         double t1 = tan(M_PI*f*dt);
