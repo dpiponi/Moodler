@@ -119,18 +119,6 @@ genStruct moduleList synth = do
         tell stateSource
     tell "} state;\n"
 
---genInit :: WriterT String (Either String) ()
-genInit :: [String] -> M.Map String Module ->
-           WriterT String (Either String) ()
-genInit moduleList synth = do
-    tell "void init(struct State *state) {\n"
-
-    forM_ moduleList $ \name -> do
-        (Module _ nodeType _ _) <- lookupM "error 2" name synth
-        initSource <- lift $ instantiateInit name nodeType
-        tell initSource
-    tell "}\n"
-
 genExec :: [(String, t)] -> M.Map String Module ->
            WriterT String (Either String) ()
 genExec y synth = do
@@ -148,6 +136,8 @@ genExec y synth = do
     tell "return 0;"
     tell "}\n"
 
+-- Create C function to return offset into state corresponding
+-- to fields.
 genAddress :: [String] -> M.Map String Module ->
               WriterT String (Either String) ()
 genAddress moduleList synth = do
@@ -163,6 +153,35 @@ genAddress moduleList synth = do
                    fieldName ++ "); }\n"
     tell "printf(\"Couldn't find %s.%s\\n\", node, field);\n"
     tell "    return -1;\n"
+    tell "}\n"
+
+-- I think this needs a way to specify which module is
+-- being intialised.
+genInit2 :: [String] -> M.Map String Module ->
+            WriterT String (Either String) ()
+genInit2 moduleList synth = do
+    tell "void init2(struct State *state, const char *node) {\n"
+
+    forM_ moduleList $ \name -> do
+        (Module _ nodeType _ _) <- lookupM "error 2.5" name synth
+        initSource <- lift $ instantiateInit name nodeType
+        tell $ "if (!strcmp(node, \"" ++ name ++
+               "\")) {\n"
+        tell initSource
+        tell "return;}\n"
+    tell "}\n"
+
+-- I think this needs a way to specify which module is
+-- being intialised.
+genInit :: [String] -> M.Map String Module ->
+           WriterT String (Either String) ()
+genInit moduleList synth = do
+    tell "void init(struct State *state) {\n"
+
+    forM_ moduleList $ \name -> do
+        (Module _ nodeType _ _) <- lookupM "error 2" name synth
+        initSource <- lift $ instantiateInit name nodeType
+        tell initSource
     tell "}\n"
 
 genSet :: WriterT String (Either String) ()
@@ -201,6 +220,7 @@ gen currentDirectory synth out' = do
     genSet
     genCreate
     genInit moduleList synth
+    genInit2 moduleList synth
     genExec y synth
 
 compile :: String -> String -> IO ()
@@ -219,6 +239,8 @@ type InitFn = Ptr () -> IO ()
 type ExecuteFn = Ptr () -> IO ()
 type SetFn = Ptr () -> CString -> CString -> CDouble -> IO ()
 
+-- Represents a DSO loaded into memory along with Haskell wrappers
+-- around C functions within it.
 data DSO = DSO { dl :: DL,
                  createFn :: CreateFn,
                  dsoInitFn :: InitFn,

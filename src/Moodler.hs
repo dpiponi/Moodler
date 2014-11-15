@@ -52,8 +52,7 @@ main = do
         dso <- makeDSOFromSynth synth output
 
         liftIO $ do
-            audioStateList <-
-                forM [0..numVoices-1] (\_ -> createFn dso)
+            audioStateList <- replicateM numVoices (createFn dso)
             let audioStates = 
                     listArray (0, numVoices-1) audioStateList
             forM_ [0..numVoices-1] $ \i ->
