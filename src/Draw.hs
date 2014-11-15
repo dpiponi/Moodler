@@ -97,14 +97,17 @@ drawUIElement _ world (Image _ _ _ (x, y) _ picture _ _) =
             Just (x', _, _) -> x')
 
 drawUIElement _ _ (Out _ wasSelected _ (x, y) _displayName col) =
-    translate x y (color (selectColor wasSelected (interpretColour col)) (
-      circleSolid 10 <>
-      color (interpretColour col) (circleSolid 5)))
+    translate x y (
+        color (selectColor wasSelected (makeColor 0.1 0.1 0.1 1)) (circleSolid 9) <>
+        color (interpretColour col) (circleSolid 4.5)
+        )
 
 drawUIElement _ world (In _ wasSelected _ (x, y) _ col _ cableList) =
-    translate x y (color (selectColor wasSelected (interpretColour col)) (
-                circleSolid 10 <>
-                color black (circleSolid 5))) <>
+    translate x y (
+                color (selectColor wasSelected (makeColor 0.1 0.1 0.1 1)) (circleSolid 9) <>
+                color (selectColor wasSelected (makeColor 0.5 0.5 0.5 1)) (circleSolid 6) <>
+                color (interpretColour col) (circleSolid 3)
+                ) <>
     mconcat (zipWith (drawCable world (x, y))
                      (True : repeat False)
                      cableList)

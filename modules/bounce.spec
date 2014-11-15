@@ -8,7 +8,7 @@ void init() {
 
 void exec(in control lo, in control hi,
           in control down, in control up,
-          out control result) {
+          out control result, out control direction) {
     {
         if (direction == 0.0) {
             direction = 1.0;
