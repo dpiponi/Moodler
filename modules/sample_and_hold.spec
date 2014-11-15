@@ -6,7 +6,7 @@ void init() {
     result = 0.0;
 }
 
-void exec(in trigger, in signal, out result) {
+void exec(in control trigger, in control signal, out control result) {
     if (last_trigger <= 0 && trigger > 0) {
         result = signal;
     }

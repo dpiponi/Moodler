@@ -27,14 +27,14 @@ magic _ = undefined
 handleMousePosition :: GlossWorld -> MoodlerM Zero -> Point ->
                        IO GlossWorld
 handleMousePosition world m p = do
-    (newContinuation, newWorld) <- runStateT (runFreeT (runMoodlerM m))
+    (newContinuation, newWorld) <- runStateT (runFreeT m)
                                              world
     return $ newWorld & mouseLoc .~ p
                       & cont .~ newContinuation -- <- XXX elim fmap?
 
 handleNoMousePosition :: GlossWorld -> MoodlerM Zero -> IO GlossWorld
 handleNoMousePosition world m = do
-    (newContinuation, newWorld) <- runStateT (runFreeT (runMoodlerM m))
+    (newContinuation, newWorld) <- runStateT (runFreeT m)
                                    world
     return $ newWorld & cont .~ newContinuation
 
@@ -48,7 +48,7 @@ eventHandler (EventKey a1 a2 a3 p) world@GlossWorld { _cont = m } =
             let xform = world ^. rootTransform
                 p' = applyTransform (inverse xform) p
             in handleMousePosition world
-                         (MoodlerM (handler (EventKey a1 a2 a3 p'))) p'
+                         ({-MoodlerM-} handler (EventKey a1 a2 a3 p')) p'
 
 eventHandler (EventMotion p) world@GlossWorld { _cont = m } =
     case m of
@@ -58,14 +58,14 @@ eventHandler (EventMotion p) world@GlossWorld { _cont = m } =
             let xform = world ^. rootTransform
                 p' = applyTransform (inverse xform) p
             in handleMousePosition world
-                            (MoodlerM (handler (EventMotion p'))) p'
+                            ({-MoodlerM-} handler (EventMotion p')) p'
 
 eventHandler event@(EventResize _) world@GlossWorld { _cont = m } =
     case m of
         Pure a -> magic a
 
         Free (GetEvent handler) ->
-            handleNoMousePosition world (MoodlerM (handler event))
+            handleNoMousePosition world ({-MoodlerM-} handler event)
 
 
 simulate :: Float -> GlossWorld -> IO GlossWorld
@@ -102,7 +102,7 @@ emptyGlossWorld =
                   , _currentSelection = []
                   , _previousSelection = Nothing
                   , _rootTransform = Transform (0, 0) 1
-                  , _cont = Free (GetEvent (runMoodlerM . handleDefault'))
+                  , _cont = Free (GetEvent handleDefault')
                   , _innerHistory = [innerWorld]
                   , _undoHistory = [([], [])]
                   , _innerFuture = []

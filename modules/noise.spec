@@ -3,7 +3,7 @@ double result;
 void init() {
 }
 
-void exec(out result) {
+void exec(out sample result) {
     {
     result = drand48();
     }

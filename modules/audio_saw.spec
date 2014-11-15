@@ -14,7 +14,7 @@ void init() {
     sync_pending = 0;
 }
 
-void exec(in freq, in sync, out result) {
+void exec(in control freq, in sample sync, out sample result) {
     {
         if (!started) {
             init_band_limited(&limited);

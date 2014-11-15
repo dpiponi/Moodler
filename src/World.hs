@@ -1,6 +1,7 @@
 {-# LANGUAGE Rank2Types, TemplateHaskell, FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses, GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE EmptyDataDecls, DeriveFunctor #-}
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 
 module World where
 
@@ -11,6 +12,7 @@ import Control.Applicative
 import Data.Monoid
 import Graphics.Gloss.Interface.IO.Game
 import qualified Data.Map as M
+--import Debug.Trace
 
 import Text
 import UIElement
@@ -64,6 +66,9 @@ data GlossWorld = GlossWorld { _inner :: World
 
 $(makeLenses ''GlossWorld)
 
+type MoodlerM = FreeT MoodlerF (StateT GlossWorld IO)
+
+{-
 newtype MoodlerM a = MoodlerM {
                         runMoodlerM :: FreeT MoodlerF
                                         (StateT GlossWorld IO) a }
@@ -72,9 +77,6 @@ newtype MoodlerM a = MoodlerM {
 instance Monad MoodlerM where
     return = MoodlerM . return
     MoodlerM m >>= f = MoodlerM (m >>= (runMoodlerM . f))
-
---instance Functor MoodlerM where
---    fmap f (MoodlerM m) = MoodlerM (fmap f m)
 
 instance Applicative MoodlerM where
     pure = return
@@ -86,18 +88,17 @@ instance MonadState GlossWorld MoodlerM where
 
 instance MonadIO MoodlerM where
     liftIO m = MoodlerM (liftIO m)
+-}
 
 class InputHandler m where
     getInput :: String -> String -> m (Maybe String)
 
 $(makeLenses ''World)
 
---innerGadget = inner . gadget
-
 handleGetString :: [String] -> String -> String ->
                    MoodlerM (Maybe String)
 handleGetString completions inputString prompt = do
-    e <- MoodlerM (liftF $ GetEvent id)
+    e <- liftF $ GetEvent id
     let longestCompletion = longestMatchingPrefix completions inputString
     gadget .= stringGadget longestCompletion inputString prompt
     handleGetString' completions inputString prompt e
@@ -127,11 +128,6 @@ handleGetString' completions inputString prompt
                               Down _ _) = do
     let inputString' = deleteLastChar inputString
     continueGetString prompt completions inputString'
-    {-
-    let longestCompletion = longestMatchingPrefix completions inputString
-    gadget .= stringGadget longestCompletion inputString prompt
-    handleGetString completions inputString' prompt
-    -}
 
 -- Space key during command entry
 handleGetString' completions inputString prompt (EventKey
@@ -183,6 +179,12 @@ locById w e =
     let elt = M.findWithDefault (error "locById") e
                                           (_uiElements (_inner w))
     in _loc elt
+
+colourById :: GlossWorld -> UiId -> String
+colourById w e =
+    let elt = M.findWithDefault (error "colourById") e
+                                          (_uiElements (_inner w))
+    in _dataColour elt
 
 newtype WorldMonad a = WorldMonad { runWorldMonad ::
                                             StateT GlossWorld IO a }

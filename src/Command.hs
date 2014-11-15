@@ -110,18 +110,18 @@ evalUi (Load t cfn) =
     execScript "scripts" t [] >> evalUi cfn
 
 evalUi (PlugIn n t p creationParent cfn) = do
-    let e = In creationParent False False p t "" t []
+    let e = In creationParent False False p t "#sample" t []
     createdInParent n e creationParent
     evalUi (cfn n)
 
 evalUi (PlugOut n t p creationPlane cfn) = do
-    let e = Out creationPlane False False p t "" 
+    let e = Out creationPlane False False p t "#sample"
     createdInParent n e creationPlane
     evalUi (cfn n)
 
 evalUi (UiLib.Knob n t p creationParent cfn) = do
     let e = UIElement.Knob creationParent False False
-                                p t t 0.0 Nothing Nothing
+                                p t "#control" t 0.0 Nothing Nothing
     createdInParent n e creationParent
     evalUi (cfn n)
 
@@ -181,6 +181,9 @@ evalUi (SetLow t v cfn) =
 
 evalUi (SetHigh t v cfn) =
     inner . uiElements . ix t . UIElement.knobMax .= v >> evalUi cfn
+
+evalUi (SetColour t v cfn) =
+    inner . uiElements . ix t . UIElement.dataColour .= v >> evalUi cfn
 
 evalUi (Mouse cfn) = do
     p <- use mouseLoc

@@ -16,8 +16,9 @@ void init() {
     last_gate = 0.0;
 }
 
-void exec(in gate,
-          out div02, out div04, out div08, out div16, out div32) {
+void exec(in control gate,
+          out control div02, out control div04, out control div08,
+          out control div16, control sample div32) {
     {
         div02 = counter & 1 ? 1.0 : 0.0;
         div04 = counter & 2 ? 1.0 : 0.0;

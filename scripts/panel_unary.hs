@@ -1,55 +1,55 @@
 do
-    (x, y) <- mouse
-    main <- currentPlane
-    cos19 <- new' "cos"
-    exp20 <- new' "exp"
-    input21 <- new' "input"
-    negate22 <- new' "negate"
-    sin23 <- new' "sin"
-    tanh24 <- new' "tanh"
-    vca25 <- new' "vca"
-    image26 <- container' "panel_unary.bmp" (x+(-2.0), y+(7.0)) main
-    in27 <- plugin' (exp20++"."++"signal") (x+(-15.0), y+(-118.0)) main
-    hide in27
-    parent image26 in27
-    in28 <- plugin' (negate22++"."++"signal") (x+(-13.0), y+(30.0)) main
-    hide in28
-    parent image26 in28
-    in29 <- plugin' (sin23++"."++"signal") (x+(-16.0), y+(-9.0)) main
-    hide in29
-    parent image26 in29
-    in30 <- plugin' (cos19++"."++"signal") (x+(-17.0), y+(-45.0)) main
-    hide in30
-    parent image26 in30
-    in31 <- plugin' (tanh24++"."++"signal") (x+(-13.0), y+(-82.0)) main
-    hide in31
-    parent image26 in31
-    in32 <- plugin' (vca25++"."++"cv") (x+(44.0), y+(84.0)) main
-    hide in32
-    parent image26 in32
-    in33 <- plugin' (vca25++"."++"signal") (x+(-30.0), y+(85.0)) main
-    parent image26 in33
-    knob34 <- knob' (input21++"."++"result") (x+(44.0), y+(86.0)) main
-    parent image26 knob34
-    out35 <- plugout' (tanh24++"."++"result") (x+(51.0), y+(-84.0)) main
-    parent image26 out35
-    out36 <- plugout' (exp20++"."++"result") (x+(52.0), y+(-117.0)) main
-    parent image26 out36
-    out37 <- plugout' (negate22++"."++"result") (x+(55.0), y+(32.0)) main
-    parent image26 out37
-    out38 <- plugout' (sin23++"."++"result") (x+(56.0), y+(-12.0)) main
-    parent image26 out38
-    out39 <- plugout' (cos19++"."++"result") (x+(54.0), y+(-46.0)) main
-    parent image26 out39
-    out40 <- plugout' (vca25++"."++"result") (x+(-43.0), y+(-46.0)) main
-    hide out40
-    parent image26 out40
-    cable out40 in27
-    cable out40 in28
-    cable out40 in29
-    cable out40 in30
-    cable out40 in31
-    cable knob34 in32
+    (x0, y0) <- mouse
+    let (x, y) = quantise2 quantum (x0, y0)
+    root <- currentPlane
+    cos3  <-  new' "cos"
+    exp4  <-  new' "exp"
+    input5  <-  new' "input"
+    negate6  <-  new' "negate"
+    sin7  <-  new' "sin"
+    tanh8  <-  new' "tanh"
+    vca9  <-  new' "vca"
+    container10 <- container' "panel_unary.bmp" (x+(0.0), y+(24.0)) root
+    in11 <- plugin' (exp4 ++ "." ++ "signal") (x+(-17.0), y+(-99.0)) container10
+    setColour in11 "#sample"
+    hide in11
+    in12 <- plugin' (negate6 ++ "." ++ "signal") (x+(-15.0), y+(49.0)) container10
+    setColour in12 "#sample"
+    hide in12
+    in13 <- plugin' (sin7 ++ "." ++ "signal") (x+(-18.0), y+(10.0)) container10
+    setColour in13 "#sample"
+    hide in13
+    in14 <- plugin' (cos3 ++ "." ++ "signal") (x+(-19.0), y+(-26.0)) container10
+    setColour in14 "#sample"
+    hide in14
+    in15 <- plugin' (tanh8 ++ "." ++ "signal") (x+(-15.0), y+(-63.0)) container10
+    setColour in15 "#sample"
+    hide in15
+    in16 <- plugin' (vca9 ++ "." ++ "cv") (x+(42.0), y+(103.0)) container10
+    setColour in16 "#sample"
+    hide in16
+    in17 <- plugin' (vca9 ++ "." ++ "signal") (x+(-36.0), y+(108.0)) container10
+    setColour in17 "#control"
+    knob18 <- knob' (input5 ++ "." ++ "result") (x+(48.0), y+(108.0)) container10
+    out19 <- plugout' (tanh8 ++ "." ++ "result") (x+(48.0), y+(-48.0)) container10
+    setColour out19 "#control"
+    out20 <- plugout' (exp4 ++ "." ++ "result") (x+(48.0), y+(-84.0)) container10
+    setColour out20 "#control"
+    out21 <- plugout' (negate6 ++ "." ++ "result") (x+(48.0), y+(60.0)) container10
+    setColour out21 "#control"
+    out22 <- plugout' (sin7 ++ "." ++ "result") (x+(48.0), y+(24.0)) container10
+    setColour out22 "#control"
+    out23 <- plugout' (cos3 ++ "." ++ "result") (x+(48.0), y+(-12.0)) container10
+    setColour out23 "#control"
+    out24 <- plugout' (vca9 ++ "." ++ "result") (x+(-45.0), y+(-27.0)) container10
+    setColour out24 "#sample"
+    hide out24
+    cable out24 in11
+    cable out24 in12
+    cable out24 in13
+    cable out24 in14
+    cable out24 in15
+    cable knob18 in16
     recompile
-    set knob34 (1.0)
+    set knob18 (1.0)
     return ()

@@ -10,7 +10,7 @@ void init() {
     gate = 1.0;
 }
 
-void exec(in length, in trigger, out gate) {
+void exec(in control length, in control trigger, out control gate) {
     if (trigger > 0.0 && last_trigger <= 0) {
         time_since_trigger = 0.0;
         gate = 1.0;

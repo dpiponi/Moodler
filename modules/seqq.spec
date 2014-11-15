@@ -26,17 +26,17 @@ void init() {
     target_freq = 0.0;
 }
 
-void exec(in gate,
-          in add,
-          in slide_rate,
-          in length,
-          in freq1, in freq2, in freq3, in freq4,
-          in freq5, in freq6, in freq7, in freq8,
-          in pulse1, in pulse2, in pulse3, in pulse4,
-          in pulse5, in pulse6, in pulse7, in pulse8,
-          in mode1, in mode2, in mode3, in mode4,
-          in mode5, in mode6, in mode7, in mode8,
-          out result, out trigger) {
+void exec(in control gate,
+          in control add,
+          in control slide_rate,
+          in control length,
+          in control freq1, in control freq2, in control freq3, in control freq4,
+          in control freq5, in control freq6, in control freq7, in control freq8,
+          in control pulse1, in control pulse2, in control pulse3, in control pulse4,
+          in control pulse5, in control pulse6, in control pulse7, in control pulse8,
+          in control mode1, in control mode2, in control mode3, in control mode4,
+          in control mode5, in control mode6, in control mode7, in control mode8,
+          out control result, out control trigger) {
     {
         /*
          * modes:

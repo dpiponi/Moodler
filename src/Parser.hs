@@ -12,10 +12,11 @@ import Data.Generics
 import Control.Lens
 import Control.Monad.State
 import Language.C.Syntax.AST
+import Language.C.Syntax.Constants
 import Language.C.Data.Ident
 import Language.C.Data.Node
 import qualified Data.Map as M
-import Language.C.Pretty
+--import Language.C.Pretty
 import Debug.Trace
 
 {-
@@ -88,9 +89,26 @@ idents = everything (++) ([] `mkQ` (return . identToString))
 -- XXX Note `partitionDeclSpecs`
 -- https://hackage.haskell.org/package/language-c-0.4.7/docs/Language-C-Syntax-AST.html#g:3
 getInOrOut :: CDeclarationSpecifier NodeInfo -> String
-getInOrOut (CTypeSpec (CTypeDef ident _)) = identToString ident
-getInOrOut (CTypeQual (CAttrQual (CAttr ident cexpr _))) = show (identToString ident, map pretty cexpr)
+--getInOrOut (CTypeSpec (CTypeDef ident _)) = identToString ident
+getInOrOut (CTypeQual (CAttrQual (CAttr (Ident "direction" _ _)
+                                        [CConst (CStrConst (CString "out" _) _)]
+                                        _)
+                                        )) = "out" -- show (identToString ident, map pretty cexpr)
 getInOrOut _ = ""
+
+getColour :: CDeclarationSpecifier NodeInfo -> [String]
+--getInOrOut (CTypeSpec (CTypeDef ident _)) = identToString ident
+getColour (CTypeQual (CAttrQual (CAttr (Ident "colour" _ _)
+                                        [CConst (CStrConst (CString colour _) _)]
+                                        _)
+                                        )) = [colour]
+getColour _ = []
+
+getColourFromCDecl :: CDecl -> Maybe String
+getColourFromCDecl (CDecl spec _ _) = let cols = concatMap getColour spec
+                                       in if null cols
+                                                    then Nothing
+                                                    else Just (head cols)
 
 -- A CDeclaration is a complete C declaration
 -- spec is CDeclarationSpecifier

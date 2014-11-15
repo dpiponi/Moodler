@@ -8,7 +8,7 @@ double y[16];
 void init() {
 }
 
-void exec(in signal1, in signal2, out result) {
+void exec(in sample signal1, in sample signal2, out sample result) {
     {
         for (int i = 0; i < 3; ++i) {
             x1[i] = x1[i+1];

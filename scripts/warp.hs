@@ -1,8 +1,11 @@
 do
-    (x, y) <- mouse
+    (x0, y0) <- mouse
+    let (x, y) = quantise2 quantum (x0, y0)
     root <- currentPlane
-    id3  <-  new' "id"
-    in4 <- plugin' (id3 ++ "." ++ "signal") (x+(-20.0), y+(-2.0)) root
-    out5 <- plugout' (id3 ++ "." ++ "result") (x+(21.0), y+(-2.0)) root
+    id5  <-  new' "id"
+    in6 <- plugin' (id5 ++ "." ++ "signal") (x+(-16.0), y+(-5.0)) root
+    setColour in6 "#control"
+    out7 <- plugout' (id5 ++ "." ++ "result") (x+(25.0), y+(-5.0)) root
+    setColour out7 "#control"
     recompile
     return ()

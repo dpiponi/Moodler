@@ -12,7 +12,7 @@ void init() {
     y3 = 0.0;
 }
 
-void exec(in freq, in res, in signal, out result) {
+void exec(in control freq, in control res, in sample signal, out sample result) {
     {
     double f = signal_to_frequency(freq);
     double x[5][5];

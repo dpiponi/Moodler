@@ -16,7 +16,7 @@ void init() {
     x2 = 0.0;
 }
 
-void exec(in freq, in signal, out result) {
+void exec(in control freq, in sample signal, out sample result) {
     {
         double w = 2*M_PI*signal_to_frequency(freq);
 

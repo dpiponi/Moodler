@@ -4,7 +4,7 @@ void init() {
     result = 0.0;
 }
 
-void exec(in signal, out result) {
+void exec(in sample signal, out sample result) {
     {
         result = -signal;
     }

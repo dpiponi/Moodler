@@ -7,7 +7,7 @@ void init() {
     started = 1.0;
 }
 
-void exec(in freq, in pwm, in sync, out result) {
+void exec(in control freq, in control pwm, in sample sync, out sample result) {
     {
         if (!started) {
             init_square(&square_state);

@@ -4,5 +4,5 @@ void init () {
     result = 0.0;
 }
 
-void exec(out result) {
+void exec(out control result) {
 }

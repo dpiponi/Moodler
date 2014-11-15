@@ -15,18 +15,27 @@ import World
 import qualified Box as B
 import qualified Data.Map as M
 import qualified Data.Set as S
+import Text.Read
 
 import UISupport
 import ContainerTree
 
+interpretColour :: String -> Color
+interpretColour "#control" = makeColor 0.3 0.7 0.9 0.9
+interpretColour "#sample"  = makeColor 0.9 0.5 0.2 0.9
+interpretColour s =
+    let rgb = (readMaybe s :: Maybe (Float, Float, Float))
+    in case rgb of
+        Nothing -> makeColor 0.0 0.0 0.0 1.0
+        Just (r, g, b) -> makeColor r g b 1.0
+
 pictureTransformer :: B.Transform -> Picture -> Picture
 pictureTransformer (B.Transform (tx, ty) s) = translate tx ty . scale s s
 
-outColour, inColour, knobColour, cableColour, panelColour :: Color
-outColour = makeColor 0.9 0.1 0.1 1
-inColour = makeColor 0.2 0.2 0.2 1
-knobColour = makeColor 0.2 0.2 0.2 1
-cableColour = makeColor 0.8 0.6 0.2 0.9
+outColour, inColour, knobColour, panelColour :: Color
+outColour   = makeColor 0.9 0.1 0.1 1
+inColour    = makeColor 0.2 0.2 0.2 1
+knobColour  = makeColor 0.2 0.2 0.2 1
 panelColour = makeColor 0.98 0.98 0.95 1.0
 proxyColour, inertCableColour :: Color
 proxyColour = makeColor 0.4 0.6 1.0 1.0
@@ -35,14 +44,15 @@ inertCableColour = makeColor 0.7 0.7 0.7 1
 drawCable :: GlossWorld -> Point -> Bool -> Cable -> Picture
 drawCable w (x1, y1) active (Cable o) =
     let (x0, y0) = locById w o
+        cableColour = interpretColour (colourById w o)
     in color (if active then cableColour else inertCableColour) $
             B.curve 0.15 (x0, y0) (x1, y1)
 
 uiAngle :: Floating a => Maybe a -> Maybe a -> a -> a
 uiAngle (Just lo) (Just hi) v = -3.0+6.0*(v-lo)/(hi-lo)
-uiAngle (Just lo) Nothing v = -3.0+6.0*tanh (v-lo)
-uiAngle Nothing (Just hi) v = 3.0-6.0*tanh (hi-v)
-uiAngle Nothing Nothing v = 3.0*tanh v
+uiAngle (Just lo) Nothing v   = -3.0+6.0*tanh (v-lo)
+uiAngle Nothing (Just hi) v   = 3.0-6.0*tanh (hi-v)
+uiAngle Nothing Nothing v     = 3.0*tanh v
 
 rectAt :: Float -> Float -> Int -> Int -> Picture
 rectAt x y iw ih = translate x y (
@@ -56,13 +66,11 @@ proxyFeature = rect (-20, -20) (20, 20) <>
 
 drawUIElement :: Bool -> GlossWorld -> UIElement -> Picture
 -- Recurse into containers
-drawUIElement showingHidden world (Container { _parent = _
-                                             , _contents = c
-                                             , _pic = pic'
-                                             , _loc = (x, y)
-                                             , _highlighted = highlit
-                                             , _imageWidth = iw
-                                             , _imageHeight = ih }) =
+drawUIElement showingHidden world
+              Container { _contents = c
+                        , _pic = pic'            , _loc = (x, y)
+                        , _highlighted = highlit , _imageWidth = iw
+                        , _imageHeight = ih } =
         let (x', _, _) = unJust "drawUIElement"
                             (M.lookup pic' (world ^. pics))
         in translate x y x' <>
@@ -88,13 +96,13 @@ drawUIElement _ world (Image _ _ _ (x, y) _ picture _ _) =
             Nothing -> blank
             Just (x', _, _) -> x')
 
-drawUIElement _ _ (Out _ wasSelected _ (x, y) _displayName _) =
-    translate x y (color (selectColor wasSelected outColour) (
+drawUIElement _ _ (Out _ wasSelected _ (x, y) _displayName col) =
+    translate x y (color (selectColor wasSelected (interpretColour col)) (
       circleSolid 10 <>
-      color black (circleSolid 5)))
+      color (interpretColour col) (circleSolid 5)))
 
-drawUIElement _ world (In _ wasSelected _ (x, y) _ _ _ cableList) =
-    translate x y (color (selectColor wasSelected inColour) (
+drawUIElement _ world (In _ wasSelected _ (x, y) _ col _ cableList) =
+    translate x y (color (selectColor wasSelected (interpretColour col)) (
                 circleSolid 10 <>
                 color black (circleSolid 5))) <>
     mconcat (zipWith (drawCable world (x, y))
@@ -115,11 +123,11 @@ drawUIElement _ _ (Selector _ wasSelected _ (x, y) _ v opts) =
                         scale 0.15 0.15 (color black 
                                         (text (opts!!floor v)))))))
 
-drawUIElement _ _ (Knob _ wasSelected _ (x, y) _ _ v lo hi) =
+drawUIElement _ _ (Knob _ wasSelected _ (x, y) _ col _ v lo hi) =
         translate x y $
                     color (selectColor wasSelected knobColour) $
-            circle 16 <>
-            circleSolid 12 <>
+            circle 16 <> circleSolid 12 <>
+            color (interpretColour col) (circleSolid 2) <>
             let angle = uiAngle lo hi v
             in color white $ line [(0, 0), (16*sin angle, 16*cos angle)]
 

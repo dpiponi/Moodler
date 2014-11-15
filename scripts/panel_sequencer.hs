@@ -75,7 +75,9 @@ do
     in179 <- plugin' (sequencer128 ++ "." ++ "mode8") (x+(108.0), y+(-60.0)) container157
     hide in179
     in180 <- plugin' (sequencer128 ++ "." ++ "gate") (x+(-132.0), y+(-144.0)) container157
+    setColour in180 "#control"
     in181 <- plugin' (sequencer128 ++ "." ++ "add") (x+(-132.0), y+(-108.0)) container157
+    setColour in181 "#control"
     in182 <- plugin' (sequencer128 ++ "." ++ "slide_rate") (x+(29.0), y+(-158.0)) container157
     hide in182
     in183 <- plugin' (sequencer128 ++ "." ++ "length") (x+(29.0), y+(-108.0)) container157
@@ -94,7 +96,9 @@ do
     knob193 <- knob' (input78 ++ "." ++ "result") (x+(-144.0), y+(84.0)) container157
     knob194 <- knob' (input108 ++ "." ++ "result") (x+(12.0), y+(-144.0)) container157
     out195 <- plugout' (sequencer128 ++ "." ++ "result") (x+(156.0), y+(-144.0)) container157
+    setColour out195 "#control"
     out196 <- plugout' (sequencer128 ++ "." ++ "trigger") (x+(156.0), y+(-108.0)) container157
+    setColour out196 "#control"
     selector197 <- selector' (input111 ++ "." ++ "result") (x+(-108.0), y+(36.0)) ["1","2","3","4","5","6","7","8"] container157
     selector198 <- selector' (input112 ++ "." ++ "result") (x+(-72.0), y+(36.0)) ["repeat","slide","rest","hold"] container157
     selector199 <- selector' (input114 ++ "." ++ "result") (x+(-108.0), y+(-12.0)) ["1","2","3","4","5","6","7","8"] container157

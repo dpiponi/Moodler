@@ -36,7 +36,7 @@ findContainer es = do
     return (head a, b)
 
 handleDefault :: MoodlerM Zero
-handleDefault = handleDefault' =<< MoodlerM (liftF $ GetEvent id)
+handleDefault = handleDefault' =<< {-MoodlerM-} liftF (GetEvent id)
 
 -- Handle ordinary click on an In port.
 -- If there's a cable attached we start dragging it
@@ -111,9 +111,9 @@ hoverGadget (ex, ey) elt xform =
         )
 
 handleDefault' :: Event -> MoodlerM Zero
-handleDefault' (EventMotion (x, y)) = do
+handleDefault' (EventMotion p) = do
     selectionPlane <- use planes
-    maybeHoveringOver <- selectedByPoint selectionPlane (x, y)
+    maybeHoveringOver <- selectedByPoint selectionPlane p
     case maybeHoveringOver of
         Just hoveringOver -> do
             elt <- getElementById "HandleEvent.hs" hoveringOver
@@ -148,26 +148,24 @@ handleDefault' (EventKey (Char '/') Down _ _) = do
     rootTransform %= (B.Transform (0, 0) (1/1.5) <>)
     handleDefault
 
+-- XXX quantise
 handleDefault' (EventKey (Char 'l') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
     filename <- handleGetString allScripts "" "load: "
     liftIO $ putStrLn $ "filename = " ++ show filename
-    case filename of
-        Just filename' -> do
-            W.undoPoint
-            evalUi (U.load filename')
-        Nothing -> return ()
+    withJust filename $ \filename' -> do
+        W.undoPoint
+        evalUi (U.load filename')
     handleDefault
 
 handleDefault' (EventKey (Char 's') Down _ _) = do
     allSaves <- liftIO $ getAllScripts "saves"
     filename <- handleGetString allSaves "" "save: "
     liftIO $ putStrLn $ "filename = " ++ show filename
-    case filename of
-        Just filename' -> evalUi (U.save filename')
-        Nothing -> return ()
+    withJust filename $ \filename' -> evalUi (U.save filename')
     handleDefault
 
+-- XXX quantise
 handleDefault' (EventKey (Char 'w') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
     filename <- handleGetString allScripts "" "write: "
@@ -181,9 +179,9 @@ handleDefault' (EventKey (Char 'q') Down _ _) = do
     liftIO $ exitImmediately ExitSuccess
     handleDefault
 
-handleDefault' (EventKey (Char 'c') Down _ (x, y)) = do
+handleDefault' (EventKey (Char 'c') Down _ p) = do
     selectionPlane <- use planes
-    e <- selectedByPoint selectionPlane (x, y)
+    e <- selectedByPoint selectionPlane p
     case e of
         Just i -> do
             elt <- getElementById "handleDefault'" i
@@ -196,9 +194,9 @@ handleDefault' (EventKey (Char 'c') Down _ (x, y)) = do
                 _ -> handleDefault
         Nothing -> handleDefault
 
-handleDefault' (EventKey (Char '?') Down _ (x, y)) = do
+handleDefault' (EventKey (Char '?') Down _ p) = do
     selectionPlane <- use planes
-    e <- selectedByPoint selectionPlane (x, y)
+    e <- selectedByPoint selectionPlane p
     case e of
         Just i -> do
             elt <- getElementById "HandleEvent.hs" i
@@ -224,9 +222,9 @@ handleDefault' (EventKey (Char 't') Down _ labelLocation) = do
 -- Starts MultiSelection
 handleDefault' (EventKey (MouseButton LeftButton) Down
                     (Modifiers {alt = Up, shift = Down, ctrl = Up})
-                    (x,y)) = do
+                    p) = do
     selectionPlane <- use planes
-    e <- selectedByPoint selectionPlane (x, y)
+    e <- selectedByPoint selectionPlane p
     case e of
         Just i -> do
             --guiState .= MultiSelection (S.singleton i)
@@ -256,39 +254,39 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
         Nothing -> handleDraggingRegion p p
 
 handleDefault' (EventKey (MouseButton RightButton) Down
-    (Modifiers {alt = Down, shift = Up, ctrl = Up}) (x,y)) = do
+    (Modifiers {alt = Down, shift = Up, ctrl = Up}) p) = do
     selectionPlane <- use planes
-    e <- selectedByPoint selectionPlane (x, y)
+    e <- selectedByPoint selectionPlane p
     case e of
         Just i -> do
             f <- getElementById "HandleEvent.hs" i
             gadget .= \xform ->
                 pictureTransformer xform $
-                    translate x y
+                    uncurry translate p
                         (scale 0.05 0.05 (color black (text (show f))))
             handleDefault
         Nothing -> handleDefault
 
 -- Start ordinary selection drag to move
 handleDefault' (EventKey (MouseButton LeftButton) Down
-    (Modifiers {alt = Down, shift = Up, ctrl = Up}) (x,y)) = do
+    (Modifiers {alt = Down, shift = Up, ctrl = Up}) p) = do
     selectionPlane <- use planes
-    e <- selectedByPoint selectionPlane (x, y)
+    e <- selectedByPoint selectionPlane p
     sel <- use currentSelection
     case e of
         Just i ->
             if i `elem` sel
-                then handleDraggingSelection (x, y)
+                then handleDraggingSelection p
                 else do
                     doSelection i
-                    handleDraggingSelection (x, y)
-        Nothing -> handleDraggingRoot (x, y)
+                    handleDraggingSelection p
+        Nothing -> handleDraggingRoot p
 
 -- Cable drag with ctrl-mouse
 handleDefault' (EventKey (MouseButton LeftButton) Down
-        (Modifiers {alt = Up, ctrl = Down, shift = Up}) (x,y)) = do
+        (Modifiers {alt = Up, ctrl = Down, shift = Up}) p) = do
     selectionPlane <- use planes
-    e <- selectedByPoint selectionPlane (x, y)
+    e <- selectedByPoint selectionPlane p
     case e of
         Just i -> do
             elt <- getElementById "HandleEvent.hs" i
@@ -298,7 +296,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
                     handleDefault
                 Out {} -> do
                     highlightJust i
-                    handleDraggingCable i (x, y) (x, y)
+                    handleDraggingCable i p p
                 In {} -> do
                     doSelection i
                     handleDefault
@@ -307,10 +305,10 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
                     handleDefault
                 Knob {} -> do
                     highlightJust i
-                    handleDraggingCable i (x, y) (x, y)
+                    handleDraggingCable i p p
                 Selector {} -> do
                     highlightJust i
-                    handleDraggingCable i (x, y) (x, y)
+                    handleDraggingCable i p p
                 Label {} -> do
                     doSelection i
                     handleDefault
@@ -324,7 +322,7 @@ handleDefault' (EventKey key Down
     let (dx, dy) = getDirection key
     sel <- use currentSelection
     forM_ sel $ \e ->
-        (inner . uiElements) . ix e .loc %= \(x, y) -> (x+quantum*dx, y+quantum*dy)
+        (inner . uiElements) . ix e .loc += (quantum*dx, quantum*dy)
     handleDefault
 
 -- Use key binding.
@@ -339,9 +337,9 @@ handleDefault' _ =
     handleDefault
 
 handleDraggingRoot :: Point -> MoodlerM Zero
-handleDraggingRoot (x0, y0) = do
-    e <- MoodlerM (liftF $ GetEvent id)
-    handleDraggingRoot' (x0, y0) e
+handleDraggingRoot p0 = do
+    e <- {-MoodlerM-} liftF $ GetEvent id
+    handleDraggingRoot' p0 e
 
 handleDraggingRoot' :: Point -> Event -> MoodlerM Zero
 handleDraggingRoot' (x0, y0) (EventMotion (x1, y1)) = do
@@ -362,9 +360,9 @@ handleDraggingRoot' (x0, y0)
 
 handleDraggingRoot' a _ = handleDraggingRoot a
 
-dragElement :: [UiId] -> Float -> Float -> [UiId] -> MoodlerM ()
-dragElement top dx dy sel = forM_ sel $ \s -> do
-    inner . uiElements . ix s . loc %= \(x, y) -> (x+dx, y+dy)
+dragElement :: [UiId] -> Point -> [UiId] -> MoodlerM ()
+dragElement top d@(dx, dy) sel = forM_ sel $ \s -> do
+    inner . uiElements . ix s . loc += (dx, dy)
     elts <- use (inner . uiElements)
     let Just elt = M.lookup s elts
     case elt of
@@ -372,30 +370,30 @@ dragElement top dx dy sel = forM_ sel $ \s -> do
             -- If you drag a parent and its children then only the
             -- parent needs to be expicitly dragged.
             -- XXX use minimal parent func
-            dragElement top dx dy (filter (not . flip elem top) $
+            dragElement top d (filter (not . flip elem top) $
                                                         S.toList cts)
         _ -> return ()
 
 handleDraggingSelection :: Point ->
                            MoodlerM Zero
-handleDraggingSelection (x0', y0') = do
-    let (x0, y0) = quantise2 quantum (x0', y0')
-    e <- MoodlerM (liftF $ GetEvent id)
-    handleDraggingSelection' (x0, y0) e
+handleDraggingSelection p0' = do
+    let p0 = quantise2 quantum p0'
+    e <- {-MoodlerM-} liftF $ GetEvent id
+    handleDraggingSelection' p0 e
 
 -- Don't drag container AND its children XXX
 handleDraggingSelection' :: Point -> Event -> MoodlerM Zero
-handleDraggingSelection' (x0, y0) (EventMotion (x1', y1')) = do
-    let (x1, y1) = quantise2 quantum (x1', y1')
+handleDraggingSelection' p0 (EventMotion p1') = do
     sel <- use currentSelection
-    dragElement sel (x1-x0) (y1-y0) sel
-    handleDraggingSelection (x1, y1)
+    let p1 = quantise2 quantum p1'
+    dragElement sel (p1-p0) sel
+    handleDraggingSelection p1
 
-handleDraggingSelection' (x0, y0)
-    (EventKey (MouseButton LeftButton) Up _ (x1', y1')) = do
-    let (x1, y1) = quantise2 quantum (x1', y1')
+handleDraggingSelection' p0
+    (EventKey (MouseButton LeftButton) Up _ p1') = do
     sel <- use currentSelection
-    dragElement sel (x1-x0) (y1-y0) sel
+    let p1 = quantise2 quantum p1'
+    dragElement sel (p1-p0) sel
     handleDefault
 
 handleDraggingSelection' a _ = handleDraggingSelection a
@@ -412,24 +410,23 @@ selectEverythingInRegion p0 p1 = do
 handleDraggingRegion :: Point -> Point ->
                            MoodlerM Zero
 handleDraggingRegion p1 p2 = do
-    e <- MoodlerM (liftF $ GetEvent id)
+    e <- {-MoodlerM-} liftF $ GetEvent id
     handleDraggingRegion' p1 p2 e
 
 -- Mouse motion during region drag
 handleDraggingRegion' :: Point -> Point -> Event ->
                            MoodlerM Zero
-handleDraggingRegion' f z (EventMotion (x, y)) = do
-    --secondCorner .= (x, y)
+handleDraggingRegion' f z (EventMotion p) = do
     gadget .= \xform -> pictureTransformer xform $
-                                    color black (rect z (x, y))
-    selectEverythingInRegion f (x, y)
+                                    color black (rect z p)
+    selectEverythingInRegion f p
     handleDraggingRegion f z
 
 -- Finished dragging
 handleDraggingRegion' f _
-    (EventKey (MouseButton LeftButton) Up _ (x, y)) = do
-    if f /= (x, y)
-        then selectEverythingInRegion f (x, y)
+    (EventKey (MouseButton LeftButton) Up _ p) = do
+    if f /= p
+        then selectEverythingInRegion f p
         else do
             unhighlightEverything
             currentSelection .= []
@@ -440,7 +437,7 @@ handleDraggingRegion' a b _ = handleDraggingRegion a b
 
 handleDraggingCable :: UiId -> Point -> Point -> MoodlerM Zero
 handleDraggingCable src start end =
-    handleDraggingCable' src start end =<< MoodlerM (liftF $ GetEvent id)
+    handleDraggingCable' src start end =<< {-MoodlerM-} liftF (GetEvent id)
 
 cableGadget :: Point -> Point -> B.Transform -> Picture
 cableGadget p0 p1 xform = 
@@ -502,7 +499,7 @@ handleDraggingCable' _ _ _ e = handleDefault' e
 handleDraggingKnob :: UiId -> Float -> Point -> 
                         MoodlerM Zero
 handleDraggingKnob selectedKnob v (x0, y0) = do
-    e <- MoodlerM (liftF $ GetEvent id)
+    e <- {-MoodlerM-} liftF $ GetEvent id
     handleDraggingKnob' selectedKnob v (x0, y0) e
 
 knobMapping :: Float -> Point -> Float

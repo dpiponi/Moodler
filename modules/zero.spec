@@ -4,6 +4,6 @@ void init() {
     result = 0.0;
 }
 
-void exec(out result) {
+void exec(out sample result) {
     result = 0.0;
 }

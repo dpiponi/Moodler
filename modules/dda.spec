@@ -10,11 +10,11 @@ void init() {
    last_reset = 0.0;
 }
 
-void exec(in reset,
-          in clock,
-          in phase,
-          in dy,
-          out trigger) {
+void exec(in control reset,
+          in control clock,
+          in control phase,
+          in control dy,
+          out control trigger) {
     {
         if (trigger >= 0.0) {
             trigger = 0.0;

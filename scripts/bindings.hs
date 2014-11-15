@@ -17,6 +17,8 @@ do
     bind '=' "setvalue"
     bind '|' "quantise"
     bind '!' "alert"
+    bind '%' "setcolour"
+    bind '~' "container"
 
     bind 'A' "noteA"
     bind 'B' "noteB"

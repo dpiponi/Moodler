@@ -4,7 +4,7 @@ void init() {
     result = 0.0;
 }
 
-void exec(in multiplies, in symmetry, in level, in signal, out result) {
+void exec(in control multiplies, in control symmetry, in control level, in sample signal, out sample result) {
     {
         double x0 = multiplies*signal;
         double x1 = reflect_below(symmetry-level, x0);

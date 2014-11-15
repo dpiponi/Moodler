@@ -11,6 +11,9 @@
     * A̶u̶t̶o̶m̶a̶t̶i̶c̶ ̶r̶e̶c̶t̶a̶n̶g̶l̶e̶s̶ ̶f̶o̶r̶ ̶t̶e̶x̶t̶
     * Tooltips for input may be better above or below
     * More flexible bindings (modifiers, maybe multi-char)
+    * C̶o̶l̶o̶u̶r̶e̶d̶ ̶i̶n̶s̶,̶ ̶o̶u̶t̶s̶,̶ ̶c̶a̶b̶l̶e̶s̶
+    * Current project name. Used if filename = ""
+    * Proxy picture?
 * moodler
     * Sort out module init
     * s̶y̶n̶t̶h̶ ̶d̶e̶l̶e̶t̶e̶
@@ -21,5 +24,7 @@
     * local enums?
     * c̶o̶m̶m̶e̶n̶t̶s̶ ̶i̶n̶ ̶m̶o̶d̶u̶l̶e̶s̶
     * e̶x̶t̶r̶a̶c̶t̶ ̶t̶y̶p̶e̶ ̶i̶n̶f̶o̶r̶m̶a̶t̶i̶o̶n̶ ̶f̶o̶r̶ ̶i̶n̶s̶ ̶a̶n̶d̶ ̶o̶u̶t̶s̶
+    * C̶o̶l̶o̶u̶r̶ ̶i̶n̶s̶ ̶a̶n̶d̶ ̶o̶u̶t̶s̶
 * modules
     * Why does chorus have long delay?
+    * Make bounce more efficient.

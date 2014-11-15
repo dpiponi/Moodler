@@ -3,6 +3,6 @@ double result;
 void init() {
 }
 
-void exec(in cv, in signal, out result) {
+void exec(in control cv, in sample signal, out sample result) {
     result = cv*signal;
 }

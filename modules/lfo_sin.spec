@@ -7,7 +7,7 @@ void init() {
     phase = 0;
 }
 
-void exec(in rate, in sync, out result) {
+void exec(in control rate, in control sync, out control result) {
     {
         if (last_sync <= 0 && sync > 0) {
             phase = 0.0;

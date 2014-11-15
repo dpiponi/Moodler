@@ -10,10 +10,10 @@ void init() {
     phase = 0;
 }
 
-void exec(in sync, in freq, 
-          in linear_fm,
-          in pulse_width,
-          out result, out square, out triangle, out saw) {
+void exec(in control sync, in control freq, 
+          in sample linear_fm,
+          in control pulse_width,
+          out sample result, out sample square, out sample triangle, out sample saw) {
     {
         if (last_sync <= 0 && sync > 0) {
             phase = 0.0;
@@ -25,7 +25,7 @@ void exec(in sync, in freq,
         saw = saw_wave(tphase);
 
         double f = signal_to_frequency(freq);
-        if (0) printf("vco period in samples = %lf\n", 1/(dt*f));
+        if (0) printf("vco period in sample samples = %lf\n", 1/(dt*f));
         phase += 2*M_PI*f*dt;
         last_sync = sync;
     }

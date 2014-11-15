@@ -7,7 +7,7 @@ void init() {
     started = 1.0;
 }
 
-void exec(in freq, in sync, out result) {
+void exec(in control freq, in sample sync, out sample result) {
     {
         if (!started) {
             init_sin(&sin_state);

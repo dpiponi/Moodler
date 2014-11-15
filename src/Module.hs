@@ -6,7 +6,7 @@ import Control.Monad.State
 import Control.Monad.Trans.Either
 import Control.Monad.Writer
 import Data.Maybe
-import Language.C.Data.Ident
+--import Language.C.Data.Ident
 import Language.C.Data.Name
 import Language.C.Data.Node
 import Language.C.Data.Position
@@ -19,7 +19,7 @@ import qualified Data.Map as M
 import Language.Preprocessor.Cpphs
 import Data.Tuple
 import System.FilePath.Posix
-import Language.C.Pretty
+--import Language.C.Pretty
 
 import Text
 
@@ -83,21 +83,29 @@ synthScript synthName ins outs = do
         synthPreamble panelName synthName topOffset
         forM_ (zip [inOffset, inOffset+50 ..] ins) $
                                     \(offset, (inputType, eachInput)) -> do
-             tellInd 4 $ unwords [ "--", show (pretty (plop inputType))]
              tellInd 4 $ unwords
                     [ "inp <- plugin' (name ++",
                       show ("." ++ eachInput) ++ ")",
                       xyoffset (-21, -offset),
                       "plane" ]
+             let inCol = getColourFromCDecl inputType
+             case inCol of
+                Nothing -> return ()
+                Just col ->
+                 tellInd 4 $ unwords [ "setColour", "inp", show col]
              tellInd 4 "parent panel inp"
         forM_ (zip [outOffset, outOffset+50 ..] outs) $
                                     \(offset, (outputType, eachOutput)) -> do
-             tellInd 4 $ unwords [ "--", show (pretty (plop outputType))]
              tellInd 4 $ unwords
                     [ "out <- plugout' (name ++ ",
                       show ("." ++ eachOutput) ++ ")",
                       xyoffset (20, -offset),
                       "plane" ]
+             let outCol = getColourFromCDecl outputType
+             case outCol of
+                Nothing -> return ()
+                Just col ->
+                 tellInd 4 $ unwords [ "setColour", "out", show col]
              tellInd 4 "parent panel out"
         tellInd 4 "recompile"
         tellInd 4 "return ()"
@@ -109,10 +117,18 @@ loadNodeType dir fileName' = do
     code <- liftIO $ runCpphs
                      defaultCpphsOptions -- XXX Use `defines` to set "out"
                      { boolopts = defaultBoolOptions { locations = False
-                     , stripC89 = True } } fileName rawCode
+                                                     , stripC89 = True
+                                                     }
+                     , defines =
+                        [ ("in", "__attribute__((direction(\"in\")))")
+                        , ("out", "__attribute__((direction(\"out\")))")
+                        , ("sample", "__attribute__((colour(\"#sample\"))) double")
+                        , ("control", "__attribute__((colour(\"#control\"))) double")
+                        ]
+                     } fileName rawCode
     liftIO $ putStrLn "Parsing:"
     liftIO $ putStr code
-    let typeNames = [builtinIdent "in", builtinIdent "out"] ++
+    let typeNames = [] ++
                     builtinTypeNames
     let input = B.pack code
     let pos = position 0 "" 0 0

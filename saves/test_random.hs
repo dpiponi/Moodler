@@ -13,7 +13,7 @@ do
     input14 <- new' "input"
     input15 <- new' "input"
     input16 <- new' "input"
-    input18 <- new' "input"
+    input17 <- new' "input"
     input3 <- new' "input"
     input4 <- new' "input"
     input5 <- new' "input"
@@ -23,188 +23,247 @@ do
     input9 <- new' "input"
     new "input" "keyboard"
     let keyboard = "keyboard"
-    ladder19 <- new' "ladder"
-    noise21 <- new' "noise"
-    poisson22 <- new' "poisson"
-    random23 <- new' "random"
+    ladder18 <- new' "ladder"
+    noise19 <- new' "noise"
+    poisson20 <- new' "poisson"
+    random21 <- new' "random"
+    sum22 <- new' "sum"
+    sum23 <- new' "sum"
     sum24 <- new' "sum"
     sum25 <- new' "sum"
     sum26 <- new' "sum"
-    sum27 <- new' "sum"
-    sum28 <- new' "sum"
     new "input" "trigger"
     let trigger = "trigger"
+    vca27 <- new' "vca"
+    vca28 <- new' "vca"
     vca29 <- new' "vca"
     vca30 <- new' "vca"
     vca31 <- new' "vca"
     vca32 <- new' "vca"
-    vca33 <- new' "vca"
-    vca34 <- new' "vca"
-    container35 <- container' "panel_3x1.bmp" (84.0,72.0) root
-    in36 <- plugin' (vca29 ++ "." ++ "cv") (60.0,96.0) container35
-    in37 <- plugin' (vca29 ++ "." ++ "signal") (60.0,48.0) container35
-    label38 <- label' "vca" (60.0,144.0) container35
-    out39 <- plugout' (vca29 ++ "." ++ "result") (108.0,72.0) container35
-    container40 <- container' "panel_3x1.bmp" (348.0,72.0) root
-    in41 <- plugin' (vca30 ++ "." ++ "cv") (306.0,94.0) container40
-    hide in41
-    in42 <- plugin' (vca30 ++ "." ++ "signal") (324.0,48.0) container40
-    knob43 <- knob' (input5 ++ "." ++ "result") (324.0,96.0) container40
-    label44 <- label' "vca" (300.0,144.0) container40
-    out45 <- plugout' (vca30 ++ "." ++ "result") (372.0,72.0) container40
-    container54 <- container' "panel_ladder.bmp" (216.0,72.0) root
-    in55 <- plugin' (ladder19 ++ "." ++ "signal") (168.0,-48.0) container54
-    in56 <- plugin' (sum28 ++ "." ++ "signal1") (253.0,149.0) container54
+    container33 <- container' "panel_3x1.bmp" (84.0,72.0) root
+    in34 <- plugin' (vca27 ++ "." ++ "cv") (60.0,96.0) container33
+    setColour in34 "#control"
+    in35 <- plugin' (vca27 ++ "." ++ "signal") (60.0,48.0) container33
+    setColour in35 "#sample"
+    label36 <- label' "vca" (60.0,144.0) container33
+    out37 <- plugout' (vca27 ++ "." ++ "result") (108.0,72.0) container33
+    setColour out37 "#sample"
+    container38 <- container' "panel_3x1.bmp" (348.0,72.0) root
+    in39 <- plugin' (vca28 ++ "." ++ "cv") (306.0,94.0) container38
+    setColour in39 "#sample"
+    hide in39
+    in40 <- plugin' (vca28 ++ "." ++ "signal") (324.0,48.0) container38
+    setColour in40 "#sample"
+    knob41 <- knob' (input13 ++ "." ++ "result") (324.0,96.0) container38
+    label42 <- label' "vca" (300.0,144.0) container38
+    out43 <- plugout' (vca28 ++ "." ++ "result") (372.0,72.0) container38
+    setColour out43 "#sample"
+    container44 <- container' "panel_ladder.bmp" (216.0,72.0) root
+    in45 <- plugin' (ladder18 ++ "." ++ "signal") (168.0,-48.0) container44
+    setColour in45 "#sample"
+    in46 <- plugin' (sum26 ++ "." ++ "signal1") (253.0,149.0) container44
+    setColour in46 "#sample"
+    hide in46
+    in47 <- plugin' (sum26 ++ "." ++ "signal2") (216.0,144.0) container44
+    setColour in47 "#control"
+    in48 <- plugin' (ladder18 ++ "." ++ "freq") (227.0,103.0) container44
+    setColour in48 "#sample"
+    hide in48
+    in49 <- plugin' (ladder18 ++ "." ++ "res") (250.0,66.0) container44
+    setColour in49 "#sample"
+    hide in49
+    knob50 <- knob' (input4 ++ "." ++ "result") (264.0,84.0) container44
+    knob51 <- knob' (input5 ++ "." ++ "result") (264.0,144.0) container44
+    out52 <- plugout' (ladder18 ++ "." ++ "result") (264.0,-48.0) container44
+    setColour out52 "#sample"
+    out53 <- plugout' (sum26 ++ "." ++ "result") (169.0,106.0) container44
+    setColour out53 "#sample"
+    hide out53
+    container54 <- container' "panel_adsr.bmp" (-48.0,72.0) root
+    in55 <- plugin' (adsr0 ++ "." ++ "attack") (-64.0,129.0) container54
+    setColour in55 "#sample"
+    hide in55
+    in56 <- plugin' (adsr0 ++ "." ++ "decay") (-11.0,146.0) container54
+    setColour in56 "#sample"
     hide in56
-    in57 <- plugin' (sum28 ++ "." ++ "signal2") (216.0,144.0) container54
-    in58 <- plugin' (ladder19 ++ "." ++ "freq") (227.0,103.0) container54
+    in57 <- plugin' (adsr0 ++ "." ++ "sustain") (-11.0,96.0) container54
+    setColour in57 "#sample"
+    hide in57
+    in58 <- plugin' (adsr0 ++ "." ++ "release") (-11.0,46.0) container54
+    setColour in58 "#sample"
     hide in58
-    in59 <- plugin' (ladder19 ++ "." ++ "res") (250.0,66.0) container54
-    hide in59
-    knob60 <- knob' (input11 ++ "." ++ "result") (264.0,84.0) container54
-    knob61 <- knob' (input12 ++ "." ++ "result") (264.0,144.0) container54
-    out62 <- plugout' (ladder19 ++ "." ++ "result") (264.0,-48.0) container54
-    out63 <- plugout' (sum28 ++ "." ++ "result") (169.0,106.0) container54
-    hide out63
-    container64 <- container' "panel_adsr.bmp" (-48.0,72.0) root
-    in65 <- plugin' (adsr0 ++ "." ++ "attack") (-64.0,129.0) container64
-    hide in65
-    in66 <- plugin' (adsr0 ++ "." ++ "decay") (-11.0,146.0) container64
+    in59 <- plugin' (adsr0 ++ "." ++ "gate") (-12.0,0.0) container54
+    setColour in59 "#control"
+    knob60 <- knob' (input6 ++ "." ++ "result") (-72.0,132.0) container54
+    knob61 <- knob' (input7 ++ "." ++ "result") (-12.0,132.0) container54
+    knob62 <- knob' (input9 ++ "." ++ "result") (-72.0,84.0) container54
+    knob63 <- knob' (input8 ++ "." ++ "result") (-12.0,84.0) container54
+    out64 <- plugout' (adsr0 ++ "." ++ "result") (-12.0,-36.0) container54
+    setColour out64 "#control"
+    container65 <- container' "panel_random.bmp" (-264.0,72.0) root
+    in66 <- plugin' (vca30 ++ "." ++ "cv") (-342.0,48.0) container65
+    setColour in66 "#sample"
     hide in66
-    in67 <- plugin' (adsr0 ++ "." ++ "sustain") (-11.0,96.0) container64
-    hide in67
-    in68 <- plugin' (adsr0 ++ "." ++ "release") (-11.0,46.0) container64
+    in67 <- plugin' (vca30 ++ "." ++ "signal") (-348.0,36.0) container65
+    setColour in67 "#control"
+    in68 <- plugin' (sum23 ++ "." ++ "signal1") (-235.0,-3.0) container65
+    setColour in68 "#sample"
     hide in68
-    in69 <- plugin' (adsr0 ++ "." ++ "gate") (-12.0,0.0) container64
-    knob70 <- knob' (input13 ++ "." ++ "result") (-72.0,132.0) container64
-    knob71 <- knob' (input14 ++ "." ++ "result") (-12.0,132.0) container64
-    knob72 <- knob' (input16 ++ "." ++ "result") (-72.0,84.0) container64
-    knob73 <- knob' (input15 ++ "." ++ "result") (-12.0,84.0) container64
-    out74 <- plugout' (adsr0 ++ "." ++ "result") (-12.0,-36.0) container64
-    container75 <- container' "panel_random.bmp" (-264.0,72.0) root
-    in76 <- plugin' (vca32 ++ "." ++ "cv") (-342.0,48.0) container75
-    hide in76
-    in77 <- plugin' (vca32 ++ "." ++ "signal") (-348.0,36.0) container75
-    in78 <- plugin' (sum25 ++ "." ++ "signal1") (-235.0,-3.0) container75
+    in69 <- plugin' (sum23 ++ "." ++ "signal2") (-269.0,-1.0) container65
+    setColour in69 "#sample"
+    hide in69
+    in70 <- plugin' (vca31 ++ "." ++ "cv") (-290.0,-2.0) container65
+    setColour in70 "#sample"
+    hide in70
+    in71 <- plugin' (vca31 ++ "." ++ "signal") (-348.0,-12.0) container65
+    setColour in71 "#control"
+    in72 <- plugin' (poisson20 ++ "." ++ "rate") (-175.0,4.0) container65
+    setColour in72 "#sample"
+    hide in72
+    in73 <- plugin' (sum24 ++ "." ++ "signal1") (-249.0,125.0) container65
+    setColour in73 "#sample"
+    hide in73
+    in74 <- plugin' (sum24 ++ "." ++ "signal2") (-176.0,128.0) container65
+    setColour in74 "#sample"
+    hide in74
+    in75 <- plugin' (vca32 ++ "." ++ "cv") (-264.0,80.0) container65
+    setColour in75 "#sample"
+    hide in75
+    in76 <- plugin' (vca32 ++ "." ++ "signal") (-348.0,132.0) container65
+    setColour in76 "#control"
+    in77 <- plugin' (butterlp2 ++ "." ++ "freq") (-174.0,140.0) container65
+    setColour in77 "#sample"
+    hide in77
+    in78 <- plugin' (butterlp2 ++ "." ++ "signal") (-237.0,121.0) container65
+    setColour in78 "#sample"
     hide in78
-    in79 <- plugin' (sum25 ++ "." ++ "signal2") (-269.0,-1.0) container75
+    in79 <- plugin' (butterhp1 ++ "." ++ "freq") (-175.0,91.0) container65
+    setColour in79 "#sample"
     hide in79
-    in80 <- plugin' (vca33 ++ "." ++ "cv") (-290.0,-2.0) container75
+    in80 <- plugin' (butterhp1 ++ "." ++ "signal") (-177.0,85.0) container65
+    setColour in80 "#sample"
     hide in80
-    in81 <- plugin' (vca33 ++ "." ++ "signal") (-348.0,-12.0) container75
-    in82 <- plugin' (poisson22 ++ "." ++ "rate") (-175.0,4.0) container75
+    in81 <- plugin' (sum25 ++ "." ++ "signal1") (-296.0,82.0) container65
+    setColour in81 "#sample"
+    hide in81
+    in82 <- plugin' (sum25 ++ "." ++ "signal2") (-177.0,80.0) container65
+    setColour in82 "#sample"
     hide in82
-    in83 <- plugin' (sum26 ++ "." ++ "signal1") (-249.0,125.0) container75
+    in83 <- plugin' (random21 ++ "." ++ "rate") (-227.0,36.0) container65
+    setColour in83 "#sample"
     hide in83
-    in84 <- plugin' (sum26 ++ "." ++ "signal2") (-176.0,128.0) container75
+    in84 <- plugin' (vca29 ++ "." ++ "cv") (-267.0,79.0) container65
+    setColour in84 "#sample"
     hide in84
-    in85 <- plugin' (vca34 ++ "." ++ "cv") (-264.0,80.0) container75
-    hide in85
-    in86 <- plugin' (vca34 ++ "." ++ "signal") (-348.0,132.0) container75
-    in87 <- plugin' (butterlp2 ++ "." ++ "freq") (-174.0,140.0) container75
+    in85 <- plugin' (vca29 ++ "." ++ "signal") (-348.0,84.0) container65
+    setColour in85 "#control"
+    in86 <- plugin' (sum22 ++ "." ++ "signal1") (-241.0,42.0) container65
+    setColour in86 "#sample"
+    hide in86
+    in87 <- plugin' (sum22 ++ "." ++ "signal2") (-173.0,36.0) container65
+    setColour in87 "#sample"
     hide in87
-    in88 <- plugin' (butterlp2 ++ "." ++ "signal") (-237.0,121.0) container75
-    hide in88
-    in89 <- plugin' (butterhp1 ++ "." ++ "freq") (-175.0,91.0) container75
-    hide in89
-    in90 <- plugin' (butterhp1 ++ "." ++ "signal") (-177.0,85.0) container75
-    hide in90
-    in91 <- plugin' (sum27 ++ "." ++ "signal1") (-296.0,82.0) container75
-    hide in91
-    in92 <- plugin' (sum27 ++ "." ++ "signal2") (-177.0,80.0) container75
-    hide in92
-    in93 <- plugin' (random23 ++ "." ++ "rate") (-227.0,36.0) container75
-    hide in93
-    in94 <- plugin' (vca31 ++ "." ++ "cv") (-267.0,79.0) container75
-    hide in94
-    in95 <- plugin' (vca31 ++ "." ++ "signal") (-348.0,84.0) container75
-    in96 <- plugin' (sum24 ++ "." ++ "signal1") (-241.0,42.0) container75
-    hide in96
-    in97 <- plugin' (sum24 ++ "." ++ "signal2") (-173.0,36.0) container75
-    hide in97
-    knob100 <- knob' (input8 ++ "." ++ "result") (-264.0,36.0) container75
-    knob101 <- knob' (input9 ++ "." ++ "result") (-312.0,36.0) container75
-    knob102 <- knob' (input10 ++ "." ++ "result") (-264.0,-12.0) container75
-    knob103 <- knob' (input18 ++ "." ++ "result") (-312.0,-12.0) container75
-    knob104 <- knob' (input3 ++ "." ++ "result") (-264.0,132.0) container75
-    knob105 <- knob' (input4 ++ "." ++ "result") (-312.0,132.0) container75
-    knob98 <- knob' (input6 ++ "." ++ "result") (-264.0,84.0) container75
-    knob99 <- knob' (input7 ++ "." ++ "result") (-312.0,84.0) container75
-    out106 <- plugout' (sum27 ++ "." ++ "result") (-250.0,84.0) container75
-    hide out106
-    out107 <- plugout' (vca31 ++ "." ++ "result") (-271.0,75.0) container75
-    hide out107
-    out108 <- plugout' (sum24 ++ "." ++ "result") (-256.0,37.0) container75
-    hide out108
-    out109 <- plugout' (vca32 ++ "." ++ "result") (-268.0,34.0) container75
-    hide out109
-    out110 <- plugout' (sum25 ++ "." ++ "result") (-253.0,-2.0) container75
-    hide out110
-    out111 <- plugout' (vca33 ++ "." ++ "result") (-269.0,-2.0) container75
-    hide out111
-    out112 <- plugout' (random23 ++ "." ++ "result") (-168.0,36.0) container75
-    out113 <- plugout' (poisson22 ++ "." ++ "trigger") (-168.0,-12.0) container75
-    out114 <- plugout' (sum26 ++ "." ++ "result") (-256.0,135.0) container75
-    hide out114
-    out115 <- plugout' (vca34 ++ "." ++ "result") (-267.0,126.0) container75
-    hide out115
-    out116 <- plugout' (noise21 ++ "." ++ "result") (-168.0,180.0) container75
-    out117 <- plugout' (butterlp2 ++ "." ++ "result") (-168.0,132.0) container75
-    out118 <- plugout' (butterhp1 ++ "." ++ "result") (-168.0,84.0) container75
-    in119 <- plugin' (out ++ "." ++ "value") (564.0,72.0) root
-    out120 <- plugout' (keyboard ++ "." ++ "result") (-492.0,132.0) root
-    out121 <- plugout' (trigger ++ "." ++ "result") (-492.0,24.0) root
-    cable out74 in36
-    cable out116 in37
-    cable knob43 in41
-    cable out62 in42
-    cable out39 in55
+    knob88 <- knob' (input16 ++ "." ++ "result") (-264.0,36.0) container65
+    knob89 <- knob' (input17 ++ "." ++ "result") (-312.0,36.0) container65
+    knob90 <- knob' (input3 ++ "." ++ "result") (-264.0,-12.0) container65
+    knob91 <- knob' (input10 ++ "." ++ "result") (-312.0,-12.0) container65
+    knob92 <- knob' (input11 ++ "." ++ "result") (-264.0,132.0) container65
+    knob93 <- knob' (input12 ++ "." ++ "result") (-312.0,132.0) container65
+    knob94 <- knob' (input14 ++ "." ++ "result") (-264.0,84.0) container65
+    knob95 <- knob' (input15 ++ "." ++ "result") (-312.0,84.0) container65
+    out100 <- plugout' (sum23 ++ "." ++ "result") (-253.0,-2.0) container65
+    setColour out100 "#sample"
+    hide out100
+    out101 <- plugout' (vca31 ++ "." ++ "result") (-269.0,-2.0) container65
+    setColour out101 "#sample"
+    hide out101
+    out102 <- plugout' (random21 ++ "." ++ "result") (-168.0,36.0) container65
+    setColour out102 "#control"
+    out103 <- plugout' (poisson20 ++ "." ++ "trigger") (-168.0,-12.0) container65
+    setColour out103 "#control"
+    out104 <- plugout' (sum24 ++ "." ++ "result") (-256.0,135.0) container65
+    setColour out104 "#sample"
+    hide out104
+    out105 <- plugout' (vca32 ++ "." ++ "result") (-267.0,126.0) container65
+    setColour out105 "#sample"
+    hide out105
+    out106 <- plugout' (noise19 ++ "." ++ "result") (-168.0,180.0) container65
+    setColour out106 "#sample"
+    out107 <- plugout' (butterlp2 ++ "." ++ "result") (-168.0,132.0) container65
+    setColour out107 "#sample"
+    out108 <- plugout' (butterhp1 ++ "." ++ "result") (-168.0,84.0) container65
+    setColour out108 "#sample"
+    out96 <- plugout' (sum25 ++ "." ++ "result") (-250.0,84.0) container65
+    setColour out96 "#sample"
+    hide out96
+    out97 <- plugout' (vca29 ++ "." ++ "result") (-271.0,75.0) container65
+    setColour out97 "#sample"
+    hide out97
+    out98 <- plugout' (sum22 ++ "." ++ "result") (-256.0,37.0) container65
+    setColour out98 "#sample"
+    hide out98
+    out99 <- plugout' (vca30 ++ "." ++ "result") (-268.0,34.0) container65
+    setColour out99 "#sample"
+    hide out99
+    in109 <- plugin' (out ++ "." ++ "value") (564.0,72.0) root
+    setColour in109 "#sample"
+    out110 <- plugout' (keyboard ++ "." ++ "result") (-492.0,132.0) root
+    setColour out110 "#sample"
+    out111 <- plugout' (trigger ++ "." ++ "result") (-492.0,24.0) root
+    setColour out111 "#sample"
+    cable out64 in34
+    cable out106 in35
+    cable knob41 in39
+    cable out52 in40
+    cable out37 in45
+    cable knob51 in46
+    cable out102 in47
+    cable out53 in48
+    cable knob50 in49
+    cable knob60 in55
     cable knob61 in56
-    cable out112 in57
-    cable out63 in58
-    cable knob60 in59
-    cable knob70 in65
-    cable knob71 in66
-    cable knob72 in67
-    cable knob73 in68
-    cable out113 in69
-    cable knob101 in76
-    cable knob102 in78
-    cable out111 in79
-    cable knob103 in80
-    cable out110 in82
-    cable knob104 in83
-    cable out115 in84
-    cable knob105 in85
-    cable out114 in87
-    cable out116 in88
-    cable out106 in89
-    cable out116 in90
-    cable knob98 in91
-    cable out107 in92
-    cable out108 in93
-    cable knob99 in94
-    cable knob100 in96
-    cable out109 in97
-    cable out45 in119
+    cable knob62 in57
+    cable knob63 in58
+    cable out103 in59
+    cable knob89 in66
+    cable knob90 in68
+    cable out101 in69
+    cable knob91 in70
+    cable out100 in72
+    cable knob92 in73
+    cable out105 in74
+    cable knob93 in75
+    cable out104 in77
+    cable out106 in78
+    cable out96 in79
+    cable out106 in80
+    cable knob94 in81
+    cable out97 in82
+    cable out98 in83
+    cable knob95 in84
+    cable knob88 in86
+    cable out99 in87
+    cable out43 in109
     recompile
-    set knob43 (5.0)
-    set knob60 (3.5)
-    set knob61 (0.21883485)
-    set knob70 (0.0)
-    set knob71 (0.16)
-    set knob72 (1.0)
-    set knob73 (0.30529472)
-    set knob100 (0.1)
-    set knob101 (0.0)
-    set knob102 (2.0)
-    set knob103 (0.0)
-    set knob104 (0.0)
-    set knob105 (0.0)
-    set knob98 (0.0)
-    set knob99 (0.0)
+    set knob41 (5.0)
+    set knob50 (3.5)
+    set knob51 (0.21883485)
+    set knob60 (0.0)
+    set knob61 (0.16)
+    set knob62 (1.0)
+    set knob63 (0.30529472)
+    set knob88 (0.19)
+    set knob89 (0.0)
+    set knob90 (2.0)
+    set knob91 (0.0)
+    set knob92 (0.0)
+    set knob93 (0.0)
+    set knob94 (0.0)
+    set knob95 (0.0)
     return ()
+    bind '!' "alert"
     bind '#' "sharpen"
+    bind '%' "setcolour"
     bind '-' "setmin"
     bind '0' "setzero"
     bind '1' "setone"

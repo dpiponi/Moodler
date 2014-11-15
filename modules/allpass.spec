@@ -9,7 +9,7 @@ void init() {
     result = 0.0;
 }
 
-void exec(in freq, in signal, out result) {
+void exec(in control freq, in sample signal, out sample result) {
     {
         double f = signal_to_frequency(freq);
 

@@ -14,6 +14,7 @@ import UIElement
 import Symbols
 import Utils
 import Wiring
+--import Control.Monad.Morph
 
 -- XXX Could be argued that it should be impossible to
 -- call checkExists and get False back.

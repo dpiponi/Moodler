@@ -30,6 +30,7 @@ data Ui a = Return a
           | Args ([String] -> Ui a)
           | NewId String (UiId -> Ui a)
           | Set UiId Float (Ui a)
+          | SetColour UiId String (Ui a)
           | SetLow UiId (Maybe Float) (Ui a)
           | SetHigh UiId (Maybe Float) (Ui a)
           -- | Value String Float (Ui a)
@@ -83,6 +84,7 @@ instance Monad Ui where
     GetRoot cont >>= f = GetRoot ((>>= f) . cont)
     NewId s1 cont >>= f = NewId s1 ((>>= f) . cont)
     Set t v cont >>= f = Set t v (cont >>= f)
+    SetColour t v cont >>= f = SetColour t v (cont >>= f)
     SetLow t v cont >>= f = SetLow t v (cont >>= f)
     SetHigh t v cont >>= f = SetHigh t v (cont >>= f)
     --Value t v cont >>= f = Value t v (cont >>= f)
@@ -122,16 +124,11 @@ new' s1 = do
 echo :: String -> Ui ()
 echo t = Echo t (return ())
 
-r, ru, run :: String -> [String] -> Ui ()
+run :: String -> [String] -> Ui ()
 run t ss = Run t ss (return ())
-r = run
-ru = run
 
-l, lo, loa, load :: String -> Ui ()
+load :: String -> Ui ()
 load t = Load t (return ())
-l = load
-lo = load
-loa = load
 
 plugin :: UiId -> String -> (Float, Float) -> UiId -> Ui UiId
 plugin s1 s2 p creationParent = PlugIn s1 s2 p creationParent return
@@ -228,6 +225,9 @@ newId s1 = NewId s1 return
 
 set :: UiId -> Float -> Ui ()
 set t v = Set t v (return ())
+
+setColour :: UiId -> String -> Ui ()
+setColour t v = SetColour t v (return ())
 
 setLow :: UiId -> Maybe Float -> Ui ()
 setLow t v = SetLow t v (return ())

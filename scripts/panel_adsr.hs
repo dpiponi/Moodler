@@ -17,11 +17,13 @@ do
     in192 <- plugin' (adsr183 ++ "." ++ "release") (x+(25.0), y+(-26.0)) container188
     hide in192
     in193 <- plugin' (adsr183 ++ "." ++ "gate") (x+(36.0), y+(-72.0)) container188
+    setColour in193 "#control"
     knob194 <- knob' (input184 ++ "." ++ "result") (x+(-24.0), y+(60.0)) container188
     knob195 <- knob' (input185 ++ "." ++ "result") (x+(36.0), y+(60.0)) container188
     knob196 <- knob' (input187 ++ "." ++ "result") (x+(-24.0), y+(12.0)) container188
     knob197 <- knob' (input186 ++ "." ++ "result") (x+(36.0), y+(12.0)) container188
     out198 <- plugout' (adsr183 ++ "." ++ "result") (x+(36.0), y+(-108.0)) container188
+    setColour out198 "#control"
     cable knob194 in189
     cable knob195 in190
     cable knob196 in191

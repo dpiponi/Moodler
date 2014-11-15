@@ -8,7 +8,7 @@ void init() {
     memset(delay_line, 0, 0x80000*sizeof(double));
 }
 
-void exec(in delay, in signal, out result) {
+void exec(in control delay, in sample signal, out sample result) {
     {
     int x0, x1, ipart;
     float this_delay, lambda;

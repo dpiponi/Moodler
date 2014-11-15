@@ -17,7 +17,7 @@ void init() {
     intercept = 0.0;
 }
 
-void exec(in freq, in sync, out result) {
+void exec(in control freq, in sample sync, out sample result) {
     {
         if (!started) {
             init_band_limited(&limited);
@@ -69,7 +69,7 @@ void exec(in freq, in sync, out result) {
         }
 
         result = get_sample(&limited);
-        printf("x=<%f>\n", result);
+        /* printf("x=<%f>\n", result); */
 
         ++this_sample;
 

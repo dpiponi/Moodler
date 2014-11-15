@@ -11,8 +11,8 @@ void init() {
     state = RELEASE;
 }
 
-void exec(in attack, in decay, in sustain, in release,
-          in gate, out result) {
+void exec(in control attack, in control decay, in control sustain, in control release,
+          in control gate, out sample result) {
     {
         attack_rate = attack ? dt/attack : 0.0;
         decay_rate = decay ? dt/decay : 0.0;

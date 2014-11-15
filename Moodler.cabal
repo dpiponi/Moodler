@@ -27,4 +27,5 @@ executable ui
   main-is:          ui.hs
   ghc-options:      -threaded
   build-depends:    base >= 4 && < 5, gloss, containers, lens, mtl,
-                    bmp, hint, hosc >= 0.14, unix, free, either, filepath
+                    bmp, hint, hosc >= 0.14, unix, free, either, filepath,
+                    mmorph

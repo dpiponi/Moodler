@@ -200,9 +200,12 @@ makeGroup p sel proxyLocation = do
             --unparent movingId
             moveElementToPlane movingId groupPlane
 
-getAllScripts :: String -> IO [String]
-getAllScripts dir = do
+getAllFilesOfType :: String -> String -> IO [String]
+getAllFilesOfType ext dir = do
     scriptFiles <- getDirectoryContents dir
-    let scripts = filter ((== ".hs") . takeExtension) scriptFiles
+    let scripts = filter ((== ext) . takeExtension) scriptFiles
     let scriptNames = map dropExtension scripts
     return scriptNames
+
+getAllScripts :: String -> IO [String]
+getAllScripts = getAllFilesOfType ".hs"

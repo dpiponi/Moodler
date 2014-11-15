@@ -4,7 +4,7 @@ void init() {
     result = 0.0;
 }
 
-void exec(in rise, in fall, in signal, out result) {
+void exec(in control rise, in control fall, in control signal, out control result) {
     if (result < signal && rise > 0) {
         result = min(signal, result+dt*rise);
     } else if (result > signal && fall > 0) {

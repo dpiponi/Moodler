@@ -113,23 +113,27 @@ elementLine everythingSaved parentId maybeMouseLocn eltId
     In { _name = n
        , _loc = p
        , _cablesIn = c
-       , _displayName = d } = do
+       , _displayName = d
+       , _dataColour = col } = do
     multiTellLn "module" 4 $ unwords [unUiId eltId,
                                       "<-", "plugin'",
                                       rewriteConnection n,
                                       relativeShow maybeMouseLocn p,
                                       parentId]
+    multiTellLn "module" 4 $ unwords ["setColour", unUiId eltId, show col]
     when (d /= n) $ multiTellLn "module" 4 $
                         unwords ["rename", show d, unUiId eltId]
     unless (null c) $ saveCable everythingSaved eltId (head c)
 
 elementLine _ parentId maybeMouseLocn eltName
     Out { _name = n
-        , _loc = p } =
+        , _loc = p
+        , _dataColour = col } = do
     multiTellLn "module" 4 $ unwords [unUiId eltName,
               "<- plugout'", rewriteConnection n,
               relativeShow maybeMouseLocn p,
               parentId]
+    multiTellLn "module" 4 $ unwords ["setColour", unUiId eltName, show col]
 
 elementLine _ parentId maybeMouseLocn eltName Container { _name = _
                                                       , _loc = p

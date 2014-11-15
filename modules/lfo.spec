@@ -10,7 +10,8 @@ void init() {
     last_sync = 0.0;
 }
 
-void exec(in sync, in rate, out sin_result, out square_result, out saw, out triangle) {
+void exec(in control sync, in control rate, out control sin_result,
+          out control square_result, out control saw, out control triangle) {
     sin_result = sin(phase);
     square_result = square_wave(0.5, phase);
     saw = saw_wave(phase);
