@@ -70,7 +70,7 @@ execScript :: (InputHandler m, Functor m, MonadIO m,
                MonadState GlossWorld m) =>
               String -> String -> [String] -> m ()
 execScript dir f arguments = do -- use proper dir API XXX
-    liftIO $ putStrLn $ "Exec: " ++ dir ++ "/" ++ f ++ ".hs"
+    --liftIO $ putStrLn $ "Exec: " ++ dir ++ "/" ++ f ++ ".hs"
     cmds <- liftIO $ safeReadFile $ dir ++ "/" ++ f ++ ".hs"
     case cmds of
         Left err  -> do
@@ -127,13 +127,13 @@ evalUi (UiLib.Knob n t p creationParent cfn) = do
     evalUi (cfn n)
 
 evalUi (UiLib.Selector n t p opts creationParent cfn) = do
-    liftIO $ print "Selector"
+    --liftIO $ print "Selector"
     let e = UIElement.Selector creationParent False False p t 0.0 opts
     createdInParent n e creationParent
     evalUi (cfn n)
 
 evalUi (UiLib.Proxy n proxyName p planeItsOn cfn) = do
-    liftIO $ print "Proxy"
+    --liftIO $ print "Proxy"
     let e = UIElement.Proxy planeItsOn False False p proxyName S.empty
     createdInParent n e planeItsOn
     evalUi (cfn n)
@@ -233,13 +233,13 @@ evalUi (Unparent s1 cfn) =
     T.unparent s1 >> evalUi cfn
 
 evalUi (Write t cfn) = do
-    liftIO $ print "Write selection"
+    --liftIO $ print "Write selection"
     p <- use mouseLoc
     code <- saveSelection (Just (quantise2 quantum p))
     liftIO $ writeFile ("scripts/" ++ t ++ ".hs") code
-    liftIO $ putStrLn $ "----- save selection: " ++ t
-    liftIO $ putStrLn code
-    liftIO $ putStrLn "-----"
+    --liftIO $ putStrLn $ "----- save selection: " ++ t
+    --liftIO $ putStrLn code
+    --liftIO $ putStrLn "-----"
     evalUi cfn
 
 -- XXX
@@ -254,7 +254,7 @@ evalUi (NewId s1 cfn) = do
 
 evalUi (Selection cfn) = do
     a <- use currentSelection
-    liftIO $ putStrLn $ "selection = " ++ show a
+    --liftIO $ putStrLn $ "selection = " ++ show a
     evalUi (cfn a)
 
 evalUi (Bind c t cfn) =

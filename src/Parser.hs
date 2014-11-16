@@ -17,7 +17,7 @@ import Language.C.Data.Ident
 import Language.C.Data.Node
 import qualified Data.Map as M
 --import Language.C.Pretty
-import Debug.Trace
+--import Debug.Trace
 
 {-
  - We want three things from a .spec file:
@@ -116,9 +116,9 @@ getColourFromCDecl (CDecl spec _ _) = let cols = concatMap getColour spec
 -- the triples.
 getAnInOut :: CDeclaration NodeInfo -> [(CDecl, Either String String)]
 getAnInOut cdecl@(CDecl spec triples _) = let quals = map getInOrOut spec
-                                          in trace (show quals) $ if "out" `elem` quals
-                                            then [(cdecl, Right $ head $ idents triples)]
-                                            else [(cdecl, Left $ head $ idents triples)]
+                                          in if "out" `elem` quals
+                                                then [(cdecl, Right $ head $ idents triples)]
+                                                else [(cdecl, Left $ head $ idents triples)]
 
 getInOut :: CDerivedDeclarator NodeInfo -> [(CDecl, Either String String)]
 getInOut (CFunDeclr (Right (as, _)) _ _) = concatMap getAnInOut as

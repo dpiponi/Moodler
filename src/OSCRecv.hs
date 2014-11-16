@@ -10,6 +10,7 @@ import Control.Monad
 import Control.Monad.State
 import Control.Monad.Trans.Either
 import Data.Array.IArray
+import Foreign.C.String
 import Foreign.Ptr
 import GHC.IO.Exception
 import Language.C.Data.Node
@@ -25,25 +26,31 @@ import Module
 import Synth
 import Utils
 
-data Moodler = Moodler {
-        _moodlerSynth :: Synth,
-        _moodlerDSO :: DSO,
-        _keyTracker :: KeyTracker Int
-}
+data Moodler = Moodler { _moodlerSynth :: Synth
+                       , _moodlerDSO :: DSO
+                       , _modulesPendingInit :: [String]
+                       , _keyTracker :: KeyTracker Int }
 $(makeLenses ''Moodler)
 
 keyToFreq :: Int -> Float
 keyToFreq ds' = 0.1*(fromIntegral ds'-13)/12.0
 
-recompile :: MonadIO m =>
-             (FunPtr () -> IO ()) -> StateT Moodler m ()
-recompile set_fill_buffer = do
+-- Try making this use EitherT?
+recompile :: MonadIO m => Int ->
+             Array Int (Ptr ()) -> (FunPtr () -> IO ()) -> StateT Moodler m ()
+recompile numVoices dataPtrs set_fill_buffer = do
     newSynth <- use moodlerSynth
     let output' = unJust "recompile" $ M.lookup "out" newSynth
     Right newDso <- liftIO $ runEitherT $ makeDSOFromSynth
                     newSynth output'
     moodlerDSO .= newDso
+    pending <- use modulesPendingInit
+    liftIO $ forM_ pending $ \nodeToClear ->
+        withCString nodeToClear $ \nodeString ->
+            forM_ [0..numVoices-1] $ \v ->
+                dsoInit2Fn newDso (dataPtrs!v) nodeString
     liftIO $ set_fill_buffer (dsoExecuteFn newDso)
+    modulesPendingInit .= []
 
 setKeyboardState :: DSO -> Array Int (Ptr ()) ->
                     Float -> Int -> Int -> IO ()
@@ -61,7 +68,7 @@ handleInput :: MonadIO m => String ->
                StateT Moodler m ()
 handleInput knobName synthTypes = do
     -- XXX Make sure name is unique!
-    liftIO $ putStrLn $  "Adding knob " ++ knobName
+    --liftIO $ putStrLn $  "Adding knob " ++ knobName
     oldSynth <- use moodlerSynth
     let newNumber = M.size oldSynth
     let newKnob = Module knobName
@@ -89,6 +96,7 @@ addNewModule synthType synthName synthTypes = do
             (getSynth synthTypes synthType) inputs newNumber
     let newSynth = M.insert synthName newModule oldSynth
     moodlerSynth .= newSynth
+    modulesPendingInit %= (synthName :)
 
 handleMessage :: MonadIO m => Int -> Array Int (Ptr ()) ->
                               (FunPtr () -> IO ()) ->
@@ -96,8 +104,8 @@ handleMessage :: MonadIO m => Int -> Array Int (Ptr ()) ->
                               Maybe Message ->
                               StateT Moodler m ()
 handleMessage numVoices dataPtrs set_fill_buffer
-              synthTypes msg = do
-    liftIO $ putStrLn $ "received: " ++ show msg
+              synthTypes msg = --do
+    --liftIO $ putStrLn $ "received: " ++ show msg
     case msg of
         Just (Message "/input" [ASCII_String a]) ->
             handleInput (C.unpack a) synthTypes
@@ -116,7 +124,7 @@ handleMessage numVoices dataPtrs set_fill_buffer
                     setStateVar (dsoSetFn dso') (dataPtrs!v) a' b' f
 
         Just (Message "/recompile" []) ->
-            recompile set_fill_buffer
+            recompile numVoices dataPtrs set_fill_buffer
 
         Just (Message "/quit" []) ->
             liftIO $ exitImmediately ExitSuccess
@@ -128,7 +136,7 @@ handleMessage numVoices dataPtrs set_fill_buffer
 
 
         Just (Message ('/':'8':'/':'p':'u':'s':'h':ds) [Float v]) -> do
-            liftIO $ putStrLn $ "Key " ++ ds ++ ": " ++ show v
+            --liftIO $ putStrLn $ "Key " ++ ds ++ ": " ++ show v
             dso' <- use moodlerDSO
             oldTracker <- use keyTracker
             newTracker <- liftIO $ flip execStateT oldTracker $

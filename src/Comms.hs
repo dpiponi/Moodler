@@ -66,7 +66,7 @@ sendOSCMsg :: (MonadIO m, MonadState GlossWorld m) => Message -> m ()
 sendOSCMsg m = do
     ipAddress <- use ipAddr
     liftIO $ withTransport (openUDP ipAddress socket) $ sendMessage m
-    liftIO $ print m
+    --liftIO $ print m
 
 sendConnectMessage' :: (MonadIO m, MonadState GlossWorld m) =>
                        String -> String -> m ()

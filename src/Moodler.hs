@@ -66,7 +66,7 @@ main = do
             startAudioPlayer audioPlayer
 
             let tracker = KeyTracker numVoices 0 (M.empty :: M.Map Int Int)
-            pMoodler <- newIORef $ Moodler synth dso tracker
+            pMoodler <- newIORef $ Moodler synth dso [] tracker
             let transport = udpServer ipAddress socket
             void $ withTransport transport $ forever $ do
                 msg <- recvMessage

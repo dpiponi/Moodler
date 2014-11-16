@@ -227,13 +227,13 @@ gen currentDirectory synth out' = do
 
 compile :: String -> String -> IO ()
 compile sourceName libraryName = do
-    let command = "clang -O4 -dynamiclib -lm -std=gnu99 moodler_lib.o " ++
+    let command = "clang -O3 -dynamiclib -lm -std=gnu99 moodler_lib.o " ++
                                     sourceName ++ " -o " ++ libraryName
-    print $ "Running " ++ command
+    --print $ "Running " ++ command
     compileHandle <- runCommand command
-    print $ "Compiling to " ++ libraryName
+    --print $ "Compiling to " ++ libraryName
     void $ waitForProcess compileHandle
-    print $ "Done compiling to " ++ libraryName
+    --print $ "Done compiling to " ++ libraryName
     return ()
 
 type CreateFn = IO (Ptr ())
@@ -252,10 +252,12 @@ data DSO = DSO { dl :: DL
                , dsoSetFn :: SetFn }
 
 makeDso :: String -> IO DSO
-makeDso code = do
+makeDso code = --do
+{-
     print "---"
     putStr code
     print "---"
+-}
     --let tmpDir = "gensrc" ++ show (hash code)
     --createDirectoryIfMissing False tmpDir
     withSystemTempDirectory
@@ -266,7 +268,7 @@ makeDso code = do
         writeFile tmpSrcFile code
         compile tmpSrcFile tmpSoFile
         so <- dlopen tmpSoFile [RTLD_NOW, RTLD_LOCAL]
-        print $ "Loaded lib " ++ tmpSoFile
+        --print $ "Loaded lib " ++ tmpSoFile
 
         create <- dlsym so "create"
         ini <- dlsym so "init"

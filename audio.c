@@ -10,6 +10,7 @@
 #define SAMPLE_TYPE short
 #define MAX_NUMBER 32767
 #define SAMPLE_RATE 48000
+#define MAX_VOICES 16
 
 double t = 0;
 const int blockSize = 256;
@@ -20,32 +21,33 @@ const int blockSize = 256;
 void (*fill_buffer)(void *state, SAMPLE_TYPE *);
 int numStates;
 void *states[16];
-SAMPLE_TYPE *(moodler_buffer[16]);
+SAMPLE_TYPE *(moodler_buffer[MAX_VOICES]);
 
 int count = 0;
 
 /* XXX Free */
 void set_num_states(int n) {
-    printf("Setting buffs for %d states\n", n);
+    //printf("Setting buffs for %d states\n", n);
     numStates = n;
 
     for (int i = 0; i < numStates; ++i) {
-            moodler_buffer[i] = malloc(sizeof(SAMPLE_TYPE)*BUFFER_SIZE);
+        moodler_buffer[i] = malloc(sizeof(SAMPLE_TYPE)*BUFFER_SIZE);
     }
-    printf("Allocated buffs for %d states\n", n);
+    //printf("Allocated buffs for %d states\n", n);
 }
 
 void set_state_address(int i, void *state) {
-    printf("Setting address for state %d = %p\n", i, state);
+    //printf("Setting address for state %d = %p\n", i, state);
     states[i] = state;
 }
 
 void set_fill_buffer(void (*fill)(void *state, SAMPLE_TYPE *)) {
-    printf("Stting buffer filler to %p\n", fill);
+    //printf("Setting buffer filler to %p\n", fill);
     fill_buffer = fill;
 }
 
-void callback(void *custom_data, AudioQueueRef queue, AudioQueueBufferRef buffer) {
+void callback(void *custom_data, AudioQueueRef queue,
+              AudioQueueBufferRef buffer) {
 //    printf("Callback!\n");
     SAMPLE_TYPE *sample_buffer = (SAMPLE_TYPE *)buffer->mAudioData;
 
@@ -77,18 +79,15 @@ void callback(void *custom_data, AudioQueueRef queue, AudioQueueBufferRef buffer
      * XXX Make more efficient.
      */
     for (int i = 0; i < numStates; ++i) {
-        //printf("i = %d\n, blockSize = %d, BUFFER_SIZE = %d\n", i, blockSize, BUFFER_SIZE);
         for (int k = 0; k < BUFFER_SIZE/sizeof(SAMPLE_TYPE); ++k) {
             sample_buffer[k] += moodler_buffer[i][k];
-            //printf("sample_buffer[k] = %d\n", sample_buffer[k]);
         }
     }
 //    printf("Callback computed!\n");
         
     AudioQueueEnqueueBuffer(queue, buffer, 0, NULL);
         
-    if (count > SAMPLE_RATE * 10)
-    {
+    if (count > SAMPLE_RATE * 10) {
         AudioQueueStop(queue, false);
         AudioQueueDispose(queue, false);
         CFRunLoopStop(CFRunLoopGetCurrent());
@@ -105,7 +104,8 @@ void play() {
 
     format.mSampleRate       = SAMPLE_RATE;
     format.mFormatID         = kAudioFormatLinearPCM;
-    format.mFormatFlags      = kLinearPCMFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+    format.mFormatFlags      = kLinearPCMFormatFlagIsSignedInteger |
+                               kAudioFormatFlagIsPacked;
     format.mBitsPerChannel   = 8 * sizeof(SAMPLE_TYPE);
     format.mChannelsPerFrame = NUM_CHANNELS;
     format.mBytesPerFrame    = sizeof(SAMPLE_TYPE) * NUM_CHANNELS;
@@ -113,7 +113,8 @@ void play() {
     format.mBytesPerPacket   = format.mBytesPerFrame * format.mFramesPerPacket;
     format.mReserved         = 0;
     
-    AudioQueueNewOutput(&format, callback, NULL, CFRunLoopGetCurrent(), kCFRunLoopCommonModes, 0, &queue);
+    AudioQueueNewOutput(&format, callback, NULL, CFRunLoopGetCurrent(),
+                        kCFRunLoopCommonModes, 0, &queue);
     
     for (i = 0; i < NUM_BUFFERS; i++) {
         AudioQueueAllocateBuffer(queue, BUFFER_SIZE, &buffers[i]);

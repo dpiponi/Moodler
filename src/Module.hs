@@ -126,8 +126,8 @@ loadNodeType dir fileName' = do
                         , ("control", "__attribute__((colour(\"#control\"))) double")
                         ]
                      } fileName rawCode
-    liftIO $ putStrLn "Parsing:"
-    liftIO $ putStr code
+    --liftIO $ putStrLn "Parsing:"
+    --liftIO $ putStr code
     let typeNames = [] ++
                     builtinTypeNames
     let input = B.pack code
@@ -142,8 +142,8 @@ loadNodeType dir fileName' = do
 
     let synthName = fst (splitDot fileName')
     let script = synthScript synthName ins outs
-    liftIO $ putStrLn $ "In scripts/" ++ synthName ++ ".hs"
-    liftIO $ putStr script
+    --liftIO $ putStrLn $ "In scripts/" ++ synthName ++ ".hs"
+    --liftIO $ putStr script
     liftIO $ writeFile ("scripts/" ++ synthName ++ ".hs") script
 
     if isJust e && isJust i
