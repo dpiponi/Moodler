@@ -50,6 +50,8 @@ foreign import ccall "dynamic"
 foreign import ccall "dynamic"  
   mkInit :: FunPtr (Ptr () -> IO ()) -> Ptr () -> IO ()
 foreign import ccall "dynamic"  
+  mkInit2 :: FunPtr (Ptr () -> CString -> IO ()) -> Ptr () -> CString -> IO ()
+foreign import ccall "dynamic"  
   mkExecute :: FunPtr (Ptr () -> IO ()) -> Ptr () -> IO ()
 foreign import ccall "dynamic"  
   mkSet :: FunPtr (Ptr () -> CString -> CString -> CDouble -> IO ()) ->
@@ -236,16 +238,18 @@ compile sourceName libraryName = do
 
 type CreateFn = IO (Ptr ())
 type InitFn = Ptr () -> IO ()
+type Init2Fn = Ptr () -> CString -> IO ()
 type ExecuteFn = Ptr () -> IO ()
 type SetFn = Ptr () -> CString -> CString -> CDouble -> IO ()
 
 -- Represents a DSO loaded into memory along with Haskell wrappers
 -- around C functions within it.
-data DSO = DSO { dl :: DL,
-                 createFn :: CreateFn,
-                 dsoInitFn :: InitFn,
-                 dsoExecuteFn :: FunPtr (),
-                 dsoSetFn :: SetFn }
+data DSO = DSO { dl :: DL
+               , createFn :: CreateFn
+               , dsoInitFn :: InitFn
+               , dsoInit2Fn :: Init2Fn
+               , dsoExecuteFn :: FunPtr ()
+               , dsoSetFn :: SetFn }
 
 makeDso :: String -> IO DSO
 makeDso code = do
@@ -266,10 +270,11 @@ makeDso code = do
 
         create <- dlsym so "create"
         ini <- dlsym so "init"
+        ini2 <- dlsym so "init2"
         execute <- dlsym so "execute"
         set <- dlsym so "set"
 
-        return $ DSO so (mkCreate create) (mkInit ini) execute (mkSet set)
+        return $ DSO so (mkCreate create) (mkInit ini) (mkInit2 ini2) execute (mkSet set)
     -- End of tmp dir bit
 
 setStateVar :: SetFn -> Ptr () -> String -> String -> Float -> IO ()
