@@ -6,6 +6,7 @@ import Control.Monad.State
 import Control.Monad.Trans.Either
 import Control.Monad.Writer
 import Data.Maybe
+import qualified Data.Foldable as F
 --import Language.C.Data.Ident
 import Language.C.Data.Name
 import Language.C.Data.Node
@@ -19,6 +20,7 @@ import qualified Data.Map as M
 import Language.Preprocessor.Cpphs
 import Data.Tuple
 import System.FilePath.Posix
+--import qualified Data.Traversable as T
 --import Language.C.Pretty
 
 import Text
@@ -60,14 +62,16 @@ synthPreamble panelName synthName topOffset = do
     tellInd 4 "parent panel lab"
     tellInd 4 $ unwords ["name <- new'", show synthName]
 
+{-
 plop :: CDecl -> CDecl
 plop (CDecl as triples nodeinfo) =
     CDecl as triples' nodeinfo
     where triples' = filter f triples
           f (Just (CDeclr (Just _) _ _ _ _), _, _) = False
           f _ = True
+          -}
 
--- Auto-generate script for a .spec module
+-- Auto-generate UI script for a .spec module
 synthScript :: String -> [(CDecl, String)] -> [(CDecl, String)] -> String
 synthScript synthName ins outs = do
     let numIns = length ins
@@ -76,6 +80,7 @@ synthScript synthName ins outs = do
     let inOffset = -25*numIns+25
     let outOffset = -25*numOuts+25
     let topOffset = (-25, 75 :: Float)
+    -- XXX More sizes
     let panelName = if height >= 4
             then "panel_4x1.bmp"
             else "panel_3x1.bmp"
@@ -89,10 +94,8 @@ synthScript synthName ins outs = do
                       xyoffset (-21, -offset),
                       "plane" ]
              let inCol = getColourFromCDecl inputType
-             case inCol of
-                Nothing -> return ()
-                Just col ->
-                 tellInd 4 $ unwords [ "setColour", "inp", show col]
+             F.forM_ inCol $ \col ->
+                tellInd 4 $ unwords [ "setColour", "inp", show col]
              tellInd 4 "parent panel inp"
         forM_ (zip [outOffset, outOffset+50 ..] outs) $
                                     \(offset, (outputType, eachOutput)) -> do
@@ -102,9 +105,7 @@ synthScript synthName ins outs = do
                       xyoffset (20, -offset),
                       "plane" ]
              let outCol = getColourFromCDecl outputType
-             case outCol of
-                Nothing -> return ()
-                Just col ->
+             F.forM_ outCol $ \col ->
                  tellInd 4 $ unwords [ "setColour", "out", show col]
              tellInd 4 "parent panel out"
         tellInd 4 "recompile"
@@ -146,10 +147,9 @@ loadNodeType dir fileName' = do
     --liftIO $ putStr script
     liftIO $ writeFile ("scripts/" ++ synthName ++ ".hs") script
 
-    if isJust e && isJust i
-        then return $ NodeType (M.fromList $ map swap ins)
-                               (M.fromList $ map swap outs)
-                               states vs
-                               (fromJust i)
-                               (fromJust e)
-        else left "loadNodeType failed"
+    fromMaybe (left "loadNodeType failed") $ do
+        e' <- e
+        i' <- i
+        Just $ right $ NodeType (M.fromList $ map swap ins)
+                                (M.fromList $ map swap outs)
+                                states vs i' e'
