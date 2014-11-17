@@ -1,6 +1,4 @@
 do
-    bind '0' "setzero"
-    bind '1' "setone"
     bind 'd' "delete"
     bind 'h' "hide"
     bind 'H' "unhide"
