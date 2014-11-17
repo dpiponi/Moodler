@@ -6,11 +6,11 @@ import Control.Lens
 import qualified Data.Map as M
 import Language.C.Data.Node
 import Control.Monad.State
-import Data.Maybe
+--import Data.Maybe
 import Data.List
 import Control.Applicative
 import System.Directory
-import Control.Monad.Trans.Either
+import Control.Monad.Trans.Error
 
 import Module
 import Text
@@ -47,14 +47,14 @@ out :: String -> Out
 out os = let (moduleName, outName) = splitDot os
          in Out moduleName outName
 
-getSynth :: M.Map String (NodeType NodeInfo) -> String -> NodeType NodeInfo
-getSynth synths t = fromMaybe (error $ "no synth " ++ t) $
+getSynth :: M.Map String (NodeType NodeInfo) -> String -> ErrorT String Identity (NodeType NodeInfo)
+getSynth synths t = maybe (throwError $ "no synth " ++ t) return $
                             M.lookup t synths
 
 type SynthBuilder a = State Synth a
 
 loadSynthTypes :: String ->
-                  EitherT String IO (M.Map String (NodeType NodeInfo))
+                  ErrorT String IO (M.Map String (NodeType NodeInfo))
 loadSynthTypes dir = do
     moduleSpecs <- liftIO $ filter (isSuffixOf ".spec") <$>
                                             getDirectoryContents dir

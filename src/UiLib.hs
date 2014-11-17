@@ -13,8 +13,8 @@ import UISupport(quantise2, quantum)
 data Ui a = Return a
           | Echo String (Ui a)
           | New String String (Ui a)
-          | Run String [String] (Ui a)
-          | Load String (Ui a)
+          | Run String String [String] (Ui a)
+          | Load String String (Ui a)
           | PlugIn UiId String (Float, Float) UiId (UiId -> Ui a)
           | PlugOut UiId String (Float, Float) UiId (UiId -> Ui a)
           | Knob UiId String (Float, Float) UiId (UiId -> Ui a)
@@ -49,6 +49,7 @@ data Ui a = Return a
           | GetParent UiId (UiId -> Ui a)
           | GetRoot (UiId -> Ui a)
           | Recompile (Ui a)
+          | Reset (Ui a)
           | Quit (Ui a)
           | Check (Ui a)
           | Parent UiId UiId (Ui a)
@@ -63,8 +64,8 @@ instance Monad Ui where
     Return a >>= f = f a
     Echo t cont >>= f = Echo t (cont >>= f)
     New s1 s2 cont >>= f = New s1 s2 (cont >>= f)
-    Run t ss cont >>= f = Run t ss (cont >>= f)
-    Load t cont >>= f = Load t (cont >>= f)
+    Run dir t ss cont >>= f = Run dir t ss (cont >>= f)
+    Load dir t cont >>= f = Load dir t (cont >>= f)
     PlugIn s1 s2 p q cont >>= f = PlugIn s1 s2 p q ((>>= f) . cont)
     PlugOut s1 s2 p q cont >>= f = PlugOut s1 s2 p q ((>>= f) . cont)
     Knob s1 s2 p q cont >>= f = Knob s1 s2 p q ((>>= f) . cont)
@@ -101,6 +102,7 @@ instance Monad Ui where
     CurrentPlane cont >>= f = CurrentPlane ((>>= f) . cont)
     Switch p cont >>= f = Switch p (cont >>= f)
     Recompile cont >>= f = Recompile (cont >>= f)
+    Reset cont >>= f = Reset (cont >>= f)
     Quit cont >>= f = Quit (cont >>= f)
     Check cont >>= f = Check (cont >>= f)
     Parent s0 s1 cont >>= f = Parent s0 s1 (cont >>= f)
@@ -124,11 +126,11 @@ new' s1 = do
 echo :: String -> Ui ()
 echo t = Echo t (return ())
 
-run :: String -> [String] -> Ui ()
-run t ss = Run t ss (return ())
+run :: String -> String -> [String] -> Ui ()
+run dir t ss = Run dir t ss (return ())
 
-load :: String -> Ui ()
-load t = Load t (return ())
+load :: String -> String -> Ui ()
+load dir t = Load dir t (return ())
 
 plugin :: UiId -> String -> (Float, Float) -> UiId -> Ui UiId
 plugin s1 s2 p creationParent = PlugIn s1 s2 p creationParent return
@@ -252,6 +254,9 @@ hide t = Hide t True (return ())
 
 recompile :: Ui ()
 recompile = Recompile (return ())
+
+reset :: Ui ()
+reset = Reset (return ())
 
 quit :: Ui ()
 quit = Quit (return ())

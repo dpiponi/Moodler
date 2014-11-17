@@ -134,7 +134,8 @@ handleDefault' (EventKey (Char 'Z') Down _ _) = do
     W.performRedo
     handleDefault
 
-handleDefault' (EventKey (Char 'r') Down _ _) = do
+-- XXX Give this a key
+handleDefault' (EventKey (Char 'p') Down _ _) = do
     es <- use currentSelection
     (container, contentss) <- findContainer es
     forM_ contentss $ \content -> reparent container content
@@ -148,14 +149,22 @@ handleDefault' (EventKey (Char '/') Down _ _) = do
     rootTransform %= (B.Transform (0, 0) (1/1.5) <>)
     handleDefault
 
--- XXX quantise
-handleDefault' (EventKey (Char 'l') Down _ _) = do
+handleDefault' (EventKey (Char 'r') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
+    filename <- handleGetString allScripts "" "read: "
+    liftIO $ putStrLn $ "filename = " ++ show filename
+    withJust filename $ \filename' -> do
+        W.undoPoint
+        evalUi (U.load "scripts" filename')
+    handleDefault
+
+handleDefault' (EventKey (Char 'l') Down _ _) = do
+    allScripts <- liftIO $ getAllScripts "saves"
     filename <- handleGetString allScripts "" "load: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     withJust filename $ \filename' -> do
         W.undoPoint
-        evalUi (U.load filename')
+        evalUi (U.load "saves" filename')
     handleDefault
 
 handleDefault' (EventKey (Char 's') Down _ _) = do

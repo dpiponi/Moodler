@@ -4,7 +4,7 @@ do
     forM_ as $ \b -> do
         bType <- getType b
         case bType of
-            KnobType -> do
+            InType -> do
                 (x, y) <- location b
                 Just n <- name b
                 let n' = map (\c -> if c == '.' then '_' else c) n

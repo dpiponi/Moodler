@@ -6,6 +6,7 @@ module Comms(sendConnectMessage,
              sendNewSynthMessage,
              sendNewInputMessage,
              sendRecompileMessage,
+             sendResetMessage,
              sendQuitMessage,
              SendCommand(..),
              interpretSend,
@@ -35,7 +36,8 @@ socket = 7777
 -- 4. Create new input
 -- 4a. (Not implemented yet) Delete input
 -- 5. Recompile
--- 6. Quit
+-- 6. Reset
+-- 7. Quit
 
 -- XXX
 -- XXX The undo history needs to be at string, not UiId level
@@ -114,6 +116,12 @@ sendRecompileMessage :: (MonadIO m, MonadState GlossWorld m) =>
 sendRecompileMessage reason = do
     liftIO $ putStrLn $ "sendRecompileMessage: " ++ reason
     sendOSCMsg (message "/recompile" [])
+
+sendResetMessage :: (MonadIO m, MonadState GlossWorld m) =>
+                        String -> m ()
+sendResetMessage reason = do
+    liftIO $ putStrLn $ "sendResetMessage: " ++ reason
+    sendOSCMsg (message "/reset" [])
 
 sendQuitMessage :: (MonadIO m, MonadState GlossWorld m) => m ()
 sendQuitMessage =

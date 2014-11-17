@@ -1,4 +1,5 @@
 do
+    reset
     root <- getRoot
     let out = "out"
     let keyboard = "keyboard"

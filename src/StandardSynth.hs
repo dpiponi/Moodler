@@ -3,12 +3,16 @@ module StandardSynth where
 import qualified Data.Map as M
 import Control.Monad.State
 import Language.C.Data.Node
+import Control.Monad.Trans.Error
+--import Control.Monad.Identity
+import Control.Monad.Morph
 
 import Synth
 import Module
 
-standardSynth :: M.Map String (NodeType NodeInfo) -> Synth
-standardSynth synthTypes = flip execState M.empty $ do
+standardSynth :: M.Map String (NodeType NodeInfo) ->
+                 ErrorT String (State Synth) ()
+standardSynth synthTypes = {-flip execState M.empty $ -} do
 {-
         addSynth "p8_rotary1" $ Module "p8_rotary1"
                  (getSynth synthTypes "input") M.empty
@@ -27,8 +31,8 @@ standardSynth synthTypes = flip execState M.empty $ do
         addSynth "p8_rotary8" $ Module "p8_rotary8"
                  (getSynth synthTypes "input") M.empty
 -}
-        addSynth "zero" $ Module "zero"
-                 (getSynth synthTypes "zero") M.empty
-        addSynth "out" $ Module "out"
-                 (getSynth synthTypes "out")
+        zeroSynth <- hoist lift $ getSynth synthTypes "zero"
+        lift $ addSynth "zero" $ Module "zero" zeroSynth M.empty
+        outSynth <- hoist lift $ getSynth synthTypes "out"
+        lift $ addSynth "out" $ Module "out" outSynth
                  (M.fromList [("value", Out "zero" "result")])

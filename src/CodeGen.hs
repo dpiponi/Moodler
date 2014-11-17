@@ -20,7 +20,7 @@ import Data.Hashable
 import Foreign.C.String
 import Foreign.C.Types
 import System.Directory
-import Control.Monad.Trans.Either
+import Control.Monad.Trans.Error
 --import Debug.Trace
 
 import Synth
@@ -285,9 +285,10 @@ setStateVar set dataPtr nodeName stateVar value =
         withCString stateVar $ \stateString ->
             set dataPtr nodeString stateString (realToFrac value)
 
-makeDSOFromSynth :: Synth -> Module -> EitherT String IO DSO
+makeDSOFromSynth :: Synth -> Module -> ErrorT String IO DSO
 makeDSOFromSynth synth out' = do
     currentDirectory <- liftIO getCurrentDirectory
-    code' <- hoistEither $
-        execWriterT (gen currentDirectory synth out')
+    code' <- case execWriterT (gen currentDirectory synth out') of
+        Left e -> throwError e
+        Right f -> return f
     liftIO $ makeDso code'

@@ -231,6 +231,7 @@ codeWorld' ::
     -> StateT (S.Set UiId) (WriterT (Multi String String) m) ()
 codeWorld' everythingSaved synths needsSaving = do
         multiTellLn "preamble" 0 "do"
+        multiTellLn "preamble" 4 "reset"
         --multiTellLn "preamble" 4 "let (x, y) = (0, 0)"
         multiTellLn "preamble" 4 "root <- getRoot"
         multiTellLn "preamble" 4 "let out = \"out\""

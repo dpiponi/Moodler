@@ -11,6 +11,7 @@ module Wiring(synthConnect,
               synthSet,
               synthQuit,
               synthRecompile,
+              synthReset,
               undoPoint,
               performUndo, 
               performRedo) where
@@ -18,13 +19,55 @@ module Wiring(synthConnect,
 import Control.Lens
 import Control.Monad.Trans
 import Control.Monad.State
+import Graphics.Gloss.Interface.IO.Game
 import qualified Data.Map as M
+import qualified Data.Set as S
+import Control.Monad.Trans.Free
 
 import Comms
+import Box
 import Cable
 import World
 import UIElement
 import Symbols
+
+emptyWorld' :: UiId -> UIElement -> World
+emptyWorld' rootID root =
+    World { _uiElements = M.fromList [(rootID, root)]
+          , _synthList = []
+          }
+
+emptyGlossWorld' :: GlossWorld
+emptyGlossWorld' = 
+    let root = Proxy { _parent = error "Root parent shouldn't be visible"
+                     , _highlighted = False
+                     , _hidden = False
+                     , _loc = (0, 0)
+                     , _name = "root"
+                     , _contents = S.empty
+                     }
+        rootID = UiId "root"
+        innerWorld = emptyWorld' rootID root
+    in GlossWorld { _inner = innerWorld
+                  , _ipAddr = ""
+                  , _showHidden = False
+                  , _newName = 0
+                  , _mouseLoc = (0, 0)
+                  , _planes = rootID
+                  , _cmdArgs = []
+                  , _rootPlane = rootID
+                  , _bindings = M.empty
+                  , _pics = M.empty
+                  , _gadget = const blank
+                  , _currentSelection = []
+                  , _previousSelection = Nothing
+                  , _rootTransform = Transform (0, 0) 1
+                  , _cont = Pure undefined
+                  , _innerHistory = [innerWorld]
+                  , _undoHistory = [([], [])]
+                  , _innerFuture = []
+                  , _undoFuture = [([], [])]
+                  }
 
 synthConnect :: (Functor m, MonadIO m, MonadState GlossWorld m,
                 InputHandler m) =>
@@ -161,8 +204,17 @@ synthQuit = sendQuitMessage
 
 synthRecompile :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                   String -> m ()
-synthRecompile =
-    sendRecompileMessage
+synthRecompile = sendRecompileMessage
+
+synthReset :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+                  String -> m ()
+synthReset msg = do
+    sendResetMessage msg
+    ipAddress <- use ipAddr
+    oldCont <- use cont
+    put emptyGlossWorld'
+    ipAddr .= ipAddress
+    cont .= oldCont
 
 undoPoint :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
              m ()

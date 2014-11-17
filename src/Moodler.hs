@@ -7,11 +7,12 @@ import System.Posix.DynamicLinker
 import Data.IORef
 import qualified Data.Map as M
 --import Data.Maybe
-import Control.Monad.Trans.Either
+import Control.Monad.Trans.Error
 import Data.Array.IArray
 import Control.Monad.State
 --import Control.Lens
 --import Foreign.Ptr
+--import Control.Monad.Morph
 
 import Audio
 import Synth
@@ -36,8 +37,8 @@ modulesDirectory = "modules"
 numVoices :: Int
 numVoices = 1
 
-adapt :: MonadIO m => StateT a m b -> IORef a -> m b
-adapt code ref = do
+adapt :: MonadIO m => IORef a -> StateT a m b -> m b
+adapt ref code = do
       a <- liftIO $ readIORef ref
       (b, c) <- runStateT code a
       liftIO $ writeIORef ref c
@@ -45,11 +46,13 @@ adapt code ref = do
 
 main :: IO ()
 main = do
-    result <- runEitherT $ do
+    liftIO $ putStrLn "Moodler started"
+    result <- runErrorT $ do
         synthTypes <- loadSynthTypes modulesDirectory
-        let synth = standardSynth synthTypes
-        output <- maybe (left "No output") right $ M.lookup "out" synth
-        dso <- makeDSOFromSynth synth output
+        let synth0  = runErrorT $ standardSynth synthTypes
+        let (_, theStandard) = runState synth0 M.empty
+        output <- maybe (throwError "No output") return $ M.lookup "out" theStandard
+        dso <- makeDSOFromSynth theStandard output
 
         liftIO $ do
             audioStateList <- replicateM numVoices (createFn dso)
@@ -66,14 +69,13 @@ main = do
             startAudioPlayer audioPlayer
 
             let tracker = KeyTracker numVoices 0 (M.empty :: M.Map Int Int)
-            pMoodler <- newIORef $ Moodler synth dso [] tracker
+            pMoodler <- newIORef $ Moodler theStandard dso [] tracker
             let transport = udpServer ipAddress socket
             void $ withTransport transport $ forever $ do
                 msg <- recvMessage
-                adapt (handleMessage numVoices audioStates
+                lift $ adapt pMoodler (handleMessage theStandard numVoices audioStates
                                        (setFillBuffer audioPlayer)
                        synthTypes msg)
-                      pMoodler
 
             dlclose (dl dso)
             closeAudioPlayer audioPlayer

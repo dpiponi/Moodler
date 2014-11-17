@@ -3,7 +3,7 @@
 module Module where
 
 import Control.Monad.State
-import Control.Monad.Trans.Either
+import Control.Monad.Trans.Error
 import Control.Monad.Writer
 import Data.Maybe
 import qualified Data.Foldable as F
@@ -111,7 +111,15 @@ synthScript synthName ins outs = do
         tellInd 4 "recompile"
         tellInd 4 "return ()"
 
-loadNodeType :: String -> String -> EitherT String IO (NodeType NodeInfo)
+predefines :: [(String, String)]
+predefines = 
+    [ ("in", "__attribute__((direction(\"in\")))")
+    , ("out", "__attribute__((direction(\"out\")))")
+    , ("sample", "__attribute__((colour(\"#sample\"))) double")
+    , ("control", "__attribute__((colour(\"#control\"))) double")
+    ]
+
+loadNodeType :: String -> String -> ErrorT String IO (NodeType NodeInfo)
 loadNodeType dir fileName' = do
     let fileName = combine dir fileName'
     rawCode <- liftIO $ readFile fileName
@@ -120,12 +128,7 @@ loadNodeType dir fileName' = do
                      { boolopts = defaultBoolOptions { locations = False
                                                      , stripC89 = True
                                                      }
-                     , defines =
-                        [ ("in", "__attribute__((direction(\"in\")))")
-                        , ("out", "__attribute__((direction(\"out\")))")
-                        , ("sample", "__attribute__((colour(\"#sample\"))) double")
-                        , ("control", "__attribute__((colour(\"#control\"))) double")
-                        ]
+                     , defines = predefines
                      } fileName rawCode
     --liftIO $ putStrLn "Parsing:"
     --liftIO $ putStr code
@@ -133,9 +136,12 @@ loadNodeType dir fileName' = do
                     builtinTypeNames
     let input = B.pack code
     let pos = position 0 "" 0 0
-    (ast, _) <- hoistEither $ either (Left . show) Right $
+    let x = either (Left . show) Right $
                     execParser translUnitP input pos
                                typeNames newNameSupply
+    (ast, _) <- case x of
+        Left e -> throwError e
+        Right v -> return v
     (_, Extracted i e vs) <- liftIO $ runStateT
                 (extractModuleParts ast) (Extracted Nothing Nothing [])
     let states = map varDefinedInDeclaration vs
@@ -147,9 +153,9 @@ loadNodeType dir fileName' = do
     --liftIO $ putStr script
     liftIO $ writeFile ("scripts/" ++ synthName ++ ".hs") script
 
-    fromMaybe (left "loadNodeType failed") $ do
+    fromMaybe (throwError "loadNodeType failed") $ do
         e' <- e
         i' <- i
-        Just $ right $ NodeType (M.fromList $ map swap ins)
+        Just $ return $ NodeType (M.fromList $ map swap ins)
                                 (M.fromList $ map swap outs)
                                 states vs i' e'

@@ -104,11 +104,11 @@ evalUi (Delete t cfn) =
 evalUi (New s1 s2 cfn) =
     synthNew s1 s2 >> evalUi cfn
 
-evalUi (Run t ss cfn) =
-    execScript "scripts" t ss >> evalUi cfn
+evalUi (Run dir t ss cfn) =
+    execScript dir t ss >> evalUi cfn
 
-evalUi (Load t cfn) =
-    execScript "scripts" t [] >> evalUi cfn
+evalUi (Load dir t cfn) =
+    execScript dir t [] >> evalUi cfn
 
 evalUi (PlugIn n t p creationParent cfn) = do
     let e = In creationParent False False p t "#sample" t []
@@ -162,6 +162,9 @@ evalUi (UiLib.Cable s1 s2 cfn) =
 
 evalUi (UiLib.Recompile cfn) =
     synthRecompile "Recompile command" >> evalUi cfn
+
+evalUi (UiLib.Reset cfn) =
+    synthReset "Reset command" >> evalUi cfn
 
 evalUi (UiLib.Quit cfn) = synthQuit >> evalUi cfn
 
