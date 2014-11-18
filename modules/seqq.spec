@@ -50,7 +50,7 @@ void exec(in control gate,
             trigger = 0.0;
         }
         if (last_gate <= 0 && gate > 0) {
-            printf("Case %d\n", pos);
+            /*printf("Case %d\n", pos);*/
             switch (pos & 7) {
             case 0:
                 current_freq = freq1;
@@ -105,8 +105,8 @@ void exec(in control gate,
                     pos = 0;
                 }
             }
-            printf("pos = %d, pulse_number = %d, target_freq = %f\n", pos, pulse_number, target_freq);
-            printf("current_pulse = %f\n", current_pulse);
+            /*printf("pos = %d, pulse_number = %d, target_freq = %f\n", pos, pulse_number, target_freq);
+            printf("current_pulse = %f\n", current_pulse);*/
         }
         if (current_mode == 1.0) {
             if (result < target_freq) {
