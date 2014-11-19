@@ -10,6 +10,8 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 import System.Directory
 import System.FilePath
+import qualified Data.List as L
+import Data.Function
 
 import ContainerTree
 import Symbols
@@ -31,11 +33,30 @@ highlightJust i =
     unhighlightEverything >> inner . uiElements . ix i . highlighted .=
         True
 
+depthExtent :: MonadState GlossWorld m =>
+               m (Int, Int)
+depthExtent = do
+    elts <- use (inner . uiElements)
+    depths <- forM (M.toList elts) $ \(_, elt) ->
+        return (elt ^. depth)
+    let sorted = L.sort depths
+    return (head sorted, last sorted)
+
 doSelection :: MonadState GlossWorld m => UiId -> m ()
 doSelection i = do
     unhighlightEverything
     highlightJust i
     currentSelection .= [i]
+
+bringToFront :: MonadState GlossWorld m => UiId -> m ()
+bringToFront t = do
+    (_, hi) <- depthExtent
+    inner . uiElements . ix t . depth .= (hi+1)
+
+sendToBack :: MonadState GlossWorld m => UiId -> m ()
+sendToBack t = do
+    (lo, _) <- depthExtent
+    inner . uiElements . ix t . depth .= (lo-1)
 
 newUIElement :: MonadState GlossWorld m => (UiId -> UIElement) -> m UiId
 newUIElement elt = do
@@ -82,9 +103,16 @@ visitElements = do
 visitElementsOnPlane :: MonadState GlossWorld m => UiId -> m [UiId]
 visitElementsOnPlane planeId = do
     showHiddenElements <- use showHidden
-    p <- getElementById "visitElementsOnPlane" planeId
-    lists <- forM (S.toList (p ^. contents)) $ \eltId -> do
-        elt <- getElementById "visitElementsOnPlane" eltId
+    --p <- getElementById "visitElementsOnPlane" planeId
+
+    thingsToVisit <- rootElementsOnPlane planeId
+    elementsToVisit <- getElementsById "visitElementsOnPlane" thingsToVisit
+    let thingsAndelementsToVisit = L.sortBy (flip compare `on` (_depth . snd)) $
+                                    zip thingsToVisit elementsToVisit
+    --thingsToVisit' = map fst thingsAndelementsToVisit
+    --elementsToVisit' = map snd thingsAndelementsToVisit
+
+    lists <- forM thingsAndelementsToVisit $ \(eltId, elt) ->
         if showHiddenElements || not (elt ^. hidden)
             then visitElements' eltId elt
             else return []
@@ -186,7 +214,7 @@ makeGroup p sel proxyLocation = do
 
     let proxyName = "proxy" ++ show newPlaneName
     let groupPlane = UiId proxyName
-    let e = UIElement.Proxy p False False proxyLocation proxyName S.empty
+    let e = UIElement.Proxy p False 0 False proxyLocation proxyName S.empty
     createdInParent groupPlane e p
     addPlane groupPlane
 

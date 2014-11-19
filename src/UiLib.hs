@@ -14,7 +14,7 @@ data Ui a = Return a
           | Echo String (Ui a)
           | New String String (Ui a)
           | Run String String [String] (Ui a)
-          | Load String String (Ui a)
+          -- | Load String String (Ui a)
           | PlugIn UiId String (Float, Float) UiId (UiId -> Ui a)
           | PlugOut UiId String (Float, Float) UiId (UiId -> Ui a)
           | Knob UiId String (Float, Float) UiId (UiId -> Ui a)
@@ -31,18 +31,20 @@ data Ui a = Return a
           | NewId String (UiId -> Ui a)
           | Set UiId Float (Ui a)
           | SetColour UiId String (Ui a)
+          | GetColour UiId (Maybe String -> Ui a)
           | SetLow UiId (Maybe Float) (Ui a)
           | SetHigh UiId (Maybe Float) (Ui a)
           -- | Value String Float (Ui a)
           | GetValue UiId (Float -> Ui a)
-          | Save String (Ui a)
+          -- | Save String (Ui a)
           | Write String (Ui a)
           | Selection ([UiId] -> Ui a)
           | Hide UiId Bool (Ui a)
           | Delete UiId (Ui a)
           | Bind Char String (Ui a)
           | Location UiId ((Float, Float) -> Ui a)
-          | Name UiId (Maybe String -> Ui a)
+          | GetName UiId (Maybe String -> Ui a)
+          | SetName UiId String (Ui a)
           | Move UiId (Float, Float) (Ui a)
           | Switch UiId (Ui a)
           | CurrentPlane (UiId -> Ui a)
@@ -57,6 +59,8 @@ data Ui a = Return a
           | Unparent UiId (Ui a)
           | Input String (Maybe String -> Ui a)
           | GetType UiId (ElementType -> Ui a)
+          | SendBack UiId (Ui a)
+          | BringFront UiId (Ui a)
           deriving (Typeable, Functor)
 
 instance Monad Ui where
@@ -65,7 +69,7 @@ instance Monad Ui where
     Echo t cont >>= f = Echo t (cont >>= f)
     New s1 s2 cont >>= f = New s1 s2 (cont >>= f)
     Run dir t ss cont >>= f = Run dir t ss (cont >>= f)
-    Load dir t cont >>= f = Load dir t (cont >>= f)
+    -- Load dir t cont >>= f = Load dir t (cont >>= f)
     PlugIn s1 s2 p q cont >>= f = PlugIn s1 s2 p q ((>>= f) . cont)
     PlugOut s1 s2 p q cont >>= f = PlugOut s1 s2 p q ((>>= f) . cont)
     Knob s1 s2 p q cont >>= f = Knob s1 s2 p q ((>>= f) . cont)
@@ -88,15 +92,19 @@ instance Monad Ui where
     SetColour t v cont >>= f = SetColour t v (cont >>= f)
     SetLow t v cont >>= f = SetLow t v (cont >>= f)
     SetHigh t v cont >>= f = SetHigh t v (cont >>= f)
+    SetName t n cont >>= f = SetName t n (cont >>= f)
     --Value t v cont >>= f = Value t v (cont >>= f)
-    Save t cont >>= f = Save t (cont >>= f)
+    -- Save t cont >>= f = Save t (cont >>= f)
     Write t cont >>= f = Write t (cont >>= f)
     Selection cont >>= f = Selection ((>>= f) . cont)
     Hide t h cont >>= f = Hide t h (cont >>= f)
+    SendBack t cont >>= f = SendBack t (cont >>= f)
+    BringFront t cont >>= f = BringFront t (cont >>= f)
     Delete t cont >>= f = Delete t (cont >>= f)
     Bind c t cont >>= f = Bind c t (cont >>= f)
     Location s1 cont >>= f = Location s1 ((>>= f) . cont)
-    Name s1 cont >>= f = Name s1 ((>>= f) . cont)
+    GetName s1 cont >>= f = GetName s1 ((>>= f) . cont)
+    GetColour s1 cont >>= f = GetColour s1 ((>>= f) . cont)
     Move c p cont >>= f = Move c p (cont >>= f)
     --NewPlane cont >>= f = NewPlane ((>>= f) . cont)
     CurrentPlane cont >>= f = CurrentPlane ((>>= f) . cont)
@@ -129,8 +137,8 @@ echo t = Echo t (return ())
 run :: String -> String -> [String] -> Ui ()
 run dir t ss = Run dir t ss (return ())
 
-load :: String -> String -> Ui ()
-load dir t = Load dir t (return ())
+-- load :: String -> String -> Ui ()
+-- load dir t = Load dir t (return ())
 
 plugin :: UiId -> String -> (Float, Float) -> UiId -> Ui UiId
 plugin s1 s2 p creationParent = PlugIn s1 s2 p creationParent return
@@ -234,14 +242,17 @@ setColour t v = SetColour t v (return ())
 setLow :: UiId -> Maybe Float -> Ui ()
 setLow t v = SetLow t v (return ())
 
+setName :: UiId -> String -> Ui ()
+setName t n = SetName t n (return ())
+
 setHigh :: UiId -> Maybe Float -> Ui ()
 setHigh t v = SetHigh t v (return ())
 
 --value :: String -> Float -> Ui ()
 --value t v = Value t v (return ())
 
-save :: String -> Ui ()
-save s' = Save s' (return ())
+-- save :: String -> Ui ()
+-- save s' = Save s' (return ())
 
 write :: String -> Ui ()
 write s' = Write s' (return ())
@@ -251,6 +262,12 @@ selection = Selection return
 
 hide :: UiId -> Ui ()
 hide t = Hide t True (return ())
+
+sendBack :: UiId -> Ui ()
+sendBack t = SendBack t (return ())
+
+bringFront :: UiId -> Ui ()
+bringFront t = BringFront t (return ())
 
 recompile :: Ui ()
 recompile = Recompile (return ())
@@ -276,8 +293,12 @@ bind c t = Bind c t (return ())
 location :: UiId -> Ui (Float, Float)
 location s1 = Location s1 return
 
-name :: UiId -> Ui (Maybe String)
-name s1 = Name s1 return
+name, getName :: UiId -> Ui (Maybe String)
+name s1 = GetName s1 return
+getName = name
+
+getColour :: UiId -> Ui (Maybe String)
+getColour s1 = GetColour s1 return
 
 getType :: UiId -> Ui ElementType
 getType s1 = GetType s1 return

@@ -2,31 +2,33 @@
 
 module HandleEvent where
 
-import Cable
-import Command
-import ContainerTree
 import Control.Lens hiding (setting)
 import Control.Monad.State
 import Control.Monad.Trans.Free
 import Data.List
 import Data.Monoid
-import Draw
 import GHC.IO.Exception
 import Graphics.Gloss.Interface.IO.Game
-import Music
-import Numeric
-import Symbols
 import System.Posix
-import UIElement
-import UISupport
-import Utils
 import qualified Wiring as W
-import World
 import qualified Box as B
 import qualified Data.Foldable as F
 import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified UiLib as U
+
+import ContainerTree
+import Draw
+import Cable
+import Command
+import Music
+import Numeric
+import Symbols
+import UIElement
+import UISupport
+import Utils
+import World
+import Save
 
 -- Find a container somewhere in a list of ids.
 -- Assumes there is precisely one. XXX
@@ -68,7 +70,9 @@ defaultClick' p i = do
             highlightJust i
             gadget .= cableGadget p p
             handleDraggingCable i p p
-        In {} -> clickOnIn' p i
+        In {} -> do
+            W.undoPoint
+            clickOnIn' p i
         Knob {} -> do
             highlightJust i
             W.undoPoint
@@ -125,12 +129,11 @@ handleDefault' (EventKey (Char '"') Down _ _) = do
     showHidden %= not
     handleDefault
 
-handleDefault' (EventKey (Char 'z') Down _ _) = do
+handleDefault' (EventKey (Char 'z') Down Modifiers { alt = Down } _) = do
     W.performUndo
     handleDefault
 
-handleDefault' (EventKey (Char 'Z') Down _ _) = do
-    liftIO $ putStrLn "Z was pressed"
+handleDefault' (EventKey (Char 'Z') Down Modifiers { alt = Down } _) = do
     W.performRedo
     handleDefault
 
@@ -155,7 +158,8 @@ handleDefault' (EventKey (Char 'r') Down _ _) = do
     liftIO $ putStrLn $ "filename = " ++ show filename
     withJust filename $ \filename' -> do
         W.undoPoint
-        evalUi (U.load "scripts" filename')
+        fileName <- execScript "scripts" filename' []
+        projectFile .= fileName
     handleDefault
 
 handleDefault' (EventKey (Char 'l') Down _ _) = do
@@ -164,14 +168,28 @@ handleDefault' (EventKey (Char 'l') Down _ _) = do
     liftIO $ putStrLn $ "filename = " ++ show filename
     withJust filename $ \filename' -> do
         W.undoPoint
-        evalUi (U.load "saves" filename')
+        fileName <- execScript "saves" filename' []
+        projectFile .= fileName
+        liftIO $ putStrLn $ "Loaded \"" ++ filename' ++ "\""
     handleDefault
 
 handleDefault' (EventKey (Char 's') Down _ _) = do
     allSaves <- liftIO $ getAllScripts "saves"
     filename <- handleGetString allSaves "" "save: "
-    liftIO $ putStrLn $ "filename = " ++ show filename
-    withJust filename $ \filename' -> evalUi (U.save filename')
+    case filename of
+        Just filename' ->
+            if filename' == ""
+                then do
+                    fileName' <- use projectFile
+                    liftIO $ putStrLn $ "filename = " ++ show fileName'
+                    saveWorld fileName'
+                    liftIO $ putStrLn $ "Saved \"" ++ fileName' ++ "\""
+                else do
+                    let filename'' = "saves/" ++ filename' ++ ".hs"
+                    projectFile .= filename''
+                    saveWorld filename''
+                    liftIO $ putStrLn $ "Saved \"" ++ filename'' ++ "\""
+        Nothing -> return ()
     handleDefault
 
 -- XXX quantise
@@ -184,7 +202,7 @@ handleDefault' (EventKey (Char 'w') Down _ _) = do
         Nothing -> return ()
     handleDefault
 
-handleDefault' (EventKey (Char 'q') Down _ _) = do
+handleDefault' (EventKey (Char 'q') Down Modifiers { alt = Down } _) = do
     liftIO $ exitImmediately ExitSuccess
     handleDefault
 
@@ -220,12 +238,14 @@ handleDefault' (EventKey (Char 'g') Down _ proxyLocation) = do
     makeGroup p sel proxyLocation
     handleDefault
 
+{-
 handleDefault' (EventKey (Char 't') Down _ labelLocation) = do
     p <- use planes
     void $
         newUIElement (Label p False False labelLocation .
                       unUiId)
     handleDefault
+-}
 
 -- Shift mouse down
 -- Starts MultiSelection
@@ -255,6 +275,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
     e <- selectedByPoint selectionPlane p
     case e of
         Just i -> do
+            bringToFront i
             sel <- use currentSelection
             if (length sel > 1) && (i `elem` sel)
                 then handleDraggingSelection p
@@ -283,10 +304,14 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
     e <- selectedByPoint selectionPlane p
     sel <- use currentSelection
     case e of
-        Just i ->
+        Just i -> do
+            bringToFront i
             if i `elem` sel
-                then handleDraggingSelection p
+                then do
+                    W.undoPoint
+                    handleDraggingSelection p
                 else do
+                    W.undoPoint
                     doSelection i
                     handleDraggingSelection p
         Nothing -> handleDraggingRoot p
@@ -298,6 +323,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
     e <- selectedByPoint selectionPlane p
     case e of
         Just i -> do
+            bringToFront i
             elt <- getElementById "HandleEvent.hs" i
             case elt of
                 Container {} -> do

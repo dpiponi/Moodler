@@ -21,7 +21,7 @@ import Save
 import UIElement
 import UiLib
 import World
---import UISupport
+import UISupport
 import qualified ContainerTree as T
 import qualified Box as B
 
@@ -68,10 +68,11 @@ safeReadFile f =
 
 execScript :: (InputHandler m, Functor m, MonadIO m,
                MonadState GlossWorld m) =>
-              String -> String -> [String] -> m ()
+               String -> String -> [String] -> m String
 execScript dir f arguments = do -- use proper dir API XXX
     --liftIO $ putStrLn $ "Exec: " ++ dir ++ "/" ++ f ++ ".hs"
-    cmds <- liftIO $ safeReadFile $ dir ++ "/" ++ f ++ ".hs"
+    let fileName = dir ++ "/" ++ f ++ ".hs"
+    cmds <- liftIO $ safeReadFile fileName
     case cmds of
         Left err  -> do
             liftIO $ putStrLn err
@@ -79,6 +80,7 @@ execScript dir f arguments = do -- use proper dir API XXX
         Right cmd -> do
             cmdArgs .= arguments
             execCommand cmd
+    return fileName
 
 evalUi :: (Functor m, MonadIO m, MonadState GlossWorld m,
           InputHandler m) =>
@@ -107,53 +109,71 @@ evalUi (New s1 s2 cfn) =
 evalUi (Run dir t ss cfn) =
     execScript dir t ss >> evalUi cfn
 
-evalUi (Load dir t cfn) =
-    execScript dir t [] >> evalUi cfn
+{-
+evalUi (Load dir t cfn) = do
+    fileName <- execScript dir t []
+    projectFile .= fileName
+    evalUi cfn
+-}
+
+evalUi (SendBack t cfn) =
+    sendToBack t >> evalUi cfn
+
+evalUi (BringFront t cfn) =
+    bringToFront t >> evalUi cfn
 
 evalUi (PlugIn n t p creationParent cfn) = do
-    let e = In creationParent False False p t "#sample" t []
+    (_, hi) <- depthExtent
+    let e = In creationParent False (hi+1) False p t "#sample" t []
     createdInParent n e creationParent
     evalUi (cfn n)
 
 evalUi (PlugOut n t p creationPlane cfn) = do
-    let e = Out creationPlane False False p t "#sample"
+    (_, hi) <- depthExtent
+    let e = Out creationPlane False (hi+1) False p t "#sample"
     createdInParent n e creationPlane
     evalUi (cfn n)
 
 evalUi (UiLib.Knob n t p creationParent cfn) = do
-    let e = UIElement.Knob creationParent False False
+    (_, hi) <- depthExtent
+    let e = UIElement.Knob creationParent False (hi+1) False
                                 p t "#control" t 0.0 Nothing Nothing
     createdInParent n e creationParent
     evalUi (cfn n)
 
 evalUi (UiLib.Selector n t p opts creationParent cfn) = do
     --liftIO $ print "Selector"
-    let e = UIElement.Selector creationParent False False p t 0.0 opts
+    (_, hi) <- depthExtent
+    let e = UIElement.Selector creationParent False (hi+1) False p t 0.0 opts
     createdInParent n e creationParent
     evalUi (cfn n)
 
 evalUi (UiLib.Proxy n proxyName p planeItsOn cfn) = do
     --liftIO $ print "Proxy"
-    let e = UIElement.Proxy planeItsOn False False p proxyName S.empty
+    (_, hi) <- depthExtent
+    let e = UIElement.Proxy planeItsOn False (hi+1) False p proxyName S.empty
     createdInParent n e planeItsOn
     evalUi (cfn n)
 
 evalUi (UiLib.Image n bmpName p creationPlane cfn) = do
+    (_, hi) <- depthExtent
     (width, height) <- getPic bmpName
-    let e = UIElement.Image creationPlane False False
+    let e = UIElement.Image creationPlane False (hi+1) False
             p bmpName bmpName width height
     createdInParent n e creationPlane
     evalUi (cfn n)
 
 evalUi (UiLib.Container n bmpName p creationPlane cfn) = do
+    (_, hi) <- depthExtent
     (width, height) <- getPic bmpName
-    let e = UIElement.Container creationPlane False False p
+    let e = UIElement.Container creationPlane False (hi+1) False p
                                 bmpName bmpName width height S.empty
     createdInParent n e creationPlane
     evalUi (cfn n)
 
 evalUi (UiLib.Label n labelText p creationPlane cfn) = do
-    let e = UIElement.Label creationPlane False False p labelText
+    (_, hi) <- depthExtent
+    let e = UIElement.Label creationPlane False (hi+1) False p labelText
     createdInParent n e creationPlane
     evalUi (cfn n)
 
@@ -182,6 +202,9 @@ evalUi (Set t v cfn) =
 
 evalUi (SetLow t v cfn) =
     inner . uiElements . ix t . UIElement.knobMin .= v >> evalUi cfn
+
+evalUi (SetName t n cfn) =
+    inner . uiElements . ix t . UIElement.name .= n >> evalUi cfn
 
 evalUi (SetHigh t v cfn) =
     inner . uiElements . ix t . UIElement.knobMax .= v >> evalUi cfn
@@ -222,9 +245,18 @@ evalUi (GetRoot cfn) = do
     root <- use rootPlane
     evalUi (cfn (root::UiId))
 
+{-
 -- Should use current project name
-evalUi (Save t cfn) =
-    saveWorld t >> evalUi cfn
+evalUi (Save t cfn) = do
+    if null t
+        then do
+            fileName <- use projectFile
+            saveWorld fileName
+        else do
+            projectFile .= "saves/" + t + ".hs"
+            saveWorld t
+    evalUi cfn
+-}
 
 evalUi (Parent s1 s2 cfn) =
     T.reparent s1 s2 >> evalUi cfn
@@ -266,9 +298,14 @@ evalUi (Bind c t cfn) =
 evalUi (Move c p cfn) =
     inner . uiElements . ix c . loc .= p >> evalUi cfn
 
-evalUi (Name c cfn) = do
+evalUi (GetName c cfn) = do
     elts <- use (inner . uiElements)
     evalUi (cfn (_name <$> M.lookup c elts))
+
+-- Not everything has a colour XXX
+evalUi (GetColour c cfn) = do
+    elts <- use (inner . uiElements)
+    evalUi (cfn (_dataColour <$> M.lookup c elts))
 
 evalUi (Location c cfn) = do
     elt <- getElementById "Location" c

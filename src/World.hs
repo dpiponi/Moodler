@@ -52,6 +52,7 @@ data GlossWorld = GlossWorld { _inner :: World
                              , _currentSelection :: [UiId]
                              , _gadget :: B.Transform -> Picture
                              , _ipAddr :: String
+                             , _projectFile :: String
                              , _rootTransform :: B.Transform
                              , _cont :: FreeF MoodlerF Zero
                                 (FreeT MoodlerF (StateT GlossWorld IO)

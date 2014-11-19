@@ -15,6 +15,7 @@ import World
 import Options
 import Draw
 --import UISupport
+import Data.Maybe
 import UIElement
 import HandleEvent
 import Command
@@ -81,6 +82,7 @@ emptyGlossWorld :: GlossWorld
 emptyGlossWorld = 
     let root = Proxy { _parent = error "Root parent shouldn't be visible"
                      , _highlighted = False
+                     , _depth = 0
                      , _hidden = False
                      , _loc = (0, 0)
                      , _name = "root"
@@ -90,6 +92,7 @@ emptyGlossWorld =
         innerWorld = emptyWorld rootID root
     in GlossWorld { _inner = innerWorld
                   , _ipAddr = ""
+                  , _projectFile = ""
                   , _showHidden = False
                   , _newName = 0
                   , _mouseLoc = (0, 0)
@@ -127,17 +130,19 @@ main = do
           let script = lookup "FileName" opts
           let showGUI = lookup "GUI" opts
           let initialWorld = emptyGlossWorld & ipAddr .~ ipAddress
-          world' <- lift $ case script of
-                          Nothing -> return initialWorld
-                          Just scr -> execStateT (runWorldMonad
-                                        (execScript "saves" scr []))
-                                        initialWorld
+          (filename, world') <- lift $ case script of
+                                  Nothing -> return ("saves/Untitled.hs", initialWorld)
+                                  Just scr -> runStateT (runWorldMonad
+                                                (execScript "saves" scr []))
+                                                initialWorld
+          -- Need to get correct file name from execScript
+          let world'' = world' & projectFile .~ filename
 
           let gui = case showGUI of
                 Nothing -> True
                 Just a -> a == "False"
 
-          when gui (lift $ launchGUI world')
+          when gui (lift $ launchGUI world'')
     case result of
         Left err -> putStrLn err
         Right _ -> return ()

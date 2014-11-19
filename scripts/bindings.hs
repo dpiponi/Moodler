@@ -6,7 +6,8 @@ do
     bind '<' "setmin"
     bind '>' "setmax"
     bind '\\' "nolimits"
-    bind 'a' "addknob"
+    bind 'k' "addknob"
+    --bind 'K' "breakknob"
     bind 'm' "relocate"
     bind 'n' "rename"
     bind 'z' "check"
@@ -16,6 +17,8 @@ do
     bind '!' "alert"
     bind '%' "setcolour"
     bind '~' "container"
+    bind '^' "bringFront"
+    bind '$' "sendBack"
 
     bind 'A' "noteA"
     bind 'B' "noteB"

@@ -41,6 +41,7 @@ emptyGlossWorld' :: GlossWorld
 emptyGlossWorld' = 
     let root = Proxy { _parent = error "Root parent shouldn't be visible"
                      , _highlighted = False
+                     , _depth = 0
                      , _hidden = False
                      , _loc = (0, 0)
                      , _name = "root"
@@ -50,6 +51,7 @@ emptyGlossWorld' =
         innerWorld = emptyWorld' rootID root
     in GlossWorld { _inner = innerWorld
                   , _ipAddr = ""
+                  , _projectFile = ""
                   , _showHidden = False
                   , _newName = 0
                   , _mouseLoc = (0, 0)

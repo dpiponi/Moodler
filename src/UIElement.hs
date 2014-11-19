@@ -12,6 +12,7 @@ import Symbols
 
 data UIElement = Container { _parent :: UiId
                            , _highlighted :: Bool
+                           , _depth :: Int
                            , _hidden :: Bool
                            , _loc :: Point
                            , _name :: String
@@ -21,12 +22,14 @@ data UIElement = Container { _parent :: UiId
                            , _contents :: S.Set UiId }
                | Proxy { _parent :: UiId
                        , _highlighted :: Bool
+                       , _depth :: Int
                        , _hidden :: Bool
                        , _loc :: Point
                        , _name :: String
                        , _contents :: S.Set UiId }
                | In { _parent :: UiId
                     , _highlighted :: Bool
+                    , _depth :: Int
                     , _hidden :: Bool
                     , _loc :: Point
                     , _name :: String
@@ -35,17 +38,20 @@ data UIElement = Container { _parent :: UiId
                     , _cablesIn :: [Cable] }
                | Out { _parent :: UiId
                      , _highlighted :: Bool
+                     , _depth :: Int
                      , _hidden :: Bool
                      , _loc :: Point
                      , _name :: String
                      , _dataColour :: String }
                | Label { _parent :: UiId
                        , _highlighted :: Bool
+                       , _depth :: Int
                        , _hidden :: Bool
                        , _loc :: Point
                        , _name :: String }
                | Knob { _parent :: UiId
                       , _highlighted :: Bool
+                      , _depth :: Int
                       , _hidden :: Bool
                       , _loc :: Point
                       , _name :: String
@@ -56,6 +62,7 @@ data UIElement = Container { _parent :: UiId
                       , _knobMax :: Maybe Float }
                | Selector { _parent :: UiId
                           , _highlighted :: Bool
+                          , _depth :: Int
                           , _hidden :: Bool
                           , _loc :: Point
                           , _name :: String
@@ -63,6 +70,7 @@ data UIElement = Container { _parent :: UiId
                           , _options :: [String] }
                | Image { _parent :: UiId
                        , _highlighted :: Bool
+                       , _depth :: Int
                        , _hidden :: Bool
                        , _loc :: Point
                        , _name :: String

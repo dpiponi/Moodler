@@ -302,5 +302,6 @@ saveWorld :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
              String -> m ()
 saveWorld t = do
     code <- codeWorld
-    liftIO $ writeFile ("saves" ++ "/" ++ t ++ ".hs") code
+    --liftIO $ writeFile ("saves" ++ "/" ++ t ++ ".hs") code
+    liftIO $ writeFile t code
     liftIO $ putStrLn $ "----- save: " ++ t
