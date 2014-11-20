@@ -15,7 +15,7 @@ import World
 import Options
 import Draw
 --import UISupport
-import Data.Maybe
+--import Data.Maybe
 import UIElement
 import HandleEvent
 import Command
@@ -27,17 +27,18 @@ magic _ = undefined
 
 handleMousePosition :: GlossWorld -> MoodlerM Zero -> Point ->
                        IO GlossWorld
-handleMousePosition world m p = do
-    (newContinuation, newWorld) <- runStateT (runFreeT m)
-                                             world
-    return $ newWorld & mouseLoc .~ p
-                      & cont .~ newContinuation -- <- XXX elim fmap?
+handleMousePosition world m p = (`execStateT` world) $ do
+    (cont .=) =<< runFreeT m
+    mouseLoc .= p
 
 handleNoMousePosition :: GlossWorld -> MoodlerM Zero -> IO GlossWorld
-handleNoMousePosition world m = do
-    (newContinuation, newWorld) <- runStateT (runFreeT m)
-                                   world
-    return $ newWorld & cont .~ newContinuation
+handleNoMousePosition world m = (`execStateT` world) $
+    (cont .=) =<< runFreeT m
+
+{-
+applyTransformKey xform (EventKey a1 a2 a3 p) =
+    EventKey a1 a2 a3 (applyTransform xform p)
+-}
 
 -- XXX Mouse position may be off by one event in time.
 eventHandler :: Event -> GlossWorld -> IO GlossWorld
@@ -49,7 +50,7 @@ eventHandler (EventKey a1 a2 a3 p) world@GlossWorld { _cont = m } =
             let xform = world ^. rootTransform
                 p' = applyTransform (inverse xform) p
             in handleMousePosition world
-                         ({-MoodlerM-} handler (EventKey a1 a2 a3 p')) p'
+                         (handler (EventKey a1 a2 a3 p')) p'
 
 eventHandler (EventMotion p) world@GlossWorld { _cont = m } =
     case m of
@@ -59,14 +60,14 @@ eventHandler (EventMotion p) world@GlossWorld { _cont = m } =
             let xform = world ^. rootTransform
                 p' = applyTransform (inverse xform) p
             in handleMousePosition world
-                            ({-MoodlerM-} handler (EventMotion p')) p'
+                            (handler (EventMotion p')) p'
 
 eventHandler event@(EventResize _) world@GlossWorld { _cont = m } =
     case m of
         Pure a -> magic a
 
         Free (GetEvent handler) ->
-            handleNoMousePosition world ({-MoodlerM-} handler event)
+            handleNoMousePosition world (handler event)
 
 
 simulate :: Float -> GlossWorld -> IO GlossWorld
@@ -80,12 +81,12 @@ emptyWorld rootID root =
 
 emptyGlossWorld :: GlossWorld
 emptyGlossWorld = 
-    let root = Proxy { _parent = error "Root parent shouldn't be visible"
+    let root = Proxy { _ur = UrElement { _parent = error "Root parent shouldn't be visible"
                      , _highlighted = False
                      , _depth = 0
                      , _hidden = False
                      , _loc = (0, 0)
-                     , _name = "root"
+                     , _name = "root" }
                      , _contents = S.empty
                      }
         rootID = UiId "root"
@@ -130,11 +131,15 @@ main = do
           let script = lookup "FileName" opts
           let showGUI = lookup "GUI" opts
           let initialWorld = emptyGlossWorld & ipAddr .~ ipAddress
-          (filename, world') <- lift $ case script of
-                                  Nothing -> return ("saves/Untitled.hs", initialWorld)
-                                  Just scr -> runStateT (runWorldMonad
-                                                (execScript "saves" scr []))
-                                                initialWorld
+          (filename, world') <- lift $
+            case script of
+--              Nothing -> return ("saves/Untitled.hs", initialWorld)
+              Nothing -> runStateT (runWorldMonad
+                            (execScript "saves" "startup" [] >> return "saves/Untitled.hs"))
+                            initialWorld
+              Just scr -> runStateT (runWorldMonad
+                            (execScript "saves" scr []))
+                            initialWorld
           -- Need to get correct file name from execScript
           let world'' = world' & projectFile .~ filename
 

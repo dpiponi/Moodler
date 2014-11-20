@@ -54,8 +54,8 @@ clickOnIn' p i = do
             handleDraggingSelection p
         Just (Cable src) -> do
             srcElt <- getElementById "clickOnIn'" src
-            gadget .= cableGadget (_loc srcElt) p
-            handleDraggingCable src (_loc srcElt) p
+            gadget .= cableGadget (_loc (_ur srcElt)) p
+            handleDraggingCable src (_loc (_ur srcElt)) p
 
 -- Straightforward click on a UI element
 defaultClick' :: Point -> UiId -> MoodlerM Zero
@@ -102,7 +102,7 @@ defaultClick' p i = do
 elementDisplayName :: UIElement -> String
 elementDisplayName In { _displayName = n} = n
 elementDisplayName Knob { _displayName = n} = n
-elementDisplayName e = e ^. name
+elementDisplayName e = e ^. ur . name
 
 hoverGadget :: Point -> UIElement -> B.Transform -> Picture
 hoverGadget (ex, ey) elt xform = 
@@ -121,7 +121,7 @@ handleDefault' (EventMotion p) = do
     case maybeHoveringOver of
         Just hoveringOver -> do
             elt <- getElementById "HandleEvent.hs" hoveringOver
-            gadget .= hoverGadget (_loc elt) elt
+            gadget .= hoverGadget (_loc (_ur elt)) elt
         Nothing -> gadget .= const blank
     handleDefault
 
@@ -357,7 +357,7 @@ handleDefault' (EventKey key Down
     let (dx, dy) = getDirection key
     sel <- use currentSelection
     forM_ sel $ \e ->
-        (inner . uiElements) . ix e .loc += (quantum*dx, quantum*dy)
+        (inner . uiElements) . ix e . ur . loc += (quantum*dx, quantum*dy)
     handleDefault
 
 -- Use key binding.
@@ -397,7 +397,7 @@ handleDraggingRoot' a _ = handleDraggingRoot a
 
 dragElement :: [UiId] -> Point -> [UiId] -> MoodlerM ()
 dragElement top d@(dx, dy) sel = forM_ sel $ \s -> do
-    inner . uiElements . ix s . loc += (dx, dy)
+    inner . uiElements . ix s . ur . loc += (dx, dy)
     elts <- use (inner . uiElements)
     let Just elt = M.lookup s elts
     case elt of
@@ -506,7 +506,7 @@ handleDraggingCable' src start _ (EventMotion (x, y)) = do
                 In {} -> do
                     highlightElement hoveringOver
                     gadget .= cableGadget start (x, y) <>
-                                      hoverGadget (_loc elt) elt 
+                                      hoverGadget (_loc (_ur elt)) elt 
                 _ -> unhighlightEverything
         Nothing -> unhighlightEverything
     handleDraggingCable src start (x, y)

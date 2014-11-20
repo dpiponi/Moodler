@@ -39,12 +39,12 @@ emptyWorld' rootID root =
 
 emptyGlossWorld' :: GlossWorld
 emptyGlossWorld' = 
-    let root = Proxy { _parent = error "Root parent shouldn't be visible"
+    let root = Proxy { _ur = UrElement { _parent = error "Root parent shouldn't be visible"
                      , _highlighted = False
                      , _depth = 0
                      , _hidden = False
                      , _loc = (0, 0)
-                     , _name = "root"
+                     , _name = "root" }
                      , _contents = S.empty
                      }
         rootID = UiId "root"
@@ -75,8 +75,8 @@ synthConnect :: (Functor m, MonadIO m, MonadState GlossWorld m,
                 InputHandler m) =>
                 UiId -> UiId -> m ()
 synthConnect s1 s2 = do
-    s1Name <- use (inner . uiElements . ix s1 . name)
-    s2Name <- use (inner . uiElements . ix s2 . name)
+    s1Name <- use (inner . uiElements . ix s1 . ur . name)
+    s2Name <- use (inner . uiElements . ix s2 . ur . name)
     sendConnectMessage s1Name s2Name
     previousCables <- use (inner . uiElements . ix s2 . cablesIn)
     if null previousCables -- XXX case
@@ -84,7 +84,7 @@ synthConnect s1 s2 = do
                         (SendConnect s1Name s2Name)
         else do
             let (Cable o : _) = previousCables
-            oName <- use (inner . uiElements . ix o . name)
+            oName <- use (inner . uiElements . ix o . ur . name)
             recordUndo (SendConnect oName s2Name)
                        (SendConnect s1Name s2Name)
     inner . uiElements . ix s2 . cablesIn %= (Cable.Cable s1 :)
@@ -104,20 +104,20 @@ deleteCable selectedIn = do
         [] -> return Nothing
         [c@(Cable c')] -> do
             inner . uiElements . ix selectedIn . cablesIn .= []
-            selectedInName <- use (inner . uiElements . ix selectedIn . name)
+            selectedInName <- use (inner . uiElements . ix selectedIn . ur . name)
             sendDisconnectMessage selectedInName
             --deleteCable' c selectedIn
-            c'Name <- use (inner . uiElements . ix c' . name)
+            c'Name <- use (inner . uiElements . ix c' . ur . name)
             recordUndo (SendConnect c'Name selectedInName)
                        (SendDisconnect selectedInName)
             --sendRecompileMessage
             return (Just c)
         (c@(Cable c') : rc@(Cable src : _)) -> do
             inner . uiElements . ix selectedIn . cablesIn .= rc
-            srcName <- use (inner . uiElements . ix src . name)
-            selectedInName <- use (inner . uiElements . ix selectedIn . name)
+            srcName <- use (inner . uiElements . ix src . ur . name)
+            selectedInName <- use (inner . uiElements . ix selectedIn . ur . name)
             sendConnectMessage srcName selectedInName
-            c'Name <- use (inner . uiElements . ix c' . name)
+            c'Name <- use (inner . uiElements . ix c' . ur . name)
             recordUndo (SendConnect c'Name selectedInName)
                        (SendConnect srcName selectedInName)
             --sendRecompileMessage
@@ -130,9 +130,9 @@ rotateCables selectedIn = do
     case outPoint ^. cablesIn of
         (c@(Cable c') : rc@(Cable src : _)) -> do
             inner . uiElements . ix selectedIn . cablesIn .= rc ++ [c]
-            srcName <- use (inner . uiElements . ix src . name)
-            selectedInName <- use (inner . uiElements . ix selectedIn . name)
-            c'Name <- use (inner . uiElements . ix c' . name)
+            srcName <- use (inner . uiElements . ix src . ur . name)
+            selectedInName <- use (inner . uiElements . ix selectedIn . ur . name)
+            c'Name <- use (inner . uiElements . ix c' . ur . name)
             sendConnectMessage srcName selectedInName
             {- UNDO -}
             recordUndo (SendConnect c'Name selectedInName)
@@ -156,8 +156,8 @@ removeAllCablesFromTo :: (Functor m, MonadIO m,
 removeAllCablesFromTo src dst cs = do
     unless (null cs) $ do
         let Cable s : _ = cs
-        dstName <- use (inner . uiElements . ix dst . name)
-        srcName <- use (inner . uiElements . ix src . name)
+        dstName <- use (inner . uiElements . ix dst . ur . name)
+        srcName <- use (inner . uiElements . ix src . ur . name)
         when (s == src) $ do
             let newCs = filter (not . cableIsFrom src) cs
             if null newCs
@@ -167,7 +167,7 @@ removeAllCablesFromTo src dst cs = do
                                (SendDisconnect dstName)
                 else do
                     let Cable newSrc : _ = newCs
-                    newSrcName <- use (inner . uiElements . ix newSrc . name)
+                    newSrcName <- use (inner . uiElements . ix newSrc . ur . name)
                     sendConnectMessage newSrcName dstName
                     recordUndo (SendConnect srcName dstName)
                                (SendConnect newSrcName dstName)
@@ -193,7 +193,7 @@ synthSet t v = do
     -- Note this is using fact that string is monoid
     -- Not good! XXX
     elt <- getElementById "synthSet" t
-    let knobName = UIElement._name elt
+    let knobName = UIElement._name (_ur elt)
     let oldValue = UIElement._setting elt
     inner . uiElements . ix t . UIElement.setting .= v
     sendSetMessage knobName v

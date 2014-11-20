@@ -19,18 +19,18 @@ import UIElement
 import World
 
 highlightElement :: MonadState GlossWorld m => UiId -> m ()
-highlightElement i = inner . uiElements . ix i . highlighted .= True
+highlightElement i = inner . uiElements . ix i . ur . highlighted .= True
 
 unhighlightElement :: MonadState GlossWorld m => UiId -> m ()
-unhighlightElement i = inner . uiElements . ix i . highlighted .= False
+unhighlightElement i = inner . uiElements . ix i . ur . highlighted .= False
 
 unhighlightEverything :: MonadState GlossWorld m => m ()
-unhighlightEverything = inner . uiElements . traverse . highlighted .=
+unhighlightEverything = inner . uiElements . traverse . ur . highlighted .=
                             False
 
 highlightJust :: MonadState GlossWorld m => UiId -> m ()
 highlightJust i =
-    unhighlightEverything >> inner . uiElements . ix i . highlighted .=
+    unhighlightEverything >> inner . uiElements . ix i . ur . highlighted .=
         True
 
 depthExtent :: MonadState GlossWorld m =>
@@ -38,7 +38,7 @@ depthExtent :: MonadState GlossWorld m =>
 depthExtent = do
     elts <- use (inner . uiElements)
     depths <- forM (M.toList elts) $ \(_, elt) ->
-        return (elt ^. depth)
+        return (elt ^. ur . depth)
     let sorted = L.sort depths
     return (head sorted, last sorted)
 
@@ -51,12 +51,12 @@ doSelection i = do
 bringToFront :: MonadState GlossWorld m => UiId -> m ()
 bringToFront t = do
     (_, hi) <- depthExtent
-    inner . uiElements . ix t . depth .= (hi+1)
+    inner . uiElements . ix t . ur . depth .= (hi+1)
 
 sendToBack :: MonadState GlossWorld m => UiId -> m ()
 sendToBack t = do
     (lo, _) <- depthExtent
-    inner . uiElements . ix t . depth .= (lo-1)
+    inner . uiElements . ix t . ur . depth .= (lo-1)
 
 newUIElement :: MonadState GlossWorld m => (UiId -> UIElement) -> m UiId
 newUIElement elt = do
@@ -73,7 +73,7 @@ visitElements' :: MonadState GlossWorld m =>
                   UiId -> UIElement -> m [UiId]
 visitElements' e elt@Container { _contents = cts } = do
     showHiddenElements <- use showHidden
-    if not showHiddenElements && (elt ^. hidden)
+    if not showHiddenElements && (elt ^. ur . hidden)
         then return []
         else do
             childElements <- forM (S.toList cts) $ \c -> do
@@ -82,7 +82,7 @@ visitElements' e elt@Container { _contents = cts } = do
             return $ concat childElements ++ [e]
 visitElements' e elt = do
     showHiddenElements <- use showHidden
-    return $ if not showHiddenElements && (elt ^. hidden)
+    return $ if not showHiddenElements && (elt ^. ur . hidden)
         then []
         else [e]
     
@@ -107,13 +107,13 @@ visitElementsOnPlane planeId = do
 
     thingsToVisit <- rootElementsOnPlane planeId
     elementsToVisit <- getElementsById "visitElementsOnPlane" thingsToVisit
-    let thingsAndelementsToVisit = L.sortBy (flip compare `on` (_depth . snd)) $
+    let thingsAndelementsToVisit = L.sortBy (flip compare `on` (_depth . _ur . snd)) $
                                     zip thingsToVisit elementsToVisit
     --thingsToVisit' = map fst thingsAndelementsToVisit
     --elementsToVisit' = map snd thingsAndelementsToVisit
 
     lists <- forM thingsAndelementsToVisit $ \(eltId, elt) ->
-        if showHiddenElements || not (elt ^. hidden)
+        if showHiddenElements || not (elt ^. ur . hidden)
             then visitElements' eltId elt
             else return []
     return $ concat lists
@@ -214,15 +214,15 @@ makeGroup p sel proxyLocation = do
 
     let proxyName = "proxy" ++ show newPlaneName
     let groupPlane = UiId proxyName
-    let e = UIElement.Proxy p False 0 False proxyLocation proxyName S.empty
+    let e = UIElement.Proxy (UrElement p False 0 False proxyLocation proxyName) S.empty
     createdInParent groupPlane e p
     addPlane groupPlane
 
     forM_ everythingThatsMoving $ \movingId -> do
         liftIO $ print $ "considering " ++ show movingId
         movingElement <- getElementById "makeGroup" movingId
-        liftIO $ putStrLn $ "parent = " ++ show (movingElement ^. parent)
-        let p' = movingElement ^. parent
+        liftIO $ putStrLn $ "parent = " ++ show (movingElement ^. ur . parent)
+        let p' = movingElement ^. ur . parent
         unless (p' `elem` everythingThatsMoving) $ do
             liftIO $ print $ "no parent for " ++ show p'
             --unparent movingId

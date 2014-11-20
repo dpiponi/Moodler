@@ -98,7 +98,7 @@ evalUi (Echo t cfn) =
     doAlert t >> evalUi cfn
 
 evalUi (Hide t h cfn) =
-    inner . uiElements . ix t . hidden .= h >> evalUi cfn
+    inner . uiElements . ix t . ur . hidden .= h >> evalUi cfn
 
 evalUi (Delete t cfn) =
     T.deleteElement t >> evalUi cfn
@@ -124,56 +124,56 @@ evalUi (BringFront t cfn) =
 
 evalUi (PlugIn n t p creationParent cfn) = do
     (_, hi) <- depthExtent
-    let e = In creationParent False (hi+1) False p t "#sample" t []
+    let e = In (UrElement creationParent False (hi+1) False p t) "#sample" t []
     createdInParent n e creationParent
     evalUi (cfn n)
 
 evalUi (PlugOut n t p creationPlane cfn) = do
     (_, hi) <- depthExtent
-    let e = Out creationPlane False (hi+1) False p t "#sample"
+    let e = Out (UrElement creationPlane False (hi+1) False p t) "#sample"
     createdInParent n e creationPlane
     evalUi (cfn n)
 
 evalUi (UiLib.Knob n t p creationParent cfn) = do
     (_, hi) <- depthExtent
-    let e = UIElement.Knob creationParent False (hi+1) False
-                                p t "#control" t 0.0 Nothing Nothing
+    let e = UIElement.Knob (UrElement creationParent False (hi+1) False
+                                p t) "#control" t KnobStyle 0.0 Nothing Nothing
     createdInParent n e creationParent
     evalUi (cfn n)
 
 evalUi (UiLib.Selector n t p opts creationParent cfn) = do
     --liftIO $ print "Selector"
     (_, hi) <- depthExtent
-    let e = UIElement.Selector creationParent False (hi+1) False p t 0.0 opts
+    let e = UIElement.Selector (UrElement creationParent False (hi+1) False p t) 0.0 opts
     createdInParent n e creationParent
     evalUi (cfn n)
 
 evalUi (UiLib.Proxy n proxyName p planeItsOn cfn) = do
     --liftIO $ print "Proxy"
     (_, hi) <- depthExtent
-    let e = UIElement.Proxy planeItsOn False (hi+1) False p proxyName S.empty
+    let e = UIElement.Proxy (UrElement planeItsOn False (hi+1) False p proxyName) S.empty
     createdInParent n e planeItsOn
     evalUi (cfn n)
 
 evalUi (UiLib.Image n bmpName p creationPlane cfn) = do
     (_, hi) <- depthExtent
     (width, height) <- getPic bmpName
-    let e = UIElement.Image creationPlane False (hi+1) False
-            p bmpName bmpName width height
+    let e = UIElement.Image (UrElement creationPlane False (hi+1) False
+            p bmpName) bmpName width height
     createdInParent n e creationPlane
     evalUi (cfn n)
 
 evalUi (UiLib.Container n bmpName p creationPlane cfn) = do
     (_, hi) <- depthExtent
     (width, height) <- getPic bmpName
-    let e = UIElement.Container creationPlane False (hi+1) False p
-                                bmpName bmpName width height S.empty
+    let e = UIElement.Container (UrElement creationPlane False (hi+1) False p
+                                bmpName) bmpName width height S.empty
     createdInParent n e creationPlane
     evalUi (cfn n)
 
 evalUi (UiLib.Label n labelText p creationPlane cfn) = do
     (_, hi) <- depthExtent
-    let e = UIElement.Label creationPlane False (hi+1) False p labelText
+    let e = UIElement.Label (UrElement creationPlane False (hi+1) False p labelText)
     createdInParent n e creationPlane
     evalUi (cfn n)
 
@@ -204,7 +204,7 @@ evalUi (SetLow t v cfn) =
     inner . uiElements . ix t . UIElement.knobMin .= v >> evalUi cfn
 
 evalUi (SetName t n cfn) =
-    inner . uiElements . ix t . UIElement.name .= n >> evalUi cfn
+    inner . uiElements . ix t . ur . UIElement.name .= n >> evalUi cfn
 
 evalUi (SetHigh t v cfn) =
     inner . uiElements . ix t . UIElement.knobMax .= v >> evalUi cfn
@@ -238,7 +238,7 @@ evalUi (GetParent s1 cfn) = do
         then evalUi (cfn root)
         else let a = case M.lookup s1 elts of
                         Nothing -> error "No value"
-                        Just e  -> UIElement._parent e
+                        Just e  -> UIElement._parent (_ur e)
              in evalUi (cfn a)
 
 evalUi (GetRoot cfn) = do
@@ -296,11 +296,11 @@ evalUi (Bind c t cfn) =
     bindings %= M.insert c t >> evalUi cfn
 
 evalUi (Move c p cfn) =
-    inner . uiElements . ix c . loc .= p >> evalUi cfn
+    inner . uiElements . ix c . ur . loc .= p >> evalUi cfn
 
 evalUi (GetName c cfn) = do
     elts <- use (inner . uiElements)
-    evalUi (cfn (_name <$> M.lookup c elts))
+    evalUi (cfn (_name . _ur <$> M.lookup c elts))
 
 -- Not everything has a colour XXX
 evalUi (GetColour c cfn) = do
@@ -309,7 +309,7 @@ evalUi (GetColour c cfn) = do
 
 evalUi (Location c cfn) = do
     elt <- getElementById "Location" c
-    evalUi (cfn (elt ^. loc))
+    evalUi (cfn (elt ^. ur . loc))
 
 evalUi (Input prompt cfn) = do
     inp <- getInput "" prompt

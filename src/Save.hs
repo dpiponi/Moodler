@@ -22,10 +22,10 @@ import Utils
 import World
 
 synthUsedInElement :: UIElement -> S.Set String
-synthUsedInElement In { _name = n } = S.singleton (base n)
-synthUsedInElement Out { _name = n } = S.singleton (base n)
-synthUsedInElement Knob { _name = n } = S.singleton (base n)
-synthUsedInElement Selector { _name = n } = S.singleton (base n)
+synthUsedInElement In { _ur = UrElement { _name = n } } = S.singleton (base n)
+synthUsedInElement Out { _ur = UrElement { _name = n } } = S.singleton (base n)
+synthUsedInElement Knob { _ur = UrElement { _name = n } } = S.singleton (base n)
+synthUsedInElement Selector { _ur = UrElement { _name = n } } = S.singleton (base n)
 synthUsedInElement _ = S.empty
 
 synthUsedInItem :: (Functor m, MonadState GlossWorld m) =>
@@ -64,22 +64,21 @@ elementLine :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                Maybe Point -> UiId -> UIElement ->
                StateT (S.Set UiId) (WriterT (Multi String String) m) ()
 elementLine _ parentId maybeMouseLocn eltName
-    Image { _name = _
-          , _loc = p
+    Image { _ur = UrElement { _loc = p }
           , _pic = picture} =
     multiTellLn "module" 4 $ unwords [unUiId eltName,
                              "<- image'", show picture,
                              relativeShow maybeMouseLocn p, parentId]
 
-elementLine _ parentId maybeMouseLocn eltName Label { _name = n
-                                                  , _loc = p } =
+elementLine _ parentId maybeMouseLocn eltName Label { _ur = UrElement { _name = n
+                                                  , _loc = p } } =
     multiTellLn "module" 4 $ unwords [unUiId eltName,
                                       "<-", "label'", show n,
                                       relativeShow maybeMouseLocn p, parentId]
 
-elementLine _ parentId maybeMouseLocn eltName Knob { _name = n
+elementLine _ parentId maybeMouseLocn eltName Knob { _ur = UrElement { _name = n
+                                                 , _loc = p }
                                                  , _displayName = d
-                                                 , _loc = p
                                                  , _setting = s
                                                  , _knobMin = a
                                                  , _knobMax = b} = do
@@ -98,8 +97,8 @@ elementLine _ parentId maybeMouseLocn eltName Knob { _name = n
                 unwords ["setHigh ", unUiId eltName,
                   paren (unwords ["Just", paren (show b')])]
 
-elementLine _ parentId maybeMouseLocn eltName Selector { _name = n
-                                                     , _loc = p
+elementLine _ parentId maybeMouseLocn eltName Selector { _ur = UrElement { _name = n
+                                                     , _loc = p }
                                                      , _options = opts
                                                      , _setting = s} = do
     multiTellLn "module" 4 $ unwords [unUiId eltName, "<-", "selector'",
@@ -110,8 +109,8 @@ elementLine _ parentId maybeMouseLocn eltName Selector { _name = n
                                         "(" ++ show s ++ ")"]
 
 elementLine everythingSaved parentId maybeMouseLocn eltId
-    In { _name = n
-       , _loc = p
+    In { _ur = UrElement { _name = n
+       , _loc = p }
        , _cablesIn = c
        , _displayName = d
        , _dataColour = col } = do
@@ -126,8 +125,8 @@ elementLine everythingSaved parentId maybeMouseLocn eltId
     unless (null c) $ saveCable everythingSaved eltId (head c)
 
 elementLine _ parentId maybeMouseLocn eltName
-    Out { _name = n
-        , _loc = p
+    Out { _ur = UrElement { _name = n
+        , _loc = p }
         , _dataColour = col } = do
     multiTellLn "module" 4 $ unwords [unUiId eltName,
               "<- plugout'", rewriteConnection n,
@@ -135,16 +134,14 @@ elementLine _ parentId maybeMouseLocn eltName
               parentId]
     multiTellLn "module" 4 $ unwords ["setColour", unUiId eltName, show col]
 
-elementLine _ parentId maybeMouseLocn eltName Container { _name = _
-                                                      , _loc = p
+elementLine _ parentId maybeMouseLocn eltName Container { _ur = UrElement { _loc = p }
                                                       , _pic = picture} =
     multiTellLn "module" 4 $ unwords [unUiId eltName,
                               "<-", "container'", show picture,
                               relativeShow maybeMouseLocn p, parentId]
 
 elementLine _ parentId maybeMouseLocn eltName
-    Proxy { _name = _
-          , _loc = p } =
+    Proxy { _ur = UrElement { _loc = p } } =
     multiTellLn "module" 4 $ unwords [unUiId eltName,
                               "<-", "proxy'",
                               relativeShow maybeMouseLocn p,
@@ -157,7 +154,7 @@ saveElement :: (Functor m, MonadIO m, MonadState GlossWorld m)
                             (WriterT (Multi String String) m) ()
 saveElement parentId everythingSaved maybeMouseLocn eltName elt = do
     elementLine everythingSaved parentId maybeMouseLocn eltName elt
-    when (elt ^. hidden) $ multiTellLn "module" 4 $
+    when (elt ^. ur . hidden) $ multiTellLn "module" 4 $
                         unwords ["hide", unUiId eltName]
 
 saveItem :: (Functor m, MonadIO m, MonadState GlossWorld m)
@@ -279,7 +276,7 @@ codeWorld = do
     selElts <- getElementsById "codeWorld" everythingSaved
     let everythingSavedSet = S.fromList everythingSaved
     let needsSaving = [item | (item, elt) <- zip everythingSaved selElts,
-                              (elt ^. parent) `S.notMember` everythingSavedSet]
+                              (elt ^. ur . parent) `S.notMember` everythingSavedSet]
     sections <- execWriterT (evalStateT (
             codeWorld' everythingSavedSet synths needsSaving
         ) S.empty)

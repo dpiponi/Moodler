@@ -10,74 +10,45 @@ import Box
 import Cable
 import Symbols
 
-data UIElement = Container { _parent :: UiId
+data KnobStyle = KnobStyle | SliderStyle deriving Show
+
+data UrElement = UrElement { _parent :: UiId
                            , _highlighted :: Bool
                            , _depth :: Int
                            , _hidden :: Bool
                            , _loc :: Point
                            , _name :: String
+                           } deriving Show
+data UIElement = Container { _ur :: UrElement
                            , _pic :: String
                            , _imageWidth :: Int
                            , _imageHeight :: Int
                            , _contents :: S.Set UiId }
-               | Proxy { _parent :: UiId
-                       , _highlighted :: Bool
-                       , _depth :: Int
-                       , _hidden :: Bool
-                       , _loc :: Point
-                       , _name :: String
+               | Proxy { _ur :: UrElement
                        , _contents :: S.Set UiId }
-               | In { _parent :: UiId
-                    , _highlighted :: Bool
-                    , _depth :: Int
-                    , _hidden :: Bool
-                    , _loc :: Point
-                    , _name :: String
+               | In { _ur :: UrElement
                     , _dataColour :: String
                     , _displayName :: String
                     , _cablesIn :: [Cable] }
-               | Out { _parent :: UiId
-                     , _highlighted :: Bool
-                     , _depth :: Int
-                     , _hidden :: Bool
-                     , _loc :: Point
-                     , _name :: String
+               | Out { _ur :: UrElement
                      , _dataColour :: String }
-               | Label { _parent :: UiId
-                       , _highlighted :: Bool
-                       , _depth :: Int
-                       , _hidden :: Bool
-                       , _loc :: Point
-                       , _name :: String }
-               | Knob { _parent :: UiId
-                      , _highlighted :: Bool
-                      , _depth :: Int
-                      , _hidden :: Bool
-                      , _loc :: Point
-                      , _name :: String
+               | Label { _ur :: UrElement }
+               | Knob { _ur :: UrElement 
                       , _dataColour :: String
                       , _displayName :: String
+                      , _knobStyle :: KnobStyle
                       , _setting :: Float
                       , _knobMin :: Maybe Float
                       , _knobMax :: Maybe Float }
-               | Selector { _parent :: UiId
-                          , _highlighted :: Bool
-                          , _depth :: Int
-                          , _hidden :: Bool
-                          , _loc :: Point
-                          , _name :: String
+               | Selector { _ur :: UrElement
                           , _setting :: Float
                           , _options :: [String] }
-               | Image { _parent :: UiId
-                       , _highlighted :: Bool
-                       , _depth :: Int
-                       , _hidden :: Bool
-                       , _loc :: Point
-                       , _name :: String
+               | Image { _ur :: UrElement
                        , _pic :: String
                        , _imageWidth :: Int
                        , _imageHeight :: Int } deriving Show
 
+$(makeLenses ''UrElement)
 $(makeLenses ''UIElement)
 
 selectColor :: Bool -> Color -> Color
@@ -114,22 +85,22 @@ elementType (Image {}) = ImageType
 elementType (Selector {}) = SelectorType
 
 pointNearUIElement :: Point -> UIElement -> Bool
-pointNearUIElement p Image { _loc = q
+pointNearUIElement p Image { _ur = UrElement { _loc = q }
                            , _imageWidth = w
                            , _imageHeight = h } =
     pointWithin p $ rectToBox q w h
-pointNearUIElement p Container { _loc = q
+pointNearUIElement p Container { _ur = UrElement { _loc = q }
                                , _imageWidth = w
                                , _imageHeight = h } =
     pointWithin p $ rectToBox q w h
-pointNearUIElement p e = pointNear (elementRadius e) p (_loc e)
+pointNearUIElement p e = pointNear (elementRadius e) p (_loc (_ur e))
 
 bbox :: UIElement -> Box
-bbox Image { _loc = p
+bbox Image { _ur = UrElement { _loc = p }
            , _imageWidth = w
            , _imageHeight = h} = rectToBox p w h
 bbox e = let r = elementRadius e
-             (x, y) = _loc e
+             (x, y) = _loc (_ur e)
          in  ((x-r, y-r), (x+r, y+r))
 
 uiElementWithinBox :: Box -> UIElement -> Bool

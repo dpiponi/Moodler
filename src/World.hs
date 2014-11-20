@@ -179,7 +179,7 @@ locById :: GlossWorld -> UiId -> (Float, Float)
 locById w e =
     let elt = M.findWithDefault (error "locById") e
                                           (_uiElements (_inner w))
-    in _loc elt
+    in _loc (_ur elt)
 
 colourById :: GlossWorld -> UiId -> String
 colourById w e =

@@ -18,6 +18,7 @@ import qualified Data.Set as S
 import qualified Data.List as L
 import Text.Read
 import Data.Function
+--import Debug.Trace
 
 import UISupport
 import ContainerTree
@@ -70,8 +71,8 @@ drawUIElement :: Bool -> GlossWorld -> UIElement -> Picture
 -- Recurse into containers
 drawUIElement showingHidden world
               Container { _contents = c
-                        , _pic = pic'            , _loc = (x, y)
-                        , _highlighted = highlit , _imageWidth = iw
+                        , _pic = pic'            , _ur = UrElement { _loc = (x, y)
+                        , _highlighted = highlit } , _imageWidth = iw
                         , _imageHeight = ih } =
         let (x', _, _) = unJust "drawUIElement"
                             (M.lookup pic' (world ^. pics))
@@ -86,25 +87,25 @@ drawUIElement showingHidden world
                     Nothing -> error $ "In drawUIElement missing " ++
                                             show i) (S.toList c))
 
-drawUIElement _ _ (Proxy _ wasSelected _ _ (x, y) n _) =
+drawUIElement _ _ (Proxy (UrElement _ wasSelected _ _ (x, y) n) _) =
         translate x y . color
                     (selectColor wasSelected proxyColour) $ 
               proxyFeature <>
               translate 15 (-5) (scale 0.1 0.1 (text n))
 
-drawUIElement _ world (Image _ _ _ _ (x, y) _ picture _ _) =
+drawUIElement _ world (Image (UrElement _ _ _ _ (x, y) _) picture _ _) =
     translate x y (
         case M.lookup picture (world ^. pics) of
             Nothing -> blank
             Just (x', _, _) -> x')
 
-drawUIElement _ _ (Out _ wasSelected _ _ (x, y) _displayName col) =
+drawUIElement _ _ (Out (UrElement _ wasSelected _ _ (x, y) _) col) =
     translate x y (
         color (selectColor wasSelected (makeColor 0.1 0.1 0.1 1)) (circleSolid 9) <>
         color (interpretColour col) (circleSolid 4.5)
         )
 
-drawUIElement _ world (In _ wasSelected _ _ (x, y) _ col _ cableList) =
+drawUIElement _ world (In (UrElement _ wasSelected _ _ (x, y) _) col _ cableList) =
     translate x y (
                 color (selectColor wasSelected (makeColor 0.1 0.1 0.1 1)) (circleSolid 9) <>
                 color (selectColor wasSelected (makeColor 0.5 0.5 0.5 1)) (circleSolid 6) <>
@@ -114,12 +115,12 @@ drawUIElement _ world (In _ wasSelected _ _ (x, y) _ col _ cableList) =
                      (True : repeat False)
                      cableList)
 
-drawUIElement _ _ (Label _ wasSelected _ _ (x, y) dispName) =
+drawUIElement _ _ (Label (UrElement _ wasSelected _ _ (x, y) dispName)) =
         translate x y (
             color (selectColor wasSelected $ makeColor 0.7 0.7 0.5 1) $
                 scale 0.15 0.15 $ color black $ text dispName)
 
-drawUIElement _ _ (Selector _ wasSelected _ _ (x, y) _ v opts) =
+drawUIElement _ _ (Selector (UrElement _ wasSelected _ _ (x, y) _) v opts) =
         translate x y (
             color black (circleSolid 6 <>
             translate 10 (-5) (
@@ -128,7 +129,7 @@ drawUIElement _ _ (Selector _ wasSelected _ _ (x, y) _ v opts) =
                         scale 0.15 0.15 (color black 
                                         (text (opts!!floor v)))))))
 
-drawUIElement _ _ (Knob _ wasSelected _ _ (x, y) _ col _ v lo hi) =
+drawUIElement _ _ (Knob (UrElement _ wasSelected _ _ (x, y) _) col _ _style v lo hi) =
         translate x y $
                     color (selectColor wasSelected knobColour) $
             circle 16 <> circleSolid 12 <>
@@ -146,7 +147,7 @@ drawUIElement'' :: Bool -> GlossWorld -> UIElement -> Picture
 drawUIElement'' showingHidden w e =
     -- Don't draw parented elements as they'll get drawn
     -- with parent
-    if _hidden e && not showingHidden
+    if _hidden (_ur e) && not showingHidden
         then blank
         else drawUIElement showingHidden w e
 
@@ -168,7 +169,7 @@ renderWorld w@GlossWorld { _rootTransform = rootXform
             else use rootPlane
         thingsToDraw <- rootElementsOnPlane wplanes
         elementsToDraw <- getElementsById "renderWorld" thingsToDraw
-        let elementsToDraw' = L.sortBy (compare `on` _depth) elementsToDraw
+        let elementsToDraw' = L.sortBy (compare `on` _depth . _ur) elementsToDraw
         elems <- mapM (
                 return . drawUIElement'' showingHidden w) elementsToDraw'
         firstPlane <- getElementById "Draw.hs" wplanes
@@ -176,5 +177,5 @@ renderWorld w@GlossWorld { _rootTransform = rootXform
 
         return $ pictureTransformer rootXform (
                      mconcat elems <>
-                     renderPlaneName (_name firstPlane)) <>
+                     renderPlaneName (_name (_ur firstPlane))) <>
                  gadgetPicture rootXform) w

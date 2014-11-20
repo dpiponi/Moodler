@@ -31,7 +31,7 @@ createdInParent n e q = do
 assignElementToPlane :: MonadState GlossWorld m => UiId -> UiId -> m ()
 assignElementToPlane e newPlane' = do
     inner . uiElements . ix newPlane' . contents %= S.insert e
-    inner . uiElements . ix e . UIElement.parent .= newPlane'
+    inner . uiElements . ix e . ur . UIElement.parent .= newPlane'
 
 withContaining :: Monad m => UIElement -> (S.Set UiId -> m ()) -> m ()
 withContaining elt f = 
@@ -70,13 +70,13 @@ reparent newParentId childId = do
     --inner . uiElements . ix currentParentId . contents %= S.delete childId
     removeFromParent childId
     inner . uiElements . ix newParentId . contents %= S.insert childId
-    inner . uiElements . ix childId . parent .= newParentId
+    inner . uiElements . ix childId . ur . parent .= newParentId
 
 removeFromParent :: MonadState GlossWorld m => UiId -> m ()
 removeFromParent childId = do
     -- Remove child from existing parent
     childElt <- getElementById "UISupport.hs" childId
-    let currentParentId = _parent childElt
+    let currentParentId = _parent (_ur childElt)
     inner . uiElements . ix currentParentId . contents %= S.delete childId
 
 -- Includes argument in result
@@ -122,4 +122,4 @@ getMinimalParents :: (Functor m, MonadState GlossWorld  m) =>
 getMinimalParents everything sel = do
     selElts <- getElementsById "getMinimalParents" sel
     return [item | (item, elt) <- zip sel selElts,
-                   elt ^. parent `notElem` everything]
+                   elt ^. ur . parent `notElem` everything]

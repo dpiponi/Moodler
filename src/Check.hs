@@ -36,11 +36,11 @@ checkChildrenHaveCorrectParent' :: (Functor m, MonadIO m, MonadState GlossWorld 
 checkChildrenHaveCorrectParent' parentId childrenIds = do
     result <- forM (S.toList childrenIds) $ \childId -> do
         childElt <- getElementById "checkChildrenHaveCorrectParent'" childId
-        if parentId /= _parent childElt
+        if parentId /= _parent (_ur childElt)
             then do
                 liftIO $ putStrLn $
                     unUiId childId ++ " should have parent " ++
-                    unUiId parentId ++ " not " ++ unUiId (_parent childElt)
+                    unUiId parentId ++ " not " ++ unUiId (_parent (_ur childElt))
                 return False
             else case childElt of
                 Container { _contents = cts } ->
