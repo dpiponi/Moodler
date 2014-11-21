@@ -91,10 +91,6 @@ defaultClick' p i = do
         Selector { _setting = oldSetting,
                    _options = opts } -> do
             let newSetting = (floor oldSetting+1) `mod` length opts
-            --inner . uiElements . ix i . UIElement.setting .=
-            --                                fromIntegral newSetting
-            -- Comms
-            --sendSetMessage selectorName (fromIntegral newSetting)
             W.undoPoint
             W.synthSet i (fromIntegral newSetting)
             handleDefault
@@ -357,7 +353,7 @@ handleDefault' (EventKey key Down
     let (dx, dy) = getDirection key
     sel <- use currentSelection
     forM_ sel $ \e ->
-        (inner . uiElements) . ix e . ur . loc += (quantum*dx, quantum*dy)
+        inner . uiElements . ix e . ur . loc += (quantum*dx, quantum*dy)
     handleDefault
 
 -- Use key binding.
@@ -396,10 +392,11 @@ handleDraggingRoot' (x0, y0)
 handleDraggingRoot' a _ = handleDraggingRoot a
 
 dragElement :: [UiId] -> Point -> [UiId] -> MoodlerM ()
-dragElement top d@(dx, dy) sel = forM_ sel $ \s -> do
-    inner . uiElements . ix s . ur . loc += (dx, dy)
-    elts <- use (inner . uiElements)
-    let Just elt = M.lookup s elts
+dragElement top d sel = forM_ sel $ \s -> do
+    inner . uiElements . ix s . ur . loc += d
+    --elts <- use (inner . uiElements)
+    --let Just elt = M.lookup s elts
+    elt <- getElementById "dragElement" s
     case elt of
         Container { _contents = cts } ->
             -- If you drag a parent and its children then only the
@@ -413,22 +410,24 @@ handleDraggingSelection :: Point ->
                            MoodlerM Zero
 handleDraggingSelection p0' = do
     let p0 = quantise2 quantum p0'
-    e <- {-MoodlerM-} liftF $ GetEvent id
+    e <- liftF $ GetEvent id
     handleDraggingSelection' p0 e
 
--- Don't drag container AND its children XXX
+doDrag :: Point -> Point -> MoodlerM ()
+doDrag p0 p1 = do
+    sel <- use currentSelection
+    dragElement sel (p1-p0) sel
+
 handleDraggingSelection' :: Point -> Event -> MoodlerM Zero
 handleDraggingSelection' p0 (EventMotion p1') = do
-    sel <- use currentSelection
     let p1 = quantise2 quantum p1'
-    dragElement sel (p1-p0) sel
+    doDrag p0 p1
     handleDraggingSelection p1
 
 handleDraggingSelection' p0
     (EventKey (MouseButton LeftButton) Up _ p1') = do
-    sel <- use currentSelection
     let p1 = quantise2 quantum p1'
-    dragElement sel (p1-p0) sel
+    doDrag p0 p1
     handleDefault
 
 handleDraggingSelection' a _ = handleDraggingSelection a

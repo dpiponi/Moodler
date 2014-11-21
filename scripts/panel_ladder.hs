@@ -6,7 +6,7 @@ do
     input60  <-  new' "input"
     ladder61  <-  new' "ladder"
     sum62  <-  new' "sum"
-    container63 <- container' "panel_ladder.bmp" (x+(0.0), y+(0.0)) root
+    container63 <- container' "panel_ladder.png" (x+(0.0), y+(0.0)) root
     in64 <- plugin' (ladder61 ++ "." ++ "signal") (x+(-48.0), y+(-120.0)) container63
     setColour in64 "#sample"
     in65 <- plugin' (sum62 ++ "." ++ "signal1") (x+(37.0), y+(71.0)) container63

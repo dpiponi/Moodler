@@ -19,7 +19,7 @@ do
     vca26  <-  new' "vca"
     vca27  <-  new' "vca"
     vca28  <-  new' "vca"
-    container73 <- container' "panel_filter.bmp" (x+(0.0), y+(0.0)) root
+    container73 <- container' "panel_filter.png" (x+(0.0), y+(0.0)) root
     in74 <- plugin' (vca26 ++ "." ++ "cv") (x+(-12.0), y+(120.0)) container73
     setColour in74 "#sample"
     hide in74

@@ -11,7 +11,7 @@ do
     sqrt76  <-  new' "sqrt"
     tanh8  <-  new' "tanh"
     vca9  <-  new' "vca"
-    container10 <- container' "panel_unary.bmp" (x+(0.0), y+(0.0)) root
+    container10 <- container' "panel_unary.png" (x+(0.0), y+(0.0)) root
     in11 <- plugin' (exp4 ++ "." ++ "signal") (x+(-17.0), y+(-123.0)) container10
     setColour in11 "#sample"
     hide in11

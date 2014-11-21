@@ -7,7 +7,7 @@ do
     input185  <-  new' "input"
     input186  <-  new' "input"
     input187  <-  new' "input"
-    container188 <- container' "panel_adsr.bmp" (x+(0.0), y+(0.0)) root
+    container188 <- container' "panel_adsr.png" (x+(0.0), y+(0.0)) root
     in189 <- plugin' (adsr183 ++ "." ++ "attack") (x+(-28.0), y+(57.0)) container188
     hide in189
     in190 <- plugin' (adsr183 ++ "." ++ "decay") (x+(25.0), y+(74.0)) container188

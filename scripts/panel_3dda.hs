@@ -24,7 +24,7 @@ do
     input22  <-  new' "input"
     input23  <-  new' "input"
     input24  <-  new' "input"
-    container114 <- container' "panel_3dda.bmp" (x+(0.0), y+(0.0)) root
+    container114 <- container' "panel_3dda.png" (x+(0.0), y+(0.0)) root
     in115 <- plugin' (id10 ++ "." ++ "signal") (x+(-36.0), y+(96.0)) container114
     setColour in115 "#control"
     in116 <- plugin' (id11 ++ "." ++ "signal") (x+(-36.0), y+(36.0)) container114
@@ -65,7 +65,7 @@ do
     setColour out130 "#control"
     proxy131 <- proxy' (x+(44.0), y+(-114.0)) container114
     hide proxy131
-    container132 <- container' "panel_4x1.bmp" (-89.0,-14.0) proxy131
+    container132 <- container' "panel_4x1.png" (-89.0,-14.0) proxy131
     in133 <- plugin' (dda1 ++ "." ++ "reset") (-110.0,61.0) container132
     setColour in133 "#sample"
     in134 <- plugin' (dda1 ++ "." ++ "clock") (-110.0,11.0) container132
@@ -77,7 +77,7 @@ do
     label137 <- label' "dda" (-114.0,61.0) container132
     out138 <- plugout' (dda1 ++ "." ++ "trigger") (-69.0,-14.0) container132
     setColour out138 "#sample"
-    container139 <- container' "panel_4x1.bmp" (-95.0,-308.0) proxy131
+    container139 <- container' "panel_4x1.png" (-95.0,-308.0) proxy131
     in140 <- plugin' (dda2 ++ "." ++ "reset") (-116.0,-233.0) container139
     setColour in140 "#sample"
     in141 <- plugin' (dda2 ++ "." ++ "clock") (-116.0,-283.0) container139
@@ -89,7 +89,7 @@ do
     label144 <- label' "dda" (-120.0,-233.0) container139
     out145 <- plugout' (dda2 ++ "." ++ "trigger") (-75.0,-308.0) container139
     setColour out145 "#sample"
-    container146 <- container' "panel_3x1.bmp" (196.0,318.0) proxy131
+    container146 <- container' "panel_3x1.png" (196.0,318.0) proxy131
     in147 <- plugin' (gate4 ++ "." ++ "length") (175.0,343.0) container146
     setColour in147 "#sample"
     in148 <- plugin' (gate4 ++ "." ++ "trigger") (175.0,293.0) container146
@@ -97,7 +97,7 @@ do
     label149 <- label' "gate" (171.0,393.0) container146
     out150 <- plugout' (gate4 ++ "." ++ "gate") (216.0,318.0) container146
     setColour out150 "#sample"
-    container151 <- container' "panel_3x1.bmp" (191.0,-340.0) proxy131
+    container151 <- container' "panel_3x1.png" (191.0,-340.0) proxy131
     in152 <- plugin' (gate5 ++ "." ++ "length") (170.0,-315.0) container151
     setColour in152 "#sample"
     in153 <- plugin' (gate5 ++ "." ++ "trigger") (170.0,-365.0) container151
@@ -105,7 +105,7 @@ do
     label154 <- label' "gate" (166.0,-265.0) container151
     out155 <- plugout' (gate5 ++ "." ++ "gate") (211.0,-340.0) container151
     setColour out155 "#sample"
-    container156 <- container' "panel_3x1.bmp" (191.0,-74.0) proxy131
+    container156 <- container' "panel_3x1.png" (191.0,-74.0) proxy131
     in157 <- plugin' (gate3 ++ "." ++ "length") (170.0,-49.0) container156
     setColour in157 "#sample"
     in158 <- plugin' (gate3 ++ "." ++ "trigger") (170.0,-99.0) container156
@@ -113,7 +113,7 @@ do
     label159 <- label' "gate" (166.0,1.0) container156
     out160 <- plugout' (gate3 ++ "." ++ "gate") (211.0,-74.0) container156
     setColour out160 "#sample"
-    container161 <- container' "panel_4x1.bmp" (-87.0,281.0) proxy131
+    container161 <- container' "panel_4x1.png" (-87.0,281.0) proxy131
     in162 <- plugin' (dda0 ++ "." ++ "clock") (-108.0,306.0) container161
     setColour in162 "#sample"
     in163 <- plugin' (dda0 ++ "." ++ "phase") (-108.0,256.0) container161

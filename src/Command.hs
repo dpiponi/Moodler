@@ -2,7 +2,7 @@
 
 module Command where
 
-import Codec.BMP
+--import Codec.BMP
 import Control.Applicative
 import Control.Exception
 import Control.Lens
@@ -24,6 +24,9 @@ import World
 import UISupport
 import qualified ContainerTree as T
 import qualified Box as B
+import Graphics.Gloss.Juicy
+import Codec.Picture
+import qualified Codec.Picture.Types as P
 
 alertGadget :: String -> B.Transform -> Picture
 alertGadget alt _ = 
@@ -35,13 +38,35 @@ doAlert alt = do
     gadget .= alertGadget alt
     liftIO $ putStrLn alt
 
+-- XXX Must be doing this wrong
+imageDimensions :: P.DynamicImage -> (Int, Int)
+imageDimensions (P.ImageY8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
+imageDimensions (P.ImageY16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
+imageDimensions (P.ImageYF (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
+imageDimensions (P.ImageYA8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
+imageDimensions (P.ImageYA16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
+imageDimensions (P.ImageRGB8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
+imageDimensions (P.ImageRGB16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
+imageDimensions (P.ImageRGBF (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
+imageDimensions (P.ImageRGBA8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
+imageDimensions (P.ImageRGBA16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
+imageDimensions (P.ImageYCbCr8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
+imageDimensions (P.ImageCMYK8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
+imageDimensions (P.ImageCMYK16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
+
 getPic :: (MonadIO m, MonadState GlossWorld m) => String -> m (Int, Int)
 getPic bmpName = do
-    Right bmp <- liftIO $ readBMP ("assets/" ++ bmpName)
-    let b = bitmapOfBMP bmp
-    let (width, height) = bmpDimensions bmp
-    pics %= M.insert bmpName (b, width, height)
-    return (width, height)
+    liftIO $ putStrLn $ "Loading: " ++ show bmpName
+    let imageFileName = "assets/" ++ bmpName
+    mImage <- liftIO $ readImage imageFileName
+    case mImage of
+        Right image'' -> do
+                let bmp = image''
+                let Just b = fromDynamicImage bmp
+                let (width, height) = imageDimensions bmp
+                pics %= M.insert bmpName (b, width, height)
+                return (width, height)
+        Left e -> error ("\"" ++ imageFileName ++ "\" didn't load: " ++ e)
 
 execCommand :: (InputHandler m, Functor m, MonadIO m,
                 MonadState GlossWorld m) =>
@@ -144,7 +169,7 @@ evalUi (UiLib.Knob n t p creationParent cfn) = do
 evalUi (UiLib.Selector n t p opts creationParent cfn) = do
     --liftIO $ print "Selector"
     (_, hi) <- depthExtent
-    let e = UIElement.Selector (UrElement creationParent False (hi+1) False p t) 0.0 opts
+    let e = UIElement.Selector (UrElement creationParent False (hi+1) False p t) "#control" 0.0 opts
     createdInParent n e creationParent
     evalUi (cfn n)
 

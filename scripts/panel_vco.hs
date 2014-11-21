@@ -17,7 +17,7 @@ do
     input37  <-  new' "input"
     input38  <-  new' "input"
     sum48  <-  new' "sum"
-    container63 <- container' "panel_vco2.bmp" (x+(0.0), y+(-12.0)) root
+    container63 <- container' "panel_vco2.png" (x+(0.0), y+(-12.0)) root
     in64 <- plugin' (id8 ++ "." ++ "signal") (x+(36.0), y+(24.0)) container63
     setColour in64 "#control"
     in65 <- plugin' (id9 ++ "." ++ "signal") (x+(13.0), y+(68.0)) container63
@@ -40,7 +40,7 @@ do
     setColour out73 "#sample"
     proxy74 <- proxy' (x+(-47.0), y+(70.0)) container63
     hide proxy74
-    container75 <- container' "panel_3x1.bmp" (-815.0,439.0) proxy74
+    container75 <- container' "panel_3x1.png" (-815.0,439.0) proxy74
     in76 <- plugin' (sum48 ++ "." ++ "signal2") (-836.0,414.0) container75
     setColour in76 "#sample"
     in77 <- plugin' (sum48 ++ "." ++ "signal1") (-836.0,464.0) container75
@@ -48,7 +48,7 @@ do
     label78 <- label' "sum" (-840.0,514.0) container75
     out79 <- plugout' (sum48 ++ "." ++ "result") (-795.0,439.0) container75
     setColour out79 "#sample"
-    container80 <- container' "panel_3x1.bmp" (-434.0,420.0) proxy74
+    container80 <- container' "panel_3x1.png" (-434.0,420.0) proxy74
     in81 <- plugin' (audio_triangle4 ++ "." ++ "freq") (-455.0,445.0) container80
     setColour in81 "#sample"
     in82 <- plugin' (audio_triangle4 ++ "." ++ "sync") (-455.0,395.0) container80
@@ -56,7 +56,7 @@ do
     label83 <- label' "audio_triangle" (-459.0,495.0) container80
     out84 <- plugout' (audio_triangle4 ++ "." ++ "result") (-414.0,420.0) container80
     setColour out84 "#sample"
-    container85 <- container' "panel_3x1.bmp" (-318.0,291.0) proxy74
+    container85 <- container' "panel_3x1.png" (-318.0,291.0) proxy74
     in86 <- plugin' (audio_saw1 ++ "." ++ "freq") (-339.0,316.0) container85
     setColour in86 "#sample"
     in87 <- plugin' (audio_saw1 ++ "." ++ "sync") (-339.0,266.0) container85
@@ -64,7 +64,7 @@ do
     label88 <- label' "audio_saw" (-343.0,366.0) container85
     out89 <- plugout' (audio_saw1 ++ "." ++ "result") (-298.0,291.0) container85
     setColour out89 "#sample"
-    container90 <- container' "panel_3x1.bmp" (-691.0,453.0) proxy74
+    container90 <- container' "panel_3x1.png" (-691.0,453.0) proxy74
     in91 <- plugin' (audio_sin2 ++ "." ++ "freq") (-712.0,478.0) container90
     setColour in91 "#sample"
     in92 <- plugin' (audio_sin2 ++ "." ++ "sync") (-712.0,428.0) container90
@@ -72,7 +72,7 @@ do
     label93 <- label' "audio_sin" (-716.0,528.0) container90
     out94 <- plugout' (audio_sin2 ++ "." ++ "result") (-671.0,453.0) container90
     setColour out94 "#sample"
-    container95 <- container' "panel_3x1.bmp" (-826.0,199.0) proxy74
+    container95 <- container' "panel_3x1.png" (-826.0,199.0) proxy74
     in96 <- plugin' (audio_square3 ++ "." ++ "pwm") (-847.0,199.0) container95
     setColour in96 "#sample"
     in97 <- plugin' (audio_square3 ++ "." ++ "sync") (-847.0,149.0) container95

@@ -5,7 +5,7 @@ do
     input10 <- new' "input"
     input8 <- new' "input"
     input9 <- new' "input"
-    image11 <- container' "panel_folder.bmp" (x+(3.0), y+(-10.0)) main
+    image11 <- container' "panel_folder.png" (x+(3.0), y+(-10.0)) main
     in16 <- plugin' (folder7++"."++"multiplies") (x+(33.0), y+(69.0)) main
     hide in16
     parent image11 in16

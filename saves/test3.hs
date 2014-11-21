@@ -31,7 +31,7 @@ do
     let trigger = "trigger"
     vca148 <- new' "vca"
     vca148_cv <- new' "input"
-    container138 <- container' "panel_lfo.bmp" (-205.0,-195.0) root
+    container138 <- container' "panel_lfo.png" (-205.0,-195.0) root
     in139 <- plugin' (lfo137 ++ "." ++ "sync") (-202.0,-180.0) container138
     in140 <- plugin' (lfo137 ++ "." ++ "rate") (-203.0,-121.0) container138
     hide in140
@@ -40,14 +40,14 @@ do
     out143 <- plugout' (lfo137 ++ "." ++ "triangle") (-161.0,-316.0) container138
     out144 <- plugout' (lfo137 ++ "." ++ "sin_result") (-222.0,-274.0) container138
     out145 <- plugout' (lfo137 ++ "." ++ "square_result") (-160.0,-275.0) container138
-    container146 <- container' "panel_3x1.bmp" (-58.0,-159.0) root
+    container146 <- container' "panel_3x1.png" (-58.0,-159.0) root
     in149 <- plugin' (vca148 ++ "." ++ "cv") (-79.0,-134.0) container146
     hide in149
     in150 <- plugin' (vca148 ++ "." ++ "signal") (-79.0,-184.0) container146
     knob152 <- knob' (vca148_cv ++ "." ++ "result") (-79.0,-134.0) container146
     label147 <- label' "vca" (-83.0,-84.0) container146
     out151 <- plugout' (vca148 ++ "." ++ "result") (-38.0,-159.0) container146
-    container21 <- container' "panel_vco2.bmp" (-108.0,176.5) root
+    container21 <- container' "panel_vco2.png" (-108.0,176.5) root
     in25 <- plugin' (id9 ++ "." ++ "signal") (-91.0,218.0) container21
     in28 <- plugin' (id10 ++ "." ++ "signal") (-92.0,255.0) container21
     hide in28
@@ -62,28 +62,28 @@ do
     out60 <- plugout' (id15 ++ "." ++ "result") (-71.0,61.0) container21
     proxy3 <- proxy' (-152.0,257.0) container21
     hide proxy3
-    container18 <- container' "panel_3x1.bmp" (-719.0,52.0) proxy3
+    container18 <- container' "panel_3x1.png" (-719.0,52.0) proxy3
     in29 <- plugin' (audio_square6 ++ "." ++ "freq") (-740.0,102.0) container18
     in30 <- plugin' (audio_square6 ++ "." ++ "pwm") (-740.0,52.0) container18
     in31 <- plugin' (audio_square6 ++ "." ++ "sync") (-740.0,2.0) container18
     label46 <- label' "audio_square" (-744.0,127.0) container18
     out54 <- plugout' (audio_square6 ++ "." ++ "result") (-699.0,52.0) container18
-    container19 <- container' "panel_3x1.bmp" (-708.0,292.0) proxy3
+    container19 <- container' "panel_3x1.png" (-708.0,292.0) proxy3
     in24 <- plugin' (sum17 ++ "." ++ "signal2") (-729.0,267.0) container19
     in42 <- plugin' (sum17 ++ "." ++ "signal1") (-729.0,317.0) container19
     label44 <- label' "sum" (-733.0,367.0) container19
     out50 <- plugout' (sum17 ++ "." ++ "result") (-688.0,292.0) container19
-    container20 <- container' "panel_3x1.bmp" (-327.0,273.0) proxy3
+    container20 <- container' "panel_3x1.png" (-327.0,273.0) proxy3
     in35 <- plugin' (audio_triangle7 ++ "." ++ "freq") (-348.0,298.0) container20
     in36 <- plugin' (audio_triangle7 ++ "." ++ "sync") (-348.0,248.0) container20
     label47 <- label' "audio_triangle" (-352.0,348.0) container20
     out58 <- plugout' (audio_triangle7 ++ "." ++ "result") (-307.0,273.0) container20
-    container22 <- container' "panel_3x1.bmp" (-211.0,144.0) proxy3
+    container22 <- container' "panel_3x1.png" (-211.0,144.0) proxy3
     in39 <- plugin' (audio_saw4 ++ "." ++ "freq") (-232.0,169.0) container22
     in40 <- plugin' (audio_saw4 ++ "." ++ "sync") (-232.0,119.0) container22
     label48 <- label' "audio_saw" (-236.0,219.0) container22
     out61 <- plugout' (audio_saw4 ++ "." ++ "result") (-191.0,144.0) container22
-    container23 <- container' "panel_3x1.bmp" (-584.0,306.0) proxy3
+    container23 <- container' "panel_3x1.png" (-584.0,306.0) proxy3
     in26 <- plugin' (audio_sin5 ++ "." ++ "freq") (-605.0,331.0) container23
     in27 <- plugin' (audio_sin5 ++ "." ++ "sync") (-605.0,281.0) container23
     label45 <- label' "audio_sin" (-609.0,381.0) container23
@@ -96,7 +96,7 @@ do
     out53 <- plugout' (id10 ++ "." ++ "result") (-785.0,322.0) proxy3
     out55 <- plugout' (id11 ++ "." ++ "result") (-787.0,52.0) proxy3
     out56 <- plugout' (id12 ++ "." ++ "result") (-786.0,-1.0) proxy3
-    container67 <- container' "panel_ladder.bmp" (129.0,109.0) root
+    container67 <- container' "panel_ladder.png" (129.0,109.0) root
     in68 <- plugin' (ladder65 ++ "." ++ "signal") (121.0,41.0) container67
     in69 <- plugin' (sum66 ++ "." ++ "signal1") (173.0,183.0) container67
     hide in69

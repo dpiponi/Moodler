@@ -5,7 +5,7 @@ do
     input125  <-  new' "input"
     input126  <-  new' "input"
     vactroid127  <-  new' "vactroid"
-    container128 <- container' "panel_vactroid.bmp" (x+(0.0), y+(-12.0)) root
+    container128 <- container' "panel_vactroid.png" (x+(0.0), y+(-12.0)) root
     in129 <- plugin' (vactroid127 ++ "." ++ "decay_up") (x+(0.0), y+(36.0)) container128
     setColour in129 "#control"
     hide in129

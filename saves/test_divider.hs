@@ -45,7 +45,7 @@ do
     vca34 <- new' "vca"
     xnor35 <- new' "xnor"
     xor36 <- new' "xor"
-    container107 <- container' "panel_ladder.bmp" (168.0,-492.0) root
+    container107 <- container' "panel_ladder.png" (168.0,-492.0) root
     in108 <- plugin' (ladder16 ++ "." ++ "signal") (120.0,-612.0) container107
     setColour in108 "#control"
     in109 <- plugin' (sum25 ++ "." ++ "signal1") (216.0,-422.0) container107
@@ -66,7 +66,7 @@ do
     out116 <- plugout' (sum25 ++ "." ++ "result") (132.0,-465.0) container107
     setColour out116 "#sample"
     hide out116
-    container117 <- container' "panel_3x1.bmp" (496.0,100.0) root
+    container117 <- container' "panel_3x1.png" (496.0,100.0) root
     in118 <- plugin' (vca30 ++ "." ++ "cv") (475.0,125.0) container117
     setColour in118 "#sample"
     hide in118
@@ -76,7 +76,7 @@ do
     label121 <- label' "vca" (471.0,175.0) container117
     out122 <- plugout' (vca30 ++ "." ++ "result") (516.0,100.0) container117
     setColour out122 "#sample"
-    container123 <- container' "panel_ladder.bmp" (168.0,408.0) root
+    container123 <- container' "panel_ladder.png" (168.0,408.0) root
     in124 <- plugin' (ladder17 ++ "." ++ "res") (214.0,402.0) container123
     setColour in124 "#sample"
     hide in124
@@ -97,14 +97,14 @@ do
     out132 <- plugout' (sum26 ++ "." ++ "result") (133.0,442.0) container123
     setColour out132 "#sample"
     hide out132
-    container133 <- container' "panel_or.bmp" (0.0,12.0) root
+    container133 <- container' "panel_or.png" (0.0,12.0) root
     in134 <- plugin' (or22 ++ "." ++ "signal1") (-60.0,36.0) container133
     setColour in134 "#control"
     in135 <- plugin' (or22 ++ "." ++ "signal2") (-60.0,-12.0) container133
     setColour in135 "#control"
     out136 <- plugout' (or22 ++ "." ++ "result") (60.0,12.0) container133
     setColour out136 "#control"
-    container137 <- container' "panel_ladder.bmp" (168.0,108.0) root
+    container137 <- container' "panel_ladder.png" (168.0,108.0) root
     in138 <- plugin' (ladder18 ++ "." ++ "signal") (120.0,-12.0) container137
     setColour in138 "#control"
     in139 <- plugin' (sum27 ++ "." ++ "signal1") (206.0,176.0) container137
@@ -125,7 +125,7 @@ do
     out146 <- plugout' (sum27 ++ "." ++ "result") (122.0,133.0) container137
     setColour out146 "#sample"
     hide out146
-    container147 <- container' "panel_ladder.bmp" (168.0,-192.0) root
+    container147 <- container' "panel_ladder.png" (168.0,-192.0) root
     in148 <- plugin' (ladder19 ++ "." ++ "signal") (120.0,-312.0) container147
     setColour in148 "#control"
     in149 <- plugin' (sum28 ++ "." ++ "signal1") (217.0,-120.0) container147
@@ -146,7 +146,7 @@ do
     out156 <- plugout' (sum28 ++ "." ++ "result") (133.0,-163.0) container147
     setColour out156 "#sample"
     hide out156
-    container37 <- container' "panel_4x1.bmp" (396.0,108.0) root
+    container37 <- container' "panel_4x1.png" (396.0,108.0) root
     in38 <- plugin' (sum429 ++ "." ++ "signal1") (372.0,192.0) container37
     setColour in38 "#sample"
     in39 <- plugin' (sum429 ++ "." ++ "signal2") (372.0,132.0) container37
@@ -158,7 +158,7 @@ do
     label42 <- label' "sum4" (372.0,192.0) container37
     out43 <- plugout' (sum429 ++ "." ++ "result") (408.0,108.0) container37
     setColour out43 "#sample"
-    container44 <- container' "panel_3x1.bmp" (300.0,408.0) root
+    container44 <- container' "panel_3x1.png" (300.0,408.0) root
     in45 <- plugin' (vca31 ++ "." ++ "cv") (282.0,430.0) container44
     setColour in45 "#sample"
     hide in45
@@ -168,7 +168,7 @@ do
     label48 <- label' "vca" (276.0,480.0) container44
     out49 <- plugout' (vca31 ++ "." ++ "result") (324.0,408.0) container44
     setColour out49 "#sample"
-    container50 <- container' "panel_3x1.bmp" (300.0,-492.0) root
+    container50 <- container' "panel_3x1.png" (300.0,-492.0) root
     in51 <- plugin' (vca32 ++ "." ++ "cv") (282.0,-463.0) container50
     setColour in51 "#sample"
     hide in51
@@ -178,49 +178,49 @@ do
     label54 <- label' "vca" (276.0,-408.0) container50
     out55 <- plugout' (vca32 ++ "." ++ "result") (324.0,-492.0) container50
     setColour out55 "#sample"
-    container56 <- container' "panel_or.bmp" (0.0,408.0) root
+    container56 <- container' "panel_or.png" (0.0,408.0) root
     in57 <- plugin' (or23 ++ "." ++ "signal1") (-60.0,432.0) container56
     setColour in57 "#control"
     in58 <- plugin' (or23 ++ "." ++ "signal2") (-60.0,384.0) container56
     setColour in58 "#control"
     out59 <- plugout' (or23 ++ "." ++ "result") (60.0,408.0) container56
     setColour out59 "#control"
-    container60 <- container' "panel_xnor.bmp" (0.0,120.0) root
+    container60 <- container' "panel_xnor.png" (0.0,120.0) root
     in61 <- plugin' (xnor35 ++ "." ++ "signal1") (-60.0,144.0) container60
     setColour in61 "#control"
     in62 <- plugin' (xnor35 ++ "." ++ "signal2") (-60.0,96.0) container60
     setColour in62 "#control"
     out63 <- plugout' (xnor35 ++ "." ++ "result") (60.0,120.0) container60
     setColour out63 "#control"
-    container64 <- container' "panel_nand.bmp" (0.0,-144.0) root
+    container64 <- container' "panel_nand.png" (0.0,-144.0) root
     in65 <- plugin' (nand21 ++ "." ++ "signal1") (-60.0,-120.0) container64
     setColour in65 "#control"
     in66 <- plugin' (nand21 ++ "." ++ "signal2") (-60.0,-168.0) container64
     setColour in66 "#control"
     out67 <- plugout' (nand21 ++ "." ++ "result") (60.0,-144.0) container64
     setColour out67 "#control"
-    container68 <- container' "panel_xor.bmp" (0.0,-240.0) root
+    container68 <- container' "panel_xor.png" (0.0,-240.0) root
     in69 <- plugin' (xor36 ++ "." ++ "signal1") (-60.0,-216.0) container68
     setColour in69 "#control"
     in70 <- plugin' (xor36 ++ "." ++ "signal2") (-60.0,-264.0) container68
     setColour in70 "#control"
     out71 <- plugout' (xor36 ++ "." ++ "result") (60.0,-240.0) container68
     setColour out71 "#control"
-    container72 <- container' "panel_and.bmp" (0.0,-456.0) root
+    container72 <- container' "panel_and.png" (0.0,-456.0) root
     in73 <- plugin' (and0 ++ "." ++ "signal1") (-60.0,-432.0) container72
     setColour in73 "#control"
     in74 <- plugin' (and0 ++ "." ++ "signal2") (-60.0,-480.0) container72
     setColour in74 "#control"
     out75 <- plugout' (and0 ++ "." ++ "result") (60.0,-456.0) container72
     setColour out75 "#control"
-    container76 <- container' "panel_or.bmp" (0.0,-552.0) root
+    container76 <- container' "panel_or.png" (0.0,-552.0) root
     in77 <- plugin' (or24 ++ "." ++ "signal1") (-60.0,-528.0) container76
     setColour in77 "#control"
     in78 <- plugin' (or24 ++ "." ++ "signal2") (-60.0,-576.0) container76
     setColour in78 "#control"
     out79 <- plugout' (or24 ++ "." ++ "result") (60.0,-552.0) container76
     setColour out79 "#control"
-    container80 <- container' "panel_3x1.bmp" (300.0,-192.0) root
+    container80 <- container' "panel_3x1.png" (300.0,-192.0) root
     in81 <- plugin' (vca33 ++ "." ++ "cv") (281.0,-168.0) container80
     setColour in81 "#sample"
     hide in81
@@ -230,7 +230,7 @@ do
     label84 <- label' "vca" (276.0,-120.0) container80
     out85 <- plugout' (vca33 ++ "." ++ "result") (324.0,-192.0) container80
     setColour out85 "#sample"
-    container86 <- container' "panel_divider.bmp" (-168.0,108.0) root
+    container86 <- container' "panel_divider.png" (-168.0,108.0) root
     in87 <- plugin' (divider1 ++ "." ++ "gate") (-192.0,132.0) container86
     setColour in87 "#control"
     out88 <- plugout' (divider1 ++ "." ++ "div32") (-144.0,-12.0) container86
@@ -243,7 +243,7 @@ do
     setColour out91 "#control"
     out92 <- plugout' (divider1 ++ "." ++ "div16") (-144.0,36.0) container86
     setColour out92 "#control"
-    container93 <- container' "panel_3x1.bmp" (300.0,120.0) root
+    container93 <- container' "panel_3x1.png" (300.0,120.0) root
     in94 <- plugin' (vca34 ++ "." ++ "cv") (283.0,146.0) container93
     setColour in94 "#sample"
     hide in94
@@ -253,7 +253,7 @@ do
     label97 <- label' "vca" (276.0,192.0) container93
     out98 <- plugout' (vca34 ++ "." ++ "result") (324.0,120.0) container93
     setColour out98 "#sample"
-    container99 <- container' "panel_lfo.bmp" (-300.0,108.0) root
+    container99 <- container' "panel_lfo.png" (-300.0,108.0) root
     in100 <- plugin' (lfo20 ++ "." ++ "sync") (-288.0,132.0) container99
     setColour in100 "#control"
     in101 <- plugin' (lfo20 ++ "." ++ "rate") (-339.0,186.0) container99

@@ -4,7 +4,7 @@ do
     root <- currentPlane
     input17  <-  new' "input"
     lfo24  <-  new' "lfo"
-    container82 <- container' "panel_lfo.bmp" (x+(0.0), y+(12.0)) root
+    container82 <- container' "panel_lfo.png" (x+(0.0), y+(12.0)) root
     in83 <- plugin' (lfo24 ++ "." ++ "sync") (x+(12.0), y+(36.0)) container82
     setColour in83 "#control"
     in84 <- plugin' (lfo24 ++ "." ++ "rate") (x+(-3.0), y+(67.0)) container82

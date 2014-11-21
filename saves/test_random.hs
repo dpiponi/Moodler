@@ -41,7 +41,7 @@ do
     vca30 <- new' "vca"
     vca31 <- new' "vca"
     vca32 <- new' "vca"
-    container33 <- container' "panel_3x1.bmp" (84.0,72.0) root
+    container33 <- container' "panel_3x1.png" (84.0,72.0) root
     in34 <- plugin' (vca27 ++ "." ++ "cv") (60.0,96.0) container33
     setColour in34 "#control"
     in35 <- plugin' (vca27 ++ "." ++ "signal") (60.0,48.0) container33
@@ -49,7 +49,7 @@ do
     label36 <- label' "vca" (60.0,144.0) container33
     out37 <- plugout' (vca27 ++ "." ++ "result") (108.0,72.0) container33
     setColour out37 "#sample"
-    container38 <- container' "panel_3x1.bmp" (348.0,72.0) root
+    container38 <- container' "panel_3x1.png" (348.0,72.0) root
     in39 <- plugin' (vca28 ++ "." ++ "cv") (306.0,94.0) container38
     setColour in39 "#sample"
     hide in39
@@ -59,7 +59,7 @@ do
     label42 <- label' "vca" (300.0,144.0) container38
     out43 <- plugout' (vca28 ++ "." ++ "result") (372.0,72.0) container38
     setColour out43 "#sample"
-    container44 <- container' "panel_ladder.bmp" (216.0,72.0) root
+    container44 <- container' "panel_ladder.png" (216.0,72.0) root
     in45 <- plugin' (ladder18 ++ "." ++ "signal") (168.0,-48.0) container44
     setColour in45 "#sample"
     in46 <- plugin' (sum26 ++ "." ++ "signal1") (253.0,149.0) container44
@@ -80,7 +80,7 @@ do
     out53 <- plugout' (sum26 ++ "." ++ "result") (169.0,106.0) container44
     setColour out53 "#sample"
     hide out53
-    container54 <- container' "panel_adsr.bmp" (-48.0,72.0) root
+    container54 <- container' "panel_adsr.png" (-48.0,72.0) root
     in55 <- plugin' (adsr0 ++ "." ++ "attack") (-64.0,129.0) container54
     setColour in55 "#sample"
     hide in55
@@ -101,7 +101,7 @@ do
     knob63 <- knob' (input8 ++ "." ++ "result") (-12.0,84.0) container54
     out64 <- plugout' (adsr0 ++ "." ++ "result") (-12.0,-36.0) container54
     setColour out64 "#control"
-    container65 <- container' "panel_random.bmp" (-264.0,72.0) root
+    container65 <- container' "panel_random.png" (-264.0,72.0) root
     in66 <- plugin' (vca30 ++ "." ++ "cv") (-342.0,48.0) container65
     setColour in66 "#sample"
     hide in66

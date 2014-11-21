@@ -82,8 +82,8 @@ synthScript synthName ins outs = do
     let topOffset = (-25, 75 :: Float)
     -- XXX More sizes
     let panelName = if height >= 4
-            then "panel_4x1.bmp"
-            else "panel_3x1.bmp"
+            then "panel_4x1.png"
+            else "panel_3x1.png"
     execWriter $ do
         synthPreamble panelName synthName topOffset
         forM_ (zip [inOffset, inOffset+50 ..] ins) $

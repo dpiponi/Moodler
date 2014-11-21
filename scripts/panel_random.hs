@@ -23,7 +23,7 @@ do
     vca30  <-  new' "vca"
     vca31  <-  new' "vca"
     vca32  <-  new' "vca"
-    container65 <- container' "panel_random.bmp" (x+(0.0), y+(0.0)) root
+    container65 <- container' "panel_random.png" (x+(0.0), y+(0.0)) root
     in66 <- plugin' (vca30 ++ "." ++ "cv") (x+(-78.0), y+(-24.0)) container65
     setColour in66 "#sample"
     hide in66

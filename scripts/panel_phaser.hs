@@ -42,7 +42,7 @@ do
     vco55  <-  new' "vco"
     vco56  <-  new' "vco"
     vco57  <-  new' "vco"
-    container58 <- container' "panel_phaser.bmp" (x+(12.0), y+(12.0)) root
+    container58 <- container' "panel_phaser.png" (x+(12.0), y+(12.0)) root
     in59 <- plugin' (vca52 ++ "." ++ "cv") (x+(-32.0), y+(79.0)) container58
     setColour in59 "#sample"
     hide in59

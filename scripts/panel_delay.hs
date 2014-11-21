@@ -8,7 +8,7 @@ do
     sum359  <-  new' "sum"
     vca360  <-  new' "vca"
     vca361  <-  new' "vca"
-    container362 <- container' "panel_delay.bmp" (x+(0.0), y+(-12.0)) root
+    container362 <- container' "panel_delay.png" (x+(0.0), y+(-12.0)) root
     in363 <- plugin' (sum359 ++ "." ++ "signal1") (x+(-48.0), y+(-132.0)) container362
     setColour in363 "#sample"
     in364 <- plugin' (sum359 ++ "." ++ "signal2") (x+(-67.0), y+(-150.0)) container362

@@ -29,7 +29,7 @@ do
     input98  <-  new' "input"
     input99  <-  new' "input"
     sequencer128  <-  new' "sequencer"
-    container157 <- container' "panel_sequencer.bmp" (x+(0.0), y+(-12.0)) root
+    container157 <- container' "panel_sequencer.png" (x+(0.0), y+(-12.0)) root
     in158 <- plugin' (sequencer128 ++ "." ++ "freq2") (x+(-144.0), y+(41.0)) container157
     hide in158
     in159 <- plugin' (sequencer128 ++ "." ++ "pulse2") (x+(-101.0), y+(36.0)) container157

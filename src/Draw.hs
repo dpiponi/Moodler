@@ -87,10 +87,13 @@ drawUIElement showingHidden world
                     Nothing -> error $ "In drawUIElement missing " ++
                                             show i) (S.toList c))
 
-drawUIElement _ _ (Proxy (UrElement _ wasSelected _ _ (x, y) n) _) =
-        translate x y . color
+drawUIElement _ world (Proxy (UrElement _ wasSelected _ _ (x, y) n) _) =
+        let feature = case M.lookup "panel_proxy.png" (world ^. pics) of
+                        Nothing -> proxyFeature
+                        Just (x', _, _) -> x'
+        in translate x y . color
                     (selectColor wasSelected proxyColour) $ 
-              proxyFeature <>
+              feature <>
               translate 15 (-5) (scale 0.1 0.1 (text n))
 
 drawUIElement _ world (Image (UrElement _ _ _ _ (x, y) _) picture _ _) =
@@ -120,9 +123,9 @@ drawUIElement _ _ (Label (UrElement _ wasSelected _ _ (x, y) dispName)) =
             color (selectColor wasSelected $ makeColor 0.7 0.7 0.5 1) $
                 scale 0.15 0.15 $ color black $ text dispName)
 
-drawUIElement _ _ (Selector (UrElement _ wasSelected _ _ (x, y) _) v opts) =
+drawUIElement _ _ (Selector (UrElement _ wasSelected _ _ (x, y) _) col v opts) =
         translate x y (
-            color black (circleSolid 6 <>
+            color (interpretColour col) (circleSolid 6.5 <>
             translate 10 (-5) (
                 color (selectColor wasSelected (
                     makeColor 0.7 0.7 0.5 1)) (

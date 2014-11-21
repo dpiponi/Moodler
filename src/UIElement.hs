@@ -41,6 +41,7 @@ data UIElement = Container { _ur :: UrElement
                       , _knobMin :: Maybe Float
                       , _knobMax :: Maybe Float }
                | Selector { _ur :: UrElement
+                          , _dataColour :: String
                           , _setting :: Float
                           , _options :: [String] }
                | Image { _ur :: UrElement

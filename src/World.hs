@@ -12,7 +12,7 @@ import Control.Applicative
 import Data.Monoid
 import Graphics.Gloss.Interface.IO.Game
 import qualified Data.Map as M
---import Debug.Trace
+import Debug.Trace
 
 import Text
 import UIElement
@@ -182,7 +182,7 @@ locById w e =
     in _loc (_ur elt)
 
 colourById :: GlossWorld -> UiId -> String
-colourById w e =
+colourById w e = trace (show e) $
     let elt = M.findWithDefault (error "colourById") e
                                           (_uiElements (_inner w))
     in _dataColour elt
