@@ -1,5 +1,4 @@
 * ui
-    * More flexible bindings (modifiers, maybe multi-char)
     * Sliders
     * Still need to draw cables in front
     * Remove extraneous stuff from phaser

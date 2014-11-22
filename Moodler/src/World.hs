@@ -56,7 +56,7 @@ data GlossWorld = GlossWorld { _inner :: World
                              , _ipAddr :: String
                              , _projectFile :: String
                              , _rootTransform :: B.Transform
-                             , _keyMatcher :: KeyMatcher Char String
+                             , _keyMatcher :: KeyMatcher (Key, Modifiers) String
                              , _cont :: FreeF MoodlerF Zero
                                 (FreeT MoodlerF (StateT GlossWorld IO)
                                     Zero)

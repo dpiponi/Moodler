@@ -22,6 +22,7 @@ import UIElement
 import Utils
 import World
 import KeyMatcher
+import KeyStrokes
 
 synthUsedInElement :: UIElement -> S.Set String
 synthUsedInElement In { _ur = UrElement { _name = n } } = S.singleton (base n)
@@ -290,7 +291,7 @@ saveBindings = do
     bs <- lift $ use keyMatcher
     forM_ (M.toList (bs ^. dict)) $ \(keys, cmd) ->
         multiTellLn "bindings" 4 $
-                unwords ["bind", show keys, show cmd]
+                unwords ["bind", show (unInterpretKeys keys), show cmd]
 
 rewriteConnection :: String -> String
 rewriteConnection s1 =

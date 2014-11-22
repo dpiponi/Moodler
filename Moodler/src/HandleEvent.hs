@@ -360,10 +360,11 @@ handleDefault' (EventKey key Down
     handleDefault
 
 -- Use key binding.
-handleDefault' (EventKey (Char key) Down _ _) = do
+handleDefault' (EventKey key Down mods _) = do
     W.undoPoint
     matcher <- use keyMatcher
-    let (mBinds, matcher') = updateKeyMatcher key matcher
+    let (mBinds, matcher') = updateKeyMatcher (key, mods) matcher
+    liftIO $ putStrLn $ show (key, mods)
     F.forM_ mBinds $ \script ->
             execScript "scripts" script
     keyMatcher .= matcher'
