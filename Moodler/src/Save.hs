@@ -21,6 +21,7 @@ import Text
 import UIElement
 import Utils
 import World
+import KeyMatcher
 
 synthUsedInElement :: UIElement -> S.Set String
 synthUsedInElement In { _ur = UrElement { _name = n } } = S.singleton (base n)
@@ -286,10 +287,10 @@ codeWorld = do
 saveBindings :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                 StateT (S.Set UiId) (WriterT (Multi String String) m) ()
 saveBindings = do
-    bs <- lift $ use bindings
-    forM_ (M.toList bs) $ \(key, cmd) ->
+    bs <- lift $ use keyMatcher
+    forM_ (M.toList (bs ^. dict)) $ \(keys, cmd) ->
         multiTellLn "bindings" 4 $
-                unwords ["bind", show key, show cmd]
+                unwords ["bind", show keys, show cmd]
 
 rewriteConnection :: String -> String
 rewriteConnection s1 =

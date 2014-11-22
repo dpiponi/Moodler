@@ -31,6 +31,7 @@ import qualified Box as B
 import Graphics.Gloss.Juicy
 import Codec.Picture
 import qualified Codec.Picture.Types as P
+import KeyMatcher
 --import UiLibElement
 
 alertGadget :: String -> B.Transform -> Picture
@@ -327,7 +328,7 @@ evalUi (Selection cfn) = do
     evalUi (cfn a)
 
 evalUi (Bind c t cfn) =
-    bindings %= M.insert c t >> evalUi cfn
+    keyMatcher %= addKey c t >> evalUi cfn
 
 evalUi (Move c p cfn) =
     inner . uiElements . ix c . ur . loc .= p >> evalUi cfn

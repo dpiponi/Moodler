@@ -20,6 +20,7 @@ import Sound.MoodlerLib.UiLibElement
 import Text
 import UIElement
 import qualified Box as B
+import KeyMatcher
 
 data MoodlerF a = GetEvent (Event -> a) deriving Functor
 
@@ -48,13 +49,14 @@ data GlossWorld = GlossWorld { _inner :: World
                              , _newName :: Int
                              , _showHidden :: Bool
                              , _pics :: M.Map String (Picture, Int, Int)
-                             , _bindings :: M.Map Char String
+                             --, _bindings :: M.Map Char String
                              --, _cmdArgs :: [String]
                              , _currentSelection :: [UiId]
                              , _gadget :: B.Transform -> Picture
                              , _ipAddr :: String
                              , _projectFile :: String
                              , _rootTransform :: B.Transform
+                             , _keyMatcher :: KeyMatcher Char String
                              , _cont :: FreeF MoodlerF Zero
                                 (FreeT MoodlerF (StateT GlossWorld IO)
                                     Zero)

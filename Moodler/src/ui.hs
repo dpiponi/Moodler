@@ -22,6 +22,7 @@ import UIElement
 import HandleEvent
 import Command
 import Box
+import KeyMatcher
 
 -- Zero elimination
 magic :: Zero -> a
@@ -102,7 +103,7 @@ emptyGlossWorld =
                   , _planes = rootID
                   --, _cmdArgs = []
                   , _rootPlane = rootID
-                  , _bindings = M.empty
+                  , _keyMatcher = initKeyMatcher
                   , _pics = M.empty
                   , _gadget = const blank
                   , _currentSelection = []

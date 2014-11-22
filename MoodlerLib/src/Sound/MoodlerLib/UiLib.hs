@@ -40,7 +40,7 @@ data Ui a = Return a
           | Selection ([UiId] -> Ui a)
           | Hide UiId Bool (Ui a)
           | Delete UiId (Ui a)
-          | Bind Char String (Ui a)
+          | Bind String String (Ui a)
           | Location UiId ((Float, Float) -> Ui a)
           | GetName UiId (Maybe String -> Ui a)
           | SetName UiId String (Ui a)
@@ -286,7 +286,7 @@ unhide t = Hide t False (return ())
 delete :: UiId -> Ui ()
 delete t = Delete t (return ())
 
-bind :: Char -> String -> Ui ()
+bind :: String -> String -> Ui ()
 bind c t = Bind c t (return ())
 
 location :: UiId -> Ui (Float, Float)

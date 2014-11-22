@@ -32,6 +32,7 @@ import Box
 import Cable
 import World
 import UIElement
+import KeyMatcher
 
 emptyWorld' :: UiId -> UIElement -> World
 emptyWorld' rootID root =
@@ -60,7 +61,7 @@ emptyGlossWorld' =
                   , _planes = rootID
                   --, _cmdArgs = []
                   , _rootPlane = rootID
-                  , _bindings = M.empty
+                  , _keyMatcher = initKeyMatcher
                   , _pics = M.empty
                   , _gadget = const blank
                   , _currentSelection = []

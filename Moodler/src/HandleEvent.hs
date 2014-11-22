@@ -31,6 +31,7 @@ import UISupport
 import Utils
 import World
 import Save
+import KeyMatcher
 
 -- Find a container somewhere in a list of ids.
 -- Assumes there is precisely one. XXX
@@ -361,9 +362,11 @@ handleDefault' (EventKey key Down
 -- Use key binding.
 handleDefault' (EventKey (Char key) Down _ _) = do
     W.undoPoint
-    binds <- use bindings
-    F.forM_ (M.lookup key binds) $ \script ->
+    matcher <- use keyMatcher
+    let (mBinds, matcher') = updateKeyMatcher key matcher
+    F.forM_ mBinds $ \script ->
             execScript "scripts" script
+    keyMatcher .= matcher'
     handleDefault
 
 handleDefault' _ =
