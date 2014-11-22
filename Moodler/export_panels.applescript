@@ -2,7 +2,7 @@ tell application "OmniGraffle"
 	activate
 	set theDocument to open ((path to documents folder as text) & "Moodler:panels.graffle")
 	--set theDocument to front document
-	--set theDocument to open "Macintosh HD:Users:dpiponi:Moodler:panels.graffle"
+	--set theDocument to open "Macintosh HD:Users:dpiponi:Moodler:Moodler:panels.graffle"
 	set theCanvases to every canvas of theDocument
 	set fileName to (name of theDocument)
 	set filePath to (path of theDocument)
