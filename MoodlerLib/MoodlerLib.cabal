@@ -1,0 +1,25 @@
+name:               MoodlerLib
+version:            0.1.0.0
+build-type:         Simple
+cabal-version:      >=1.8
+category:           Sound
+maintainer:         dpiponi@gmail.com
+synopsis:           A modular synthesiser librray
+description:        A modular synthesiser librray
+license:            OtherLicense
+license-file:       LICENSE
+
+source-repository head
+  type:               git
+  location:           https://github.com/dpiponi/Moodler
+
+library
+  hs-source-dirs:   src
+  build-depends:    base >= 4 && < 5, containers, lens, mtl,
+                    bmp, unix, free, either, filepath,
+                    mmorph
+  exposed-modules:
+    Sound.MoodlerLib.UiLib
+    Sound.MoodlerLib.Symbols
+    Sound.MoodlerLib.Quantise
+    Sound.MoodlerLib.UiLibElement
