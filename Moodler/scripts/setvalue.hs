@@ -6,9 +6,12 @@ do
     case value of
         Nothing -> return ()
         Just val -> do
-            let v = read val
-            forM_ knobs $ \k -> do
-                t <- getType k
-                case t of
-                    KnobType -> set k v
-                    _ -> return ()
+            let mV = readMaybe val
+            case mV of
+                Nothing -> return ()
+                Just v ->
+                    forM_ knobs $ \k -> do
+                        t <- getType k
+                        case t of
+                            KnobType -> set k v
+                            _ -> return ()

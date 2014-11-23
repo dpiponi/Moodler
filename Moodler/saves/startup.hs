@@ -1,5 +1,5 @@
 do
-    reset
+    restart
     main <- currentPlane
     new "input" "keyboard"
     new "input" "trigger"

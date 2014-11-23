@@ -14,6 +14,8 @@ interpretKeys' m ('⌃' : ks) = interpretKeys' m { ctrl = Down } ks
 interpretKeys' m ('⌫' : ks) = (SpecialKey KeyDelete, m) : interpretKeys ks
 interpretKeys' m ('↵' : ks) = (SpecialKey KeyEnter, m) : interpretKeys ks
 interpretKeys' m ('⇥' : ks) = (SpecialKey KeyTab, m) : interpretKeys ks
+interpretKeys' m ('⎋' : ks) = (SpecialKey KeyEsc, m) : interpretKeys ks
+interpretKeys' m (' ' : ks) = (SpecialKey KeySpace, m) : interpretKeys ks
 interpretKeys' _ [] = []
 interpretKeys' m (k:ks) = (Char k, m) : interpretKeys ks
 
@@ -30,6 +32,8 @@ uninterpretKey (k, Modifiers { alt = alt0, ctrl = ctrl0, shift = shift0}) =
                 SpecialKey KeyDelete -> '⌫'
                 SpecialKey KeyEnter -> '↵'
                 SpecialKey KeyTab -> '⇥'
+                SpecialKey KeyEsc -> '⎋'
+                SpecialKey KeySpace -> ' '
                 _ -> '?'
         mods = (if alt0 == Down then "⌥" else "") ++
                (if shift0 == Down then "⇧" else "") ++

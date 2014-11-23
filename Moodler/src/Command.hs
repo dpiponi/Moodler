@@ -83,6 +83,7 @@ execCommand cmd = do
         I.set [I.searchPath I.:= ["src"]]
         I.setImports [ "Prelude",
                        "Control.Monad",
+                       "Text.Read",
                        "Sound.MoodlerLib.Symbols",
                        "Sound.MoodlerLib.UiLib",
                        "Sound.MoodlerLib.UiLibElement",
@@ -217,8 +218,8 @@ evalUi (U.Cable s1 s2 cfn) =
 evalUi (U.Recompile cfn) =
     synthRecompile "Recompile command" >> evalUi cfn
 
-evalUi (U.Reset cfn) =
-    synthReset "Reset command" >> evalUi cfn
+evalUi (U.Restart cfn) =
+    synthReset "Restart command" >> evalUi cfn
 
 evalUi (U.Quit cfn) = synthQuit >> evalUi cfn
 

@@ -1,5 +1,5 @@
 do
-    reset
+    restart
     root <- getRoot
     let out = "out"
     let keyboard = "keyboard"
@@ -239,13 +239,13 @@ do
     setColour in107 "#sample"
     in108 <- plugin' (dda0 ++ "." ++ "dy") (-108.0,206.0) container105
     setColour in108 "#sample"
-    in109 <- plugin' (dda0 ++ "." ++ "reset") (-108.0,356.0) container105
+    in109 <- plugin' (dda0 ++ "." ++ "restart") (-108.0,356.0) container105
     setColour in109 "#sample"
     label110 <- label' "dda" (-112.0,356.0) container105
     out111 <- plugout' (dda0 ++ "." ++ "trigger") (-67.0,281.0) container105
     setColour out111 "#sample"
     container76 <- container' "panel_4x1.png" (-89.0,-14.0) proxy75
-    in77 <- plugin' (dda1 ++ "." ++ "reset") (-110.0,61.0) container76
+    in77 <- plugin' (dda1 ++ "." ++ "restart") (-110.0,61.0) container76
     setColour in77 "#sample"
     in78 <- plugin' (dda1 ++ "." ++ "clock") (-110.0,11.0) container76
     setColour in78 "#sample"
@@ -257,7 +257,7 @@ do
     out82 <- plugout' (dda1 ++ "." ++ "trigger") (-69.0,-14.0) container76
     setColour out82 "#sample"
     container83 <- container' "panel_4x1.png" (-95.0,-308.0) proxy75
-    in84 <- plugin' (dda2 ++ "." ++ "reset") (-116.0,-233.0) container83
+    in84 <- plugin' (dda2 ++ "." ++ "restart") (-116.0,-233.0) container83
     setColour in84 "#sample"
     in85 <- plugin' (dda2 ++ "." ++ "clock") (-116.0,-283.0) container83
     setColour in85 "#sample"
