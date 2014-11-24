@@ -16,7 +16,7 @@ data Ui a = Return a
           | Load String String (Ui a)
           | PlugIn UiId String (Float, Float) UiId (UiId -> Ui a)
           | PlugOut UiId String (Float, Float) UiId (UiId -> Ui a)
-          | Knob UiId String (Float, Float) UiId (UiId -> Ui a)
+          | Knob UiId String (Float, Float) KnobStyle UiId (UiId -> Ui a)
           | Proxy UiId String (Float, Float) UiId (UiId -> Ui a)
           | Image UiId String (Float, Float) UiId (UiId -> Ui a)
           | Container UiId String (Float, Float) UiId (UiId -> Ui a)
@@ -71,7 +71,7 @@ instance Monad Ui where
     Load dir t cont >>= f = Load dir t (cont >>= f)
     PlugIn s1 s2 p q cont >>= f = PlugIn s1 s2 p q ((>>= f) . cont)
     PlugOut s1 s2 p q cont >>= f = PlugOut s1 s2 p q ((>>= f) . cont)
-    Knob s1 s2 p q cont >>= f = Knob s1 s2 p q ((>>= f) . cont)
+    Knob s1 s2 p knobStyle q cont >>= f = Knob s1 s2 p knobStyle q ((>>= f) . cont)
     Selector s1 s2 p opts q cont >>= f = Selector
                                 s1 s2 p opts q ((>>= f) . cont)
     Proxy s1 s2 p q cont >>= f = Proxy s1 s2 p q ((>>= f) . cont)
@@ -155,8 +155,8 @@ plugout' s2 p creationParent = do
     s1 <- newId "out"
     PlugOut s1 s2 p creationParent return
 
-knob :: UiId -> String -> (Float, Float) -> UiId -> Ui UiId
-knob s1 s2 p creationParent = Knob s1 s2 p creationParent return
+knob :: UiId -> String -> (Float, Float) -> KnobStyle -> UiId -> Ui UiId
+knob s1 s2 p knobStyle creationParent = Knob s1 s2 p knobStyle creationParent return
 
 proxy' :: (Float, Float) -> UiId -> Ui UiId
 proxy' pos creationParent = do
@@ -166,7 +166,12 @@ proxy' pos creationParent = do
 knob' :: String -> (Float, Float) -> UiId -> Ui UiId
 knob' s2 p creationParent = do
     s1 <- newId "knob"
-    Knob s1 s2 p creationParent return
+    Knob s1 s2 p KnobStyle creationParent return
+
+slider' :: String -> (Float, Float) -> UiId -> Ui UiId
+slider' s2 p creationParent = do
+    s1 <- newId "slider"
+    Knob s1 s2 p SliderStyle creationParent return
 
 selector' :: String -> (Float, Float) -> [String] -> UiId -> Ui UiId
 selector' s2 p opts creationParent = do

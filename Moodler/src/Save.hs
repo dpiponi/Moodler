@@ -13,6 +13,7 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 
 import Sound.MoodlerLib.Symbols
+import Sound.MoodlerLib.UiLibElement
 
 import Cable
 import ContainerTree
@@ -82,11 +83,12 @@ elementLine _ parentId maybeMouseLocn eltName Label { _ur = UrElement { _name = 
 elementLine _ parentId maybeMouseLocn eltName Knob { _ur = UrElement { _name = n
                                                  , _loc = p }
                                                  , _displayName = d
+                                                 , _knobStyle = style
                                                  , _setting = s
                                                  , _knobMin = a
                                                  , _knobMax = b} = do
     multiTellLn "module" 4 $ unwords [unUiId eltName,
-                             "<- knob'", rewriteConnection n,
+                             if style == KnobStyle then "<- knob'" else "<- slider'", rewriteConnection n,
                              relativeShow maybeMouseLocn p, parentId]
     multiTellLn "settings" 4 $ unwords ["set", unUiId eltName,
                                                   "(" ++ show s ++ ")"]
@@ -231,7 +233,7 @@ codeWorld' ::
     -> StateT (S.Set UiId) (WriterT (Multi String String) m) ()
 codeWorld' everythingSaved synths needsSaving = do
         multiTellLn "preamble" 0 "do"
-        multiTellLn "preamble" 4 "reset"
+        multiTellLn "preamble" 4 "restart"
         --multiTellLn "preamble" 4 "let (x, y) = (0, 0)"
         multiTellLn "preamble" 4 "root <- getRoot"
         multiTellLn "preamble" 4 "let out = \"out\""

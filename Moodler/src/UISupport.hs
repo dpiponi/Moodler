@@ -19,6 +19,18 @@ import ContainerTree
 import UIElement
 import World
 
+uiAngle :: Floating a => Maybe a -> Maybe a -> a -> a
+uiAngle (Just lo) (Just hi) v = -1.0+2.0*(v-lo)/(hi-lo)
+uiAngle (Just lo) Nothing   v = -1.0+2.0*tanh (v-lo)
+uiAngle Nothing   (Just hi) v = 1.0-2.0*tanh (hi-v)
+uiAngle Nothing   Nothing v   = tanh v
+
+unUiAngle :: (Ord a, Floating a) => Maybe a -> Maybe a -> a -> a
+unUiAngle (Just lo) (Just hi) v = (lo+(hi-lo)*(v+1.0)/2.0 `max` lo) `min` hi
+unUiAngle (Just lo) Nothing   v = (lo+atanh ((v+1.0)/2.0)) `max` lo
+unUiAngle Nothing   (Just hi) v = (hi-atanh ((1.0-v)/2.0)) `min` hi
+unUiAngle Nothing   Nothing   v = atanh v
+
 highlightElement :: MonadState GlossWorld m => UiId -> m ()
 highlightElement i = inner . uiElements . ix i . ur . highlighted .= True
 

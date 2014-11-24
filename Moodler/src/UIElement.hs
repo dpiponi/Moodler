@@ -86,6 +86,9 @@ pointNearUIElement p Container { _ur = UrElement { _loc = q }
                                , _imageWidth = w
                                , _imageHeight = h } =
     pointWithin p $ rectToBox q w h
+pointNearUIElement p Knob { _ur = UrElement { _loc = q }
+                                , _knobStyle = SliderStyle } =
+    pointWithin p $ rectToBox q 12 30
 pointNearUIElement p e = pointNear (elementRadius e) p (_loc (_ur e))
 
 bbox :: UIElement -> Box

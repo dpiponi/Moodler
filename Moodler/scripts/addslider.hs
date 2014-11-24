@@ -10,4 +10,4 @@ do
         p <- getParent b
         k <- slider' (n' ++ ".result") (x, y) p
         cable k b
-        trace "Hello" $ recompile
+        recompile

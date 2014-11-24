@@ -19,6 +19,7 @@ import qualified Data.Set as S
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.Quantise
 import qualified Sound.MoodlerLib.UiLib as U
+import Sound.MoodlerLib.UiLibElement
 
 import ContainerTree
 import Draw
@@ -76,10 +77,14 @@ defaultClick' p i = do
         In {} -> do
             W.undoPoint
             clickOnIn' p i
-        Knob {} -> do
+        Knob { _knobStyle = KnobStyle } -> do
             highlightJust i
             W.undoPoint
             handleDraggingKnob i (_setting elt) p
+        Knob { _knobStyle = SliderStyle } -> do
+            highlightJust i
+            W.undoPoint
+            handleDraggingSlider i p
         Label {} -> do
             doSelection i
             handleDefault
@@ -143,11 +148,11 @@ handleDefault' (EventKey (Char 'p') Down _ _) = do
     forM_ contentss $ \content -> reparent container content
     handleDefault
 
-handleDefault' (EventKey (Char '*') Down _ _) = do
+handleDefault' (EventKey (Char '+') Down Modifiers { shift = Down, alt = Down, ctrl = Up } _) = do
     rootTransform %= (B.Transform (0, 0) 1.5 <>)
     handleDefault
 
-handleDefault' (EventKey (Char '/') Down _ _) = do
+handleDefault' (EventKey (Char '-') Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
     rootTransform %= (B.Transform (0, 0) (1/1.5) <>)
     handleDefault
 
@@ -172,7 +177,7 @@ handleDefault' (EventKey (Char 'l') Down _ _) = do
         liftIO $ putStrLn $ "Loaded \"" ++ filename' ++ "\""
     handleDefault
 
-handleDefault' (EventKey (Char 's') Down _ _) = do
+handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctrl = Up } _) = do
     allSaves <- liftIO $ getAllScripts "saves"
     filename <- handleGetString allSaves "" "save: "
     case filename of
@@ -563,7 +568,7 @@ handleDraggingKnob' selectedKnob v p0@(x0, y0) (EventMotion p) = do
                     Nothing -> v0
                     Just hi -> min v0 hi
             gadget .= \xform -> pictureTransformer xform $
-                                            translate x0 y0 (
+                                            translate (x0+150) y0 (
                 color (B.transparentBlack 0.8) (rectangleSolid 250 100) <>
                 translate (-80) (-40) (scale 0.27 0.27 $
                     color green $ text (showFFloat (Just 4) v1 "")) <>
@@ -579,3 +584,50 @@ handleDraggingKnob' selectedKnob _ _
     handleDefault
 
 handleDraggingKnob' _ _ _ e = handleDefault' e
+
+handleDraggingSlider :: UiId -> Point ->
+                        MoodlerM Zero
+handleDraggingSlider selectedSlider (x0, y0) = do
+    elt <- getElementById "handleDraggingSlider" selectedSlider
+    let sliderLoc = elt ^. ur . loc . _2 :: Float
+    let v = unUiAngle (_knobMin elt) (_knobMax elt) ((y0-sliderLoc)/15.0) :: Float
+    W.synthSet selectedSlider v
+    e <- liftF $ GetEvent id
+    handleDraggingSlider' selectedSlider e
+
+{-
+knobMapping :: Float -> Point -> Float
+knobMapping v (dx, dy) = v+0.01*dx*exp (0.01*dy)
+-}
+
+handleDraggingSlider' :: UiId -> Event -> MoodlerM Zero
+handleDraggingSlider' selectedSlider (EventMotion p) = do
+    -- Use zoom?
+    elt <- getElementById "handleDraggingSlider'" selectedSlider
+    let sliderLoc = elt ^. ur . loc
+    let newV = unUiAngle (_knobMin elt) (_knobMax elt) ((snd p-snd sliderLoc)/15.0) :: Float
+    let lowLimit = _knobMin elt
+    let highLimit = _knobMax elt
+    let v0 = case lowLimit of
+            Nothing -> newV
+            Just lo -> max newV lo
+    let v1 = case highLimit of
+            Nothing -> v0
+            Just hi -> min v0 hi
+    gadget .= \xform -> pictureTransformer xform $
+                                    translate (fst sliderLoc+150) (snd sliderLoc) (
+        color (B.transparentBlack 0.8) (rectangleSolid 250 100) <>
+        translate (-80) (-40) (scale 0.27 0.27 $
+            color green $ text (showFFloat (Just 4) v1 "")) <>
+        translate (-80) 0 (scale 0.27 0.27 $
+                color red $ text (showNote v1)))
+    W.synthSet selectedSlider v1
+    handleDraggingSlider selectedSlider p
+
+handleDraggingSlider' selectedSlider
+    (EventKey (MouseButton LeftButton) Up _ _) = do
+    gadget .= const blank
+    doSelection selectedSlider
+    handleDefault
+
+handleDraggingSlider' _ e = handleDefault' e

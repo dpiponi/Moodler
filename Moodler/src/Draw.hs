@@ -20,6 +20,8 @@ import Text.Read
 import Data.Function
 --import Debug.Trace
 
+import Sound.MoodlerLib.UiLibElement
+
 import UISupport
 import ContainerTree
 
@@ -50,12 +52,6 @@ drawCable w (x1, y1) active (Cable o) =
         cableColour = interpretColour (colourById w o)
     in color (if active then cableColour else inertCableColour) $
             B.curve 0.15 (x0, y0) (x1, y1)
-
-uiAngle :: Floating a => Maybe a -> Maybe a -> a -> a
-uiAngle (Just lo) (Just hi) v = -3.0+6.0*(v-lo)/(hi-lo)
-uiAngle (Just lo) Nothing v   = -3.0+6.0*tanh (v-lo)
-uiAngle Nothing (Just hi) v   = 3.0-6.0*tanh (hi-v)
-uiAngle Nothing Nothing v     = 3.0*tanh v
 
 rectAt :: Float -> Float -> Int -> Int -> Picture
 rectAt x y iw ih = translate x y (
@@ -132,13 +128,19 @@ drawUIElement _ _ (Selector (UrElement _ wasSelected _ _ (x, y) _) col v opts) =
                         scale 0.15 0.15 (color black 
                                         (text (opts!!floor v)))))))
 
-drawUIElement _ _ (Knob (UrElement _ wasSelected _ _ (x, y) _) col _ _style v lo hi) =
+drawUIElement _ _ (Knob (UrElement _ wasSelected _ _ (x, y) _) col _ KnobStyle v lo hi) =
         translate x y $
                     color (selectColor wasSelected knobColour) $
             circle 16 <> circleSolid 12 <>
             color (interpretColour col) (circleSolid 2) <>
-            let angle = uiAngle lo hi v
+            let angle = 3.0*uiAngle lo hi v
             in color white $ line [(0, 0), (16*sin angle, 16*cos angle)]
+
+drawUIElement _ _ (Knob (UrElement _ wasSelected _ _ (x, y) _) col _ SliderStyle v lo hi) =
+        translate x y $
+                    color (selectColor wasSelected knobColour) $
+            let angle = 3.0*uiAngle lo hi v
+            in color (interpretColour col) $ polygon [(-6,-15), (6,-15), (6,5*angle), (-6,5*angle), (-6,-15)]
 
 rect :: Point -> Point -> Picture
 rect (x0, y0) (x1, y1) = Line [ (x0, y0), (x1, y0)
