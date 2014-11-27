@@ -74,8 +74,9 @@ instantiateExec nodeName nodeType connections = do
     let e = execCode nodeType
     let variables = varsFromNodeType nodeType connections 
     rewritten <- rewriteVars False nodeName variables e
-    return $ concatMap (\s -> render (pretty s) ++ "\n") $
-                            splitCompound rewritten
+    return $ render (pretty rewritten)
+--    return $ concatMap (\s -> render (pretty s) ++ "\n") $
+--                            splitCompound rewritten
 
 instantiateInit :: String -> NodeType NodeInfo -> Either String String
 instantiateInit nodeName nodeType = do

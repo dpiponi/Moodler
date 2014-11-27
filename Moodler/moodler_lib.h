@@ -303,3 +303,7 @@ struct Square {
 
 void init_square(struct Square *state);
 sample step_square(struct Square *state, double dt, sample frequency, sample pwm, sample sync);
+
+inline double interp(double lambda, double x, double y) {
+    return (1-lambda)*x+lambda*y;
+}

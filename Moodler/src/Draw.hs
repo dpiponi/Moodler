@@ -106,8 +106,8 @@ drawUIElement _ _ (Out (UrElement _ wasSelected _ _ (x, y) _) col) =
 
 drawUIElement _ world (In (UrElement _ wasSelected _ _ (x, y) _) col _ cableList) =
     translate x y (
-                color (selectColor wasSelected (makeColor 0.1 0.1 0.1 1)) (circleSolid 9) <>
-                color (selectColor wasSelected (makeColor 0.5 0.5 0.5 1)) (circleSolid 6) <>
+                --color (selectColor wasSelected (makeColor 0.1 0.1 0.1 1)) (circleSolid 9) <>
+                color (selectColor wasSelected (makeColor 0.5 0.5 0.5 1)) (circleSolid 9) <>
                 color (interpretColour col) (circleSolid 3)
                 ) <>
     mconcat (zipWith (drawCable world (x, y))

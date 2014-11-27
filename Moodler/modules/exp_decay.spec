@@ -6,7 +6,7 @@ double multiplier;
 void init() {
     last_trigger = 0;
     multiplier = 0;
-    last_time = 1.0;
+    last_time = -1;
 }
 
 void exec(in control decay_time, in control trigger, out control result) {
