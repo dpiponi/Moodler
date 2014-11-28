@@ -6,6 +6,7 @@
     * Tooltips for input may be better above or below
     * Proxy picture?
     * Properly integrate oscilloscope
+    * Integer input?
 * moodler
     * Get rid of old init
     * rename should use proper C struct
@@ -16,6 +17,8 @@
     * "Hidden" attribute for module parameter?
     * #includes in modules
     * Don't need to dlopen audio.so. Just access directly from FFI.
+    * Remove excess braces...again
+    * Higher quality interp in delay?
 * modules
     * Why does chorus have long delay?
     * Make bounce more efficient.

@@ -17,25 +17,23 @@ void init() {
 }
 
 void exec(in control freq, in sample signal, out sample result) {
-    {
-        freq = clamp(-1.0, 0.65, freq);
-        double w = 2*M_PI*signal_to_frequency(freq);
+    freq = clamp(-1.0, 0.65, freq);
+    double w = 2*M_PI*signal_to_frequency(freq);
 
-        double a1 = (-4*cos(dt*w))/(2 + sqrt(2)*sin(dt*w));
-        double a2 = (2 - sqrt(2)*sin(dt*w))/(2 + sqrt(2)*sin(dt*w));
+    double a1 = (-4*cos(dt*w))/(2 + sqrt(2)*sin(dt*w));
+    double a2 = (2 - sqrt(2)*sin(dt*w))/(2 + sqrt(2)*sin(dt*w));
 
-        double temp1 = sin((dt*w)/2.);
-        double temp2 = 1/temp1;
-        double b0 = 1/(sqrt(2)/tan((dt*w)/2.) + temp2*temp2);
-        double b1 = (4*temp1*temp1)/(2 + sqrt(2)*sin(dt*w));
-        double b2 = b0;
+    double temp1 = sin((dt*w)/2.);
+    double temp2 = 1/temp1;
+    double b0 = 1/(sqrt(2)/tan((dt*w)/2.) + temp2*temp2);
+    double b1 = (4*temp1*temp1)/(2 + sqrt(2)*sin(dt*w));
+    double b2 = b0;
 
-        x0 = signal;
-        y0 = -a1*y1-a2*y2+b0*x0+b1*x1+b2*x2;
-        result = y0;
-        y2 = y1;
-        y1 = y0;
-        x2 = x1;
-        x1 = x0;
-    }
+    x0 = signal;
+    y0 = -a1*y1-a2*y2+b0*x0+b1*x1+b2*x2;
+    result = y0;
+    y2 = y1;
+    y1 = y0;
+    x2 = x1;
+    x1 = x0;
 }

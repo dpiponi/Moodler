@@ -8,14 +8,12 @@ void init() {
 }
 
 void exec(in control freq, in control pwm, in sample sync, out sample result) {
-    {
-        if (!started) {
-            init_square(&square_state);
-            started = 1.0;
-        }
-        double frequency = signal_to_frequency(freq);
-        double period = 1.0/frequency;
-
-        result = step_square(&square_state, dt, frequency, pwm, sync);
+    if (!started) {
+        init_square(&square_state);
+        started = 1.0;
     }
+    double frequency = signal_to_frequency(freq);
+    double period = 1.0/frequency;
+
+    result = step_square(&square_state, dt, frequency, pwm, sync);
 }

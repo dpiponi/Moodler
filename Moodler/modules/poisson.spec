@@ -6,11 +6,9 @@ void init() {
 
 void exec(in control rate,
           out control trigger) {
-    {
-        trigger = 0.0;
-        double prob = rate*dt;
-        if (drand48() < prob) {
-            trigger = 1.0;
-        }
+    trigger = 0.0;
+    double prob = rate*dt;
+    if (drand48() < prob) {
+        trigger = 1.0;
     }
 }

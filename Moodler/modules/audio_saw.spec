@@ -15,50 +15,48 @@ void init() {
 }
 
 void exec(in control freq, in sample sync, out sample result) {
-    {
-        if (!started) {
-            init_band_limited(&limited);
-            started = 1.0;
-            last_sync = 0.0;
-            sync_pending = 0;
-        }
-        double frequency = signal_to_frequency(freq);
-        double period = 1.0/frequency;
-        gradient = 2.0/period/48000;
-        double sync_time;
-
-        if (last_sync < 0 && sync >= 0) {
-            sync_time = last_sync/(last_sync-sync);
-            sync_pending = 1;
-            if (sync_time == 0) {
-                add_sample(&limited, -1);
-            }
-        } else {
-            add_sample(&limited,
-                       -1+(this_sample-last_fall_time)*gradient);
-        }
-        while (1) {
-            if (sync_pending && this_sample+sync_time <= next_fall_time) {
-                sync_pending = 0;
-                double value_at_sync =
-                    -1+(this_sample+sync_time-last_fall_time)*gradient;
-                add_discontinuity0(&limited, sync_time,
-                                   -(value_at_sync+1));
-                last_fall_time = this_sample+sync_time;
-                next_fall_time = last_fall_time+period/dt;
-            }
-            if (next_fall_time >= this_sample+1) {
-                break;
-            }
-            add_discontinuity0(&limited, next_fall_time-this_sample, -2);
-            last_fall_time = next_fall_time;
-            next_fall_time += period/dt;
-        }
-
-        result = get_sample(&limited);
-
-        ++this_sample;
-
-        last_sync = sync;
+    if (!started) {
+        init_band_limited(&limited);
+        started = 1.0;
+        last_sync = 0.0;
+        sync_pending = 0;
     }
+    double frequency = signal_to_frequency(freq);
+    double period = 1.0/frequency;
+    gradient = 2.0/period/48000;
+    double sync_time;
+
+    if (last_sync < 0 && sync >= 0) {
+        sync_time = last_sync/(last_sync-sync);
+        sync_pending = 1;
+        if (sync_time == 0) {
+            add_sample(&limited, -1);
+        }
+    } else {
+        add_sample(&limited,
+                   -1+(this_sample-last_fall_time)*gradient);
+    }
+    while (1) {
+        if (sync_pending && this_sample+sync_time <= next_fall_time) {
+            sync_pending = 0;
+            double value_at_sync =
+                -1+(this_sample+sync_time-last_fall_time)*gradient;
+            add_discontinuity0(&limited, sync_time,
+                               -(value_at_sync+1));
+            last_fall_time = this_sample+sync_time;
+            next_fall_time = last_fall_time+period/dt;
+        }
+        if (next_fall_time >= this_sample+1) {
+            break;
+        }
+        add_discontinuity0(&limited, next_fall_time-this_sample, -2);
+        last_fall_time = next_fall_time;
+        next_fall_time += period/dt;
+    }
+
+    result = get_sample(&limited);
+
+    ++this_sample;
+
+    last_sync = sync;
 }

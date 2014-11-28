@@ -5,7 +5,5 @@ void init() {
 }
 
 void exec(in sample signal1, in sample signal2, out sample result) {
-    {
-        result = signal1-signal2;
-    }
+    result = signal1-signal2;
 }

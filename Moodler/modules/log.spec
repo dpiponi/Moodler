@@ -5,7 +5,5 @@ void init() {
 }
 
 void exec(in control signal, out control result) {
-    {
-        result = signal > 0.0001 ? log(signal) : 0.0;
-    }
+    result = signal > 0.0001 ? log(signal) : 0.0;
 }

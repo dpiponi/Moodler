@@ -5,7 +5,5 @@ void init() {
 }
 
 void exec(in control signal, out control result) {
-    {
-        result = exp(signal);
-    }
+    result = exp(signal);
 }
