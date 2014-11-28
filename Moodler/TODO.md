@@ -1,14 +1,11 @@
 * ui
-    * Sliders
     * Still need to draw cables in front
     * Remove extraneous stuff from phaser
-    * Tooltips for input may be better above or below
     * Proxy picture?
     * Properly integrate oscilloscope
     * Integer input?
-    * ! instead of ++ "." ++ ?
+    * Sliders could be better
 * moodler
-    * Get rid of old init
     * rename should use proper C struct
     * local enums?
     * Need consistent naming:
@@ -16,9 +13,10 @@
         + SharedObject instead of DSO
     * "Hidden" attribute for module parameter?
     * #includes in modules
-    * Don't need to dlopen audio.so. Just access directly from FFI.
     * Remove excess braces...again
     * Higher quality interp in delay?
+    * Pending FFI issues: Don't need to dlopen audio.so. Just access directly from FFI.
+    * int/string support?
 * modules
     * Why does chorus have long delay?
     * Make bounce more efficient.

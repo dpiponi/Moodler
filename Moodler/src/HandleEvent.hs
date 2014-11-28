@@ -26,6 +26,7 @@ import Draw
 import Cable
 import Command
 import Music
+import Text
 import Numeric
 import UIElement
 import UISupport
@@ -110,13 +111,16 @@ elementDisplayName e = e ^. ur . name
 
 hoverGadget :: Point -> UIElement -> B.Transform -> Picture
 hoverGadget (ex, ey) elt xform = 
-     pictureTransformer xform $ translate ex ey (
+     let txt = elementDisplayName elt
+         w = estimateTextWidth txt
+     in pictureTransformer xform $ translate ex (ey+25) $ scale 0.5 0.5 $ B.textInBox (B.transparentBlack 0.7) white txt
+{-translate ex ey (
         translate 86 1 (color (B.transparentBlack 0.5)
                               (rectangleSolid 150 24))
         <>
         translate 18 (-2) (scale 0.1 0.1 (
                 color white (text (elementDisplayName elt))))
-        )
+       )-}
 
 handleDefault' :: Event -> MoodlerM Zero
 handleDefault' (EventMotion p) = do
@@ -368,7 +372,7 @@ handleDefault' (EventKey key Down mods _) = do
     W.undoPoint
     matcher <- use keyMatcher
     let (mBinds, matcher') = updateKeyMatcher (key, mods) matcher
-    liftIO $ putStrLn $ show (key, mods)
+    liftIO $ print (key, mods)
     F.forM_ mBinds $ \script ->
             execScript "scripts" script
     keyMatcher .= matcher'

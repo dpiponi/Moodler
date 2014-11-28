@@ -6,7 +6,7 @@ category:           Sound
 maintainer:         dpiponi@gmail.com
 synopsis:           A modular synthesiser
 description:        A modular synthesiser
-license:            OtherLicense
+license:            BSD2
 license-file:       LICENSE
 cabal-version:    >= 1.10
 
