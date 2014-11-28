@@ -18,7 +18,7 @@ do
     pcm89 <- new' "pcm8"
     shift_right10 <- new' "shift_right"
     shift_right11 <- new' "shift_right"
-    t12 <- new' "t"
+    t64 <- new' "t"
     new "input" "trigger"
     let trigger = "trigger"
     vca13 <- new' "vca"
@@ -80,10 +80,6 @@ do
     label46 <- label' "pcm8" (155.0,75.0) container44
     out47 <- plugout' (pcm89 ! "result") (200.0,0.0) container44
     setColour out47 "#sample"
-    container48 <- container' "panel_3x1.png" (-360.0,204.0) root
-    label49 <- label' "t" (-385.0,279.0) container48
-    out50 <- plugout' (t12 ! "result") (-340.0,204.0) container48
-    setColour out50 "(0, 1, 0)"
     container51 <- container' "panel_bit_or.png" (48.0,-12.0) root
     in52 <- plugin' (bit_or0 ! "x") (-12.0,12.0) container51
     setColour in52 "(0, 1, 0)"
@@ -105,10 +101,14 @@ do
     knob61 <- knob' (input5 ! "result") (-264.0,72.0) container59
     out62 <- plugout' (id2 ! "result") (-228.0,72.0) container59
     setColour out62 "#control"
-    cable out50 in18
-    cable out50 in22
+    container65 <- container' "panel_t.png" (-264.0,180.0) root
+    out66 <- plugout' (t64 ! "result") (-240.0,180.0) container65
+    setColour out66 "(0, 1, 0)"
+    cable out66 in18
+    cable out66 in19
+    cable out66 in22
     cable out34 in23
-    cable out50 in26
+    cable out66 in26
     cable out38 in27
     cable out43 in30
     cable out20 in32
@@ -119,7 +119,7 @@ do
     cable out24 in45
     cable out58 in52
     cable out28 in53
-    cable out50 in56
+    cable out66 in56
     cable out62 in57
     cable knob61 in60
     recompile
