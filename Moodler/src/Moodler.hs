@@ -13,6 +13,7 @@ import Control.Monad.State
 --import Control.Lens
 --import Foreign.Ptr
 --import Control.Monad.Morph
+import Foreign.C.String
 
 import Audio
 import Synth
@@ -58,8 +59,12 @@ main = do
             audioStateList <- replicateM numVoices (createFn dso)
             let audioStates = 
                     listArray (0, numVoices-1) audioStateList
+                    {-
             forM_ [0..numVoices-1] $ \i ->
-                dsoInitFn dso (audioStates!i) -- come back here
+                forM_ (M.keys theStandard) $ \nodeToClear ->
+                    withCString nodeToClear $ \nodeString ->
+                        dsoInit2Fn dso (audioStates!i) nodeString
+                        -}
 
             audioPlayer <- liftIO loadAudioDSO
             setNumStates audioPlayer numVoices

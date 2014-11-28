@@ -162,8 +162,7 @@ handleDefault' (EventKey (Char 'r') Down _ _) = do
     liftIO $ putStrLn $ "filename = " ++ show filename
     withJust filename $ \filename' -> do
         W.undoPoint
-        fileName <- execScript "scripts" filename'
-        projectFile .= fileName
+        void $ execScript "scripts" filename'
     handleDefault
 
 handleDefault' (EventKey (Char 'l') Down _ _) = do
@@ -587,7 +586,7 @@ handleDraggingKnob' _ _ _ e = handleDefault' e
 
 handleDraggingSlider :: UiId -> Point ->
                         MoodlerM Zero
-handleDraggingSlider selectedSlider (x0, y0) = do
+handleDraggingSlider selectedSlider (_, y0) = do
     elt <- getElementById "handleDraggingSlider" selectedSlider
     let sliderLoc = elt ^. ur . loc . _2 :: Float
     let v = unUiAngle (_knobMin elt) (_knobMax elt) ((y0-sliderLoc)/15.0) :: Float

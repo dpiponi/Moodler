@@ -217,9 +217,11 @@ synthReset msg = do
     sendResetMessage msg
     ipAddress <- use ipAddr
     oldCont <- use cont
+    oldBindings <- use keyMatcher
     put emptyGlossWorld'
     ipAddr .= ipAddress
     cont .= oldCont
+    keyMatcher .= oldBindings
 
 undoPoint :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
              m ()

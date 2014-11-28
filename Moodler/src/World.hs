@@ -49,8 +49,6 @@ data GlossWorld = GlossWorld { _inner :: World
                              , _newName :: Int
                              , _showHidden :: Bool
                              , _pics :: M.Map String (Picture, Int, Int)
-                             --, _bindings :: M.Map Char String
-                             --, _cmdArgs :: [String]
                              , _currentSelection :: [UiId]
                              , _gadget :: B.Transform -> Picture
                              , _ipAddr :: String
@@ -60,12 +58,9 @@ data GlossWorld = GlossWorld { _inner :: World
                              , _cont :: FreeF MoodlerF Zero
                                 (FreeT MoodlerF (StateT GlossWorld IO)
                                     Zero)
--- UNDO
                              , _undoInfo :: UndoInfo
--- END UNDO
                              }
 
--- UNDO
 data UndoInfo = UndoInfo { _innerHistory :: [World]
                          , _undoHistory ::
                                     [([SendCommand], [SendCommand])]
@@ -75,7 +70,6 @@ data UndoInfo = UndoInfo { _innerHistory :: [World]
                          }
 
 $(makeLenses ''UndoInfo)
--- END UNDO
 
 $(makeLenses ''GlossWorld)
 

@@ -9,7 +9,7 @@ import Control.Monad.Writer
 import Data.Tuple
 import Graphics.Gloss.Interface.IO.Game
 import qualified Data.List as L
-import qualified Data.Map as M
+--import qualified Data.Map as M
 import qualified Data.Set as S
 
 import Sound.MoodlerLib.Symbols
@@ -22,8 +22,8 @@ import Text
 import UIElement
 import Utils
 import World
-import KeyMatcher
-import KeyStrokes
+--import KeyMatcher
+--import KeyStrokes
 
 synthUsedInElement :: UIElement -> S.Set String
 synthUsedInElement In { _ur = UrElement { _name = n } } = S.singleton (base n)
@@ -260,12 +260,12 @@ codeWorld' everythingSaved synths needsSaving = do
                                  show synthType]
 
         saveSelection' everythingSaved Nothing needsSaving
-        saveBindings
+        --saveBindings
 
 codeSections :: [String]
 codeSections = ["preamble", "synth", "module",
                 "cables", "midamble", "settings",
-                "postamble", "bindings"]
+                "postamble"]
 
 codeWorld :: (Functor m, MonadIO m, MonadState GlossWorld m)
                  => m String
@@ -287,6 +287,7 @@ codeWorld = do
         ) S.empty)
     return $ collate codeSections sections
 
+{-
 saveBindings :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                 StateT (S.Set UiId) (WriterT (Multi String String) m) ()
 saveBindings = do
@@ -294,11 +295,12 @@ saveBindings = do
     forM_ (M.toList (bs ^. dict)) $ \(keys, cmd) ->
         multiTellLn "bindings" 4 $
                 unwords ["bind", show (unInterpretKeys keys), show cmd]
+-}
 
 rewriteConnection :: String -> String
 rewriteConnection s1 =
     let (a, b) = splitDot s1
-    in paren (unwords [a, "++ \".\" ++", show b])
+    in paren (unwords [a, "!", show b])
 
 saveWorld :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
              String -> m ()

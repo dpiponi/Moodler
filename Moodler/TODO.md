@@ -2,11 +2,11 @@
     * Sliders
     * Still need to draw cables in front
     * Remove extraneous stuff from phaser
-    * Store config with bindings separately from actual 'scene'
     * Tooltips for input may be better above or below
     * Proxy picture?
     * Properly integrate oscilloscope
     * Integer input?
+    * ! instead of ++ "." ++ ?
 * moodler
     * Get rid of old init
     * rename should use proper C struct

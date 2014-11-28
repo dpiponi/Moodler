@@ -52,6 +52,7 @@ recompile' numVoices dataPtrs set_fill_buffer = do
     -- be running. So exec() needs to signal that it has finished.
     moodlerDSO .= newDso
     pending <- use modulesPendingInit
+    liftIO $ putStrLn $ "Moduled pending init = " ++ show pending
     liftIO $ forM_ pending $ \nodeToClear ->
         withCString nodeToClear $ \nodeString ->
             forM_ [0..numVoices-1] $ \v ->

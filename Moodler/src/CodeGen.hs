@@ -170,12 +170,14 @@ genInit2 moduleList synth = do
         initSource <- lift $ instantiateInit name nodeType
         tell $ "if (!strcmp(node, \"" ++ name ++
                "\")) {\n"
+        tell $ "printf(\"Clearing %s\\n\"," ++ show name ++ ");\n"
         tell initSource
         tell "return;}\n"
     tell "}\n"
 
 -- I think this needs a way to specify which module is
 -- being intialised.
+{-
 genInit :: [String] -> M.Map String Module ->
            WriterT String (Either String) ()
 genInit moduleList synth = do
@@ -186,6 +188,7 @@ genInit moduleList synth = do
         initSource <- lift $ instantiateInit name nodeType
         tell initSource
     tell "}\n"
+-}
 
 genSet :: WriterT String (Either String) ()
 genSet = do
@@ -222,7 +225,7 @@ gen currentDirectory synth out' = do
     genAddress moduleList synth
     genSet
     genCreate
-    genInit moduleList synth
+    --genInit moduleList synth
     genInit2 moduleList synth
     genExec y synth
 
@@ -247,7 +250,7 @@ type SetFn = Ptr () -> CString -> CString -> CDouble -> IO ()
 -- around C functions within it.
 data DSO = DSO { dl :: DL
                , createFn :: CreateFn
-               , dsoInitFn :: InitFn
+               -- , dsoInitFn :: InitFn
                , dsoInit2Fn :: Init2Fn
                , dsoExecuteFn :: FunPtr ()
                , dsoSetFn :: SetFn }
@@ -272,12 +275,12 @@ makeDso code = --do
         --print $ "Loaded lib " ++ tmpSoFile
 
         create <- dlsym so "create"
-        ini <- dlsym so "init"
+        --ini <- dlsym so "init"
         ini2 <- dlsym so "init2"
         execute <- dlsym so "execute"
         set <- dlsym so "set"
 
-        return $ DSO so (mkCreate create) (mkInit ini) (mkInit2 ini2) execute (mkSet set)
+        return $ DSO so (mkCreate create) {-(mkInit ini)-} (mkInit2 ini2) execute (mkSet set)
     -- End of tmp dir bit
 
 setStateVar :: SetFn -> Ptr () -> String -> String -> Float -> IO ()
