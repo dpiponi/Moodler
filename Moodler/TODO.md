@@ -1,5 +1,4 @@
 * ui
-    * Still need to draw cables in front
     * Remove extraneous stuff from phaser
     * Proxy picture?
     * Properly integrate oscilloscope
