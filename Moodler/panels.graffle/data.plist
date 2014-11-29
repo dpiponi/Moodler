@@ -38,7 +38,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-11-28 23:02:22 +0000</string>
+	<string>2014-11-29 06:30:07 +0000</string>
 	<key>Modifier</key>
 	<string>Dan Piponi</string>
 	<key>NotesVisible</key>
@@ -37469,7 +37469,7 @@
 		<key>SidebarWidth</key>
 		<integer>230</integer>
 		<key>TopSlabHeight</key>
-		<real>251</real>
+		<real>346</real>
 		<key>VisibleRegion</key>
 		<string>{{15, 0}, {561, 426}}</string>
 		<key>Zoom</key>

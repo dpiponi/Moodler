@@ -1,18 +1,14 @@
 do
-    plane <- currentPlane
-    (x, y) <- fmap (quantise2 quantum) mouse
-    panel <- container' "panel_3x1.png" (x, y) plane
-    lab <- label' "nor" (x-25.0, y+75.0) plane
-    parent panel lab
-    name <- new' "nor"
-    inp <- plugin' (name ++ ".signal1") (x-21, y+25) plane
-    setColour inp "#control"
-    parent panel inp
-    inp <- plugin' (name ++ ".signal2") (x-21, y-25) plane
-    setColour inp "#control"
-    parent panel inp
-    out <- plugout' (name ++  ".result") (x+20, y) plane
-    setColour out "#control"
-    parent panel out
+    (x0, y0) <- mouse
+    let (x, y) = quantise2 quantum (x0, y0)
+    root <- currentPlane
+    and0  <-  new' "nor"
+    container162 <- container' "panel_nor.png" (x+(0.0), y+(0.0)) root
+    in57 <- plugin' (and0 ++ "." ++ "signal1") (x+(-60.0), y+(24.0)) container162
+    setColour in57 "#control"
+    in58 <- plugin' (and0 ++ "." ++ "signal2") (x+(-60.0), y+(-24.0)) container162
+    setColour in58 "#control"
+    out60 <- plugout' (and0 ++ "." ++ "result") (x+(60.0), y+(0.0)) container162
+    setColour out60 "#control"
     recompile
     return ()

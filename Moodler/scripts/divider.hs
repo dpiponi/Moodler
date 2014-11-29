@@ -1,27 +1,20 @@
 do
-    plane <- currentPlane
-    (x, y) <- fmap (quantise2 quantum) mouse
-    panel <- container' "panel_4x1.png" (x, y) plane
-    lab <- label' "divider" (x-25.0, y+75.0) plane
-    parent panel lab
-    name <- new' "divider"
-    inp <- plugin' (name ++ ".gate") (x-21, y+25) plane
-    setColour inp "#control"
-    parent panel inp
-    inp <- plugin' (name ++ ".div32") (x-21, y-25) plane
-    setColour inp "#control"
-    parent panel inp
-    out <- plugout' (name ++  ".div02") (x+20, y+75) plane
-    setColour out "#control"
-    parent panel out
-    out <- plugout' (name ++  ".div04") (x+20, y+25) plane
-    setColour out "#control"
-    parent panel out
-    out <- plugout' (name ++  ".div08") (x+20, y-25) plane
-    setColour out "#control"
-    parent panel out
-    out <- plugout' (name ++  ".div16") (x+20, y-75) plane
-    setColour out "#control"
-    parent panel out
+    (x0, y0) <- mouse
+    let (x, y) = quantise2 quantum (x0, y0)
+    root <- currentPlane
+    divider1  <-  new' "divider"
+    container86 <- container' "panel_divider.png" (x+(0.0), y+(0.0)) root
+    in87 <- plugin' (divider1 ++ "." ++ "gate") (x+(-24.0), y+(24.0)) container86
+    setColour in87 "#control"
+    out88 <- plugout' (divider1 ++ "." ++ "div32") (x+(24.0), y+(-120.0)) container86
+    setColour out88 "#control"
+    out89 <- plugout' (divider1 ++ "." ++ "div02") (x+(24.0), y+(72.0)) container86
+    setColour out89 "#control"
+    out90 <- plugout' (divider1 ++ "." ++ "div04") (x+(24.0), y+(24.0)) container86
+    setColour out90 "#control"
+    out91 <- plugout' (divider1 ++ "." ++ "div08") (x+(24.0), y+(-24.0)) container86
+    setColour out91 "#control"
+    out92 <- plugout' (divider1 ++ "." ++ "div16") (x+(24.0), y+(-72.0)) container86
+    setColour out92 "#control"
     recompile
     return ()

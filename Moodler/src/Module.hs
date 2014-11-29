@@ -151,7 +151,7 @@ loadNodeType dir fileName' = do
     let script = synthScript synthName ins outs
     --liftIO $ putStrLn $ "In scripts/" ++ synthName ++ ".hs"
     --liftIO $ putStr script
-    liftIO $ writeFile ("scripts/" ++ synthName ++ ".hs") script
+    liftIO $ writeFile ("scripts/_" ++ synthName ++ ".hs") script
 
     fromMaybe (throwError "loadNodeType failed") $ do
         e' <- e

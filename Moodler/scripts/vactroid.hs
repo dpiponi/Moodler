@@ -1,21 +1,26 @@
 do
-    plane <- currentPlane
-    (x, y) <- fmap (quantise2 quantum) mouse
-    panel <- container' "panel_3x1.png" (x, y) plane
-    lab <- label' "vactroid" (x-25.0, y+75.0) plane
-    parent panel lab
-    name <- new' "vactroid"
-    inp <- plugin' (name ++ ".decay_up") (x-21, y+50) plane
-    setColour inp "#control"
-    parent panel inp
-    inp <- plugin' (name ++ ".decay_down") (x-21, y) plane
-    setColour inp "#control"
-    parent panel inp
-    inp <- plugin' (name ++ ".input") (x-21, y-50) plane
-    setColour inp "#control"
-    parent panel inp
-    out <- plugout' (name ++  ".result") (x+20, y) plane
-    setColour out "#control"
-    parent panel out
+    (x0, y0) <- mouse
+    let (x, y) = quantise2 quantum (x0, y0)
+    root <- currentPlane
+    input125  <-  new' "input"
+    input126  <-  new' "input"
+    vactroid127  <-  new' "vactroid"
+    container128 <- container' "panel_vactroid.png" (x+(0.0), y+(-12.0)) root
+    in129 <- plugin' (vactroid127 ++ "." ++ "decay_up") (x+(0.0), y+(36.0)) container128
+    setColour in129 "#control"
+    hide in129
+    in130 <- plugin' (vactroid127 ++ "." ++ "decay_down") (x+(0.0), y+(-12.0)) container128
+    setColour in130 "#control"
+    hide in130
+    in131 <- plugin' (vactroid127 ++ "." ++ "input") (x+(-24.0), y+(-72.0)) container128
+    setColour in131 "#control"
+    knob132 <- knob' (input126 ++ "." ++ "result") (x+(0.0), y+(36.0)) container128
+    knob133 <- knob' (input125 ++ "." ++ "result") (x+(0.0), y+(-12.0)) container128
+    out134 <- plugout' (vactroid127 ++ "." ++ "result") (x+(24.0), y+(-72.0)) container128
+    setColour out134 "#control"
+    cable knob132 in129
+    cable knob133 in130
     recompile
+    set knob132 (1.0e-3)
+    set knob133 (0.5)
     return ()

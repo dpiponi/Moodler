@@ -150,9 +150,9 @@ cabal run ui
 For a minimal example we'll listen to a voltage controlled oscillator (VCO).
 We'll run a script to build a VCO.
 The scripts are in <code>Moodler/Moodler/scripts</code> and we want the one
-called <code>panel_vco</code>.
+called <code>vco</code>.
 Move the cursor to the centre of the UI window and hit <code>alt-r</code>.
-Now type in the script name <code>panel_vco</code> and hit enter.
+Now type in the script name <code>vco</code> and hit enter.
 You should end up with a view like in Figure 3.
 </P>
 <FIGURE>
@@ -181,4 +181,232 @@ separate it from the panel where it lives.
 In fact, you can use <code>alt-drag</code> to move any component around.
 You can build your own modules by moving components around.
 More of that later.
+</P>
+
+<H2>Key commands</H2>
+<P>
+The Moodler UI has a number of built-in key commands.
+Apart from those, any script in <code>Moodler/Moodler/scripts</code>
+may be bound to a (possibly modified) key.
+</P>
+
+<P>
+Here are some built-in commands:
+</P>
+
+<UL>
+<LI>
+<P>
+<B>alt-s</B> Save entire patch, i.e. everything currently on screen.
+When prompted for a name the final result is constructed by adding the extension
+<code>.hs</code> and saving in <code>Moodler/Moodler/saves</code>.
+The save format is in fact a Haskell script.
+</P>
+<P>
+Saving with the empty patch name uses the current project patch name.
+</P>
+<P>
+Note: If you save a patch with thousands of components and cables it can take a few
+seconds to reload because it needs to be compiled.
+At a future date I may implement an interpreter for the tiny subset of Haskell used
+in saves.
+</P>
+</LI>
+
+<LI>
+<P>
+<B>alt-l</B> Load an entire patch.
+See <B>alt-s</B> for a description of how the file name is formed.
+As a side effect it also sets the current project patch name.
+</P>
+</LI>
+
+<LI>
+<P>
+<B>alt-r</B> Run a script.
+The file name is constructed similarly to <B>alt-s</B> except that the
+script comes from <code>Moodler/Moodler/scripts/</code>.
+</P>
+</LI>
+
+<LI>
+<P>
+<B>alt-w</B> Write a script.
+Saves a script corresponding to the currently selected components.
+The script will recreates any dependencies needed, for example the contents
+of planes linked to by proxies. (I haven't written plane/proxy docs yet.)
+</P>
+
+<LI>
+<P>
+<B>alt-z</B> Undo last command. I need to sprinkle more checkpoints through the
+code to make this behave better.
+</P>
+</LI>
+
+<LI>
+<P>
+<B>shift-alt-Z</B> Redo the last thing undone.
+</P>
+</LI>
+
+<LI>
+<P>
+<B>"</B> Toggle <code>showhidden</code> mode.
+See <a href="#hide">hide/unhide</a>.
+</P>
+</LI>
+</UL>
+
+<P>
+Here are some commands from the default <code>moodlerrc</code>:
+</P>
+
+<UL>
+<LI>
+<B>delete</B> Delete the currently selected component.
+If it's a container or proxy then the corresponding contents are also
+deleted.
+Note that nothing is ever really deleted on the server side but from
+the user's perspective this is hard to observe so don't worry about it.
+</LI>
+
+<LI>
+<P>
+<a name="hide"></a>
+<B>alt-h</B> Hide currently selected components.
+They still exist, they're simply not rendered.
+Useful when you want to build a module without making its internal parts visible.
+Hidden objects can be viewed in <code>showhidden</code> mode.
+</P>
+</LI>
+
+<LI>
+<P>
+<B>shift-alt-H</B> Unhide currently selected components.
+Hidden objects can be selected for unhiding when in <code>showhidden</code> mode.
+</P>
+</LI>
+</UL>
+
+<H2>Components</H2>
+<UL>
+<LI>
+<B>Inputs</B>
+</LI>
+
+<LI>
+<B>Outputs</B>
+</LI>
+
+<LI>
+<B>Knobs</B>
+</LI>
+
+<LI>
+<B>Containers</B>
+</LI>
+
+<LI>
+<B>Proxies</B>
+</LI>
+</UL>
+
+<H2>Modules</H2>
+<P>
+Modules are built from primitives.
+Examples of primitives are sine wave oscillators or addition operations.
+The primitives are defined by the <code>.spec</code> files in
+<code>Moodler/Moodler/modules</code>.
+When <code>moodler</code> is launched it automatically generates a module
+for each primitive in <code>scripts/</code>.
+These are named after the primitive with an underscore prepended.
+Other modules in <code>scripts/</code> were constructed non-automatically,
+sometimes by writing Haskell code, sometimes by using <B>alt-w</B>.
+</P>
+
+<P>
+Here are some modules:
+</P>
+<UL>
+
+<!-- VCO MODULE -->
+<LI>
+<B>VCO</B>
+<FIGURE>
+<IMG SRC="vco.png" ALT="Voltage controlled oscillator">
+<FIGCAPTION>Voltage controlled oscillator</FIGCAPTION>
+</FIGURE>
+<P>
+The VCO module generates band-limited waveforms. It supports four types of
+output:
+</P>
+<OL>
+<LI>
+<B>Sine wave</B>
+Varies from -1 to 1.
+</LI>
+<LI>
+<B>Square wave</B>
+<P>
+This is the band-limited form of a square wave varying from -1 to 1.
+This means it actually overshoots -1 and 1 slightly.
+This is correct behaviour.
+(See <a href="http://en.wikipedia.org/wiki/Gibbs_phenomenon">Gibbs phenomenon</a>.)
+</P>
+</LI>
+<LI>
+<B>Triangle wave</B>
+<P>
+This is a band-limited triangle wave varying from 0 to 1.
+</P>
+</LI>
+<LI>
+<B>Saw wave</B>
+<P>
+This is a band-limited saw wave varying from -1 to 1.
+</P>
+</OL>
+<P>
+The input controls are:
+</P>
+<UL>
+<LI>
+<B>Tune</B>
+Sets frequency of output.
+</LI>
+<LI>
+<B>CV</B>
+Also sets frequency of output.
+This input is added to the value set by the "Tune" knob.
+<LI>
+<B>PWM</B>
+For square waves this sets the width of the pulse relative to the oscillation
+period.
+</LI>
+<LI>
+<B>Sync</B>
+Resets the phase of the output each time this input goes over zero.
+A reasonable attempt has been made to ensure this reset operation is
+band-limited for all four waveforms.
+</LI>
+</UL>
+
+<!-- LFO MODULE -->
+<LI>
+<B>LFO</B>
+</LI>
+
+<!-- _VCA MODULE -->
+<LI>
+<B>_VCA</B>
+</LI>
+
+<!-- ADSR MODULE -->
+<LI>
+<B>ADSR</B>
+</LI>
+
+</UL>
+
 </BODY>
