@@ -126,6 +126,9 @@ The installation of <code>Moodler</code> needs to be global until
 <A HREF="http://hub.darcs.net/jcpetruzza/hint/issue/5">hint issue #5</A>
 is resolved.
 The <code>make</code> will go away eventually.
+If these steps fail I'll have to leave you to your Haskell-fu.
+For example you may need to install alex and happy and mess with
+the dependencies.
 </P>
 
 <P>
@@ -332,13 +335,13 @@ Here are some modules:
 
 <!-- VCO MODULE -->
 <LI>
-<B>VCO</B>
+<B>vco</B>
 <FIGURE>
 <IMG SRC="vco.png" ALT="Voltage controlled oscillator">
 <FIGCAPTION>Voltage controlled oscillator</FIGCAPTION>
 </FIGURE>
 <P>
-The VCO module generates band-limited waveforms. It supports four types of
+The vco module generates band-limited waveforms. It supports four types of
 output:
 </P>
 <OL>
@@ -394,19 +397,44 @@ band-limited for all four waveforms.
 
 <!-- LFO MODULE -->
 <LI>
-<B>LFO</B>
+<B>lfo</B>
 </LI>
 
 <!-- _VCA MODULE -->
 <LI>
-<B>_VCA</B>
+<B>_vca</B>
 </LI>
 
 <!-- ADSR MODULE -->
 <LI>
-<B>ADSR</B>
+<B>adsr</B>
 </LI>
 
 </UL>
+
+<H2>Command line invocation</H2>
+
+<H2>Issues</H2>
+There are lots of bugs in moodler, most of which are of the "I haven't had
+time to cover that case yet" variety.
+Some cause moodler to terminate without saving.
+They include:
+<OL>
+<LI>
+Commands to set the value of a component that can't have its value set (eg.
+anything that isn't a knob) can cause termination.
+</LI>
+<LI>
+Any output can be connected to any input.
+The types are not checked in any way.
+Sometimes the result C code won't compile.
+(I haven't decided how to handle this yet.
+I don't want overly strict type checking as that might eliminate some
+creative uses of modules.)
+</LI>
+<LI>
+This documentation is incomplete.
+</LI>
+</OL>
 
 </BODY>
