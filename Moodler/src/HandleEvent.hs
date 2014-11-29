@@ -26,7 +26,7 @@ import Draw
 import Cable
 import Command
 import Music
-import Text
+--import Text
 import Numeric
 import UIElement
 import UISupport
@@ -34,6 +34,7 @@ import Utils
 import World
 import Save
 import KeyMatcher
+import HandleDraggingRoot
 
 -- Find a container somewhere in a list of ids.
 -- Assumes there is precisely one. XXX
@@ -112,7 +113,7 @@ elementDisplayName e = e ^. ur . name
 hoverGadget :: Point -> UIElement -> B.Transform -> Picture
 hoverGadget (ex, ey) elt xform = 
      let txt = elementDisplayName elt
-         w = estimateTextWidth txt
+         --w = estimateTextWidth txt
      in pictureTransformer xform $ translate ex (ey+25) $ scale 0.5 0.5 $ B.textInBox (B.transparentBlack 0.7) white txt
 {-translate ex ey (
         translate 86 1 (color (B.transparentBlack 0.5)
@@ -160,7 +161,7 @@ handleDefault' (EventKey (Char '-') Down Modifiers { shift = Up, alt = Down, ctr
     rootTransform %= (B.Transform (0, 0) (1/1.5) <>)
     handleDefault
 
-handleDefault' (EventKey (Char 'r') Down _ _) = do
+handleDefault' (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
     filename <- handleGetString allScripts "" "read: "
     liftIO $ putStrLn $ "filename = " ++ show filename
@@ -321,7 +322,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
                     W.undoPoint
                     doSelection i
                     handleDraggingSelection p
-        Nothing -> handleDraggingRoot p
+        Nothing -> handleDraggingRoot handleDefault p
 
 -- Cable drag with ctrl-mouse
 handleDefault' (EventKey (MouseButton LeftButton) Down
@@ -380,30 +381,6 @@ handleDefault' (EventKey key Down mods _) = do
 
 handleDefault' _ =
     handleDefault
-
-handleDraggingRoot :: Point -> MoodlerM Zero
-handleDraggingRoot p0 = do
-    e <- {-MoodlerM-} liftF $ GetEvent id
-    handleDraggingRoot' p0 e
-
-handleDraggingRoot' :: Point -> Event -> MoodlerM Zero
-handleDraggingRoot' (x0, y0) (EventMotion (x1, y1)) = do
-    rootTransform %= (B.Transform (x1-x0, y1-y0) 1 <>)
-    -- It's not obvious that the following line is correct.
-    -- It's tempting to use (x1, y1).
-    -- Remember that mouse coordinates have been transformed
-    -- by the very transform we're changing.
-    -- This means that the position of the mouse at the previous
-    -- event is always (x0, y0) in the current coordinate system
-    -- despite the fact that the mouse is moving.
-    handleDraggingRoot (x0, y0)
-
-handleDraggingRoot' (x0, y0)
-    (EventKey (MouseButton LeftButton) Up _ (x1, y1)) = do
-    rootTransform %= (B.Transform (x1-x0, y1-y0) 1 <>)
-    handleDefault
-
-handleDraggingRoot' a _ = handleDraggingRoot a
 
 dragElement :: [UiId] -> Point -> [UiId] -> MoodlerM ()
 dragElement top d sel = forM_ sel $ \s -> do
