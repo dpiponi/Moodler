@@ -126,6 +126,9 @@ The installation of <code>Moodler</code> needs to be global until
 <A HREF="http://hub.darcs.net/jcpetruzza/hint/issue/5">hint issue #5</A>
 is resolved.
 The <code>make</code> will go away eventually.
+If these steps fail I'll have to leave you to your Haskell-fu.
+For example you may need to install alex and happy and mess with
+the dependencies.
 </P>
 
 <P>
@@ -182,6 +185,77 @@ In fact, you can use <code>alt-drag</code> to move any component around.
 You can build your own modules by moving components around.
 More of that later.
 </P>
+
+<P>
+Moodler comes with some patches you can play with.
+Launch these with
+</P>
+<div class="codebox">
+<code>
+cabal run ui &lt;patch-name&gt;
+</code>
+</div>
+<P>
+Some examples are
+</P>
+<UL>
+
+<LI>
+<P>
+<B>test_bits</B> A <a href="http://countercomplex.blogspot.com/2011/10/algorithmic-symphonies-from-one-line-of.html">one line symphony</a>
+</P>
+</LI>
+
+<LI>
+<P>
+<B> test_tinkle</B> A metallic tinkling sound.
+</P>
+</LI>
+
+<LI>
+<P>
+<B> test_bounce</B> A ball bouncing on a membrane.
+</P>
+</LI>
+
+<LI>
+<P>
+<B> test_fanfare</B> A few notes from a well known piece of music.
+</P>
+</LI>
+
+<LI>
+<P>
+<B> test_arpeggio</B> A bunch of instruments playing a simple looped melody.
+</P>
+</LI>
+
+<LI>
+<P>
+<B> test_3dda</B> A "Euclidean" rhythm.
+</P>
+</LI>
+
+<LI>
+<P>
+<B> test_phaser</B> A sawtooth chord played through a phaser.
+</P>
+</LI>
+
+<LI>
+<P>
+<B> test_logistic</B> Uses the sample_and_hold module to set up the logistic
+equation modulating a filter.
+</P>
+</LI>
+
+<LI>
+<P>
+<B> test_logic</B> Uses logic gates to set up a simple rhythm.
+</P>
+</LI>
+
+</UL>
 
 <H2>Key commands</H2>
 <P>
@@ -332,13 +406,13 @@ Here are some modules:
 
 <!-- VCO MODULE -->
 <LI>
-<B>VCO</B>
+<B>vco</B>
 <FIGURE>
 <IMG SRC="vco.png" ALT="Voltage controlled oscillator">
 <FIGCAPTION>Voltage controlled oscillator</FIGCAPTION>
 </FIGURE>
 <P>
-The VCO module generates band-limited waveforms. It supports four types of
+The vco module generates band-limited waveforms. It supports four types of
 output:
 </P>
 <OL>
@@ -394,19 +468,44 @@ band-limited for all four waveforms.
 
 <!-- LFO MODULE -->
 <LI>
-<B>LFO</B>
+<B>lfo</B>
 </LI>
 
 <!-- _VCA MODULE -->
 <LI>
-<B>_VCA</B>
+<B>_vca</B>
 </LI>
 
 <!-- ADSR MODULE -->
 <LI>
-<B>ADSR</B>
+<B>adsr</B>
 </LI>
 
 </UL>
+
+<H2>Command line invocation</H2>
+
+<H2>Issues</H2>
+There are lots of bugs in moodler, most of which are of the "I haven't had
+time to cover that case yet" variety.
+Some cause moodler to terminate without saving.
+They include:
+<OL>
+<LI>
+Commands to set the value of a component that can't have its value set (eg.
+anything that isn't a knob) can cause termination.
+</LI>
+<LI>
+Any output can be connected to any input.
+The types are not checked in any way.
+Sometimes the result C code won't compile.
+(I haven't decided how to handle this yet.
+I don't want overly strict type checking as that might eliminate some
+creative uses of modules.)
+</LI>
+<LI>
+This documentation is incomplete.
+</LI>
+</OL>
 
 </BODY>
