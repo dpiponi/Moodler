@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<HEAD>
+<STYLE>
+img {
+    border: 2px solid;
+}
+p {
+    width: 25cm;
+}
+ol {
+    width: 20cm;
+}
+ul {
+    width: 20cm;
+}
+.codebox {
+    /* Below are styles for the codebox (not the code itself) */
+    border:2px solid black;
+    background-color:#EEEEFF;
+    width:300px;
+    overflow:auto;    
+    padding:10px;
+}
+.codebox code {
+    /* Styles in here affect the text of the codebox */
+    font-size:0.9em;
+    /* You could also put all sorts of styling here, like different font, color, underline, etc. for the code. */
+}
+</STYLE>
+</HEAD>
+
+<BODY>
+<H1>Moodler</H1>
+<H2>Introduction</H2>
+<P>
+Moodler is a software modular synthesiser for MacOSX.
+It consists of two parts:
+</P>
+<OL>
+<LI>A server. This generates audio signals that are played though the default audio device.</LI>
+<LI>A client. This sends commands to the server.</LI>
+</OL>
+
+<P>
+Audio is synthesised by modules that are connected using patch cables from the outputs of one modules to the inputs of another module.
+</P>
+<FIGURE>
+<IMG SRC="intro1.png" ALT="Example of some modules with connections">
+<FIGCAPTION>Figure 1. Some modules with connections</FIGCAPTION>
+</FIGURE>
+<P>
+In Figure 1 we have three modules visible.
+</P>
+<OL>
+<LI>On the left an "xor" module,</LI>
+<LI>in the middle a "bass drum" module,</LI>
+<LI>and on the right a "voltage comtrolled amplifier" module.</LI>
+</OL>
+<P>
+We also have blue and orange wires connecting these modules.
+</P>
+<UL>
+<LI>The blue wires carry control information.
+For example the wire from the "xor" module to the "bass drum" module is blue.
+It carries the signal saying when the drum should be triggered.</LI>
+<LI>On the other hand, the output from the drum is attached to an orange cable.
+This is because it corresponds to an audio signal.</LI>
+</UL>
+<P>
+Note that in Moodler all signals are sampled at the same rate (typically 48kHz).
+Some Moodler modules input and output integers and those cables have been coloured green.
+</P>
+
+<P>
+The inputs to a module look like grey circles with a centre that indicates the type of the input.
+The outputs from a module look like black circles with a similar centre indicating type.
+</P>
+
+<P>
+You can connect a cable by dragging from an output to an input.
+The cable will be coloured according to the colour of the output.
+</P>
+
+<P>
+You can drag a cable from its end (in an input) if you wish to plug it in somewhere else.
+Or if you release a dragged cable away from any input it will just vanish.
+You can drag multiple cables to a single input.
+Only the last will be active with the previous cables being coloured gray.
+The previous cable will become active again should you delete a later cable.
+When I fix the bug, the 'c' key will rotate through the cables attached to an input.
+This allows you to try a bunch of different configurations in turn.
+</P>
+
+<P>
+When you start the moodler UI you'll see two modules like those in Figure 2
+</P>
+<FIGURE>
+<IMG SRC="intro2.png" ALT="Example of some modules with connections">
+<FIGCAPTION>Figure 2. The modules present when the Moodler UI starts</FIGCAPTION>
+</FIGURE>
+<P>
+The module on the left corresponds to MIDI input.
+That requires a separate bridge application which will be described later.
+The module on the right is the output module.
+You'll need to connect an audio signal to it to hear anything.
+</P>
+
+<P>
+Before running moodler you'll need to build it.
+Currently, in <code>Moodler/MoodlerLib</code> you'll need to
+<div class="codebox">
+<code>
+cabal install
+</code>
+</div>
+and in <code>Moodler/Moodler</code>
+<div class="codebox">
+<code>
+cabal build
+<br>
+make
+</code>
+</div>
+<P>
+The installation of <code>Moodler</code> needs to be global until
+<A HREF="http://hub.darcs.net/jcpetruzza/hint/issue/5">hint issue #5</A>
+is resolved.
+The <code>make</code> will go away eventually.
+</P>
+
+<P>
+To run Moodler go into <code>Moodler/Moodler</code> in two terminals.
+In one run the server with
+</p>
+<div class="codebox">
+<code>
+cabal run moodler
+</code>
+</div>
+<P>
+and in the other run the GUI with
+</P>
+<div class="codebox">
+<code>
+cabal run ui
+</code>
+</div>
+
+<P>
+For a minimal example we'll listen to a voltage controlled oscillator (VCO).
+We'll run a script to build a VCO.
+The scripts are in <code>Moodler/Moodler/scripts</code> and we want the one
+called <code>panel_vco</code>.
+Move the cursor to the centre of the UI window and hit <code>alt-r</code>.
+Now type in the script name <code>panel_vco</code> and hit enter.
+You should end up with a view like in Figure 3.
+</P>
+<FIGURE>
+<IMG SRC="intro3.png" ALT="A VCO ready to be connected to output">
+<FIGCAPTION>Figure 3. A VCO ready to be connected to output</FIGCAPTION>
+</FIGURE>
+<P>
+Now drag from bottom right output of the VCO panel to the
+input on the right.
+You should hear a middle C played with a saw wave.
+Turn the volume up if you hear nothing.
+You should see some confirmatory output from the window running the
+<code>moodler</code> process.
+If you don't then something is wrong.
+</P>
+<P>
+Now you can start experimenting. Trying connecting different outputs from
+the VCO to the output. Try dragging the "Tune" knob.
+If you select the square wave output (the top right of the four bottom
+outputs) then try dragging the "PWM" knob.
+</P>
+</BODY>
