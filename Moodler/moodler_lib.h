@@ -7,6 +7,10 @@ static inline double signal_to_frequency(double x) {
     return 261.625565*pow(2.0, 10.0*x);
 }
 
+static inline double frequency_to_signal(double x) {
+    return 0.1*log(x/261.625565)/log(2.0);
+}
+
 static inline double square_wave(double pulse_width, double x) {
     double i;
     return modf(x*(1.0/(2*M_PI)), &i) < pulse_width ? 1.0 : -1.0;
