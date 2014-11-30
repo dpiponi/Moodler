@@ -17,6 +17,7 @@ data Ui a = Return a
           | PlugIn UiId String (Float, Float) UiId (UiId -> Ui a)
           | PlugOut UiId String (Float, Float) UiId (UiId -> Ui a)
           | Knob UiId String (Float, Float) KnobStyle UiId (UiId -> Ui a)
+          | TextBox UiId String (Float, Float) UiId (UiId -> Ui a)
           | Proxy UiId String (Float, Float) UiId (UiId -> Ui a)
           | Image UiId String (Float, Float) UiId (UiId -> Ui a)
           | Container UiId String (Float, Float) UiId (UiId -> Ui a)
@@ -29,6 +30,7 @@ data Ui a = Return a
           -- | Args ([String] -> Ui a)
           | NewId String (UiId -> Ui a)
           | Set UiId Float (Ui a)
+          | SetString UiId String (Ui a)
           | SetColour UiId String (Ui a)
           | GetColour UiId (Maybe String -> Ui a)
           | SetLow UiId (Maybe Float) (Ui a)
@@ -72,6 +74,7 @@ instance Monad Ui where
     PlugIn s1 s2 p q cont >>= f = PlugIn s1 s2 p q ((>>= f) . cont)
     PlugOut s1 s2 p q cont >>= f = PlugOut s1 s2 p q ((>>= f) . cont)
     Knob s1 s2 p knobStyle q cont >>= f = Knob s1 s2 p knobStyle q ((>>= f) . cont)
+    TextBox s1 s2 p q cont >>= f = TextBox s1 s2 p q ((>>= f) . cont)
     Selector s1 s2 p opts q cont >>= f = Selector
                                 s1 s2 p opts q ((>>= f) . cont)
     Proxy s1 s2 p q cont >>= f = Proxy s1 s2 p q ((>>= f) . cont)
@@ -88,6 +91,7 @@ instance Monad Ui where
     GetRoot cont >>= f = GetRoot ((>>= f) . cont)
     NewId s1 cont >>= f = NewId s1 ((>>= f) . cont)
     Set t v cont >>= f = Set t v (cont >>= f)
+    SetString t v cont >>= f = SetString t v (cont >>= f)
     SetColour t v cont >>= f = SetColour t v (cont >>= f)
     SetLow t v cont >>= f = SetLow t v (cont >>= f)
     SetHigh t v cont >>= f = SetHigh t v (cont >>= f)
@@ -168,6 +172,11 @@ knob' s2 p creationParent = do
     s1 <- newId "knob"
     Knob s1 s2 p KnobStyle creationParent return
 
+textBox' :: String -> (Float, Float) -> UiId -> Ui UiId
+textBox' s2 p creationParent = do
+    s1 <- newId "textBox"
+    TextBox s1 s2 p creationParent return
+
 slider' :: String -> (Float, Float) -> UiId -> Ui UiId
 slider' s2 p creationParent = do
     s1 <- newId "slider"
@@ -239,6 +248,9 @@ newId s1 = NewId s1 return
 
 set :: UiId -> Float -> Ui ()
 set t v = Set t v (return ())
+
+setString :: UiId -> String -> Ui ()
+setString t v = SetString t v (return ())
 
 setColour :: UiId -> String -> Ui ()
 setColour t v = SetColour t v (return ())

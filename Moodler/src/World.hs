@@ -40,6 +40,7 @@ data World = World { _uiElements :: M.Map UiId UIElement
 data SendCommand = SendConnect String String
                  | SendDisconnect String
                  | SendSet String Float
+                 | SendSetString String String
                  deriving Show
 
 data GlossWorld = GlossWorld { _inner :: World

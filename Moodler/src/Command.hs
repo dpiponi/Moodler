@@ -183,6 +183,13 @@ evalUi (U.Selector n t p opts creationParent cfn) = do
     createdInParent n e creationParent
     evalUi (cfn n)
 
+evalUi (U.TextBox n t p creationParent cfn) = do
+    --liftIO $ print "Selector"
+    (_, hi) <- depthExtent
+    let e = UIElement.TextBox (UrElement creationParent False (hi+1) False p t) ""
+    createdInParent n e creationParent
+    evalUi (cfn n)
+
 evalUi (U.Proxy n proxyName p planeItsOn cfn) = do
     --liftIO $ print "Proxy"
     (_, hi) <- depthExtent
@@ -234,6 +241,9 @@ evalUi (U.Check cfn) = do
 
 evalUi (Set t v cfn) =
     synthSet t v >> evalUi cfn
+
+evalUi (SetString t v cfn) =
+    synthSetString t v >> evalUi cfn
 
 evalUi (SetLow t v cfn) =
     inner . uiElements . ix t . UIElement.knobMin .= v >> evalUi cfn

@@ -9,6 +9,7 @@ module Wiring(synthConnect,
               removeAllCablesFrom,
               synthNew,
               synthSet,
+              synthSetString,
               synthQuit,
               synthRecompile,
               synthReset,
@@ -202,6 +203,20 @@ synthSet t v = do
     let oldValue = UIElement._setting elt
     recordUndo (SendSet knobName oldValue)
                (SendSet knobName v)
+
+synthSetString :: (Functor m, MonadIO m,
+                  MonadState GlossWorld m) =>
+                  UiId -> String -> m ()
+synthSetString t v = do
+    -- Note this is using fact that string is monoid
+    -- Not good! XXX
+    elt <- getElementById "synthSetString" t
+    let textBoxName = UIElement._name (_ur elt)
+    inner . uiElements . ix t . UIElement.boxText .= v
+    sendSetStringMessage textBoxName v
+    let oldValue = UIElement._boxText elt
+    recordUndo (SendSetString textBoxName oldValue)
+               (SendSetString textBoxName v)
 
 synthQuit :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
              m ()

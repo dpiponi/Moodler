@@ -113,6 +113,16 @@ elementLine _ parentId maybeMouseLocn eltName Selector { _ur = UrElement { _name
     multiTellLn "settings" 4 $ unwords ["set", unUiId eltName,
                                         "(" ++ show s ++ ")"]
 
+elementLine _ parentId maybeMouseLocn eltName TextBox { _ur = UrElement { _name = n
+                                                     , _loc = p }
+                                                     , _boxText = txt} = do
+    multiTellLn "module" 4 $ unwords [unUiId eltName, "<-", "textBox'",
+                             rewriteConnection n,
+                             relativeShow maybeMouseLocn p,
+                             parentId]
+    multiTellLn "settings" 4 $ unwords ["setString", unUiId eltName,
+                                        "(" ++ show txt ++ ")"]
+
 elementLine everythingSaved parentId maybeMouseLocn eltId
     In { _ur = UrElement { _name = n
        , _loc = p }

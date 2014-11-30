@@ -3,6 +3,7 @@
 module Comms(sendConnectMessage,
              sendDisconnectMessage,
              sendSetMessage,
+             sendSetStringMessage,
              sendNewSynthMessage,
              sendNewInputMessage,
              sendRecompileMessage,
@@ -10,10 +11,7 @@ module Comms(sendConnectMessage,
              sendQuitMessage,
              SendCommand(..),
              interpretSend,
-             -- pushSend,
--- UNDO
              recordUndo
--- END UNDO
              ) where
 
 import Control.Monad.State
@@ -37,6 +35,7 @@ interpretSend :: (MonadIO m, MonadState GlossWorld m, Functor m) =>
 interpretSend (SendConnect a b) = sendConnectMessage a b
 interpretSend (SendDisconnect a) = sendDisconnectMessage a
 interpretSend (SendSet a b) = sendSetMessage a b
+interpretSend (SendSetString a b) = sendSetStringMessage a b
 
 -- UNDO
 -- SendSet a x * SendSet a x' == SendSet a x'
@@ -81,6 +80,13 @@ sendSetMessage :: (MonadIO m, MonadState GlossWorld m) =>
 sendSetMessage knobName value = do
     let (a, b) = splitDot knobName
     let msg = message "/set" [string a, string b, float value]
+    sendOSCMsg msg
+
+sendSetStringMessage :: (MonadIO m, MonadState GlossWorld m) =>
+                        String -> String -> m ()
+sendSetStringMessage textBoxName value = do
+    let (a, b) = splitDot textBoxName
+    let msg = message "/set" [string a, string b, string value]
     sendOSCMsg msg
 
 sendNewInputMessage :: (MonadIO m, MonadState GlossWorld m) =>

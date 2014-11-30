@@ -34,6 +34,8 @@ data UIElement = Container { _ur :: UrElement
                | Out { _ur :: UrElement
                      , _dataColour :: String }
                | Label { _ur :: UrElement }
+               | TextBox { _ur :: UrElement
+                         , _boxText :: String }
                | Knob { _ur :: UrElement 
                       , _dataColour :: String
                       , _displayName :: String
@@ -63,6 +65,7 @@ elementRadius (In {})    = 10
 elementRadius (Out {})   = 10
 elementRadius (Knob {})  = 18
 elementRadius (Label {}) = 20
+elementRadius (TextBox {}) = 20
 elementRadius (Proxy {}) = 20
 elementRadius (Image {}) = 0
 elementRadius (Selector {}) = 10
@@ -73,6 +76,7 @@ elementType (In {})    = InType
 elementType (Out {})   = OutType
 elementType (Knob {})  = KnobType
 elementType (Label {}) = LabelType
+elementType (TextBox {}) = TextBoxType
 elementType (Proxy {}) = ProxyType
 elementType (Image {}) = ImageType
 elementType (Selector {}) = SelectorType

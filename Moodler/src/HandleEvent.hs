@@ -104,6 +104,8 @@ defaultClick' p i = do
             W.undoPoint
             W.synthSet i (fromIntegral newSetting)
             handleDefault
+        TextBox { } -> do
+            handleTextBox i
 
 elementDisplayName :: UIElement -> String
 elementDisplayName In { _displayName = n} = n
@@ -358,6 +360,9 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
                 Image {} -> do
                     doSelection i
                     handleDefault
+                TextBox {} -> do
+                    highlightJust i
+                    handleDraggingCable i p p
         Nothing -> handleDefault
 
 handleDefault' (EventKey key Down
@@ -396,6 +401,22 @@ dragElement top d sel = forM_ sel $ \s -> do
             dragElement top d (filter (not . flip elem top) $
                                                         S.toList cts)
         _ -> return ()
+
+handleTextBox :: UiId -> MoodlerM Zero
+handleTextBox selectedTextBox = do
+    newText <- handleGetString [] "" "textbox: "
+    case newText of
+        Nothing -> return ()
+        Just txt -> do
+            W.undoPoint
+            W.synthSetString selectedTextBox txt
+    handleDefault
+
+{-
+handleTextBox' :: UiId -> Event -> MoodlerM Zero
+handleTextBox' selectedTextBox e =
+    elt <- getElementById "handletextBox" selectedTextBox
+    -}
 
 handleDraggingSelection :: Point ->
                            MoodlerM Zero

@@ -151,6 +151,14 @@ drawUIElement _ _ (Knob (UrElement _ wasSelected _ _ (x, y) _) col _ SliderStyle
             let angle = 3.0*uiAngle lo hi v
             in color (interpretColour col) $ polygon [(-6,-15), (6,-15), (6,5*angle), (-6,5*angle), (-6,-15)]
 
+drawUIElement _ _ (TextBox (UrElement _ wasSelected _ _ (x, y) _) txt) =
+        below $ translate x y (
+            color green (circleSolid 6.5 <>
+            translate 10 (-5) (
+                color (selectColor wasSelected (
+                    makeColor 0.6 0.8 0.4 1)) (
+                        scale 0.15 0.15 (color black (text txt))))))
+
 rect :: Point -> Point -> Picture
 rect (x0, y0) (x1, y1) = Line [ (x0, y0), (x1, y0)
                               , (x1, y1), (x0, y1)
