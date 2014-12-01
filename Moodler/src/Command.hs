@@ -186,7 +186,7 @@ evalUi (U.Selector n t p opts creationParent cfn) = do
 evalUi (U.TextBox n t p creationParent cfn) = do
     --liftIO $ print "Selector"
     (_, hi) <- depthExtent
-    let e = UIElement.TextBox (UrElement creationParent False (hi+1) False p t) ""
+    let e = UIElement.TextBox (UrElement creationParent False (hi+1) False p t) "(0, 0, 1)" ""
     createdInParent n e creationParent
     evalUi (cfn n)
 

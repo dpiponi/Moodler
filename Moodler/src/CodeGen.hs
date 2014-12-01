@@ -21,7 +21,7 @@ import Foreign.C.String
 import Foreign.C.Types
 import System.Directory
 import Control.Monad.Trans.Error
---import Debug.Trace
+import Debug.Trace
 
 import Synth
 import Module
@@ -56,6 +56,9 @@ foreign import ccall "dynamic"
 foreign import ccall "dynamic"  
   mkSet :: FunPtr (Ptr () -> CString -> CString -> CDouble -> IO ()) ->
                    Ptr () -> CString -> CString -> CDouble -> IO ()
+foreign import ccall "dynamic"  
+  mkSetString :: FunPtr (Ptr () -> CString -> CString -> CString -> IO ()) ->
+                         Ptr () -> CString -> CString -> CString -> IO ()
 
 concatMapM :: Monad m => (a -> m [b]) -> [a] -> m [b]
 concatMapM f xs = liftM concat (mapM f xs)
@@ -122,6 +125,11 @@ genStruct moduleList synth = do
         tell stateSource
     tell "} state;\n"
 
+-- XXX Gross hack. Need proper zero support.
+nameOfOutput :: Out -> String
+nameOfOutput (Out "zero" _) = "0"
+nameOfOutput (Out name' name'') = "state->" ++ name' ++ "_" ++ name''
+
 genExec :: [(String, t)] -> M.Map String Module ->
            WriterT String (Either String) ()
 genExec y synth = do
@@ -130,8 +138,8 @@ genExec y synth = do
     forM_ y $ \(name, _) -> do
         (Module _ nodeType connections _) <-
                 lookupM "error 4" name synth
-        let connections' = M.map (\(Out name' name'') ->
-                            "state->"++name'++"_"++name'') connections
+        let connections' = M.map nameOfOutput connections
+        trace ("name="++name++": " ++ show connections) $ tell ""
         execSource <- lift $ instantiateExec name nodeType connections'
         tell execSource
         tell "\n"
@@ -199,6 +207,15 @@ genSet = do
     tell "printf(\"set %s.%s(%d)=%f\\n\",node,field,offset,value);\n"
     tell "}\n"
 
+genSetString :: WriterT String (Either String) ()
+genSetString = do
+    tell "void set_string(struct State *state, const char *node,\n"
+    tell "                  const char *field, const char *value) {\n"
+    tell "    int offset = address(node, field);\n"
+    tell "    *(char **)((char *)state+offset) = strdup(value);\n"
+    tell "printf(\"set %s.%s(%d)=%s\\n\",node,field,offset,value);\n"
+    tell "}\n"
+
 genCreate :: WriterT String (Either String) ()
 genCreate = do
     tell "struct State *create() {\n"
@@ -224,6 +241,7 @@ gen currentDirectory synth out' = do
     genStruct moduleList synth
     genAddress moduleList synth
     genSet
+    genSetString
     genCreate
     --genInit moduleList synth
     genInit2 moduleList synth
@@ -245,6 +263,7 @@ type InitFn = Ptr () -> IO ()
 type Init2Fn = Ptr () -> CString -> IO ()
 type ExecuteFn = Ptr () -> IO ()
 type SetFn = Ptr () -> CString -> CString -> CDouble -> IO ()
+type SetStringFn = Ptr () -> CString -> CString -> CString -> IO ()
 
 -- Represents a DSO loaded into memory along with Haskell wrappers
 -- around C functions within it.
@@ -253,7 +272,8 @@ data DSO = DSO { dl :: DL
                -- , dsoInitFn :: InitFn
                , dsoInit2Fn :: Init2Fn
                , dsoExecuteFn :: FunPtr ()
-               , dsoSetFn :: SetFn }
+               , dsoSetFn :: SetFn
+               , dsoSetStringFn :: SetStringFn }
 
 makeDso :: String -> IO DSO
 makeDso code = --do
@@ -279,8 +299,10 @@ makeDso code = --do
         ini2 <- dlsym so "init2"
         execute <- dlsym so "execute"
         set <- dlsym so "set"
+        setString <- dlsym so "set_string"
 
         return $ DSO so (mkCreate create) {-(mkInit ini)-} (mkInit2 ini2) execute (mkSet set)
+                                                                    (mkSetString setString)
     -- End of tmp dir bit
 
 setStateVar :: SetFn -> Ptr () -> String -> String -> Float -> IO ()
@@ -288,6 +310,13 @@ setStateVar set dataPtr nodeName stateVar value =
     withCString nodeName $ \nodeString ->
         withCString stateVar $ \stateString ->
             set dataPtr nodeString stateString (realToFrac value)
+
+setStringStateVar :: SetStringFn -> Ptr () -> String -> String -> String -> IO ()
+setStringStateVar set dataPtr nodeName stateVar value =
+    withCString nodeName $ \nodeString ->
+        withCString stateVar $ \stateString ->
+            withCString value $ \valueString ->
+                set dataPtr nodeString stateString valueString
 
 makeDSOFromSynth :: Synth -> Module -> ErrorT String IO DSO
 makeDSOFromSynth synth out' = do

@@ -1,10 +1,15 @@
 * ui
+    * Proper disconnection instead of zero connection.
+    * Prettify textbox
     * Remove extraneous stuff from phaser
     * Proxy picture?
     * Properly integrate oscilloscope
     * Integer input?
     * Sliders could be better
 * moodler
+    * Deal with "zero" module hacks. Support missing input properly.
+    * Define arpeggiator DSL
+    * "Default" inputs to modules.
     * rename should use proper C struct
     * local enums?
     * Need consistent naming:

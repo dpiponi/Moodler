@@ -30,6 +30,7 @@ synthUsedInElement In { _ur = UrElement { _name = n } } = S.singleton (base n)
 synthUsedInElement Out { _ur = UrElement { _name = n } } = S.singleton (base n)
 synthUsedInElement Knob { _ur = UrElement { _name = n } } = S.singleton (base n)
 synthUsedInElement Selector { _ur = UrElement { _name = n } } = S.singleton (base n)
+synthUsedInElement TextBox { _ur = UrElement { _name = n } } = S.singleton (base n)
 synthUsedInElement _ = S.empty
 
 synthUsedInItem :: (Functor m, MonadState GlossWorld m) =>

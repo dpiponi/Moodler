@@ -157,6 +157,13 @@ handleMessage theStandard numVoices dataPtrs set_fill_buffer
                     forM_ [0..numVoices-1] $ \v ->
                         setStateVar (dsoSetFn dso') (dataPtrs!v) a' b' f
 
+            Just (Message "/set" [a, b, ASCII_String f]) ->  do
+                let [a', b'] = (C.unpack . d_ascii_string) <$> [a, b]
+                dso' <- use moodlerDSO
+                liftIO $
+                    forM_ [0..numVoices-1] $ \v ->
+                            setStringStateVar (dsoSetStringFn dso') (dataPtrs!v) a' b' (C.unpack f)
+
             Just (Message "/recompile" []) ->
                 recompile' numVoices dataPtrs set_fill_buffer
 

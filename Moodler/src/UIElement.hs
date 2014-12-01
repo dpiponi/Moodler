@@ -35,6 +35,7 @@ data UIElement = Container { _ur :: UrElement
                      , _dataColour :: String }
                | Label { _ur :: UrElement }
                | TextBox { _ur :: UrElement
+                         , _dataColour :: String
                          , _boxText :: String }
                | Knob { _ur :: UrElement 
                       , _dataColour :: String
