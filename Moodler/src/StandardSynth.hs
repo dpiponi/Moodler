@@ -31,8 +31,8 @@ standardSynth synthTypes = {-flip execState M.empty $ -} do
         addSynth "p8_rotary8" $ Module "p8_rotary8"
                  (getSynth synthTypes "input") M.empty
 -}
-        zeroSynth <- hoist lift $ getSynth synthTypes "zero"
-        lift $ addSynth "zero" $ Module "zero" zeroSynth M.empty
+        --zeroSynth <- hoist lift $ getSynth synthTypes "zero"
+        --lift $ addSynth "zero" $ Module "zero" zeroSynth M.empty
         outSynth <- hoist lift $ getSynth synthTypes "out"
         lift $ addSynth "out" $ Module "out" outSynth
-                 (M.fromList [("value", Out "zero" "result")])
+                 (M.fromList [("value", Disconnected)])

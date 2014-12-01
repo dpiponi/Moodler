@@ -15,7 +15,8 @@ import Control.Monad.Trans.Error
 import Module
 import Text
 
-data Out = Out { _outModule :: String
+data Out = Disconnected
+         | Out { _outModule :: String
                , _outModuleOut :: String
                } deriving (Eq, Ord, Show)
 
@@ -42,6 +43,10 @@ dumpSynth synth = do
 connect :: String -> String -> String -> String -> Synth -> Synth
 connect outNode outField inNode inField synth =
     ix inNode . inputNodes . ix inField .~ Out outNode outField $ synth 
+
+disconnect :: String -> String -> Synth -> Synth
+disconnect inNode inField synth =
+    ix inNode . inputNodes . ix inField .~ Disconnected $ synth 
 
 out :: String -> Out
 out os = let (moduleName, outName) = splitDot os

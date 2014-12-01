@@ -41,9 +41,12 @@ orderNodes synth out' =
              let dict' = M.insert name level dict
              let level' = level+1
              put (level', dict')
-             forM_ (inValues inputs) (\(Out node _) ->
-                orderNodes' nodes (fromMaybe (error ("failed to find "++node++" in a "++name))
-                                            (M.lookup node nodes)))
+             forM_ (inValues inputs) $ \outNode ->
+                case outNode of
+                    Out node _ ->
+                        orderNodes' nodes (fromMaybe (error ("failed to find "++node++" in a "++name))
+                                            (M.lookup node nodes))
+                    Disconnected -> return ()
 
 foreign import ccall "dynamic"  
   mkCreate :: FunPtr (IO (Ptr ())) -> IO (Ptr ())
@@ -127,7 +130,7 @@ genStruct moduleList synth = do
 
 -- XXX Gross hack. Need proper zero support.
 nameOfOutput :: Out -> String
-nameOfOutput (Out "zero" _) = "0"
+nameOfOutput Disconnected = "0"
 nameOfOutput (Out name' name'') = "state->" ++ name' ++ "_" ++ name''
 
 genExec :: [(String, t)] -> M.Map String Module ->

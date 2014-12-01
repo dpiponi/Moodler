@@ -119,7 +119,7 @@ addNewModule synthType synthName synthTypes = do
                         M.lookup synthType synthTypes
     -- Throws away CDecl
     let inputs = M.fromList $
-            zip (map fst $ M.toList ins) (repeat (out "zero.result"))
+            zip (map fst $ M.toList ins) (repeat Disconnected)
     -- XXX Deal with M.empty
     newSynth <- hoist generalize $ getSynth synthTypes synthType
     let newModule = Module synthName newSynth inputs newNumber
@@ -174,6 +174,11 @@ handleMessage theStandard numVoices dataPtrs set_fill_buffer
                 let [a', b', c', d'] =
                         (C.unpack . d_ascii_string) <$> [a, b, c, d]
                 moodlerSynth %= connect a' b' c' d'
+
+            Just (Message "/disconnect" [c, d]) -> do
+                let [c', d'] =
+                        (C.unpack . d_ascii_string) <$> [c, d]
+                moodlerSynth %= disconnect c' d'
 
 
             Just (Message ('/':'8':'/':'p':'u':'s':'h':ds) [Float v]) -> do
