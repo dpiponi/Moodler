@@ -12,7 +12,7 @@ void init() {
     playing = 0.0;
 }
 
-void exec(in __attribute__((colour("(0, 0, 1)"))) const char *pattern,
+void exec(in __attribute__((normal("abc"))) __attribute__((colour("(0, 0, 1)"))) const char *pattern,
           in control trigger,
           in control note1,
           in control note2,

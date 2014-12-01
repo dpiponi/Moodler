@@ -7,7 +7,9 @@ import qualified Data.Set as S
 import Control.Monad.State
 import System.Posix.DynamicLinker
 import Data.Maybe
+import Control.Lens hiding (set)
 import Data.List
+import Language.C.Syntax.AST
 import Text.PrettyPrint
 import Foreign.Ptr
 import System.IO.Temp
@@ -21,7 +23,7 @@ import Foreign.C.String
 import Foreign.C.Types
 import System.Directory
 import Control.Monad.Trans.Error
-import Debug.Trace
+--import Debug.Trace
 
 import Synth
 import Module
@@ -68,16 +70,16 @@ concatMapM f xs = liftM concat (mapM f xs)
 
 varsFromNodeType :: NodeType a -> M.Map String String -> Vars
 varsFromNodeType nodeType connections =
-    let states = stateNames nodeType
-        ins = inNames nodeType
-        outs = outNames nodeType
+    let states = _stateNames nodeType
+        ins = _inNames nodeType
+        outs = _outNames nodeType
     in Vars states outs ins connections
 
--- Create inner pieces of C code.
+-- Create inner piece of C code corresponding to the selected node.
 instantiateExec :: String -> NodeType NodeInfo -> M.Map String String ->
                    Either String String
 instantiateExec nodeName nodeType connections = do
-    let e = execCode nodeType
+    let e = _execCode nodeType
     let variables = varsFromNodeType nodeType connections 
     rewritten <- rewriteVars False nodeName variables e
     return $ render (pretty rewritten)
@@ -86,14 +88,14 @@ instantiateExec nodeName nodeType connections = do
 
 instantiateInit :: String -> NodeType NodeInfo -> Either String String
 instantiateInit nodeName nodeType = do
-    let i = initCode nodeType
+    let i = _initCode nodeType
     let variables = varsFromNodeType nodeType M.empty
     rewritten <- rewriteVars False nodeName variables i
     return $ render $ pretty rewritten
 
 instantiateState :: String -> NodeType NodeInfo -> Either String String
 instantiateState nodeName nodeType = do
-    let decls = stateDecls nodeType
+    let decls = _stateDecls nodeType
     let variables = varsFromNodeType nodeType M.empty
     concatMapM (\v -> do
         rewritten <- rewriteVarsEverywhere True nodeName variables v
@@ -128,10 +130,16 @@ genStruct moduleList synth = do
         tell stateSource
     tell "} state;\n"
 
--- XXX Gross hack. Need proper zero support.
-nameOfOutput :: Out -> String
-nameOfOutput Disconnected = "0"
-nameOfOutput (Out name' name'') = "state->" ++ name' ++ "_" ++ name''
+nameOfOutput :: M.Map String CDecl -> String -> Out -> String
+nameOfOutput inDecls inName Disconnected =
+    case M.lookup inName inDecls of
+        Nothing -> error "nameOfOutput"
+        Just cdecl ->
+            case getNormalFromCDecl cdecl of
+                Nothing -> "0"
+                Just normalValue -> "(" ++ render (pretty normalValue) ++ ")"
+
+nameOfOutput _ _ (Out name' name'') = "state->" ++ name' ++ "_" ++ name''
 
 genExec :: [(String, t)] -> M.Map String Module ->
            WriterT String (Either String) ()
@@ -139,10 +147,14 @@ genExec y synth = do
     tell "int execute(struct State *state, short *buffer) {\n"
     tell "for (int i = 0; i < 256; ++i) {\n"
     forM_ y $ \(name, _) -> do
-        (Module _ nodeType connections _) <-
+        (Module { _getNodeType = nodeType, _inputNodes = connections }) <-
                 lookupM "error 4" name synth
-        let connections' = M.map nameOfOutput connections
-        trace ("name="++name++": " ++ show connections) $ tell ""
+        -- This like takes a dictionary
+        -- M.Map String -> Out
+        -- and converts it into a dictionary
+        -- M.Map String -> String
+        let connections' = M.mapWithKey (nameOfOutput (nodeType ^. inNames)) connections
+        --trace ("name="++name++": " ++ show connections) $ tell ""
         execSource <- lift $ instantiateExec name nodeType connections'
         tell execSource
         tell "\n"
@@ -158,7 +170,7 @@ genAddress moduleList synth = do
     tell "int address(const char *node, const char *field) {\n"
     forM_ moduleList $ \name -> do
         (Module _ nodeType _ _) <- lookupM "error 1" name synth
-        let stateVars = stateNames nodeType
+        let stateVars = _stateNames nodeType
         forM_ stateVars $ \varName -> do
             let fieldName = name ++ "_" ++ varName
             tell $ "    if (!strcmp(node, \"" ++ name ++
@@ -279,12 +291,10 @@ data DSO = DSO { dl :: DL
                , dsoSetStringFn :: SetStringFn }
 
 makeDso :: String -> IO DSO
-makeDso code = --do
-{-
+makeDso code = do
     print "---"
     putStr code
     print "---"
--}
     --let tmpDir = "gensrc" ++ show (hash code)
     --createDirectoryIfMissing False tmpDir
     withSystemTempDirectory

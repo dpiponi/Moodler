@@ -44,6 +44,9 @@ connect :: String -> String -> String -> String -> Synth -> Synth
 connect outNode outField inNode inField synth =
     ix inNode . inputNodes . ix inField .~ Out outNode outField $ synth 
 
+-- We want to pass synthTypes into here and use that to
+-- set up normalled value. Maybe.
+-- -- XXX
 disconnect :: String -> String -> Synth -> Synth
 disconnect inNode inField synth =
     ix inNode . inputNodes . ix inField .~ Disconnected $ synth 

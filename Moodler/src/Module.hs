@@ -1,9 +1,10 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TemplateHaskell, FlexibleContexts #-}
 
 module Module where
 
 import Control.Monad.State
 import Control.Monad.Trans.Error
+import Control.Lens
 import Control.Monad.Writer
 import Data.Maybe
 import qualified Data.Foldable as F
@@ -26,13 +27,15 @@ import System.FilePath.Posix
 import Text
 
 data NodeType a = NodeType {
-    inNames :: M.Map String CDecl,
-    outNames :: M.Map String CDecl,
-    stateNames :: [String],
-    stateDecls :: [CDeclaration a],
-    initCode :: CFunctionDef a,
-    execCode :: CFunctionDef a
+    _inNames :: M.Map String CDecl,
+    _outNames :: M.Map String CDecl,
+    _stateNames :: [String],
+    _stateDecls :: [CDeclaration a],
+    _initCode :: CFunctionDef a,
+    _execCode :: CFunctionDef a
 } deriving Show
+
+$(makeLenses ''NodeType)
 
 varoffset :: (Eq a, Ord a, Num a, Show a) => String -> a -> String
 varoffset var x | x == 0  = var
@@ -142,10 +145,10 @@ loadNodeType dir fileName' = do
     (ast, _) <- case x of
         Left e -> throwError e
         Right v -> return v
-    (_, Extracted i e vs) <- liftIO $ runStateT
+    (_, Extracted i execFunction vs) <- liftIO $ runStateT
                 (extractModuleParts ast) (Extracted Nothing Nothing [])
     let states = map varDefinedInDeclaration vs
-    let (ins, outs) = getInsAndOuts (fromJust e)
+    let (ins, outs) = getInsAndOuts (fromJust execFunction)
 
     let synthName = fst (splitDot fileName')
     let script = synthScript synthName ins outs
@@ -154,7 +157,7 @@ loadNodeType dir fileName' = do
     liftIO $ writeFile ("scripts/_" ++ synthName ++ ".hs") script
 
     fromMaybe (throwError "loadNodeType failed") $ do
-        e' <- e
+        e' <- execFunction
         i' <- i
         Just $ return $ NodeType (M.fromList $ map swap ins)
                                 (M.fromList $ map swap outs)

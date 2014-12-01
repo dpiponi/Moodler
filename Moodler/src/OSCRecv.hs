@@ -115,8 +115,8 @@ addNewModule synthType synthName synthTypes = do
             "Adding synth " ++ synthType ++ " " ++ synthName
     oldSynth <- use moodlerSynth
     let newNumber = M.size oldSynth
-    let ins = inNames $ unJust "addNewModule" $
-                        M.lookup synthType synthTypes
+    let ins = _inNames $ unJust "addNewModule" $
+                         M.lookup synthType synthTypes
     -- Throws away CDecl
     let inputs = M.fromList $
             zip (map fst $ M.toList ins) (repeat Disconnected)
