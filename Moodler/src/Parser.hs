@@ -104,11 +104,25 @@ getColour (CTypeQual (CAttrQual (CAttr (Ident "colour" _ _)
                                         )) = [colour]
 getColour _ = []
 
+getNormal :: CDeclarationSpecifier NodeInfo -> [CExpr]
+--getInOrOut (CTypeSpec (CTypeDef ident _)) = identToString ident
+getNormal (CTypeQual (CAttrQual (CAttr (Ident "normal" _ _)
+                                        [expr]
+                                        _)
+                                        )) = [expr]
+getNormal _ = []
+
 getColourFromCDecl :: CDecl -> Maybe String
 getColourFromCDecl (CDecl spec _ _) = let cols = concatMap getColour spec
                                        in if null cols
                                                     then Nothing
                                                     else Just (head cols)
+
+getNormalFromCDecl :: CDecl -> Maybe CExpr
+getNormalFromCDecl (CDecl spec _ _) = let normals = concatMap getNormal spec
+                                       in if null normals
+                                                    then Nothing
+                                                    else Just (head normals)
 
 -- A CDeclaration is a complete C declaration
 -- spec is CDeclarationSpecifier
