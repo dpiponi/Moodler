@@ -5,6 +5,7 @@
     * Properly integrate oscilloscope
     * Integer input?
     * Sliders could be better
+    * Fuse containers and proxies
 * moodler
     * "Default" inputs to modules.
     * Define arpeggiator DSL
