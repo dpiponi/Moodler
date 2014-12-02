@@ -15,6 +15,8 @@ import Language.C.Syntax.AST
 import Language.C.Syntax.Constants
 import Language.C.Data.Ident
 import Language.C.Data.Node
+import Language.C.Data.Position
+import Language.C.Data.Name
 import qualified Data.Map as M
 --import Language.C.Pretty
 --import Debug.Trace
@@ -179,32 +181,50 @@ data Vars = Vars { _states :: [String]
                  , _connections :: M.Map String String
                  }
 
-rewriteVar :: Bool -> String -> Vars ->
-              Ident -> Either String Ident
-rewriteVar inStruct nodeName
+rewriteVar :: String -> Vars -> CExpr -> Either String CExpr
+rewriteVar nodeName
            _variables@Vars { _states = states
                            , _outs = outs
                            , _ins = ins
                            , _connections = connections }
-           i@(Ident name _ _)
+           (CVar i@(Ident name _ _) i2)
     | name `elem` states || name `M.member` outs
-        = return $ i & identName %~
-                        (((if not inStruct then "state->" else "") ++
-                         nodeName ++ "_") ++)
+        -- = return $ CVar (i & identName %~ (("state->" ++ nodeName ++ "_") ++)) i2
+        = return $ CVar (mkIdent nopos ("state->" ++ nodeName ++ "_" ++ name) (Name 0)) i2
+        -- = return $ CMember (CVar (mkIdent nopos "state" (Name 1000)) i2) (mkIdent nopos (nodeName++"_" ++ name) (Name 1001)) True i2
     | name `M.member` ins =
             case M.lookup name connections of
                 Nothing -> Left "error2"
-                Just inName -> return $ i & identName .~ inName
-    | otherwise = return i
+                Just inName -> return $ CVar (i & identName .~ inName) i2
+    | otherwise = return (CVar i i2)
+rewriteVar _ _ v = return v
 
 rewriteVarsEverywhere :: (Data b, Typeable b) =>
-                         Bool -> String -> Vars ->
+                         String -> Vars ->
                          b -> Either String b
-rewriteVarsEverywhere inStruct nodeName variables =
-    everywhereM (mkM (rewriteVar inStruct nodeName variables))
+rewriteVarsEverywhere nodeName variables =
+    everywhereM (mkM (rewriteVar nodeName variables))
 
-rewriteVars :: Bool -> String -> Vars -> 
+rewriteVars :: String -> Vars -> 
                CFunctionDef NodeInfo -> Either String (CStatement NodeInfo)
-rewriteVars inStruct nodeName variables
+rewriteVars nodeName variables
             (CFunDef _ _ _ stmt _) = 
-    rewriteVarsEverywhere inStruct nodeName variables stmt
+    rewriteVarsEverywhere nodeName variables stmt
+
+rewriteVarInStruct :: String -> Vars ->
+              CDeclr -> Either String CDeclr
+rewriteVarInStruct nodeName
+           _variables@Vars { _states = states
+                           , _outs = outs }
+           (CDeclr (Just i@(Ident name _ _)) i1 i2 i3 i4)
+    | name `elem` states || name `M.member` outs
+        = return $ CDeclr (Just (i & identName %~
+                        ((nodeName ++ "_") ++))) i1 i2 i3 i4
+    | otherwise = return (CDeclr (Just i) i1 i2 i3 i4)
+rewriteVarInStruct nodeName variables v = gmapM (rewriteVarsInStructEverywhere nodeName variables) v
+
+rewriteVarsInStructEverywhere :: (Data b, Typeable b) =>
+                         String -> Vars ->
+                         b -> Either String b
+rewriteVarsInStructEverywhere nodeName variables =
+    everywhereM (mkM (rewriteVarInStruct nodeName variables))

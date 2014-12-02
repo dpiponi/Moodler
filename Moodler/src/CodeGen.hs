@@ -81,7 +81,7 @@ instantiateExec :: String -> NodeType NodeInfo -> M.Map String String ->
 instantiateExec nodeName nodeType connections = do
     let e = _execCode nodeType
     let variables = varsFromNodeType nodeType connections 
-    rewritten <- rewriteVars False nodeName variables e
+    rewritten <- rewriteVars nodeName variables e
     return $ render (pretty rewritten)
 --    return $ concatMap (\s -> render (pretty s) ++ "\n") $
 --                            splitCompound rewritten
@@ -90,7 +90,7 @@ instantiateInit :: String -> NodeType NodeInfo -> Either String String
 instantiateInit nodeName nodeType = do
     let i = _initCode nodeType
     let variables = varsFromNodeType nodeType M.empty
-    rewritten <- rewriteVars False nodeName variables i
+    rewritten <- rewriteVars nodeName variables i
     return $ render $ pretty rewritten
 
 instantiateState :: String -> NodeType NodeInfo -> Either String String
@@ -98,7 +98,7 @@ instantiateState nodeName nodeType = do
     let decls = _stateDecls nodeType
     let variables = varsFromNodeType nodeType M.empty
     concatMapM (\v -> do
-        rewritten <- rewriteVarsEverywhere True nodeName variables v
+        rewritten <- rewriteVarsInStructEverywhere nodeName variables v
         return $ render (pretty rewritten) ++ ";\n") decls
 
 --generateCStruct :: Either
@@ -291,10 +291,10 @@ data DSO = DSO { dl :: DL
                , dsoSetStringFn :: SetStringFn }
 
 makeDso :: String -> IO DSO
-makeDso code = do
-    print "---"
-    putStr code
-    print "---"
+makeDso code = --do
+    --print "---"
+    --putStr code
+    --print "---"
     --let tmpDir = "gensrc" ++ show (hash code)
     --createDirectoryIfMissing False tmpDir
     withSystemTempDirectory

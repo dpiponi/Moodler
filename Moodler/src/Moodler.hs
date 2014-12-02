@@ -13,7 +13,7 @@ import Control.Monad.State
 --import Control.Lens
 --import Foreign.Ptr
 --import Control.Monad.Morph
-import Foreign.C.String
+--import Foreign.C.String
 
 import Audio
 import Synth

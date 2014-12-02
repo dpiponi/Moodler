@@ -23,7 +23,7 @@ executable moodler
                     pretty, process, hashable, containers,
                     either, bytestring, array, hosc >= 0.14, syb,
                     directory, temporary, cpphs, optparse-applicative,
-                    mmorph, transformers, filepath
+                    mmorph, transformers, filepath, uniplate
 
 executable ui
   default-language: Haskell2010

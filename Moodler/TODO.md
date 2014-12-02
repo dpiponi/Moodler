@@ -7,7 +7,6 @@
     * Sliders could be better
     * Fuse containers and proxies
 * moodler
-    * "Default" inputs to modules.
     * Define arpeggiator DSL
     * rename should use proper C struct
     * local enums?
@@ -20,6 +19,7 @@
     * Higher quality interp in delay?
     * Pending FFI issues: Don't need to dlopen audio.so. Just access directly from FFI.
     * int/string support?
+    * Consider storing default values in temporaries.
 * modules
     * Why does chorus have long delay?
     * Make bounce more efficient.
