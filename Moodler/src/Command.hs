@@ -193,7 +193,12 @@ evalUi (U.TextBox n t p creationParent cfn) = do
 evalUi (U.Proxy n proxyName p planeItsOn cfn) = do
     --liftIO $ print "Proxy"
     (_, hi) <- depthExtent
-    let e = UIElement.Proxy (UrElement planeItsOn False (hi+1) False p proxyName) S.empty
+    let e = UIElement.Container { _ur = UrElement planeItsOn False (hi+1) False p proxyName
+                                , _pic = "panel_proxy.png"
+                                , _imageWidth = 40
+                                , _imageHeight = 40
+                                , _inside = S.empty
+                                , _outside = S.empty }
     createdInParent n e planeItsOn
     evalUi (cfn n)
 
@@ -208,8 +213,12 @@ evalUi (U.Image n bmpName p creationPlane cfn) = do
 evalUi (U.Container n bmpName p creationPlane cfn) = do
     (_, hi) <- depthExtent
     (width, height) <- getPic bmpName
-    let e = UIElement.Container (UrElement creationPlane False (hi+1) False p
-                                bmpName) bmpName width height S.empty
+    let e = UIElement.Container { _ur = UrElement creationPlane False (hi+1) False p bmpName
+                                , _pic = bmpName
+                                , _imageWidth = width
+                                , _imageHeight = height
+                                , _inside = S.empty
+                                , _outside = S.empty }
     createdInParent n e creationPlane
     evalUi (cfn n)
 
@@ -278,11 +287,12 @@ evalUi (GetType s1 cfn) = do
     t <- getElementTypeById s1
     evalUi (cfn t)
 
+-- Is this right? XXX
 evalUi (GetParent s1 cfn) = do
     elts <- use (inner . uiElements)
     root <- use rootPlane
     if s1 == root
-        then evalUi (cfn root)
+        then evalUi (cfn (Inside root))
         else let a = case M.lookup s1 elts of
                         Nothing -> error "No value"
                         Just e  -> UIElement._parent (_ur e)

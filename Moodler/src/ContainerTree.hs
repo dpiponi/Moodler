@@ -3,7 +3,7 @@
 module ContainerTree where
 
 import Control.Monad.State
-import Control.Lens
+import Control.Lens hiding (inside, outside)
 import qualified Data.Set as S
 import qualified Data.Map as M
 import qualified Data.List as L
@@ -23,22 +23,38 @@ checkExists :: (Functor m, MonadState GlossWorld m) =>
                UiId -> m Bool
 checkExists i = M.member i <$> use (inner . uiElements)
 
-createdInParent :: MonadState GlossWorld m =>
+createdInsideParent :: MonadState GlossWorld m =>
                    UiId -> UIElement -> UiId -> m ()
-createdInParent n e q = do
+createdInsideParent n e q = do
     inner . uiElements %= M.insert n e
-    assignElementToPlane n q
+    assignElementToInside n q
 
-assignElementToPlane :: MonadState GlossWorld m => UiId -> UiId -> m ()
-assignElementToPlane e newPlane' = do
-    inner . uiElements . ix newPlane' . contents %= S.insert e
-    inner . uiElements . ix e . ur . UIElement.parent .= newPlane'
+createdOutsideParent :: MonadState GlossWorld m =>
+                   UiId -> UIElement -> UiId -> m ()
+createdOutsideParent n e q = do
+    inner . uiElements %= M.insert n e
+    assignElementToOutside n q
+
+createdInParent :: MonadState GlossWorld m =>
+                   UiId -> UIElement -> Location -> m ()
+createdInParent n e (Inside q) = createdInsideParent n e q
+createdInParent n e (Outside q) = createdOutsideParent n e q
+
+assignElementToInside :: MonadState GlossWorld m => UiId -> UiId -> m ()
+assignElementToInside e newPlane' = do
+    inner . uiElements . ix newPlane' . inside %= S.insert e
+    inner . uiElements . ix e . ur . UIElement.parent .= Inside newPlane'
+
+assignElementToOutside :: MonadState GlossWorld m => UiId -> UiId -> m ()
+assignElementToOutside e newPlane' = do
+    inner . uiElements . ix newPlane' . outside %= S.insert e
+    inner . uiElements . ix e . ur . UIElement.parent .= Outside newPlane'
 
 withContaining :: Monad m => UIElement -> (S.Set UiId -> m ()) -> m ()
 withContaining elt f = 
     case elt of
-        Container { _contents = cts } -> f cts
-        Proxy { _contents = cts } -> f cts
+        Container { _inside = insideCts, _outside = outsideCts } ->
+            f (S.union insideCts outsideCts)
         _ -> return () -- XXX Come back to this. Be explicit.
 
 deleteElement :: (Functor m, MonadIO m,
@@ -61,19 +77,29 @@ isContainer i = do
 unparent :: MonadState GlossWorld m => UiId -> m ()
 unparent childId = do
     currentPlane <- use planes
-    reparent currentPlane childId
+    reparent (Inside currentPlane) childId
 
-reparent :: MonadState GlossWorld m => UiId -> UiId -> m ()
-reparent newParentId childId = do
+reparent :: MonadState GlossWorld m => Location -> UiId -> m ()
+reparent (Outside newParentId) childId = do
     removeFromParent childId
-    inner . uiElements . ix newParentId . contents %= S.insert childId
-    inner . uiElements . ix childId . ur . parent .= newParentId
+    inner . uiElements . ix newParentId . outside %= S.insert childId
+    inner . uiElements . ix childId . ur . parent .= Outside newParentId
+reparent (Inside newParentId) childId = do
+    removeFromParent childId
+    inner . uiElements . ix newParentId . inside %= S.insert childId
+    inner . uiElements . ix childId . ur . parent .= Inside newParentId
+
+inOrOutParent :: Location -> UiId
+inOrOutParent (Inside i) = i
+inOrOutParent (Outside o) = o
 
 removeFromParent :: MonadState GlossWorld m => UiId -> m ()
 removeFromParent childId = do
     childElt <- getElementById "UISupport.hs" childId
-    let currentParentId = _parent (_ur childElt)
-    inner . uiElements . ix currentParentId . contents %= S.delete childId
+    let currentParentId = inOrOutParent (_parent (_ur childElt))
+    -- XXX Bit of a hack deleting from both
+    inner . uiElements . ix currentParentId . outside %= S.delete childId
+    inner . uiElements . ix currentParentId . inside %= S.delete childId
 
 -- Includes argument in result
 getDescendants :: MonadState GlossWorld w =>
@@ -90,12 +116,12 @@ getAllDescendants getChildren = fmap (uniq . concat) .
                                     mapM (getDescendants getChildren)
 
 getContainerProxyChildren :: UIElement -> [UiId]
-getContainerProxyChildren (Container { _contents = cts }) = S.toList cts
-getContainerProxyChildren (Proxy { _contents = cts }) = S.toList cts
+getContainerProxyChildren (Container { _inside = insideCts, _outside = outsideCts }) =
+    S.toList insideCts ++ S.toList outsideCts
 getContainerProxyChildren _ = []
 
 getContainerChildren :: UIElement -> [UiId]
-getContainerChildren (Container { _contents = cts }) = S.toList cts
+getContainerChildren (Container { _outside = cts }) = S.toList cts
 getContainerChildren _ = []
 
 getAllContainerProxyDescendants :: (Functor w,
@@ -108,7 +134,7 @@ getAllContainerDescendants :: (Functor w, MonadState GlossWorld w) =>
                               [UiId] -> w [UiId]
 getAllContainerDescendants = getAllDescendants getContainerChildren
 
-moveElementToPlane :: MonadState GlossWorld m => UiId -> UiId -> m ()
+moveElementToPlane :: MonadState GlossWorld m => UiId -> Location -> m ()
 moveElementToPlane = flip reparent
 
 -- Find selements of second list whose parents are not in first.
@@ -118,4 +144,4 @@ getMinimalParents :: (Functor m, MonadState GlossWorld  m) =>
 getMinimalParents everything sel = do
     selElts <- getElementsById "getMinimalParents" sel
     return [item | (item, elt) <- zip sel selElts,
-                   elt ^. ur . parent `notElem` everything]
+                   inOrOutParent (elt ^. ur . parent) `notElem` everything]

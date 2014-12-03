@@ -4,43 +4,18 @@ Modular synth:
 
 Runs (if you're lucky) on MacOS X
 
-Moodler compiles and runs Haskell at runtime using hint.
-That runtime interpretation uses libraries that also form part of
-the runtime itself.
+Read `doc/intro.html` for installation info and manual.
 
-There are two packages. First
-
-    cabal install
-
-in the MoodlerLib directory.
-
-Then in the sibling Moodler directory
-
-    make
-
-and then
-
-    cabal build
-
-I'll get cabal to do the make step eventually.
-
-You'll need `alex` and `happy` so before everything else you may need:
-
-    cabal install alex happy
-
-It doesn't work sandboxed.
-(Although try http://hub.darcs.net/jcpetruzza/hint/issue/5)
-
-It runs as two processes.
-One is the server and the other is the GUI client.
-Communication is OSC via UDP.
-
-Typically:
-In one window (in the Moodler/Moodler directory) run `cabal run moodler`
-In another window run `cabal run ui -a 127.0.0.1 -f test_organ`
-Turn up the volume.
-(Try to figure out how to remove the 'crush' module dn phaser so it sounds like
-an actual organ rather than a circuit bent organ.)
+NOTES
+-----
+I've made an update that slighly changes the scripting library.
+These means all saves and scripts are now invalidated.
+The vim script update1.vim seems to be able to correctly update most
+saves and scripts but it just uses heursitics to guess the types of certain
+objects from the variable name used.
+If your previous persion of Sound.MoodlerLib.Symbols didn't define the
+`Location` type and the new one does all scripts will need upgrading.
+I doubt this actually matters to anyone yet.
 
 Things you can try
 ------------------
@@ -48,13 +23,12 @@ Things you can try
 * Try dragging on knobs.
 * 'alt-drag' on background.
 * 'alt-q' to quit.
-* 'r' to run an external command. These are loaded from scripts/
-* 'l' to load a complete patch. These are loaded from saves/
-  That's where the `-f` option loads files from too.
+* 'alt-r' to run an external command. These are loaded from scripts/
+* 'alt-l' to load a complete patch. These are loaded from saves/
   Files in saves/ were all machine generated with 's'.
   Type type the final ".hs" in an argument to 'r' or 'l'
-* 's' to save a complete patch.
-* 'd' to delete a module.
+* 'alt-s' to save a complete patch.
+* '<delete>' to delete a module.
 * '=' while on a knob to set its (floating point number) value.
 
 You can also
@@ -62,7 +36,7 @@ You can also
 * Write scripts. Look in scripts/ Many of those are machine generated
   so aren't so human readable.  Look in scripts/bindings.hs to see how
   to bind scripts to keystrokes.
-* The panel_* scripts are largely modules built entirely inside Moodler
+* The scripts are largely modules built entirely inside Moodler
   (apart from the graphics, for which I use Omnigraffle) from more primitive
  components.
 

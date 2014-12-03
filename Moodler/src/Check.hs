@@ -33,21 +33,21 @@ checkEverythingAccessibleFromRoot = do
     return $ and accessible
 
 checkChildrenHaveCorrectParent' :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
-                                   UiId -> S.Set UiId -> m Bool
+                                   Location -> S.Set UiId -> m Bool
 checkChildrenHaveCorrectParent' parentId childrenIds = do
     result <- forM (S.toList childrenIds) $ \childId -> do
         childElt <- getElementById "checkChildrenHaveCorrectParent'" childId
         if parentId /= _parent (_ur childElt)
             then do
                 liftIO $ putStrLn $
-                    unUiId childId ++ " should have parent " ++
-                    unUiId parentId ++ " not " ++ unUiId (_parent (_ur childElt))
+                    show childId ++ " should have parent " ++
+                    show parentId ++ " not " ++ show (_parent (_ur childElt))
                 return False
             else case childElt of
-                Container { _contents = cts } ->
-                    checkChildrenHaveCorrectParent' childId cts
-                Proxy { _contents = cts } ->
-                    checkChildrenHaveCorrectParent' childId cts
+                Container { _inside = insideCts, _outside = outsideCts } -> do
+                    inResult <- checkChildrenHaveCorrectParent' (Inside childId) insideCts
+                    outResult <- checkChildrenHaveCorrectParent' (Outside childId) outsideCts
+                    return $ inResult && outResult
                 _ -> return True
     return $ and result
 
@@ -58,8 +58,7 @@ checkChildrenHaveCorrectParent = do
     root <- use rootPlane
     rootElt <- getElementById "checkChildrenHaveCorrectParent" root
     case rootElt of
-        Container { _contents = cts} ->
-            checkChildrenHaveCorrectParent' root cts
-        Proxy     { _contents = cts} ->
-            checkChildrenHaveCorrectParent' root cts
+        Container { _inside = insideCts, _outside = outsideCts} -> do
+            inResult <- checkChildrenHaveCorrectParent' (Inside root) insideCts
+            return $ S.null outsideCts && inResult
         _ -> return True

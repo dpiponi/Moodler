@@ -9,7 +9,7 @@ import Data.Monoid
 --import Control.Monad.Writer
 --import Symbols
 import UIElement
-import Utils
+--import Utils
 import World
 --import Text
 import qualified Box as B
@@ -75,12 +75,13 @@ proxyFeature = rect (-20, -20) (20, 20) <>
 drawUIElement :: Bool -> GlossWorld -> UIElement -> (Picture, Picture)
 -- Recurse into containers
 drawUIElement showingHidden world
-              Container { _contents = c
+              Container { _outside = c
                         , _pic = pic'            , _ur = UrElement { _loc = (x, y)
                         , _highlighted = highlit } , _imageWidth = iw
                         , _imageHeight = ih } =
-        let (x', _, _) = unJust "drawUIElement"
-                            (M.lookup pic' (world ^. pics))
+        let x' = case M.lookup pic' (world ^. pics) of
+                    Just (aPic, _, _) -> aPic
+                    Nothing -> proxyFeature
         in below (translate x y x') <>
            below (if highlit
                 then color red (rectAt x y iw ih)
@@ -92,6 +93,7 @@ drawUIElement showingHidden world
                     Nothing -> error $ "In drawUIElement missing " ++
                                             show i) (S.toList c))
 
+{-
 drawUIElement _ world (Proxy (UrElement _ wasSelected _ _ (x, y) n) _) =
         let feature = case M.lookup "panel_proxy.png" (world ^. pics) of
                         Nothing -> proxyFeature
@@ -100,6 +102,7 @@ drawUIElement _ world (Proxy (UrElement _ wasSelected _ _ (x, y) n) _) =
                     (selectColor wasSelected proxyColour) $ 
               feature <>
               translate 15 (-5) (scale 0.1 0.1 (text n))
+              -}
 
 drawUIElement _ world (Image (UrElement _ _ _ _ (x, y) _) picture _ _) =
     below $ translate x y (
@@ -188,7 +191,9 @@ renderWorld w@GlossWorld { _rootTransform = rootXform
         planeExists <- checkExists wplanes0
         wplanes <- if planeExists
             then return wplanes0
-            else use rootPlane
+            else do
+                liftIO $ putStrLn "Plane don't exist!"
+                use rootPlane
         thingsToDraw <- rootElementsOnPlane wplanes
         elementsToDraw <- getElementsById "renderWorld" thingsToDraw
         let elementsToDraw' = L.sortBy (compare `on` _depth . _ur) elementsToDraw

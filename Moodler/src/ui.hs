@@ -102,7 +102,7 @@ emptyUr = UrElement { _parent = error "Root parent shouldn't be visible"
 
 emptyGlossWorld :: GlossWorld
 emptyGlossWorld = 
-    let root = Proxy { _ur = emptyUr, _contents = S.empty }
+    let root = Container { _ur = emptyUr, _pic = "panel_proxy.png", _imageWidth = 40, _imageHeight = 40, _inside = S.empty, _outside = S.empty }
         rootID = UiId "root"
         innerWorld = emptyWorld rootID root
     in GlossWorld { _inner = innerWorld

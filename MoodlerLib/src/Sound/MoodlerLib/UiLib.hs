@@ -14,16 +14,16 @@ data Ui a = Return a
           | New String String (Ui a)
           | Run String String (Ui a)
           | Load String String (Ui a)
-          | PlugIn UiId String (Float, Float) UiId (UiId -> Ui a)
-          | PlugOut UiId String (Float, Float) UiId (UiId -> Ui a)
-          | Knob UiId String (Float, Float) KnobStyle UiId (UiId -> Ui a)
-          | TextBox UiId String (Float, Float) UiId (UiId -> Ui a)
-          | Proxy UiId String (Float, Float) UiId (UiId -> Ui a)
-          | Image UiId String (Float, Float) UiId (UiId -> Ui a)
-          | Container UiId String (Float, Float) UiId (UiId -> Ui a)
-          | Label UiId String (Float, Float) UiId (UiId -> Ui a)
+          | PlugIn UiId String (Float, Float) Location (UiId -> Ui a)
+          | PlugOut UiId String (Float, Float) Location (UiId -> Ui a)
+          | Knob UiId String (Float, Float) KnobStyle Location (UiId -> Ui a)
+          | TextBox UiId String (Float, Float) Location (UiId -> Ui a)
+          | Proxy UiId String (Float, Float) Location (UiId -> Ui a)
+          | Image UiId String (Float, Float) Location (UiId -> Ui a)
+          | Container UiId String (Float, Float) Location (UiId -> Ui a)
+          | Label UiId String (Float, Float) Location (UiId -> Ui a)
           | Selector UiId String (Float, Float)
-                                [String] UiId (UiId -> Ui a)
+                                [String] Location (UiId -> Ui a)
           -- | Connect String String (Ui a)
           | Cable UiId UiId (Ui a)
           | Mouse ((Float, Float) -> Ui a)
@@ -49,13 +49,13 @@ data Ui a = Return a
           | Move UiId (Float, Float) (Ui a)
           | Switch UiId (Ui a)
           | CurrentPlane (UiId -> Ui a)
-          | GetParent UiId (UiId -> Ui a)
+          | GetParent UiId (Location -> Ui a)
           | GetRoot (UiId -> Ui a)
           | Recompile (Ui a)
           | Restart (Ui a)
           | Quit (Ui a)
           | Check (Ui a)
-          | Parent UiId UiId (Ui a)
+          | Parent Location UiId (Ui a)
           | Rename String UiId (Ui a)
           | Unparent UiId (Ui a)
           | Input String (Maybe String -> Ui a)
@@ -143,54 +143,54 @@ run dir t = Run dir t (return ())
 load :: String -> String -> Ui ()
 load dir t = Load dir t (return ())
 
-plugin :: UiId -> String -> (Float, Float) -> UiId -> Ui UiId
+plugin :: UiId -> String -> (Float, Float) -> Location -> Ui UiId
 plugin s1 s2 p creationParent = PlugIn s1 s2 p creationParent return
 
-plugin' :: String -> (Float, Float) -> UiId -> Ui UiId
+plugin' :: String -> (Float, Float) -> Location -> Ui UiId
 plugin' s2 p creationParent = do
     s1 <- newId "in"
     PlugIn s1 s2 p creationParent return
 
-plugout :: UiId -> String -> (Float, Float) -> UiId -> Ui UiId
+plugout :: UiId -> String -> (Float, Float) -> Location -> Ui UiId
 plugout s1 s2 p creationParent = PlugOut s1 s2 p creationParent return
 
-plugout' :: String -> (Float, Float) -> UiId -> Ui UiId
+plugout' :: String -> (Float, Float) -> Location -> Ui UiId
 plugout' s2 p creationParent = do
     s1 <- newId "out"
     PlugOut s1 s2 p creationParent return
 
-knob :: UiId -> String -> (Float, Float) -> KnobStyle -> UiId -> Ui UiId
+knob :: UiId -> String -> (Float, Float) -> KnobStyle -> Location -> Ui UiId
 knob s1 s2 p knobStyle creationParent = Knob s1 s2 p knobStyle creationParent return
 
-proxy' :: (Float, Float) -> UiId -> Ui UiId
+proxy' :: (Float, Float) -> Location -> Ui UiId
 proxy' pos creationParent = do
     nodeId <- newId "proxy"
     Proxy nodeId (unUiId nodeId) pos creationParent return
 
-knob' :: String -> (Float, Float) -> UiId -> Ui UiId
+knob' :: String -> (Float, Float) -> Location -> Ui UiId
 knob' s2 p creationParent = do
     s1 <- newId "knob"
     Knob s1 s2 p KnobStyle creationParent return
 
-textBox' :: String -> (Float, Float) -> UiId -> Ui UiId
+textBox' :: String -> (Float, Float) -> Location -> Ui UiId
 textBox' s2 p creationParent = do
     s1 <- newId "textBox"
     TextBox s1 s2 p creationParent return
 
-slider' :: String -> (Float, Float) -> UiId -> Ui UiId
+slider' :: String -> (Float, Float) -> Location -> Ui UiId
 slider' s2 p creationParent = do
     s1 <- newId "slider"
     Knob s1 s2 p SliderStyle creationParent return
 
-selector' :: String -> (Float, Float) -> [String] -> UiId -> Ui UiId
+selector' :: String -> (Float, Float) -> [String] -> Location -> Ui UiId
 selector' s2 p opts creationParent = do
     s1 <- newId "selector"
     Selector s1 s2 p opts creationParent return
 
-image :: UiId -> String -> (Float, Float) -> UiId -> Ui UiId
+image :: UiId -> String -> (Float, Float) -> Location -> Ui UiId
 image s1 s2 p creationParent = Image s1 s2 p creationParent return
 
-parent :: UiId -> UiId -> Ui ()
+parent :: Location -> UiId -> Ui ()
 parent s1 s2 = Parent s1 s2 (return ())
 
 rename :: String -> UiId -> Ui ()
@@ -199,17 +199,17 @@ rename s1 s2 = Rename s1 s2 (return ())
 unparent :: UiId -> Ui ()
 unparent s1 = Unparent s1 (return ())
 
-image' :: String -> (Float, Float) -> UiId -> Ui UiId
+image' :: String -> (Float, Float) -> Location -> Ui UiId
 image' s2 p creationParent = do
     s1 <- newId "image"
     Image s1 s2 p creationParent return
 
-container' :: String -> (Float, Float) -> UiId -> Ui UiId
+container' :: String -> (Float, Float) -> Location -> Ui UiId
 container' bmpName p creationParent = do
     nodeId <- newId "container"
     Container nodeId bmpName p creationParent return
 
-label' :: String -> (Float, Float) -> UiId -> Ui UiId
+label' :: String -> (Float, Float) -> Location -> Ui UiId
 label' labelText p creationParent = do
     nodeId <- newId "label"
     Label nodeId labelText p creationParent return
@@ -237,7 +237,7 @@ getValue s1 = GetValue s1 return
 input :: String -> Ui (Maybe String)
 input s1 = Input s1 return
 
-getParent :: UiId -> Ui UiId
+getParent :: UiId -> Ui Location
 getParent s1 = GetParent s1 return
 
 getRoot :: Ui UiId

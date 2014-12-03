@@ -5,5 +5,5 @@ do
     case mName of
         Nothing -> return ()
         Just filename -> do
-            container' filename (x, y) plane
+            container' filename (x, y) (Inside plane)
             return ()

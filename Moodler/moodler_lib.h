@@ -311,3 +311,11 @@ sample step_square(struct Square *state, double dt, sample frequency, sample pwm
 inline double interp(double lambda, double x, double y) {
     return (1-lambda)*x+lambda*y;
 }
+
+/*
+ * Correct for positive b
+ */
+inline int correct_mod(int a, int b) {
+    int ret = a % b;
+    return ret < 0 ? ret+b : ret;
+}

@@ -2,7 +2,7 @@
 
 module UISupport where
 
-import Control.Lens
+import Control.Lens hiding (inside, outside)
 import Control.Monad.State
 import Graphics.Gloss.Interface.IO.Game
 --import qualified Data.Foldable as F
@@ -84,7 +84,7 @@ newUIElement elt = do
 
 visitElements' :: MonadState GlossWorld m =>
                   UiId -> UIElement -> m [UiId]
-visitElements' e elt@Container { _contents = cts } = do
+visitElements' e elt@Container { _outside = cts } = do
     showHiddenElements <- use showHidden
     if not showHiddenElements && (elt ^. ur . hidden)
         then return []
@@ -135,7 +135,7 @@ visitElementsOnPlane planeId = do
 rootElementsOnPlane :: MonadState GlossWorld m => UiId -> m [UiId]
 rootElementsOnPlane planeId = do
     p <- getElementById "rootElementsOnPlane" planeId
-    return $ S.toList (p ^. contents)
+    return $ S.toList (p ^. inside)
 
 -- What UI element lies directly under point?
 selectedByPoint :: MonadState GlossWorld m => UiId -> (Float, Float) ->
@@ -218,8 +218,13 @@ makeGroup p sel proxyLocation = do
 
     let proxyName = "proxy" ++ show newPlaneName
     let groupPlane = UiId proxyName
-    let e = UIElement.Proxy (UrElement p False 0 False proxyLocation proxyName) S.empty
-    createdInParent groupPlane e p
+    let e = UIElement.Container { _ur = UrElement (Inside p) False 0 False proxyLocation proxyName
+                                , _pic = "panel_proxy.png"
+                                , _imageWidth = 40
+                                , _imageHeight = 40
+                                , _inside = S.empty
+                                , _outside = S.empty }
+    createdInsideParent groupPlane e p
     addPlane groupPlane
 
     forM_ everythingThatsMoving $ \movingId -> do
@@ -227,10 +232,10 @@ makeGroup p sel proxyLocation = do
         movingElement <- getElementById "makeGroup" movingId
         liftIO $ putStrLn $ "parent = " ++ show (movingElement ^. ur . parent)
         let p' = movingElement ^. ur . parent
-        unless (p' `elem` everythingThatsMoving) $ do
+        unless (inOrOutParent p' `elem` everythingThatsMoving) $ do
             liftIO $ print $ "no parent for " ++ show p'
             --unparent movingId
-            moveElementToPlane movingId groupPlane
+            moveElementToPlane movingId (Inside groupPlane)
 
 getAllFilesOfType :: String -> String -> IO [String]
 getAllFilesOfType ext dir = do

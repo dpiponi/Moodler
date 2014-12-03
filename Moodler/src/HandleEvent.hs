@@ -94,18 +94,32 @@ defaultClick' p i = do
             doSelection i
             handleDefault
         -- Switch plane
+        {-
         Proxy {} -> do
             --let pl = Plane newPlane
             planes .= i
             handleDefault
+            -}
         Selector { _setting = oldSetting,
                    _options = opts } -> do
             let newSetting = (floor oldSetting+1) `mod` length opts
             W.undoPoint
             W.synthSet i (fromIntegral newSetting)
             handleDefault
-        TextBox { } -> do
+        TextBox { } -> 
             handleTextBox i
+
+{-
+ctrlClick' :: Point -> UiId -> MoodlerM Zero
+ctrlClick' p i = do
+    elt <- getElementById "ctrlClick'" i
+    case elt of
+        -- XXX Need to select images/containers correctly.
+        Container {} -> do
+            planes .= i
+            handleDefault
+        _ -> defaultClick' p i
+        -}
 
 elementDisplayName :: UIElement -> String
 elementDisplayName In { _displayName = n} = n
@@ -152,7 +166,7 @@ handleDefault' (EventKey (Char 'Z') Down Modifiers { alt = Down } _) = do
 handleDefault' (EventKey (Char 'p') Down _ _) = do
     es <- use currentSelection
     (container, contentss) <- findContainer es
-    forM_ contentss $ \content -> reparent container content
+    forM_ contentss $ \content -> reparent (Inside container) content
     handleDefault
 
 handleDefault' (EventKey (Char '+') Down Modifiers { shift = Down, alt = Down, ctrl = Up } _) = do
@@ -337,7 +351,8 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
             elt <- getElementById "HandleEvent.hs" i
             case elt of
                 Container {} -> do
-                    doSelection i
+                    liftIO $ putStrLn $ "ctrl-click on " ++ show i
+                    planes .= i
                     handleDefault
                 Out {} -> do
                     highlightJust i
@@ -345,9 +360,11 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
                 In {} -> do
                     doSelection i
                     handleDefault
+                    {-
                 Proxy {} -> do
                     doSelection i
                     handleDefault
+                    -}
                 Knob {} -> do
                     highlightJust i
                     handleDraggingCable i p p
@@ -394,7 +411,7 @@ dragElement top d sel = forM_ sel $ \s -> do
     --let Just elt = M.lookup s elts
     elt <- getElementById "dragElement" s
     case elt of
-        Container { _contents = cts } ->
+        Container { _outside = cts } ->
             -- If you drag a parent and its children then only the
             -- parent needs to be expicitly dragged.
             -- XXX use minimal parent func

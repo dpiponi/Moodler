@@ -4,10 +4,10 @@ do
     root <- currentPlane
     keyboard  <-  new' "input"
     trigger  <-  new' "input"
-    container3 <- container' "panel_keyboard.png" (x+(0.0), y+(0.0)) root
-    out0 <- plugout' (keyboard ! "result") (x+(60.0), y+(24.0)) container3
+    container3 <- container' "panel_keyboard.png" (x+(0.0), y+(0.0)) (Inside root)
+    out0 <- plugout' (keyboard ! "result") (x+(60.0), y+(24.0)) (Outside container3)
     setColour out0 "#control"
-    out1 <- plugout' (trigger ! "result") (x+(60.0), y+(-24.0)) container3
+    out1 <- plugout' (trigger ! "result") (x+(60.0), y+(-24.0)) (Outside container3)
     setColour out1 "#control"
     recompile
     return ()

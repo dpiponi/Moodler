@@ -57,12 +57,13 @@ synthPreamble panelName synthName topOffset = do
     tellInd 4 "(x, y) <- fmap (quantise2 quantum) mouse"
     tellInd 4 $ unwords ["panel <- container'",
                          show panelName,
-                         "(x, y) plane"]
+                         "(x, y) (Inside plane)"]
     tellInd 4 $ unwords ["lab <- label'",
                           show synthName,
                           xyoffset topOffset,
-                          "plane"]
-    tellInd 4 "parent panel lab"
+                          "(Outside panel)"] -- XXX Create in place
+                          --"(Inside plane)"] -- XXX Create in place
+    --tellInd 4 "parent panel lab"
     tellInd 4 $ unwords ["name <- new'", show synthName]
 
 {-
@@ -95,22 +96,24 @@ synthScript synthName ins outs = do
                     [ "inp <- plugin' (name ++",
                       show ("." ++ eachInput) ++ ")",
                       xyoffset (-21, -offset),
-                      "plane" ]
+                      "(Outside panel)" ]
+                      --"(Inside plane)" ]
              let inCol = getColourFromCDecl inputType
              F.forM_ inCol $ \col ->
                 tellInd 4 $ unwords [ "setColour", "inp", show col]
-             tellInd 4 "parent panel inp"
+             --tellInd 4 "parent panel inp" -- XXX Create in place
         forM_ (zip [outOffset, outOffset+50 ..] outs) $
                                     \(offset, (outputType, eachOutput)) -> do
              tellInd 4 $ unwords
                     [ "out <- plugout' (name ++ ",
                       show ("." ++ eachOutput) ++ ")",
                       xyoffset (20, -offset),
-                      "plane" ]
+                      "(Outside panel)" ] -- XXX Create in place
+                      --"(Inside plane)" ] -- XXX Create in place
              let outCol = getColourFromCDecl outputType
              F.forM_ outCol $ \col ->
                  tellInd 4 $ unwords [ "setColour", "out", show col]
-             tellInd 4 "parent panel out"
+             --tellInd 4 "parent panel out"
         tellInd 4 "recompile"
         tellInd 4 "return ()"
 

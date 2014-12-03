@@ -1,17 +1,17 @@
 do
     plane <- currentPlane
     (x, y) <- fmap (quantise2 quantum) mouse
-    panel <- container' "panel_3x1.png" (x, y) plane
-    lab <- label' "sample_and_hold" (x-25.0, y+75.0) plane
+    panel <- container' "panel_3x1.png" (x, y) (Inside plane)
+    lab <- label' "sample_and_hold" (x-25.0, y+75.0) (Inside plane)
     parent panel lab
     name <- new' "sample_and_hold"
-    inp <- plugin' (name ++ ".trigger") (x-21, y+25) plane
+    inp <- plugin' (name ++ ".trigger") (x-21, y+25) (Inside plane)
     setColour inp "#control"
     parent panel inp
-    inp <- plugin' (name ++ ".signal") (x-21, y-25) plane
+    inp <- plugin' (name ++ ".signal") (x-21, y-25) (Inside plane)
     setColour inp "#control"
     parent panel inp
-    out <- plugout' (name ++  ".result") (x+20, y) plane
+    out <- plugout' (name ++  ".result") (x+20, y) (Inside plane)
     setColour out "#control"
     parent panel out
     recompile

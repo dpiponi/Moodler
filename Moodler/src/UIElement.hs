@@ -13,7 +13,7 @@ import Sound.MoodlerLib.Symbols
 import Box
 import Cable
 
-data UrElement = UrElement { _parent :: UiId
+data UrElement = UrElement { _parent :: Location
                            , _highlighted :: Bool
                            , _depth :: Int
                            , _hidden :: Bool
@@ -24,9 +24,12 @@ data UIElement = Container { _ur :: UrElement
                            , _pic :: String
                            , _imageWidth :: Int
                            , _imageHeight :: Int
-                           , _contents :: S.Set UiId }
+                           , _inside :: S.Set UiId
+                           , _outside :: S.Set UiId }
+                           {-
                | Proxy { _ur :: UrElement
                        , _contents :: S.Set UiId }
+                       -}
                | In { _ur :: UrElement
                     , _dataColour :: String
                     , _displayName :: String
@@ -67,7 +70,7 @@ elementRadius (Out {})   = 10
 elementRadius (Knob {})  = 18
 elementRadius (Label {}) = 20
 elementRadius (TextBox {}) = 20
-elementRadius (Proxy {}) = 20
+--elementRadius (Proxy {}) = 20
 elementRadius (Image {}) = 0
 elementRadius (Selector {}) = 10
 
@@ -78,7 +81,7 @@ elementType (Out {})   = OutType
 elementType (Knob {})  = KnobType
 elementType (Label {}) = LabelType
 elementType (TextBox {}) = TextBoxType
-elementType (Proxy {}) = ProxyType
+--elementType (Proxy {}) = ProxyType
 elementType (Image {}) = ImageType
 elementType (Selector {}) = SelectorType
 
@@ -112,5 +115,5 @@ isPlane Container {} = True
 isPlane _ = False
 
 isProxy :: UIElement -> Bool
-isProxy Proxy {} = True
+--isProxy Proxy {} = True
 isProxy _ = False

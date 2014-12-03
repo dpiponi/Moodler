@@ -43,13 +43,17 @@ emptyWorld' rootID root =
 
 emptyGlossWorld' :: GlossWorld
 emptyGlossWorld' = 
-    let root = Proxy { _ur = UrElement { _parent = error "Root parent shouldn't be visible"
+    let root = Container { _ur = UrElement { _parent = error "Root parent shouldn't be visible"
                      , _highlighted = False
                      , _depth = 0
                      , _hidden = False
                      , _loc = (0, 0)
                      , _name = "root" }
-                     , _contents = S.empty
+                     , _inside = S.empty
+                     , _outside = S.empty
+                     , _pic = "panel_proxy.png"
+                     , _imageWidth = 40
+                     , _imageHeight = 40
                      }
         rootID = UiId "root"
         innerWorld = emptyWorld' rootID root
