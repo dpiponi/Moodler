@@ -81,74 +81,119 @@ class InputHandler m where
 
 $(makeLenses ''World)
 
-handleGetString :: [String] -> String -> String ->
+handleGetString :: [String] -> String -> String -> String ->
                    MoodlerM (Maybe String)
-handleGetString completions inputString prompt = do
+handleGetString completions inputString afterCursor prompt = do
     e <- liftF $ GetEvent id
-    let longestCompletion = longestMatchingPrefix completions inputString
-    gadget .= stringGadget longestCompletion inputString prompt
-    handleGetString' completions inputString prompt e
+    let longestCompletion = if null afterCursor then longestMatchingPrefix completions inputString else inputString
+    gadget .= stringGadget longestCompletion inputString afterCursor prompt
+    handleGetString' completions inputString afterCursor prompt e
 
-continueGetString :: String -> [String] -> String ->
+continueGetString :: String -> [String] -> String -> String ->
                      MoodlerM (Maybe String)
-continueGetString prompt completions inputString = do
-    let longestCompletion = longestMatchingPrefix completions inputString
-    gadget .= stringGadget longestCompletion inputString prompt
-    handleGetString completions inputString prompt
+continueGetString prompt completions inputString afterCursor = do
+    let longestCompletion = if null afterCursor then longestMatchingPrefix completions inputString else inputString
+    gadget .= stringGadget longestCompletion inputString afterCursor prompt
+    handleGetString completions inputString afterCursor prompt
 
-handleGetString' :: [String] -> String -> String -> Event ->
+handleGetString' :: [String] -> String -> String -> String -> Event ->
                     MoodlerM (Maybe String)
-handleGetString' _ inputString _ (EventKey (SpecialKey KeyEnter)
+handleGetString' _ inputString afterCursor _ (EventKey (SpecialKey KeyEnter)
                                               Down _ _) = do
     gadget .= const blank
-    return (Just inputString)
+    return (Just (inputString ++ afterCursor))
 
-handleGetString' _ _ _ (EventKey (SpecialKey KeyEsc)
+handleGetString' _ _ _ _ (EventKey (SpecialKey KeyEsc)
                                               Down _ _) = do
     gadget .= const blank
     return Nothing
 
 -- Delete key during command entry
-handleGetString' completions inputString prompt
+handleGetString' completions inputString afterCursor prompt
                     (EventKey (SpecialKey KeyDelete)
                               Down _ _) = do
     let inputString' = deleteLastChar inputString
-    continueGetString prompt completions inputString'
+    continueGetString prompt completions inputString' afterCursor
 
 -- Space key during command entry
-handleGetString' completions inputString prompt (EventKey
+handleGetString' completions inputString afterCursor prompt (EventKey
                                      (SpecialKey KeySpace)
                                      Down _ _) = do
     let inputString' = inputString ++ " "
-    continueGetString prompt completions inputString'
+    continueGetString prompt completions inputString' afterCursor
 
-handleGetString' completions inputString prompt
+handleGetString' completions inputString afterCursor prompt
                     (EventKey (SpecialKey KeyTab)
                     Down _ _) = do
-    let longestCompletion = longestMatchingPrefix completions inputString
-    gadget .= stringGadget longestCompletion inputString prompt
-    handleGetString completions longestCompletion prompt
+    let longestCompletion = if null afterCursor then longestMatchingPrefix completions inputString else inputString
+    gadget .= stringGadget longestCompletion inputString afterCursor prompt
+    handleGetString completions longestCompletion afterCursor prompt
+
+handleGetString' completions inputString afterCursor prompt
+                    (EventKey (SpecialKey KeyLeft)
+                    Down _ _) =
+    if not (null inputString)
+        then do
+            let afterCursor' = last inputString : afterCursor
+            let inputString' = init inputString
+            let longestCompletion = inputString
+            gadget .= stringGadget longestCompletion inputString' afterCursor' prompt
+            handleGetString completions inputString' afterCursor' prompt
+        else handleGetString completions inputString afterCursor prompt
+
+handleGetString' completions inputString afterCursor prompt
+                    (EventKey (SpecialKey KeyRight)
+                    Down _ _) =
+    if not (null afterCursor)
+        then do
+            let inputString' = inputString ++ [head afterCursor]
+            let afterCursor' = tail afterCursor
+            let longestCompletion = if null afterCursor' then longestMatchingPrefix completions inputString' else inputString
+            gadget .= stringGadget longestCompletion inputString' afterCursor' prompt
+            handleGetString completions inputString' afterCursor' prompt
+        else handleGetString completions inputString afterCursor prompt
+
+handleGetString' completions inputString afterCursor prompt
+                    (EventKey (SpecialKey KeyHome)
+                    Down _ _) = do
+    let inputString' = ""
+    let afterCursor' = inputString ++ afterCursor
+    let longestCompletion = if null afterCursor' then longestMatchingPrefix completions inputString' else inputString
+    gadget .= stringGadget longestCompletion inputString' afterCursor' prompt
+    handleGetString completions inputString' afterCursor' prompt
+
+handleGetString' completions inputString afterCursor prompt
+                    (EventKey (SpecialKey KeyEnd)
+                    Down _ _) = do
+    let inputString' = inputString ++ afterCursor
+    let afterCursor' = ""
+    let longestCompletion = longestMatchingPrefix completions inputString'
+    gadget .= stringGadget longestCompletion inputString' afterCursor' prompt
+    handleGetString completions inputString' afterCursor' prompt
 
 -- Command key entry
-handleGetString' completions inputString prompt
+handleGetString' completions inputString afterCursor prompt
                         (EventKey (Char c) Down _ _) = do
     let inputString' = inputString ++ [c]
-    continueGetString prompt completions inputString'
+    continueGetString prompt completions inputString' afterCursor
 
 -- XXX Need to think about this
-handleGetString' c x y _ = handleGetString c x y
+handleGetString' c x y z _ = handleGetString c x y z
 
 instance InputHandler MoodlerM where
-    getInput = handleGetString []
+    getInput inputString = handleGetString [] inputString ""
 
 grey50 :: Color
 grey50 = makeColor 0.5 0.5 0.5 1.0
 
-stringGadget :: String -> String -> String -> B.Transform -> Picture
-stringGadget completion inputString prompt _ =
-    translate 0 20 (color (B.transparentBlack 0.8) (rectangleSolid 500 60)) <>
-    translate (-250) 0 (scale 0.4 0.4 (color grey50 $ text (prompt ++ completion))) <>
-    translate (-250) 0 (scale 0.4 0.4 (color white $ text (prompt ++ inputString)))
+stringGadget :: String -> String -> String -> String -> B.Transform -> Picture
+stringGadget completion inputString afterCursor prompt _ =
+    let displayedString = prompt ++ inputString ++ "|" ++ afterCursor
+        displayedCompletion = if null afterCursor then prompt ++ inputString ++ "|" ++ (drop (length inputString) completion) else ""
+    in
+        translate 0 10 (color (B.transparentBlack 0.8) (rectangleSolid 600 50)) <>
+        translate (-300) 0 (scale 0.3 0.3 (color grey50 $ text displayedCompletion)) <>
+        translate (-300) 0 (scale 0.3 0.3 (color white $ text displayedString))
 
 locById :: GlossWorld -> UiId -> (Float, Float)
 locById w e =

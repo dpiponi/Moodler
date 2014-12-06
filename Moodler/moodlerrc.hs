@@ -23,7 +23,7 @@ do
     bind "⇧|" "quantise"
     bind "⇧!" "alert"
     bind "⇧%" "setcolour"
-    bind "⇧~" "container"
+    bind "⇧~" "setpicture"
     bind "⇧⌥F" "bringFront"
     bind "⇧⌥B" "sendBack"
 

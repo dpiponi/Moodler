@@ -14,7 +14,6 @@ import qualified Wiring as W
 import qualified Box as B
 import qualified Data.Foldable as F
 import qualified Data.Map as M
-import qualified Data.Set as S
 
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.Quantise
@@ -35,6 +34,7 @@ import World
 import Save
 import KeyMatcher
 import HandleDraggingRoot
+import HandleDraggingSelection
 
 -- Find a container somewhere in a list of ids.
 -- Assumes there is precisely one. XXX
@@ -57,7 +57,7 @@ clickOnIn' p i = do
     case d of
         Nothing -> do
             doSelection i
-            handleDraggingSelection p
+            handleDraggingSelection handleDefault p
         Just (Cable src) -> do
             srcElt <- getElementById "clickOnIn'" src
             gadget .= cableGadget (_loc (_ur srcElt)) p
@@ -71,7 +71,7 @@ defaultClick' p i = do
         -- XXX Need to select images/containers correctly.
         Container {} -> do
             doSelection i
-            handleDraggingSelection p
+            handleDraggingSelection handleDefault p
         Out {} -> do
             highlightJust i
             gadget .= cableGadget p p
@@ -166,7 +166,7 @@ handleDefault' (EventKey (Char 'Z') Down Modifiers { alt = Down } _) = do
 handleDefault' (EventKey (Char 'p') Down _ _) = do
     es <- use currentSelection
     (container, contentss) <- findContainer es
-    forM_ contentss $ \content -> reparent (Inside container) content
+    forM_ contentss $ \content -> reparent (Outside container) content
     handleDefault
 
 handleDefault' (EventKey (Char '+') Down Modifiers { shift = Down, alt = Down, ctrl = Up } _) = do
@@ -179,7 +179,7 @@ handleDefault' (EventKey (Char '-') Down Modifiers { shift = Up, alt = Down, ctr
 
 handleDefault' (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
-    filename <- handleGetString allScripts "" "read: "
+    filename <- handleGetString allScripts "" "" "read: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     withJust filename $ \filename' -> do
         W.undoPoint
@@ -188,7 +188,7 @@ handleDefault' (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctr
 
 handleDefault' (EventKey (Char 'l') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "saves"
-    filename <- handleGetString allScripts "" "load: "
+    filename <- handleGetString allScripts "" "" "load: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     withJust filename $ \filename' -> do
         W.undoPoint
@@ -199,7 +199,7 @@ handleDefault' (EventKey (Char 'l') Down _ _) = do
 
 handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctrl = Up } _) = do
     allSaves <- liftIO $ getAllScripts "saves"
-    filename <- handleGetString allSaves "" "save: "
+    filename <- handleGetString allSaves "" "" "save: "
     case filename of
         Just filename' ->
             if filename' == ""
@@ -219,7 +219,7 @@ handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctr
 -- XXX quantise
 handleDefault' (EventKey (Char 'w') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
-    filename <- handleGetString allScripts "" "write: "
+    filename <- handleGetString allScripts "" "" "write: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     case filename of
         Just filename' -> evalUi (U.write filename')
@@ -302,7 +302,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
             bringToFront i
             sel <- use currentSelection
             if (length sel > 1) && (i `elem` sel)
-                then handleDraggingSelection p
+                then handleDraggingSelection handleDefault p
                 else defaultClick' p i
 
         Nothing -> handleDraggingRegion p p
@@ -333,11 +333,11 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
             if i `elem` sel
                 then do
                     W.undoPoint
-                    handleDraggingSelection p
+                    handleDraggingSelection handleDefault p
                 else do
                     W.undoPoint
                     doSelection i
-                    handleDraggingSelection p
+                    handleDraggingSelection handleDefault p
         Nothing -> handleDraggingRoot handleDefault p
 
 -- Cable drag with ctrl-mouse
@@ -404,24 +404,10 @@ handleDefault' (EventKey key Down mods _) = do
 handleDefault' _ =
     handleDefault
 
-dragElement :: [UiId] -> Point -> [UiId] -> MoodlerM ()
-dragElement top d sel = forM_ sel $ \s -> do
-    inner . uiElements . ix s . ur . loc += d
-    --elts <- use (inner . uiElements)
-    --let Just elt = M.lookup s elts
-    elt <- getElementById "dragElement" s
-    case elt of
-        Container { _outside = cts } ->
-            -- If you drag a parent and its children then only the
-            -- parent needs to be expicitly dragged.
-            -- XXX use minimal parent func
-            dragElement top d (filter (not . flip elem top) $
-                                                        S.toList cts)
-        _ -> return ()
-
 handleTextBox :: UiId -> MoodlerM Zero
 handleTextBox selectedTextBox = do
-    newText <- handleGetString [] "" "textbox: "
+    oldText <- use (inner . uiElements . ix selectedTextBox . boxText)
+    newText <- handleGetString [] oldText "" "textbox: "
     case newText of
         Nothing -> return ()
         Just txt -> do
@@ -434,32 +420,6 @@ handleTextBox' :: UiId -> Event -> MoodlerM Zero
 handleTextBox' selectedTextBox e =
     elt <- getElementById "handletextBox" selectedTextBox
     -}
-
-handleDraggingSelection :: Point ->
-                           MoodlerM Zero
-handleDraggingSelection p0' = do
-    let p0 = quantise2 quantum p0'
-    e <- liftF $ GetEvent id
-    handleDraggingSelection' p0 e
-
-doDrag :: Point -> Point -> MoodlerM ()
-doDrag p0 p1 = do
-    sel <- use currentSelection
-    dragElement sel (p1-p0) sel
-
-handleDraggingSelection' :: Point -> Event -> MoodlerM Zero
-handleDraggingSelection' p0 (EventMotion p1') = do
-    let p1 = quantise2 quantum p1'
-    doDrag p0 p1
-    handleDraggingSelection p1
-
-handleDraggingSelection' p0
-    (EventKey (MouseButton LeftButton) Up _ p1') = do
-    let p1 = quantise2 quantum p1'
-    doDrag p0 p1
-    handleDefault
-
-handleDraggingSelection' a _ = handleDraggingSelection a
 
 selectEverythingInRegion :: (MonadIO m, MonadState GlossWorld m) =>
                             Point -> Point -> m ()

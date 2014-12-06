@@ -1,9 +1,10 @@
 const char *result;
 
 void init() {
+    result = 0;
 }
 
-void exec(in __attribute__((colour("(0, 0, 1)"))) const char *input,
-          out __attribute__((colour("(0, 0, 1)"))) const char *result) {
+void exec(in __attribute((colour("(0, 0, 1)"))) const char *input,
+          out __attribute((colour("(0, 0, 1)"))) const char *result) {
     result = input;
 }

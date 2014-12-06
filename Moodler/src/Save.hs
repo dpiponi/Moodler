@@ -160,15 +160,6 @@ elementLine _ parentId maybeMouseLocn eltName Container { _ur = UrElement { _loc
                               "<-", "container'", show picture,
                               relativeShow maybeMouseLocn p, showParent parentId]
 
-{-
-elementLine _ parentId maybeMouseLocn eltName
-    Proxy { _ur = UrElement { _loc = p } } =
-    multiTellLn "module" 4 $ unwords [unUiId eltName,
-                              "<-", "proxy'",
-                              relativeShow maybeMouseLocn p,
-                              parentId]
--}
-
 saveElement :: (Functor m, MonadIO m, MonadState GlossWorld m)
                   => Location -> S.Set UiId -> Maybe Point ->
                      UiId -> UIElement ->

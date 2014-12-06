@@ -26,10 +26,6 @@ data UIElement = Container { _ur :: UrElement
                            , _imageHeight :: Int
                            , _inside :: S.Set UiId
                            , _outside :: S.Set UiId }
-                           {-
-               | Proxy { _ur :: UrElement
-                       , _contents :: S.Set UiId }
-                       -}
                | In { _ur :: UrElement
                     , _dataColour :: String
                     , _displayName :: String

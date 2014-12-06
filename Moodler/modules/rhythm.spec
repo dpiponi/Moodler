@@ -1,0 +1,76 @@
+/*
+ * Arpeggiator DSL is loosely inspired by
+ * http://kevin.mcguireclan.net/papers/ArpEggWeb/ArpEgg.htm
+ * There's no rewriting going on here, just a simple state machine.
+ */
+int pc;
+const char *last_pattern;
+double last_trigger;
+double last_reset;
+double playing;
+double gate;
+int count_stack[12];
+int count_stack_address[12];
+int count_stack_pointer;
+
+void init() {
+    pc = 0;
+    last_pattern = 0;
+    last_trigger = 0;
+    last_reset = 0;
+    playing = 0.0;
+}
+
+void exec(in __attribute__((normal("abc"))) __attribute__((colour("(0, 0, 1)"))) const char *pattern,
+          in control trigger,
+          in control reset,
+          out control gate) {
+    const char *pattern2 = pattern;
+    if (pattern2 != last_pattern || (last_reset <= 0 && reset > 0)) {
+        pc = 0;
+        count_stack_pointer = 0;
+    }
+
+    if (pattern2) {
+        int done = 0;
+        if (last_trigger <= 0 && trigger > 0) {
+            while (!done) {
+                if (pattern2[pc] >= '0' && pattern2[pc] <= '9') {
+                    count_stack[count_stack_pointer] = pattern2[pc]-'0';;
+                } else
+                switch (pattern2[pc]) {
+                case '(':
+                    count_stack_address[count_stack_pointer] = pc;
+                    ++count_stack_pointer;
+                    break;
+                case ')':
+                    if (--count_stack[count_stack_pointer-1] <= 0) {
+                        --count_stack_pointer;
+                    } else {
+                        pc = count_stack_address[count_stack_pointer-1];
+                    }
+                    break;
+                case 'x':
+                    playing = 1.0;
+                    done = 1;
+                    break;
+                case '.':
+                    playing = 0.0;
+                    done = 1;
+                    break;
+                }
+
+                if (pattern2[pc] == 0) {
+                    pc = 0;
+                    count_stack_pointer = 0;
+                } else {
+                    ++pc;
+                }
+            }
+        }
+    }
+    last_trigger = trigger;
+    last_pattern = pattern2;
+    last_reset = reset;
+    gate = trigger*playing;
+}

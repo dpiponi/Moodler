@@ -13,6 +13,9 @@ ol {
 ul {
     width: 20cm;
 }
+body {
+    margin: 0.5cm;
+}
 .codebox {
     /* Below are styles for the codebox (not the code itself) */
     border:2px solid black;
@@ -483,7 +486,124 @@ band-limited for all four waveforms.
 
 </UL>
 
+<H2>Building your own module</H2>
+<P>
+There are quite a few approaches to building modules in Moodler.
+I think this is the simplest.
+The VCA module essentially just multiplies its two inputs together.
+Often you think of the first input as being the gain and the second
+input as the signal being amplified.
+Let's build a nonlinear voltage controlled amplifier that multiplies the
+signal by the square of the CV input.
+</P>
+<P>
+We can start by creating a VCA by using <B>alt-r</B> followed by
+<B>_vca</B>:
+</P>
+<FIGURE>
+<IMG SRC="step1.png" ALT="Building your own module">
+<FIGCAPTION>Building your own module</FIGCAPTION>
+</FIGURE>
+<P>
+Now make another VCA and direct the output of the first to the second:
+</P>
+<FIGURE>
+<IMG SRC="step2.png" ALT="Building your own module">
+<FIGCAPTION>Building your own module</FIGCAPTION>
+</FIGURE>
+<P>
+Now we want to build the external plugs that cables will attach to.
+So using <B>alt-r</B> we create suitable pairs of ins and outs using
+an invocation of <B>audio_warp</B> and two of <B>warp</B>.
+These each create pairs of disembodied ins out outs that are magically
+connected even though you can't see a cable.
+Hook these up as so:
+</P>
+<FIGURE>
+<IMG SRC="step3.png" ALT="Building your own module">
+<FIGCAPTION>Building your own module</FIGCAPTION>
+</FIGURE>
+<P>
+The collection of components attached by cables to the VCAs will now go
+inside a container. Select them with the mouse like so:
+</P>
+<FIGURE>
+<IMG SRC="step4.png" ALT="Building your own module">
+<FIGCAPTION>Building your own module</FIGCAPTION>
+</FIGURE>
+<P>
+Now hit <B>g</B> which places the selected components inside a new container.
+Hit <B>esc</B> to get back out to the top level again.
+You'll see the endpoints and an icon representing the container.
+</P>
+<FIGURE>
+<IMG SRC="step5.png" ALT="Building your own module">
+<FIGCAPTION>Building your own module</FIGCAPTION>
+</FIGURE>
+<P>
+Let's get rid of the ugly icon. Select the container and hit <B>~</B>
+to select the filename of a better looking image.
+I used <B>panel_bit_and.png</B> but you can make your own image and store it in
+the <code>assets/</code> directory.
+</P>
+<FIGURE>
+<IMG SRC="step6.png" ALT="Building your own module">
+<FIGCAPTION>Building your own module</FIGCAPTION>
+</FIGURE>
+<P>
+Now <B>alt-drag</B> the ins and outs to their position on the container.
+</P>
+<FIGURE>
+<IMG SRC="step7.png" ALT="Building your own module">
+<FIGCAPTION>Building your own module</FIGCAPTION>
+</FIGURE>
+<P>
+The ins and outs are correctly placed but they're not attached to the container
+yet. With the mouse select the container (and the ins and outs) and hit
+<B>p</B>. This attaches everything to the selected container.
+There is an important concept here: the <B>g</B> command placed a set of
+components <EM>inside</EM> a container, but <B>p</B> attached them
+on the <EM>outside</EM>. Every container has an inside and outside like this.
+To look inside a container <B>ctrl-click</B> on it. Use <B>esc</B> get
+back out again.
+</P>
+<P>
+Once you have finished making your new component you can save it as a script.
+Select the component and save it with <B>alt-w</B>.
+You can then run your script again with <B>alt-r</B> and you'll get a copy.
+Note that the script places the created object at the cursor relative to the
+position of the cursor so when you save, place the cursor in the centre of
+what you're saving.
+</P>
+<P>
+You might want to attach a knob to the CV input at the top left.
+Select it with a cursor and hit <B>k</B>.
+You can <B>alt-w</B> this too.
+<B>But!</B> When you select components to <B>alt-w</B> you don't want
+to miss hidden components.
+The script that <B>k</B> runs hides the original input.
+So hit <B>"</B> before selecting and saving and hit it again afterwards to
+toggle <EM>showhidden</EM> mode.
+</P>
+<P>
+Some notes:
+</P>
+<UL>
+<LI>
+We used the <code>warp</code> and <code>audio_warp</code> to connect the inside
+of a container with the outside world without having to break a cable in
+two.
+</LI>
+<LI>
+You can detach components from their container. In fact, the <code>warp</code>
+components are nothing other than an <code>id</code> module with the container
+removed.
+</LI>
+</UL>
+
 <H2>Command line invocation</H2>
+
+<H2>Glossary</H2>
 
 <H2>Issues</H2>
 There are lots of bugs in moodler, most of which are of the "I haven't had
@@ -501,7 +621,8 @@ The types are not checked in any way.
 Sometimes the result C code won't compile.
 (I haven't decided how to handle this yet.
 I don't want overly strict type checking as that might eliminate some
-creative uses of modules.)
+creative uses of modules. Functional fixedness is antithetical to the modular
+synth philosophy.)
 </LI>
 <LI>
 This documentation is incomplete.

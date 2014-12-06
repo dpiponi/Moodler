@@ -8,6 +8,7 @@ int pc;
 int np;
 const char *last_pattern;
 double last_trigger;
+double last_reset;
 double playing;
 double gate;
 double note[12];
@@ -21,19 +22,21 @@ void init() {
     pc = 0;
     last_pattern = 0;
     last_trigger = 0;
+    last_reset = 0;
     playing = 0.0;
     chord_offset = 0;
 }
 
 void exec(in __attribute__((normal("abc"))) __attribute__((colour("(0, 0, 1)"))) const char *pattern,
           in control trigger,
-          in control note1,
-          in __attribute__((normal(-100.0))) control note2,
-          in __attribute__((normal(-100.0))) control note3,
+          in control reset,
+          in control root,
+          in __attribute__((normal(-100.0))) control interval1,
+          in __attribute__((normal(-100.0))) control interval2,
           out control result,
           out control gate) {
     const char *pattern2 = pattern;
-    if (pattern2 != last_pattern) {
+    if (pattern2 != last_pattern || (last_reset <= 0 && reset > 0)) {
         pc = 0;
         count_stack_pointer = 0;
         chord_offset = 0;
@@ -42,12 +45,12 @@ void exec(in __attribute__((normal("abc"))) __attribute__((colour("(0, 0, 1)")))
 
     np = 0;
     for (double octave = 0; np < 4; octave += 0.1) {
-        note[np++] = note1+octave;
-        if (note2 > -100.0) {
-            note[np++] = note1+note2+octave;
+        note[np++] = root+octave;
+        if (interval1 > -100.0) {
+            note[np++] = root+interval1+octave;
         }
-        if (note3 > -100.0) {
-            note[np++] = note1+note3+octave;
+        if (interval2 > -100.0) {
+            note[np++] = root+interval2+octave;
         }
     }
 
@@ -136,5 +139,6 @@ void exec(in __attribute__((normal("abc"))) __attribute__((colour("(0, 0, 1)")))
     }
     last_trigger = trigger;
     last_pattern = pattern2;
+    last_reset = reset;
     gate = trigger*playing;
 }

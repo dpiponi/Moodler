@@ -264,7 +264,7 @@ gen currentDirectory synth out' = do
 
 compile :: String -> String -> IO ()
 compile sourceName libraryName = do
-    let command = "clang -O3 -dynamiclib -lm -std=gnu99 moodler_lib.o " ++
+    let command = "clang -O3 -dynamiclib -lm -std=gnu99 -Wno-logical-op-parentheses moodler_lib.o " ++
                                     sourceName ++ " -o " ++ libraryName
     --print $ "Running " ++ command
     compileHandle <- runCommand command

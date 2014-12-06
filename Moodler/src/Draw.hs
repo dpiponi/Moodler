@@ -68,9 +68,10 @@ rectAt x y iw ih = translate x y (
                 (fromIntegral iw/2, fromIntegral ih/2))
 
 proxyFeature :: Picture
-proxyFeature = rect (-20, -20) (20, 20) <>
-               rect (-18, -18) (18, 18) <>
-               thickCircle 2 16
+proxyFeature = color proxyColour (
+                   rect (-20, -20) (20, 20) <>
+                   rect (-18, -18) (18, 18) <>
+                   thickCircle 2 16)
 
 drawUIElement :: Bool -> GlossWorld -> UIElement -> (Picture, Picture)
 -- Recurse into containers

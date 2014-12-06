@@ -1,0 +1,4 @@
+audio.so
+moodler_lib.o
+scripts/_*
+dist

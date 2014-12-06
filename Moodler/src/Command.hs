@@ -61,7 +61,7 @@ imageDimensions (P.ImageYCbCr8 (P.Image { P.imageWidth = w, P.imageHeight = h })
 imageDimensions (P.ImageCMYK8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
 imageDimensions (P.ImageCMYK16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
 
-getPic :: (MonadIO m, MonadState GlossWorld m) => String -> m (Int, Int)
+getPic :: (MonadIO m, MonadState GlossWorld m) => String -> m (Either String (Int, Int))
 getPic bmpName = do
     liftIO $ putStrLn $ "Loading: " ++ show bmpName
     let imageFileName = "assets/" ++ bmpName
@@ -72,8 +72,8 @@ getPic bmpName = do
                 let Just b = fromDynamicImage bmp
                 let (width, height) = imageDimensions bmp
                 pics %= M.insert bmpName (b, width, height)
-                return (width, height)
-        Left e -> error ("\"" ++ imageFileName ++ "\" didn't load: " ++ e)
+                return $ Right (width, height)
+        Left e -> return $ Left ("\"" ++ imageFileName ++ "\" didn't load: " ++ e)
 
 execCommand :: (InputHandler m, Functor m, MonadIO m,
                 MonadState GlossWorld m) =>
@@ -204,23 +204,39 @@ evalUi (U.Proxy n proxyName p planeItsOn cfn) = do
 
 evalUi (U.Image n bmpName p creationPlane cfn) = do
     (_, hi) <- depthExtent
-    (width, height) <- getPic bmpName
-    let e = UIElement.Image (UrElement creationPlane False (hi+1) False
-            p bmpName) bmpName width height
-    createdInParent n e creationPlane
+    maybePic <- getPic bmpName
+    case maybePic of
+        Right (width, height) -> do
+            let e = UIElement.Image (UrElement creationPlane False (hi+1) False
+                    p bmpName) bmpName width height
+            createdInParent n e creationPlane
+        Left e -> doAlert e
     evalUi (cfn n)
 
 evalUi (U.Container n bmpName p creationPlane cfn) = do
     (_, hi) <- depthExtent
-    (width, height) <- getPic bmpName
-    let e = UIElement.Container { _ur = UrElement creationPlane False (hi+1) False p bmpName
-                                , _pic = bmpName
-                                , _imageWidth = width
-                                , _imageHeight = height
-                                , _inside = S.empty
-                                , _outside = S.empty }
-    createdInParent n e creationPlane
+    maybePic <- getPic bmpName
+    case maybePic of
+        Right (width, height) -> do
+            let e = UIElement.Container { _ur = UrElement creationPlane False (hi+1) False p bmpName
+                                        , _pic = bmpName
+                                        , _imageWidth = width
+                                        , _imageHeight = height
+                                        , _inside = S.empty
+                                        , _outside = S.empty }
+            createdInParent n e creationPlane
+        Left e -> doAlert e
     evalUi (cfn n)
+
+evalUi (U.SetPicture uiId pictureFileName cfn) = do
+    maybePic <- getPic pictureFileName
+    case maybePic of
+        Right (width, height) -> do
+            inner . uiElements . ix uiId . pic .= pictureFileName
+            inner . uiElements . ix uiId . UIElement.imageWidth .= width
+            inner . uiElements . ix uiId . UIElement.imageHeight .= height
+        Left e -> doAlert e
+    evalUi cfn
 
 evalUi (U.Label n labelText p creationPlane cfn) = do
     (_, hi) <- depthExtent

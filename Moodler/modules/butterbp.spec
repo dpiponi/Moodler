@@ -25,10 +25,10 @@ void init() {
 }
 
 void exec(in control freq, in control bandwidth, in sample signal, out sample result) {
-    freq = clamp(-1.0, 0.5, freq);
-    bandwidth = clamp(1.0, 1000.0, bandwidth);
-    double w = 2*M_PI*signal_to_frequency(freq);
-    double b = 2*M_PI*bandwidth;
+    double freq2 = clamp(-1.0, 0.5, freq);
+    double bandwidth2 = clamp(1.0, 1000.0, bandwidth);
+    double w = 2*M_PI*signal_to_frequency(freq2);
+    double b = 2*M_PI*bandwidth2;
     if (fabs(b)<10.0) {
         b = 10.0;
     }

@@ -1,9 +1,6 @@
 * ui
-    * Prettify textbox
     * Remove extraneous stuff from phaser
-    * Proxy picture?
     * Properly integrate oscilloscope
-    * Integer input?
     * Sliders could be better
     * Ensure panel_proxy.png is loaded when needed
 * moodler

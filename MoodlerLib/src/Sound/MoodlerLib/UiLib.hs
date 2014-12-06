@@ -62,6 +62,7 @@ data Ui a = Return a
           | GetType UiId (ElementType -> Ui a)
           | SendBack UiId (Ui a)
           | BringFront UiId (Ui a)
+          | SetPicture UiId String (Ui a)
           deriving (Typeable, Functor)
 
 instance Monad Ui where
@@ -96,6 +97,7 @@ instance Monad Ui where
     SetLow t v cont >>= f = SetLow t v (cont >>= f)
     SetHigh t v cont >>= f = SetHigh t v (cont >>= f)
     SetName t n cont >>= f = SetName t n (cont >>= f)
+    SetPicture t n cont >>= f = SetPicture t n (cont >>= f)
     --Value t v cont >>= f = Value t v (cont >>= f)
     -- Save t cont >>= f = Save t (cont >>= f)
     Write t cont >>= f = Write t (cont >>= f)
@@ -260,6 +262,9 @@ setLow t v = SetLow t v (return ())
 
 setName :: UiId -> String -> Ui ()
 setName t n = SetName t n (return ())
+
+setPicture :: UiId -> String -> Ui ()
+setPicture t n = SetPicture t n (return ())
 
 setHigh :: UiId -> Maybe Float -> Ui ()
 setHigh t v = SetHigh t v (return ())
