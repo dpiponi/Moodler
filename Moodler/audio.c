@@ -4,7 +4,7 @@
 #include <CoreAudio/CoreAudioTypes.h>
 #include <CoreFoundation/CFRunLoop.h>
 
-#define NUM_CHANNELS 1
+#define NUM_CHANNELS 2
 #define NUM_BUFFERS 3
 #define BUFFER_SIZE 2048
 #define SAMPLE_TYPE short
@@ -55,7 +55,8 @@ void callback(void *custom_data, AudioQueueRef queue,
      * Clear the audio buffer for filling.
      */
     for (int k = 0; k < BUFFER_SIZE/sizeof(SAMPLE_TYPE); ++k) {
-        sample_buffer[k] = 0;
+        sample_buffer[2*k] = 0;
+        sample_buffer[2*k+1] = 0;
     }
     
     int bufferLoads = BUFFER_SIZE/(sizeof(SAMPLE_TYPE)*blockSize);
@@ -80,7 +81,8 @@ void callback(void *custom_data, AudioQueueRef queue,
      */
     for (int i = 0; i < numStates; ++i) {
         for (int k = 0; k < BUFFER_SIZE/sizeof(SAMPLE_TYPE); ++k) {
-            sample_buffer[k] += moodler_buffer[i][k];
+            sample_buffer[2*k] += moodler_buffer[i][k];
+            sample_buffer[2*k+1] += 0.6*moodler_buffer[i][k];
         }
     }
 //    printf("Callback computed!\n");
@@ -108,7 +110,7 @@ void play() {
                                kAudioFormatFlagIsPacked;
     format.mBitsPerChannel   = 8 * sizeof(SAMPLE_TYPE);
     format.mChannelsPerFrame = NUM_CHANNELS;
-    format.mBytesPerFrame    = sizeof(SAMPLE_TYPE) * NUM_CHANNELS;
+    format.mBytesPerFrame    = sizeof(SAMPLE_TYPE)*NUM_CHANNELS;
     format.mFramesPerPacket  = 1;
     format.mBytesPerPacket   = format.mBytesPerFrame * format.mFramesPerPacket;
     format.mReserved         = 0;
@@ -117,8 +119,8 @@ void play() {
                         kCFRunLoopCommonModes, 0, &queue);
     
     for (i = 0; i < NUM_BUFFERS; i++) {
-        AudioQueueAllocateBuffer(queue, BUFFER_SIZE, &buffers[i]);
-        buffers[i]->mAudioDataByteSize = BUFFER_SIZE;
+        AudioQueueAllocateBuffer(queue, BUFFER_SIZE*NUM_CHANNELS, &buffers[i]);
+        buffers[i]->mAudioDataByteSize = BUFFER_SIZE*NUM_CHANNELS;
         callback(NULL, queue, buffers[i]);
     }
     AudioQueueStart(queue, NULL);

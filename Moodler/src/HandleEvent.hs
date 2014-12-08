@@ -35,6 +35,7 @@ import Save
 import KeyMatcher
 import HandleDraggingRoot
 import HandleDraggingSelection
+import HandleDraggingCable
 
 -- Find a container somewhere in a list of ids.
 -- Assumes there is precisely one. XXX
@@ -61,7 +62,7 @@ clickOnIn' p i = do
         Just (Cable src) -> do
             srcElt <- getElementById "clickOnIn'" src
             gadget .= cableGadget (_loc (_ur srcElt)) p
-            handleDraggingCable src (_loc (_ur srcElt)) p
+            handleDraggingCable handleDefault src (_loc (_ur srcElt)) p
 
 -- Straightforward click on a UI element
 defaultClick' :: Point -> UiId -> MoodlerM Zero
@@ -75,7 +76,7 @@ defaultClick' p i = do
         Out {} -> do
             highlightJust i
             gadget .= cableGadget p p
-            handleDraggingCable i p p
+            handleDraggingCable handleDefault i p p
         In {} -> do
             W.undoPoint
             clickOnIn' p i
@@ -129,15 +130,7 @@ elementDisplayName e = e ^. ur . name
 hoverGadget :: Point -> UIElement -> B.Transform -> Picture
 hoverGadget (ex, ey) elt xform = 
      let txt = elementDisplayName elt
-         --w = estimateTextWidth txt
      in pictureTransformer xform $ translate ex (ey+25) $ scale 0.5 0.5 $ B.textInBox (B.transparentBlack 0.7) white txt
-{-translate ex ey (
-        translate 86 1 (color (B.transparentBlack 0.5)
-                              (rectangleSolid 150 24))
-        <>
-        translate 18 (-2) (scale 0.1 0.1 (
-                color white (text (elementDisplayName elt))))
-       )-}
 
 handleDefault' :: Event -> MoodlerM Zero
 handleDefault' (EventMotion p) = do
@@ -356,7 +349,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
                     handleDefault
                 Out {} -> do
                     highlightJust i
-                    handleDraggingCable i p p
+                    handleDraggingCable handleDefault i p p
                 In {} -> do
                     doSelection i
                     handleDefault
@@ -367,10 +360,10 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
                     -}
                 Knob {} -> do
                     highlightJust i
-                    handleDraggingCable i p p
+                    handleDraggingCable handleDefault i p p
                 Selector {} -> do
                     highlightJust i
-                    handleDraggingCable i p p
+                    handleDraggingCable handleDefault i p p
                 Label {} -> do
                     doSelection i
                     handleDefault
@@ -379,7 +372,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
                     handleDefault
                 TextBox {} -> do
                     highlightJust i
-                    handleDraggingCable i p p
+                    handleDraggingCable handleDefault i p p
         Nothing -> handleDefault
 
 handleDefault' (EventKey key Down
@@ -457,67 +450,6 @@ handleDraggingRegion' f _
     handleDefault
 
 handleDraggingRegion' a b _ = handleDraggingRegion a b
-
-handleDraggingCable :: UiId -> Point -> Point -> MoodlerM Zero
-handleDraggingCable src start end =
-    handleDraggingCable' src start end =<< {-MoodlerM-} liftF (GetEvent id)
-
-cableGadget :: Point -> Point -> B.Transform -> Picture
-cableGadget p0 p1 xform = 
-    pictureTransformer xform $ color (makeColor 0.6 0.6 0.3 0.5)
-                              (B.curve 0.3 p0 p1)
-
-justSelect :: UiId -> MoodlerM Zero
-justSelect i = do
-    doSelection i
-    gadget .= const blank
-    handleDefault
-
-wireCable :: UiId -> UiId -> MoodlerM Zero
-wireCable i selectedOut = do
-    unhighlightEverything
-    W.undoPoint
-    W.synthConnect selectedOut i
-    W.synthRecompile "wireCable"
-    justSelect i
-
--- Motion during cable dragging
-handleDraggingCable' :: UiId -> Point -> Point -> Event -> MoodlerM Zero
-handleDraggingCable' src start _ (EventMotion (x, y)) = do
-    gadget .= cableGadget start (x, y)
-    selectionPlane <- use planes
-    maybeHoveringOver <- selectedByPoint selectionPlane (x, y)
-    case maybeHoveringOver of
-        Just hoveringOver -> do
-            elt <- getElementById "HandleEvent.hs" hoveringOver
-            case elt of
-                In {} -> do
-                    highlightElement hoveringOver
-                    gadget .= cableGadget start (x, y) <>
-                                      hoverGadget (_loc (_ur elt)) elt 
-                _ -> unhighlightEverything
-        Nothing -> unhighlightEverything
-    handleDraggingCable src start (x, y)
-
--- Deal with the end of cable dragging
-handleDraggingCable' selectedOut _ _
-    (EventKey (MouseButton LeftButton) Up _ (x, y)) = do
-    selectionPlane <- use planes
-    maybeElement <- selectedByPoint selectionPlane (x, y)
-    case maybeElement of
-        Just i -> do
-            elt <- getElementById "HandleEvent.hs" i
-            case elt of
-                In {} -> wireCable i selectedOut
-                Out {} -> justSelect i
-                _ -> do
-                        gadget .= const blank
-                        handleDefault
-        Nothing -> do
-                    gadget .= const blank
-                    handleDefault
-
-handleDraggingCable' _ _ _ e = handleDefault' e
 
 handleDraggingKnob :: UiId -> Float -> Point -> 
                         MoodlerM Zero
