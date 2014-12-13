@@ -7,7 +7,7 @@ void init() {
     count = 0;
 }
 
-void exec(out __attribute__((colour("(0, 1, 0)"))) int result) {
+inline void exec(out __attribute__((colour("(0, 1, 0)"))) int result) {
     result = t;
     if (++count >= 6) {
         count = 0;

@@ -1,0 +1,116 @@
+/*
+ * Arpeggiator DSL is loosely inspired by
+ * http://kevin.mcguireclan.net/papers/ArpEggWeb/ArpEgg.htm
+ * There's no rewriting going on here, just a simple machine_state machine.
+ */
+int pc;
+const char *last_pattern;
+double last_trigger;
+double last_reset;
+int count_stack[12];
+int count_stack_address[12];
+int count_stack_pointer;
+double note1;
+double note2;
+double note3;
+int machine_state;
+double sync;
+int offset;
+
+void init() {
+    pc = 0;
+    last_pattern = 0;
+    last_trigger = 0;
+    last_reset = 0;
+    machine_state = 0;
+    note1 = 0.0;
+    note2 = 0.0;
+    note3 = 0.0;
+    sync = 0.0;
+    offset = 0;
+}
+
+void exec(in __attribute__((normal("I"))) __attribute__((colour("(0, 0, 1)"))) const char *pattern,
+          in control root,
+          in control trigger,
+          in control reset,
+          out control sync,
+          out control note1, out control note2, out control note3) {
+    const char *pattern2 = pattern;
+    sync = 0.0;
+    if (pattern2 != last_pattern || (last_reset <= 0 && reset > 0)) {
+        pc = 0;
+        count_stack_pointer = 0;
+        sync = 1.0;
+    }
+
+    int play = 0;
+
+    if (pattern2) {
+        if (last_trigger <= 0 && trigger > 0) {
+            while (!play) {
+                char c = pattern2[pc];
+                int col;
+                switch (c) {
+                    case 'I': col = 0; break;
+                    case 'V': col = 1; break;
+                    case 'i': col = 2; break;
+                    case 'v': col = 3; break;
+                    case 'o': col = 4; break;
+                    default: col = -1;
+                }
+                if (col >= 0) {
+                    machine_state = transitions[machine_state][col];
+                    if (machine_state >= 0) {
+                        ++pc;
+                    } else {
+                        machine_state = 0;
+                        pc = 0;
+                        sync = 1.0;
+                    }
+                } else if (c >= '0' && c <= '9') {
+                    count_stack[count_stack_pointer] = c-'0';;
+                } else if (c == '-' || c == 0) {
+                    const double semitone = 0.1/12.0;
+                    int inote1 = (offset+transitions[machine_state][5])%12;
+                    int inote2 = (offset+transitions[machine_state][6])%12;
+                    int inote3 = (offset+transitions[machine_state][7])%12;
+                    note1 = root+inote1*semitone;
+                    /*note2 = (inote2-inote1)*semitone;
+                    note3 = (inote3-inote1)*semitone;*/
+                    note2 = root+inote2*semitone;
+                    note3 = root+inote3*semitone;
+                    printf("p: %d %d %d\n", inote1, inote2, inote3);
+                    printf("p: %f %f %f\n", note1, note2, note3);
+                    play = 1;
+                    offset = 0;
+                    pc = c ? pc+1 : 0;
+                    machine_state = 0;
+                } else if (c == 'b') {
+                    offset -= 1;
+                    ++pc;
+                } else if (c == '#') {
+                    offset += 1;
+                    ++pc;
+                } else {
+                    switch (c) {
+                    case '(':
+                        count_stack_address[count_stack_pointer] = pc;
+                        ++count_stack_pointer;
+                        break;
+                    case ')':
+                        if (--count_stack[count_stack_pointer-1] <= 0) {
+                            --count_stack_pointer;
+                        } else {
+                            pc = count_stack_address[count_stack_pointer-1];
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    last_trigger = trigger;
+    last_pattern = pattern2;
+    last_reset = reset;
+}

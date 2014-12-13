@@ -12,6 +12,7 @@ double gate;
 int count_stack[12];
 int count_stack_address[12];
 int count_stack_pointer;
+double sync;
 
 void init() {
     pc = 0;
@@ -19,16 +20,20 @@ void init() {
     last_trigger = 0;
     last_reset = 0;
     playing = 0.0;
+    sync = 0.0;
 }
 
 void exec(in __attribute__((normal("abc"))) __attribute__((colour("(0, 0, 1)"))) const char *pattern,
           in control trigger,
           in control reset,
+          out control sync,
           out control gate) {
     const char *pattern2 = pattern;
+    sync = 0.0;
     if (pattern2 != last_pattern || (last_reset <= 0 && reset > 0)) {
         pc = 0;
         count_stack_pointer = 0;
+        sync = 1.0;
     }
 
     if (pattern2) {
@@ -62,6 +67,7 @@ void exec(in __attribute__((normal("abc"))) __attribute__((colour("(0, 0, 1)")))
 
                 if (pattern2[pc] == 0) {
                     pc = 0;
+                    sync = 1.0;
                     count_stack_pointer = 0;
                 } else {
                     ++pc;

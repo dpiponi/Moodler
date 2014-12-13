@@ -1,5 +1,8 @@
 #include <math.h>
 
+#include "reverb.h"
+#include "delay_line.h"
+
 typedef double sample;
 
 // 0.1 "V"/Octave
@@ -320,23 +323,12 @@ inline int correct_mod(int a, int b) {
     return ret < 0 ? ret+b : ret;
 }
 
-typedef struct Reverb {
-    double *m;
-    int n;
-    int *delay_length;
-    double **delay_line;
-    int *delay_ptr;
-    double *delay_output;
-    double *transformed_output;
-    double *b;
-    double *c;
-    double *g;
-    int *perm;
-    double *h;
-    double *filtered_output;
-} Reverb;
+extern int transitions[22][8];
 
-void init_reverb(Reverb *reverb);
-void set_gain(Reverb *reverb, double dt, double gain);
-double do_reverb(Reverb *reverb, double input);
-void set_absorption(Reverb *reverb, double dt, double time);
+static inline void sort2(double *a, double *b) {
+    if (*a > *b) {
+        double t = *a;
+        *a = *b;
+        *b = t;
+    }
+}

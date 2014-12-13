@@ -5127,168 +5127,28 @@ sample step_square(struct Square *state, double dt, sample frequency, sample pwm
     return result;
 }
 
-#define MAX_DELAY_LENGTH 10000
-
-void init_reverb(Reverb *reverb) {
-    reverb->n = 12;
-
-    reverb->perm = (int *)malloc(reverb->n*sizeof(int));
-    reverb->perm[0] = 8;
-    reverb->perm[1] = 6;
-    reverb->perm[2] = 0;
-    reverb->perm[3] = 10;
-    reverb->perm[4] = 11;
-    reverb->perm[5] = 5;
-    reverb->perm[6] = 4;
-    reverb->perm[7] = 1;
-    reverb->perm[8] = 2;
-    reverb->perm[9] = 7;
-    reverb->perm[10] = 3;
-    reverb->perm[11] = 9;
-
-    /* primes */
-    reverb->delay_length = (int *)malloc(reverb->n*sizeof(int));
-    reverb->delay_length[0] = 601;
-    reverb->delay_length[1] = 691;
-    reverb->delay_length[2] = 773;
-    reverb->delay_length[3] = 839;
-    reverb->delay_length[4] = 919;
-    reverb->delay_length[5] = 997;
-    reverb->delay_length[6] = 1061;
-    reverb->delay_length[7] = 1093;
-    reverb->delay_length[8] = 1129;
-    reverb->delay_length[9] = 1151;
-    reverb->delay_length[10] = 1171;
-    reverb->delay_length[11] = 1187;
-
-#if 0
-    reverb->m = (double *)malloc(reverb->n*reverb->n*sizeof(double));
-    reverb->m[0*reverb->n+0] = 0*1/sqrt(2);
-    reverb->m[0*reverb->n+1] = 1*1/sqrt(2);
-    reverb->m[0*reverb->n+2] = 1*1/sqrt(2);
-    reverb->m[0*reverb->n+3] = 0*1/sqrt(2);
-    reverb->m[1*reverb->n+0] = -1*1/sqrt(2);
-    reverb->m[1*reverb->n+1] = 0*1/sqrt(2);
-    reverb->m[1*reverb->n+2] = 0*1/sqrt(2);
-    reverb->m[1*reverb->n+3] = -1*1/sqrt(2);
-    reverb->m[2*reverb->n+0] = 1*1/sqrt(2);
-    reverb->m[2*reverb->n+1] = 0*1/sqrt(2);
-    reverb->m[2*reverb->n+2] = 0*1/sqrt(2);
-    reverb->m[2*reverb->n+3] = -1*1/sqrt(2);
-    reverb->m[3*reverb->n+0] = 0*1/sqrt(2);
-    reverb->m[3*reverb->n+1] = 1*1/sqrt(2);
-    reverb->m[3*reverb->n+2] = -1*1/sqrt(2);
-    reverb->m[3*reverb->n+3] = 0*1/sqrt(2);
-#endif
-
-    reverb->delay_line = (double **)malloc(reverb->n*sizeof(double *));
-    reverb->delay_output = (double *)malloc(reverb->n*sizeof(double));
-    reverb->filtered_output = (double *)malloc(reverb->n*sizeof(double));
-    reverb->transformed_output = (double *)malloc(reverb->n*sizeof(double));
-    reverb->b = (double *)malloc(reverb->n*sizeof(double));
-    for (int i = 0; i < reverb->n; ++i) {
-        reverb->b[i] = 1.0/reverb->n;
-    }
-    reverb->h = (double *)malloc(reverb->n*sizeof(double));
-    set_absorption(reverb, 1/48000.0, 0.5);
-    reverb->c = (double *)malloc(reverb->n*sizeof(double));
-    double sign = 1.0;
-    for (int i = 0; i < reverb->n; ++i) {
-        reverb->c[i] = sign/reverb->n;
-        sign = -sign;
-    }
-    reverb->g = (double *)malloc(reverb->n*sizeof(double));
-    set_gain(reverb, 1/48000.0, 0.9);
-    reverb->delay_ptr = (int  *)malloc(reverb->n*sizeof(int ));
-    for (int i = 0; i < reverb->n; ++i) {
-        reverb->delay_line[i] = (double *)malloc(reverb->delay_length[i]*sizeof(double));
-        for (int j = 0; j < reverb->delay_length[i]; ++j) {
-            reverb->delay_line[i][j] = 0;
-        }
-        reverb->delay_ptr[i] = 0;
-    }
-}
-
-void set_gain(Reverb *reverb, double dt, double time) {
-    for (int i = 0; i < reverb->n; ++i) {
-        reverb->g[i] = exp(-reverb->delay_length[i]*dt/time);
-    }
-}
-
-void set_absorption(Reverb *reverb, double dt, double time) {
-    for (int i = 0; i < reverb->n; ++i) {
-        reverb->h[i] = exp(-reverb->delay_length[i]*dt/time);
-    }
-}
-
-double do_reverb(Reverb *reverb, double input) {
-#if 0
-    static int u = 0;
-    if (u % 96000 == 0) {
-        input = 1;
-    } else {
-        input = 0;
-    }
-    ++u;
-#endif
-    /*
-     * Get outputs from all delay lines
-     */
-    
-    for (int i = 0; i < reverb->n; ++i) {
-        reverb->delay_output[i] = reverb->delay_line[i][reverb->delay_ptr[i]];
-    }
-
-#if 0
-    /*
-     * Apply matrix
-     */
-    for (int i = 0; i < reverb->n; ++i) {
-        double t = 0.0;
-        for (int j = 0; j < reverb->n; ++j) {
-            t += reverb->m[reverb->n*i+j]*reverb->delay_output[j];
-        }
-        reverb->transformed_output[i] = t;
-    }
-#endif
-    double t = 0;
-    for (int i = 0; i < reverb->n; ++i) {
-        reverb->filtered_output[i] = reverb->h[i]*reverb->filtered_output[i]+(1-reverb->h[i])*reverb->delay_output[i];
-    }
-    for (int i = 0; i <reverb->n; ++i) {
-        t += reverb->filtered_output[i];
-    }
-    t = 2.0/reverb->n*t;
-    for (int i = 0; i < reverb->n; ++i) {
-        reverb->transformed_output[reverb->perm[i]] = reverb->filtered_output[i]-t;
-    }
-    
-    /*
-     * Compute output
-     */
-    double output = 0.0;
-    for (int i = 0; i < reverb->n; ++i) {
-        output += reverb->c[i]*reverb->transformed_output[i];
-    }
-
-    /*
-     * Feedback
-     */
-    for (int i = 0; i < reverb->n; ++i) {
-        reverb->delay_line[i][reverb->delay_ptr[i]] = reverb->b[i]*input+reverb->g[i]*reverb->transformed_output[i];
-        ++reverb->delay_ptr[i];
-        if (reverb->delay_ptr[i] >= reverb->delay_length[i]) {
-            reverb->delay_ptr[i] = 0;
-        }
-    }
-
-    return output;
-
-#if 0
-    if (t>=1 && count % 1== 0) {
-        fprintf(stderr, "%f %f %f %f -> %f %f %f %f\n",
-            delay_output[0], delay_output[1], delay_output[2], delay_output[3], 
-            transformed_output[0], transformed_output[1], transformed_output[2], transformed_output[3]);
-    }
-#endif
-}
+int transitions[22][8] = {
+    /*                  I   V   i   v   o  N1   N2  N3 */
+    /* 0   START  */  { 1,  2,  3,  4,  -1, -1, -1, -1  },  /* ERROR */
+    /* 1   I      */  { 5,  6,  -1, -1, -1, 0,  4,  7   },  /* MAJOR1 */
+    /* 2   V      */  { 7,  -1, -1, -1, -1, 7,  11, 14  },  /* MAJOR5 */
+    /* 3   i      */  { -1, -1, 8,  9,  10, 0,  3,  7   },  /* MINOR1 */
+    /* 4   v      */  { -1, -1, 17, -1, 18, 7,  10, 14  },  /* MINOR5 */
+    /* 5   II     */  { 11, -1, -1, -1, -1, 2,  6,  9   },  /* MAJOR2 */
+    /* 6   IV     */  { -1, -1, -1, -1, -1, 5,  9,  12  },  /* MAJOR4 */
+    /* 7   VI     */  { 12, -1, -1, -1, -1, 9,  13, 16  },  /* MAJOR6 */
+    /* 8   ii     */  { -1, -1, 13, -1, 14, 2,  5,  9   },  /* MINOR2 */
+    /* 9   iv     */  { -1, -1, -1, -1, 15, 5,  8,  12  },  /* MINOR4 */
+    /* 10  io     */  { -1, -1, -1, -1, -1, 0,  3,  6   },  /* DIMINISHED1 */
+    /* 11  III    */  { -1, -1, -1, -1, -1, 4,  8,  11  },  /* MAJOR3 */
+    /* 12  VII    */  { -1, -1, -1, -1, -1, 11, 15, 18  },  /* MAJOR7 */
+    /* 13  iii    */  { -1, -1, -1, -1, 16, 4,  7,  11  },  /* MINOR3 */
+    /* 14  iio    */  { -1, -1, -1, -1, -1, 2,  5,  8   },  /* DIMINISHED2 */
+    /* 15  ivo    */  { -1, -1, -1, -1, -1, 5,  8,  11  },  /* DIMINISHED4 */
+    /* 16  iiio   */  { -1, -1, -1, -1, -1, 4,  7,  10  },  /* DIMINISHED3 */
+    /* 17  vi     */  { -1, -1, 19, -1, 20, 9,  12, 16  },  /* MINOR6 */
+    /* 18  vo     */  { -1, -1, -1, -1, -1, 7,  10, 13  },  /* DIMINISHED5 */
+    /* 19  vii    */  { -1, -1, -1, -1, 21, 11, 14, 18  },  /* MINOR7 */
+    /* 20  vio    */  { -1, -1, -1, -1, -1, 9,  12, 15  },  /* DIMINISHED6 */
+    /* 21  viio   */  { -1, -1, -1, -1, -1, 11, 14, 17  }   /* DIMINISHED7 */
+};

@@ -67,8 +67,9 @@ loadSynthTypes dir = do
     moduleSpecs <- liftIO $ filter (isSuffixOf ".spec") <$>
                                             getDirectoryContents dir
     moduleSpecList <- forM moduleSpecs $ \moduleSpec -> do
-        loadedModule <- loadNodeType dir moduleSpec
-        return (fst $ splitDot moduleSpec, loadedModule)
+        let primTypeName = fst $ splitDot moduleSpec
+        loadedModule <- loadNodeType primTypeName dir moduleSpec
+        return (primTypeName, loadedModule)
     return $ M.fromList moduleSpecList
 
 addSynth :: String -> (Int -> Module) -> State Synth ()

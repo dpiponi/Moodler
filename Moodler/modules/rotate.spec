@@ -5,7 +5,7 @@ void init() {
     result2 = 0.0;
 }
 
-void exec(in control angle,
+inline void exec(in control angle,
           in sample signal1, in sample signal2,
           out sample result1, out sample result2) {
     double c = cos(angle);

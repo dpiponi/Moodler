@@ -2,6 +2,7 @@ module Utils where
 
 --import qualified Data.Map as M
 import qualified Data.Set as S
+import Data.List
 
 withJust :: Monad m => Maybe a -> (a -> m ()) -> m ()
 withJust Nothing _ = return ()
@@ -31,6 +32,15 @@ partitionM p (e:es) = do
 
 uniq :: (Ord a) => [a] -> [a]
 uniq = S.toList . S.fromList
+
+presortedUniqBy :: (a -> a -> Ordering) -> [a] -> [a]
+presortedUniqBy _ [] = []
+presortedUniqBy _ [a] = [a]
+presortedUniqBy cmp (a:bs@(b:_)) | cmp a b == LT = a : presortedUniqBy cmp bs
+presortedUniqBy cmp (_:bs) = presortedUniqBy cmp bs
+
+uniqBy :: (a -> a -> Ordering) -> [a] -> [a]
+uniqBy cmp as = presortedUniqBy cmp (sortBy cmp as)
 
 unJust :: String -> Maybe a -> a
 unJust msg Nothing = error ("Failed in unJust: " ++ msg)

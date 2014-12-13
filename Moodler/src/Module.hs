@@ -27,12 +27,14 @@ import System.FilePath.Posix
 import Text
 
 data NodeType a = NodeType {
+    _nodeTypeName :: String,
     _inNames :: M.Map String CDecl,
     _outNames :: M.Map String CDecl,
     _stateNames :: [String],
     _stateDecls :: [CDeclaration a],
     _initCode :: CFunctionDef a,
-    _execCode :: CFunctionDef a
+    _execCode :: CFunctionDef a,
+    _isInlined :: Bool
 } deriving Show
 
 $(makeLenses ''NodeType)
@@ -125,8 +127,8 @@ predefines =
     , ("control", "__attribute__((colour(\"#control\"))) double")
     ]
 
-loadNodeType :: String -> String -> ErrorT String IO (NodeType NodeInfo)
-loadNodeType dir fileName' = do
+loadNodeType :: String -> String -> String -> ErrorT String IO (NodeType NodeInfo)
+loadNodeType primTypeName dir fileName' = do
     let fileName = combine dir fileName'
     rawCode <- liftIO $ readFile fileName
     code <- liftIO $ runCpphs
@@ -148,8 +150,8 @@ loadNodeType dir fileName' = do
     (ast, _) <- case x of
         Left e -> throwError e
         Right v -> return v
-    (_, Extracted i execFunction vs) <- liftIO $ runStateT
-                (extractModuleParts ast) (Extracted Nothing Nothing [])
+    (_, Extracted i execFunction vs _) <- liftIO $ runStateT
+                (extractModuleParts ast) (Extracted Nothing Nothing [] M.empty)
     let states = map varDefinedInDeclaration vs
     let (ins, outs) = getInsAndOuts (fromJust execFunction)
 
@@ -162,6 +164,7 @@ loadNodeType dir fileName' = do
     fromMaybe (throwError "loadNodeType failed") $ do
         e' <- execFunction
         i' <- i
-        Just $ return $ NodeType (M.fromList $ map swap ins)
-                                (M.fromList $ map swap outs)
-                                states vs i' e'
+        Just $ return $ NodeType primTypeName
+                                 (M.fromList $ map swap ins)
+                                 (M.fromList $ map swap outs)
+                                 states vs i' e' (isInline e')

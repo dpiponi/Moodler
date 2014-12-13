@@ -6,7 +6,7 @@ void init() {
     result2 = 0.0;
 }
 
-void exec(in control gain,
+inline void exec(in control gain,
           in sample signal,
           out sample result1, out sample result2) {
     result1 = gain*signal;

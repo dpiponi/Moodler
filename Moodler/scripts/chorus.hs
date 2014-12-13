@@ -1,601 +1,343 @@
 do
-    (x, y) <- mouse
-    main <- currentPlane
-    -- proxy section
-    elt366 <- proxy' (x+(-108.0), y+(80.0)) (Inside main)
-    let plane365 = elt366
-    proxy100 <- proxy' (x+(-381.0), y+(-47.0)) (Inside plane365)
-    proxy96 <- proxy' (x+(-385.0), y+(-111.0)) (Inside plane365)
-    proxy97 <- proxy' (x+(-382.0), y+(-191.0)) (Inside plane365)
-    proxy98 <- proxy' (x+(-387.0), y+(24.0)) (Inside plane365)
-    let plane1 = (Inside proxy100)
-    let plane2 = (Inside proxy96)
-    let plane3 = (Inside proxy97)
-    let plane4 = (Inside proxy98)
-    delay10 <- new' "delay"
-    delay11 <- new' "delay"
-    delay12 <- new' "delay"
-    delay13 <- new' "delay"
-    id14 <- new' "id"
-    id15 <- new' "id"
-    id16 <- new' "id"
-    id19 <- new' "id"
-    id20 <- new' "id"
-    id25 <- new' "id"
-    id26 <- new' "id"
-    id29 <- new' "id"
-    id30 <- new' "id"
-    id362 <- new' "id"
-    input31 <- new' "input"
-    input32 <- new' "input"
-    input33 <- new' "input"
-    input34 <- new' "input"
-    input35 <- new' "input"
-    input36 <- new' "input"
-    input37 <- new' "input"
-    input38 <- new' "input"
-    input39 <- new' "input"
-    input40 <- new' "input"
-    input45 <- new' "input"
-    input46 <- new' "input"
-    lfo_sin76 <- new' "lfo_sin"
-    lfo_sin77 <- new' "lfo_sin"
-    lfo_sin78 <- new' "lfo_sin"
-    lfo_sin79 <- new' "lfo_sin"
-    sum81 <- new' "sum"
-    sum82 <- new' "sum"
-    sum83 <- new' "sum"
-    sum84 <- new' "sum"
-    sum85 <- new' "sum"
-    sum86 <- new' "sum"
-    sum87 <- new' "sum"
-    vca89 <- new' "vca"
-    vca90 <- new' "vca"
-    vca94 <- new' "vca"
-    vca95 <- new' "vca"
-    -- container section
-    container101 <- container' "panel_3x1.png" (x+(-482.0), y+(301.0)) (Inside plane2)
-    container102 <- container' "panel_3x1.png" (x+(-380.0), y+(299.0)) (Inside plane2)
-    container103 <- container' "panel_3x1.png" (x+(-691.0), y+(296.0)) (Inside plane2)
-    container104 <- container' "panel_3x1.png" (x+(-578.0), y+(305.0)) (Inside plane2)
-    container105 <- container' "panel_3x1.png" (x+(-526.0), y+(356.0)) (Inside plane3)
-    container106 <- container' "panel_3x1.png" (x+(-424.0), y+(354.0)) (Inside plane3)
-    container107 <- container' "panel_3x1.png" (x+(-735.0), y+(351.0)) (Inside plane3)
-    container108 <- container' "panel_3x1.png" (x+(-622.0), y+(360.0)) (Inside plane3)
-    container109 <- container' "panel_3x1.png" (x+(-193.0), y+(-149.0)) (Inside plane365)
-    container110 <- container' "panel_3x1.png" (x+(-55.0), y+(-91.0)) (Inside plane365)
-    container122 <- container' "panel_3x1.png" (x+(-435.0), y+(338.0)) (Inside plane4)
-    container123 <- container' "panel_3x1.png" (x+(-333.0), y+(336.0)) (Inside plane4)
-    container124 <- container' "panel_3x1.png" (x+(-644.0), y+(333.0)) (Inside plane4)
-    container125 <- container' "panel_3x1.png" (x+(-531.0), y+(342.0)) (Inside plane4)
-    container126 <- container' "panel_3x1.png" (x+(-455.0), y+(319.0)) (Inside plane1)
-    container127 <- container' "panel_3x1.png" (x+(-315.0), y+(294.0)) (Inside plane1)
-    container128 <- container' "panel_3x1.png" (x+(-664.0), y+(314.0)) (Inside plane1)
-    container129 <- container' "panel_3x1.png" (x+(-551.0), y+(323.0)) (Inside plane1)
-    container130 <- container' "panel_3x1.png" (x+(-186.0), y+(59.0)) (Inside plane365)
-    -- setting up (Outside container101)
-    -- did line for (Outside container101)
-    -- setting up (Outside container102)
-    -- did line for (Outside container102)
-    -- setting up (Outside container103)
-    -- did line for (Outside container103)
-    -- setting up (Outside container104)
-    -- did line for (Outside container104)
-    -- setting up (Outside container105)
-    -- did line for (Outside container105)
-    -- setting up (Outside container106)
-    -- did line for (Outside container106)
-    -- setting up (Outside container107)
-    -- did line for (Outside container107)
-    -- setting up (Outside container108)
-    -- did line for (Outside container108)
-    -- setting up (Outside container109)
-    -- did line for (Outside container109)
-    -- setting up (Outside container110)
-    -- did line for (Outside container110)
-    -- setting up (Outside container122)
-    -- did line for (Outside container122)
-    -- setting up (Outside container123)
-    -- did line for (Outside container123)
-    -- setting up (Outside container124)
-    -- did line for (Outside container124)
-    -- setting up (Outside container125)
-    -- did line for (Outside container125)
-    -- setting up (Outside container126)
-    -- did line for (Outside container126)
-    -- setting up (Outside container127)
-    -- did line for (Outside container127)
-    -- setting up (Outside container128)
-    -- did line for (Outside container128)
-    -- setting up (Outside container129)
-    -- did line for (Outside container129)
-    -- setting up (Outside container130)
-    -- did line for (Outside container130)
-    -- setting up elt366
-    -- did line for elt366
-    -- setting up in131
-    in131 <- plugin' (sum81++"."++"signal1") (x+(-599.0), y+(330.0)) (Inside main)
-    -- did line for in131
-    hide in131
-    parent container104 in131
-    -- setting up in132
-    in132 <- plugin' (sum81++"."++"signal2") (x+(-599.0), y+(280.0)) (Inside main)
-    -- did line for in132
-    parent container104 in132
-    -- setting up in133
-    in133 <- plugin' (vca89++"."++"cv") (x+(-503.0), y+(326.0)) (Inside main)
-    -- did line for in133
-    hide in133
-    parent container101 in133
-    -- setting up in134
-    in134 <- plugin' (vca89++"."++"signal") (x+(-503.0), y+(276.0)) (Inside main)
-    -- did line for in134
-    parent container101 in134
-    -- setting up in135
-    in135 <- plugin' (delay10++"."++"delay") (x+(-401.0), y+(324.0)) (Inside main)
-    -- did line for in135
-    parent container102 in135
-    -- setting up in136
-    in136 <- plugin' (delay10++"."++"signal") (x+(-183.0), y+(-85.0)) (Inside plane365)
-    -- did line for in136
-    -- setting up in137
-    in137 <- plugin' (id19++"."++"signal") (x+(-445.0), y+(-109.0)) (Inside plane365)
-    -- did line for in137
-    -- setting up in138
-    in138 <- plugin' (id20++"."++"signal") (x+(-226.0), y+(335.0)) (Inside plane2)
-    -- did line for in138
-    -- setting up in139
-    in139 <- plugin' (lfo_sin76++"."++"rate") (x+(-712.0), y+(321.0)) (Inside main)
-    -- did line for in139
-    hide in139
-    parent container103 in139
-    -- setting up in140
-    in140 <- plugin' (lfo_sin76++"."++"sync") (x+(-710.0), y+(266.0)) (Inside main)
-    -- did line for in140
-    parent container103 in140
-    -- setting up in141
-    in141 <- plugin' (sum82++"."++"signal1") (x+(-643.0), y+(385.0)) (Inside main)
-    -- did line for in141
-    hide in141
-    parent container108 in141
-    -- setting up in142
-    in142 <- plugin' (sum82++"."++"signal2") (x+(-643.0), y+(335.0)) (Inside main)
-    -- did line for in142
-    parent container108 in142
-    -- setting up in143
-    in143 <- plugin' (vca90++"."++"cv") (x+(-547.0), y+(381.0)) (Inside main)
-    -- did line for in143
-    hide in143
-    parent container105 in143
-    -- setting up in144
-    in144 <- plugin' (vca90++"."++"signal") (x+(-547.0), y+(331.0)) (Inside main)
-    -- did line for in144
-    parent container105 in144
-    -- setting up in145
-    in145 <- plugin' (delay11++"."++"delay") (x+(-445.0), y+(379.0)) (Inside main)
-    -- did line for in145
-    parent container106 in145
-    -- setting up in146
-    in146 <- plugin' (delay11++"."++"signal") (x+(-445.0), y+(329.0)) (Inside main)
-    -- did line for in146
-    parent container106 in146
-    -- setting up in147
-    in147 <- plugin' (id25++"."++"signal") (x+(-442.0), y+(-189.0)) (Inside plane365)
-    -- did line for in147
-    -- setting up in148
-    in148 <- plugin' (id26++"."++"signal") (x+(-270.0), y+(390.0)) (Inside plane3)
-    -- did line for in148
-    -- setting up in149
-    in149 <- plugin' (lfo_sin77++"."++"rate") (x+(-756.0), y+(376.0)) (Inside main)
-    -- did line for in149
-    hide in149
-    parent container107 in149
-    -- setting up in150
-    in150 <- plugin' (lfo_sin77++"."++"sync") (x+(-754.0), y+(321.0)) (Inside main)
-    -- did line for in150
-    parent container107 in150
-    -- setting up in151
-    in151 <- plugin' (sum83++"."++"signal1") (x+(-214.0), y+(-124.0)) (Inside main)
-    -- did line for in151
-    parent container109 in151
-    -- setting up in152
-    in152 <- plugin' (sum83++"."++"signal2") (x+(-214.0), y+(-174.0)) (Inside main)
-    -- did line for in152
-    parent container109 in152
-    -- setting up in153
-    in153 <- plugin' (sum84++"."++"signal1") (x+(-76.0), y+(-66.0)) (Inside main)
-    -- did line for in153
-    parent container110 in153
-    -- setting up in154
-    in154 <- plugin' (sum84++"."++"signal2") (x+(-76.0), y+(-116.0)) (Inside main)
-    -- did line for in154
-    parent container110 in154
-    -- setting up in155
-    in155 <- plugin' (id29++"."++"signal") (x+(-171.0), y+(81.0)) (Inside main)
-    -- did line for in155
-    -- setting up in214
-    in214 <- plugin' (sum85++"."++"signal1") (x+(-552.0), y+(367.0)) (Inside main)
-    -- did line for in214
-    hide in214
-    parent container125 in214
-    -- setting up in215
-    in215 <- plugin' (sum85++"."++"signal2") (x+(-552.0), y+(317.0)) (Inside main)
-    -- did line for in215
-    parent container125 in215
-    -- setting up in216
-    in216 <- plugin' (vca94++"."++"cv") (x+(-456.0), y+(363.0)) (Inside main)
-    -- did line for in216
-    hide in216
-    parent container122 in216
-    -- setting up in217
-    in217 <- plugin' (vca94++"."++"signal") (x+(-456.0), y+(313.0)) (Inside main)
-    -- did line for in217
-    parent container122 in217
-    -- setting up in219
-    in219 <- plugin' (delay12++"."++"delay") (x+(-354.0), y+(361.0)) (Inside main)
-    -- did line for in219
-    parent container123 in219
-    -- setting up in220
-    in220 <- plugin' (delay12++"."++"signal") (x+(-354.0), y+(311.0)) (Inside main)
-    -- did line for in220
-    parent container123 in220
-    -- setting up in221
-    in221 <- plugin' (id30++"."++"signal") (x+(-443.0), y+(24.0)) (Inside plane365)
-    -- did line for in221
-    -- setting up in222
-    in222 <- plugin' (id16++"."++"signal") (x+(-179.0), y+(372.0)) (Inside plane4)
-    -- did line for in222
-    -- setting up in223
-    in223 <- plugin' (lfo_sin79++"."++"rate") (x+(-665.0), y+(358.0)) (Inside main)
-    -- did line for in223
-    hide in223
-    parent container124 in223
-    -- setting up in224
-    in224 <- plugin' (lfo_sin79++"."++"sync") (x+(-663.0), y+(303.0)) (Inside main)
-    -- did line for in224
-    parent container124 in224
-    -- setting up in225
-    in225 <- plugin' (sum86++"."++"signal1") (x+(-572.0), y+(348.0)) (Inside main)
-    -- did line for in225
-    hide in225
-    parent container129 in225
-    -- setting up in226
-    in226 <- plugin' (sum86++"."++"signal2") (x+(-354.0), y+(-61.0)) (Inside plane365)
-    -- did line for in226
-    -- setting up in227
-    in227 <- plugin' (vca95++"."++"cv") (x+(-476.0), y+(344.0)) (Inside main)
-    -- did line for in227
-    hide in227
-    parent container126 in227
-    -- setting up in228
-    in228 <- plugin' (vca95++"."++"signal") (x+(-476.0), y+(294.0)) (Inside main)
-    -- did line for in228
-    parent container126 in228
-    -- setting up in229
-    in229 <- plugin' (delay13++"."++"delay") (x+(-336.0), y+(319.0)) (Inside main)
-    -- did line for in229
-    parent container127 in229
-    -- setting up in230
-    in230 <- plugin' (delay13++"."++"signal") (x+(-89.0), y+(72.0)) (Inside plane365)
-    -- did line for in230
-    -- setting up in231
-    in231 <- plugin' (id14++"."++"signal") (x+(-440.0), y+(-38.0)) (Inside plane365)
-    -- did line for in231
-    -- setting up in232
-    in232 <- plugin' (id15++"."++"signal") (x+(-199.0), y+(353.0)) (Inside plane1)
-    -- did line for in232
-    -- setting up in233
-    in233 <- plugin' (lfo_sin78++"."++"rate") (x+(-685.0), y+(339.0)) (Inside main)
-    -- did line for in233
-    hide in233
-    parent container128 in233
-    -- setting up in234
-    in234 <- plugin' (lfo_sin78++"."++"sync") (x+(-465.0), y+(-75.0)) (Inside plane365)
-    -- did line for in234
-    -- setting up in235
-    in235 <- plugin' (sum87++"."++"signal1") (x+(-207.0), y+(84.0)) (Inside main)
-    -- did line for in235
-    parent container130 in235
-    -- setting up in236
-    in236 <- plugin' (sum87++"."++"signal2") (x+(-207.0), y+(34.0)) (Inside main)
-    -- did line for in236
-    parent container130 in236
-    -- setting up in363
-    in363 <- plugin' (id362++"."++"signal") (x+(38.0), y+(-99.0)) (Inside plane365)
-    -- did line for in363
-    -- setting up knob237
-    knob237 <- knob' (input38++"."++"result") (x+(-572.0), y+(348.0)) (Inside main)
-    -- did line for knob237
-    parent container129 knob237
-    -- setting up knob238
-    knob238 <- knob' (input37++"."++"result") (x+(-685.0), y+(339.0)) (Inside main)
-    -- did line for knob238
-    parent container128 knob238
-    -- setting up knob239
-    knob239 <- knob' (input39++"."++"result") (x+(-476.0), y+(344.0)) (Inside main)
-    -- did line for knob239
-    parent container126 knob239
-    -- setting up knob240
-    knob240 <- knob' (input32++"."++"result") (x+(-599.0), y+(330.0)) (Inside main)
-    -- did line for knob240
-    parent container104 knob240
-    -- setting up knob241
-    knob241 <- knob' (input31++"."++"result") (x+(-712.0), y+(321.0)) (Inside main)
-    -- did line for knob241
-    parent container103 knob241
-    -- setting up knob242
-    knob242 <- knob' (input33++"."++"result") (x+(-503.0), y+(326.0)) (Inside main)
-    -- did line for knob242
-    parent container101 knob242
-    -- setting up knob243
-    knob243 <- knob' (input35++"."++"result") (x+(-643.0), y+(385.0)) (Inside main)
-    -- did line for knob243
-    parent container108 knob243
-    -- setting up knob244
-    knob244 <- knob' (input34++"."++"result") (x+(-756.0), y+(376.0)) (Inside main)
-    -- did line for knob244
-    parent container107 knob244
-    -- setting up knob245
-    knob245 <- knob' (input36++"."++"result") (x+(-547.0), y+(381.0)) (Inside main)
-    -- did line for knob245
-    parent container105 knob245
-    -- setting up knob262
-    knob262 <- knob' (input45++"."++"result") (x+(-552.0), y+(367.0)) (Inside main)
-    -- did line for knob262
-    parent container125 knob262
-    -- setting up knob263
-    knob263 <- knob' (input40++"."++"result") (x+(-665.0), y+(358.0)) (Inside main)
-    -- did line for knob263
-    parent container124 knob263
-    -- setting up knob264
-    knob264 <- knob' (input46++"."++"result") (x+(-456.0), y+(363.0)) (Inside main)
-    -- did line for knob264
-    parent container122 knob264
-    -- setting up label270
-    label270 <- label' "sum" (x+(-556.0), y+(417.0)) (Inside main)
-    -- did line for label270
-    parent container125 label270
-    -- setting up label271
-    label271 <- label' "vca" (x+(-460.0), y+(413.0)) (Inside main)
-    -- did line for label271
-    parent container122 label271
-    -- setting up label272
-    label272 <- label' "delay" (x+(-358.0), y+(411.0)) (Inside main)
-    -- did line for label272
-    parent container123 label272
-    -- setting up label273
-    label273 <- label' "lfo_sin" (x+(-669.0), y+(408.0)) (Inside main)
-    -- did line for label273
-    parent container124 label273
-    -- setting up label274
-    label274 <- label' "sum" (x+(-576.0), y+(398.0)) (Inside main)
-    -- did line for label274
-    parent container129 label274
-    -- setting up label275
-    label275 <- label' "vca" (x+(-480.0), y+(394.0)) (Inside main)
-    -- did line for label275
-    parent container126 label275
-    -- setting up label276
-    label276 <- label' "delay" (x+(-340.0), y+(369.0)) (Inside main)
-    -- did line for label276
-    parent container127 label276
-    -- setting up label277
-    label277 <- label' "lfo_sin" (x+(-689.0), y+(389.0)) (Inside main)
-    -- did line for label277
-    parent container128 label277
-    -- setting up label278
-    label278 <- label' "sum" (x+(-211.0), y+(134.0)) (Inside main)
-    -- did line for label278
-    parent container130 label278
-    -- setting up label279
-    label279 <- label' "sum" (x+(-603.0), y+(380.0)) (Inside main)
-    -- did line for label279
-    parent container104 label279
-    -- setting up label280
-    label280 <- label' "vca" (x+(-507.0), y+(376.0)) (Inside main)
-    -- did line for label280
-    parent container101 label280
-    -- setting up label281
-    label281 <- label' "delay" (x+(-405.0), y+(374.0)) (Inside main)
-    -- did line for label281
-    parent container102 label281
-    -- setting up label282
-    label282 <- label' "lfo_sin" (x+(-716.0), y+(371.0)) (Inside main)
-    -- did line for label282
-    parent container103 label282
-    -- setting up label283
-    label283 <- label' "sum" (x+(-647.0), y+(435.0)) (Inside main)
-    -- did line for label283
-    parent container108 label283
-    -- setting up label284
-    label284 <- label' "vca" (x+(-551.0), y+(431.0)) (Inside main)
-    -- did line for label284
-    parent container105 label284
-    -- setting up label285
-    label285 <- label' "delay" (x+(-449.0), y+(429.0)) (Inside main)
-    -- did line for label285
-    parent container106 label285
-    -- setting up label286
-    label286 <- label' "lfo_sin" (x+(-760.0), y+(426.0)) (Inside main)
-    -- did line for label286
-    parent container107 label286
-    -- setting up label287
-    label287 <- label' "sum" (x+(-218.0), y+(-74.0)) (Inside main)
-    -- did line for label287
-    parent container109 label287
-    -- setting up label288
-    label288 <- label' "sum" (x+(-80.0), y+(-16.0)) (Inside main)
-    -- did line for label288
-    parent container110 label288
-    -- setting up out306
-    out306 <- plugout' (sum85++"."++"result") (x+(-511.0), y+(342.0)) (Inside main)
-    -- did line for out306
-    parent container125 out306
-    -- setting up out307
-    out307 <- plugout' (vca94++"."++"result") (x+(-415.0), y+(338.0)) (Inside main)
-    -- did line for out307
-    parent container122 out307
-    -- setting up out308
-    out308 <- plugout' (delay12++"."++"result") (x+(-313.0), y+(336.0)) (Inside main)
-    -- did line for out308
-    parent container123 out308
-    -- setting up out309
-    out309 <- plugout' (id30++"."++"result") (x+(-762.0), y+(369.0)) (Inside plane4)
-    -- did line for out309
-    -- setting up out310
-    out310 <- plugout' (id16++"."++"result") (x+(-314.0), y+(25.0)) (Inside plane365)
-    -- did line for out310
-    -- setting up out311
-    out311 <- plugout' (lfo_sin79++"."++"result") (x+(-624.0), y+(333.0)) (Inside main)
-    -- did line for out311
-    parent container124 out311
-    -- setting up out312
-    out312 <- plugout' (sum86++"."++"result") (x+(-531.0), y+(323.0)) (Inside main)
-    -- did line for out312
-    parent container129 out312
-    -- setting up out313
-    out313 <- plugout' (vca95++"."++"result") (x+(-435.0), y+(319.0)) (Inside main)
-    -- did line for out313
-    parent container126 out313
-    -- setting up out314
-    out314 <- plugout' (delay13++"."++"result") (x+(-295.0), y+(294.0)) (Inside main)
-    -- did line for out314
-    parent container127 out314
-    -- setting up out315
-    out315 <- plugout' (id14++"."++"result") (x+(-782.0), y+(350.0)) (Inside plane1)
-    -- did line for out315
-    -- setting up out316
-    out316 <- plugout' (id15++"."++"result") (x+(-296.0), y+(-38.0)) (Inside plane365)
-    -- did line for out316
-    -- setting up out317
-    out317 <- plugout' (lfo_sin78++"."++"result") (x+(-644.0), y+(314.0)) (Inside main)
-    -- did line for out317
-    parent container128 out317
-    -- setting up out318
-    out318 <- plugout' (sum87++"."++"result") (x+(-166.0), y+(59.0)) (Inside main)
-    -- did line for out318
-    parent container130 out318
-    -- setting up out319
-    out319 <- plugout' (sum81++"."++"result") (x+(-558.0), y+(305.0)) (Inside main)
-    -- did line for out319
-    parent container104 out319
-    -- setting up out320
-    out320 <- plugout' (vca89++"."++"result") (x+(-462.0), y+(301.0)) (Inside main)
-    -- did line for out320
-    parent container101 out320
-    -- setting up out321
-    out321 <- plugout' (delay10++"."++"result") (x+(-360.0), y+(299.0)) (Inside main)
-    -- did line for out321
-    parent container102 out321
-    -- setting up out322
-    out322 <- plugout' (id19++"."++"result") (x+(-809.0), y+(332.0)) (Inside plane2)
-    -- did line for out322
-    -- setting up out323
-    out323 <- plugout' (id20++"."++"result") (x+(-301.0), y+(-109.0)) (Inside plane365)
-    -- did line for out323
-    -- setting up out324
-    out324 <- plugout' (lfo_sin76++"."++"result") (x+(-671.0), y+(296.0)) (Inside main)
-    -- did line for out324
-    parent container103 out324
-    -- setting up out325
-    out325 <- plugout' (sum82++"."++"result") (x+(-602.0), y+(360.0)) (Inside main)
-    -- did line for out325
-    parent container108 out325
-    -- setting up out326
-    out326 <- plugout' (vca90++"."++"result") (x+(-506.0), y+(356.0)) (Inside main)
-    -- did line for out326
-    parent container105 out326
-    -- setting up out327
-    out327 <- plugout' (delay11++"."++"result") (x+(-404.0), y+(354.0)) (Inside main)
-    -- did line for out327
-    parent container106 out327
-    -- setting up out328
-    out328 <- plugout' (id25++"."++"result") (x+(-853.0), y+(387.0)) (Inside plane3)
-    -- did line for out328
-    -- setting up out329
-    out329 <- plugout' (id26++"."++"result") (x+(-298.0), y+(-189.0)) (Inside plane365)
-    -- did line for out329
-    -- setting up out330
-    out330 <- plugout' (lfo_sin77++"."++"result") (x+(-715.0), y+(351.0)) (Inside main)
-    -- did line for out330
-    parent container107 out330
-    -- setting up out331
-    out331 <- plugout' (sum83++"."++"result") (x+(-173.0), y+(-149.0)) (Inside main)
-    -- did line for out331
-    parent container109 out331
-    -- setting up out332
-    out332 <- plugout' (sum84++"."++"result") (x+(-35.0), y+(-91.0)) (Inside main)
-    -- did line for out332
-    parent container110 out332
-    -- setting up out333
-    out333 <- plugout' (id29++"."++"result") (x+(-542.0), y+(-149.0)) (Inside plane365)
-    -- did line for out333
-    -- setting up out364
-    out364 <- plugout' (id362++"."++"result") (x+(-41.0), y+(78.0)) (Inside main)
-    -- did line for out364
-    -- setting up (Inside proxy100)
-    -- did line for (Inside proxy100)
-    -- setting up (Inside proxy96)
-    -- did line for (Inside proxy96)
-    -- setting up (Inside proxy97)
-    -- did line for (Inside proxy97)
-    -- setting up (Inside proxy98)
-    -- did line for (Inside proxy98)
-    -- wiring section
-    cable knob240 in131
-    cable out324 in132
-    cable knob242 in133
-    cable out319 in134
-    cable out320 in135
-    cable out322 in136
-    cable out333 in137
-    cable out321 in138
-    cable knob241 in139
-    cable knob243 in141
-    cable out330 in142
-    cable knob245 in143
-    cable out325 in144
-    cable out326 in145
-    cable out328 in146
-    cable out333 in147
-    cable out327 in148
-    cable knob244 in149
-    cable out323 in151
-    cable out329 in152
-    cable out318 in153
-    cable out331 in154
-    cable knob262 in214
-    cable out311 in215
-    cable knob264 in216
-    cable out306 in217
-    cable out307 in219
-    cable out309 in220
-    cable out333 in221
-    cable out308 in222
-    cable knob263 in223
-    cable knob237 in225
-    cable out317 in226
-    cable knob239 in227
-    cable out312 in228
-    cable out313 in229
-    cable out315 in230
-    cable out333 in231
-    cable out314 in232
-    cable knob238 in233
-    cable out310 in235
-    cable out316 in236
-    cable out332 in363
+    (x0, y0) <- mouse
+    let (x, y) = quantise2 quantum (x0, y0)
+    root <- currentPlane
+    audio_id10  <-  new' "audio_id"
+    audio_id11  <-  new' "audio_id"
+    delay436  <-  new' "delay4"
+    id49  <-  new' "id"
+    id50  <-  new' "id"
+    id51  <-  new' "id"
+    id52  <-  new' "id"
+    id53  <-  new' "id"
+    input1048  <-  new' "input"
+    input111  <-  new' "input"
+    input112  <-  new' "input"
+    input117  <-  new' "input"
+    input128  <-  new' "input"
+    input135  <-  new' "input"
+    input136  <-  new' "input"
+    input141  <-  new' "input"
+    input143  <-  new' "input"
+    input147  <-  new' "input"
+    input148  <-  new' "input"
+    input149  <-  new' "input"
+    input150  <-  new' "input"
+    linear_mix176  <-  new' "linear_mix"
+    random178  <-  new' "random"
+    random179  <-  new' "random"
+    random180  <-  new' "random"
+    random181  <-  new' "random"
+    sum187  <-  new' "sum"
+    sum188  <-  new' "sum"
+    sum189  <-  new' "sum"
+    sum193  <-  new' "sum"
+    sum4209  <-  new' "sum4"
+    vca1047  <-  new' "vca"
+    vca221  <-  new' "vca"
+    vca222  <-  new' "vca"
+    vca223  <-  new' "vca"
+    vca224  <-  new' "vca"
+    vca225  <-  new' "vca"
+    vca226  <-  new' "vca"
+    vca227  <-  new' "vca"
+    vca228  <-  new' "vca"
+    vca229  <-  new' "vca"
+    container506 <- container' "panel_chorus_v2.png" (x+(0.0), y+(0.0)) (Inside root)
+    container1049 <- container' "panel_gain.png" (384.0,-480.0) (Inside container506)
+    in1050 <- plugin' (vca1047 ! "cv") (360.0,-480.0) (Outside container1049)
+    setColour in1050 "#control"
+    hide in1050
+    in1051 <- plugin' (vca1047 ! "signal") (324.0,-480.0) (Outside container1049)
+    setColour in1051 "#sample"
+    knob1052 <- knob' (input1048 ! "result") (360.0,-480.0) (Outside container1049)
+    out1053 <- plugout' (vca1047 ! "result") (444.0,-480.0) (Outside container1049)
+    setColour out1053 "#sample"
+    container507 <- container' "panel_4x1.png" (108.0,-540.0) (Inside container506)
+    in508 <- plugin' (delay436 ! "delay1") (84.0,-444.0) (Outside container507)
+    setColour in508 "#control"
+    in509 <- plugin' (delay436 ! "delay2") (84.0,-492.0) (Outside container507)
+    setColour in509 "#control"
+    in510 <- plugin' (delay436 ! "delay3") (84.0,-540.0) (Outside container507)
+    setColour in510 "#control"
+    in511 <- plugin' (delay436 ! "delay4") (84.0,-588.0) (Outside container507)
+    setColour in511 "#control"
+    in512 <- plugin' (delay436 ! "signal") (84.0,-636.0) (Outside container507)
+    setColour in512 "#sample"
+    label513 <- label' "delay4" (84.0,-468.0) (Outside container507)
+    out514 <- plugout' (delay436 ! "result1") (132.0,-468.0) (Outside container507)
+    setColour out514 "#sample"
+    out515 <- plugout' (delay436 ! "result2") (132.0,-516.0) (Outside container507)
+    setColour out515 "#sample"
+    out516 <- plugout' (delay436 ! "result3") (132.0,-564.0) (Outside container507)
+    setColour out516 "#sample"
+    out517 <- plugout' (delay436 ! "result4") (132.0,-612.0) (Outside container507)
+    setColour out517 "#sample"
+    container518 <- container' "panel_4x1.png" (252.0,-564.0) (Inside container506)
+    in519 <- plugin' (sum4209 ! "signal1") (228.0,-492.0) (Outside container518)
+    setColour in519 "#sample"
+    in520 <- plugin' (sum4209 ! "signal2") (228.0,-540.0) (Outside container518)
+    setColour in520 "#sample"
+    in521 <- plugin' (sum4209 ! "signal3") (228.0,-588.0) (Outside container518)
+    setColour in521 "#sample"
+    in522 <- plugin' (sum4209 ! "signal4") (228.0,-636.0) (Outside container518)
+    setColour in522 "#sample"
+    label523 <- label' "sum4" (228.0,-492.0) (Outside container518)
+    out524 <- plugout' (sum4209 ! "result") (276.0,-564.0) (Outside container518)
+    setColour out524 "#sample"
+    container525 <- container' "panel_3x1.png" (-216.0,-528.0) (Inside container506)
+    in526 <- plugin' (random178 ! "rate") (-237.0,-528.0) (Outside container525)
+    setColour in526 "#control"
+    label527 <- label' "random" (-241.0,-453.0) (Outside container525)
+    out528 <- plugout' (random178 ! "result") (-196.0,-528.0) (Outside container525)
+    setColour out528 "#control"
+    container529 <- container' "panel_3x1.png" (-216.0,-756.0) (Inside container506)
+    in530 <- plugin' (random179 ! "rate") (-237.0,-756.0) (Outside container529)
+    setColour in530 "#control"
+    label531 <- label' "random" (-241.0,-681.0) (Outside container529)
+    out532 <- plugout' (random179 ! "result") (-196.0,-756.0) (Outside container529)
+    setColour out532 "#control"
+    container533 <- container' "panel_3x1.png" (-216.0,-984.0) (Inside container506)
+    in534 <- plugin' (random180 ! "rate") (-237.0,-984.0) (Outside container533)
+    setColour in534 "#control"
+    label535 <- label' "random" (-241.0,-909.0) (Outside container533)
+    out536 <- plugout' (random180 ! "result") (-196.0,-984.0) (Outside container533)
+    setColour out536 "#control"
+    container537 <- container' "panel_3x1.png" (-216.0,-1212.0) (Inside container506)
+    in538 <- plugin' (random181 ! "rate") (-237.0,-1212.0) (Outside container537)
+    setColour in538 "#control"
+    label539 <- label' "random" (-241.0,-1137.0) (Outside container537)
+    out540 <- plugout' (random181 ! "result") (-196.0,-1212.0) (Outside container537)
+    setColour out540 "#control"
+    container541 <- container' "panel_3x1.png" (-24.0,-528.0) (Inside container506)
+    in542 <- plugin' (vca226 ! "cv") (-48.0,-504.0) (Outside container541)
+    setColour in542 "#control"
+    in543 <- plugin' (vca226 ! "signal") (-48.0,-552.0) (Outside container541)
+    setColour in543 "#sample"
+    label544 <- label' "vca" (-48.0,-456.0) (Outside container541)
+    out545 <- plugout' (vca226 ! "result") (0.0,-528.0) (Outside container541)
+    setColour out545 "#sample"
+    container546 <- container' "panel_3x1.png" (-24.0,-756.0) (Inside container506)
+    in547 <- plugin' (vca227 ! "cv") (-48.0,-732.0) (Outside container546)
+    setColour in547 "#control"
+    in548 <- plugin' (vca227 ! "signal") (-48.0,-780.0) (Outside container546)
+    setColour in548 "#sample"
+    label549 <- label' "vca" (-48.0,-684.0) (Outside container546)
+    out550 <- plugout' (vca227 ! "result") (0.0,-756.0) (Outside container546)
+    setColour out550 "#sample"
+    container551 <- container' "panel_3x1.png" (-24.0,-984.0) (Inside container506)
+    in552 <- plugin' (vca228 ! "cv") (-48.0,-960.0) (Outside container551)
+    setColour in552 "#control"
+    in553 <- plugin' (vca228 ! "signal") (-48.0,-1008.0) (Outside container551)
+    setColour in553 "#sample"
+    label554 <- label' "vca" (-48.0,-912.0) (Outside container551)
+    out555 <- plugout' (vca228 ! "result") (0.0,-984.0) (Outside container551)
+    setColour out555 "#sample"
+    container556 <- container' "panel_3x1.png" (-24.0,-1212.0) (Inside container506)
+    in557 <- plugin' (vca229 ! "signal") (-48.0,-1236.0) (Outside container556)
+    setColour in557 "#sample"
+    in558 <- plugin' (vca229 ! "cv") (-48.0,-1188.0) (Outside container556)
+    setColour in558 "#control"
+    label559 <- label' "vca" (-48.0,-1140.0) (Outside container556)
+    out560 <- plugout' (vca229 ! "result") (0.0,-1212.0) (Outside container556)
+    setColour out560 "#sample"
+    container561 <- container' "panel_3x1.png" (-312.0,-1212.0) (Inside container506)
+    in562 <- plugin' (vca221 ! "cv") (-333.0,-1187.0) (Outside container561)
+    setColour in562 "#control"
+    hide in562
+    in563 <- plugin' (vca221 ! "signal") (-333.0,-1237.0) (Outside container561)
+    setColour in563 "#sample"
+    knob564 <- knob' (input147 ! "result") (-333.0,-1187.0) (Outside container561)
+    label565 <- label' "vca" (-337.0,-1137.0) (Outside container561)
+    out566 <- plugout' (vca221 ! "result") (-292.0,-1212.0) (Outside container561)
+    setColour out566 "#sample"
+    container567 <- container' "panel_3x1.png" (-312.0,-984.0) (Inside container506)
+    in568 <- plugin' (vca222 ! "cv") (-333.0,-959.0) (Outside container567)
+    setColour in568 "#control"
+    hide in568
+    in569 <- plugin' (vca222 ! "signal") (-333.0,-1009.0) (Outside container567)
+    setColour in569 "#sample"
+    knob570 <- knob' (input148 ! "result") (-333.0,-959.0) (Outside container567)
+    label571 <- label' "vca" (-337.0,-909.0) (Outside container567)
+    out572 <- plugout' (vca222 ! "result") (-292.0,-984.0) (Outside container567)
+    setColour out572 "#sample"
+    container573 <- container' "panel_3x1.png" (-312.0,-756.0) (Inside container506)
+    in574 <- plugin' (vca223 ! "cv") (-333.0,-731.0) (Outside container573)
+    setColour in574 "#control"
+    hide in574
+    in575 <- plugin' (vca223 ! "signal") (-333.0,-781.0) (Outside container573)
+    setColour in575 "#sample"
+    knob576 <- knob' (input149 ! "result") (-333.0,-731.0) (Outside container573)
+    label577 <- label' "vca" (-337.0,-681.0) (Outside container573)
+    out578 <- plugout' (vca223 ! "result") (-292.0,-756.0) (Outside container573)
+    setColour out578 "#sample"
+    container579 <- container' "panel_3x1.png" (-312.0,-528.0) (Inside container506)
+    in580 <- plugin' (vca224 ! "cv") (-333.0,-503.0) (Outside container579)
+    setColour in580 "#control"
+    hide in580
+    in581 <- plugin' (vca224 ! "signal") (-333.0,-553.0) (Outside container579)
+    setColour in581 "#sample"
+    knob582 <- knob' (input150 ! "result") (-333.0,-503.0) (Outside container579)
+    label583 <- label' "vca" (-337.0,-453.0) (Outside container579)
+    out584 <- plugout' (vca224 ! "result") (-292.0,-528.0) (Outside container579)
+    setColour out584 "#sample"
+    container585 <- container' "panel_3x1.png" (276.0,-864.0) (Inside container506)
+    in586 <- plugin' (linear_mix176 ! "gain") (255.0,-814.0) (Outside container585)
+    setColour in586 "#control"
+    in587 <- plugin' (linear_mix176 ! "signal1") (255.0,-864.0) (Outside container585)
+    setColour in587 "#sample"
+    in588 <- plugin' (linear_mix176 ! "signal2") (255.0,-914.0) (Outside container585)
+    setColour in588 "#sample"
+    label589 <- label' "linear_mix" (251.0,-789.0) (Outside container585)
+    out590 <- plugout' (linear_mix176 ! "result") (296.0,-864.0) (Outside container585)
+    setColour out590 "#sample"
+    container591 <- container' "panel_3x1.png" (-564.0,-468.0) (Inside container506)
+    in592 <- plugin' (vca225 ! "cv") (-585.0,-443.0) (Outside container591)
+    setColour in592 "#control"
+    in593 <- plugin' (vca225 ! "signal") (-585.0,-493.0) (Outside container591)
+    setColour in593 "#sample"
+    label594 <- label' "vca" (-589.0,-393.0) (Outside container591)
+    out595 <- plugout' (vca225 ! "result") (-544.0,-468.0) (Outside container591)
+    setColour out595 "#sample"
+    container596 <- container' "panel_knob.png" (-504.0,-624.0) (Inside container506)
+    in597 <- plugin' (id51 ! "signal") (-516.0,-624.0) (Outside container596)
+    setColour in597 "#control"
+    hide in597
+    knob598 <- knob' (input128 ! "result") (-516.0,-624.0) (Outside container596)
+    out599 <- plugout' (id51 ! "result") (-480.0,-624.0) (Outside container596)
+    setColour out599 "#control"
+    container600 <- container' "panel_3x1.png" (-120.0,-528.0) (Inside container506)
+    in601 <- plugin' (sum187 ! "signal1") (-141.0,-503.0) (Outside container600)
+    setColour in601 "#sample"
+    hide in601
+    in602 <- plugin' (sum187 ! "signal2") (-141.0,-553.0) (Outside container600)
+    setColour in602 "#sample"
+    knob603 <- knob' (input135 ! "result") (-141.0,-503.0) (Outside container600)
+    label604 <- label' "sum" (-145.0,-453.0) (Outside container600)
+    out605 <- plugout' (sum187 ! "result") (-100.0,-528.0) (Outside container600)
+    setColour out605 "#sample"
+    container606 <- container' "panel_3x1.png" (-120.0,-756.0) (Inside container506)
+    in607 <- plugin' (sum188 ! "signal1") (-141.0,-731.0) (Outside container606)
+    setColour in607 "#sample"
+    hide in607
+    in608 <- plugin' (sum188 ! "signal2") (-141.0,-781.0) (Outside container606)
+    setColour in608 "#sample"
+    knob609 <- knob' (input136 ! "result") (-141.0,-731.0) (Outside container606)
+    label610 <- label' "sum" (-145.0,-681.0) (Outside container606)
+    out611 <- plugout' (sum188 ! "result") (-100.0,-756.0) (Outside container606)
+    setColour out611 "#sample"
+    container612 <- container' "panel_3x1.png" (-120.0,-984.0) (Inside container506)
+    in613 <- plugin' (sum189 ! "signal1") (-141.0,-959.0) (Outside container612)
+    setColour in613 "#sample"
+    hide in613
+    in614 <- plugin' (sum189 ! "signal2") (-141.0,-1009.0) (Outside container612)
+    setColour in614 "#sample"
+    knob615 <- knob' (input141 ! "result") (-141.0,-959.0) (Outside container612)
+    label616 <- label' "sum" (-145.0,-909.0) (Outside container612)
+    out617 <- plugout' (sum189 ! "result") (-100.0,-984.0) (Outside container612)
+    setColour out617 "#sample"
+    container618 <- container' "panel_3x1.png" (-120.0,-1212.0) (Inside container506)
+    in619 <- plugin' (sum193 ! "signal2") (-141.0,-1237.0) (Outside container618)
+    setColour in619 "#sample"
+    in620 <- plugin' (sum193 ! "signal1") (-141.0,-1187.0) (Outside container618)
+    setColour in620 "#sample"
+    hide in620
+    knob621 <- knob' (input143 ! "result") (-141.0,-1187.0) (Outside container618)
+    label622 <- label' "sum" (-145.0,-1137.0) (Outside container618)
+    out623 <- plugout' (sum193 ! "result") (-100.0,-1212.0) (Outside container618)
+    setColour out623 "#sample"
+    in624 <- plugin' (id50 ! "signal") (-460.0,-545.0) (Inside container506)
+    setColour in624 "#control"
+    in625 <- plugin' (audio_id11 ! "signal") (345.0,-623.0) (Inside container506)
+    setColour in625 "#sample"
+    out626 <- plugout' (audio_id10 ! "result") (-370.0,-371.0) (Inside container506)
+    setColour out626 "#sample"
+    out627 <- plugout' (id49 ! "result") (-587.0,-797.0) (Inside container506)
+    setColour out627 "#control"
+    out628 <- plugout' (id50 ! "result") (-431.0,-545.0) (Inside container506)
+    setColour out628 "#control"
+    out629 <- plugout' (id52 ! "result") (-647.0,-485.0) (Inside container506)
+    setColour out629 "#control"
+    out630 <- plugout' (id53 ! "result") (-551.0,-905.0) (Inside container506)
+    setColour out630 "#control"
+    in631 <- plugin' (audio_id10 ! "signal") (x+(-48.0), y+(72.0)) (Outside container506)
+    setColour in631 "#sample"
+    in632 <- plugin' (id49 ! "signal") (x+(-48.0), y+(-24.0)) (Outside container506)
+    setColour in632 "#control"
+    hide in632
+    in633 <- plugin' (id52 ! "signal") (x+(-48.0), y+(24.0)) (Outside container506)
+    setColour in633 "#control"
+    hide in633
+    in634 <- plugin' (id53 ! "signal") (x+(-48.0), y+(-72.0)) (Outside container506)
+    setColour in634 "#control"
+    hide in634
+    knob635 <- knob' (input112 ! "result") (x+(-48.0), y+(24.0)) (Outside container506)
+    knob636 <- knob' (input111 ! "result") (x+(-48.0), y+(-24.0)) (Outside container506)
+    knob637 <- knob' (input117 ! "result") (x+(-48.0), y+(-72.0)) (Outside container506)
+    out638 <- plugout' (audio_id11 ! "result") (x+(48.0), y+(-120.0)) (Outside container506)
+    setColour out638 "#sample"
+    cable knob1052 in1050
+    cable out524 in1051
+    cable out545 in508
+    cable out550 in509
+    cable out555 in510
+    cable out560 in511
+    cable out626 in512
+    cable out514 in519
+    cable out515 in520
+    cable out516 in521
+    cable out517 in522
+    cable out584 in526
+    cable out578 in530
+    cable out572 in534
+    cable out566 in538
+    cable out628 in542
+    cable out605 in543
+    cable out628 in547
+    cable out611 in548
+    cable out628 in552
+    cable out617 in553
+    cable out623 in557
+    cable out628 in558
+    cable knob564 in562
+    cable out627 in563
+    cable knob570 in568
+    cable out627 in569
+    cable knob576 in574
+    cable out627 in575
+    cable knob582 in580
+    cable out627 in581
+    cable out630 in586
+    cable out626 in587
+    cable out1053 in588
+    cable out599 in592
+    cable out629 in593
+    cable knob598 in597
+    cable knob603 in601
+    cable out528 in602
+    cable knob609 in607
+    cable out532 in608
+    cable knob615 in613
+    cable out536 in614
+    cable out540 in619
+    cable knob621 in620
+    cable out595 in624
+    cable out590 in625
+    cable knob636 in632
+    cable knob635 in633
+    cable knob637 in634
     recompile
-    set knob237 (1.0)
-    set knob238 (0.17)
-    set knob239 (4.2461655e-3)
-    set knob240 (1.0)
-    set knob241 (0.32999998)
-    set knob242 (2.4878418e-3)
-    set knob243 (1.0)
-    set knob244 (0.42422107)
-    set knob245 (6.6156443e-3)
-    set knob262 (1.0)
-    set knob263 (0.10312942)
-    set knob264 (5.8622346e-3)
+    set knob1052 (0.5)
+    set knob564 (1.31)
+    set knob570 (1.2493283)
+    set knob576 (1.1)
+    set knob582 (1.0)
+    set knob598 (1.0e-3)
+    set knob603 (1.0)
+    set knob609 (1.0)
+    set knob615 (1.0)
+    set knob621 (1.0)
+    set knob635 (0.91896707)
+    set knob636 (1.2157872)
+    set knob637 (1.0)
     return ()

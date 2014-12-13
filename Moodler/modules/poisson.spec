@@ -4,7 +4,7 @@ void init() {
     trigger = 0;
 }
 
-void exec(in control rate,
+inline void exec(in control rate,
           out control trigger) {
     trigger = 0.0;
     double prob = rate*dt;

@@ -6,7 +6,7 @@ void init() {
     last_signal = 0.0;
 }
 
-void exec(in sample signal, out sample result) {
+inline void exec(in sample signal, out sample result) {
     if (signal != last_signal) printf("echo %f\n", signal);
     result = signal;
     last_signal = signal;

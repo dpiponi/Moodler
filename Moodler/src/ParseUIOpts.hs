@@ -37,24 +37,10 @@ parseUIArgs (s@('-' : _) : as) = do
     parseUIArgs as
 parseUIArgs [] = return ()
 parseUIArgs [a] = optFilename .= Just a
-parseUIArgs (a:_) = do
+parseUIArgs (a : _) = do
     liftIO $ putStrLn "Excess command line arguments"
     usage
     optFilename .= Just a
 
 parseUIOpts :: [String] -> IO UIOptions
 parseUIOpts as = execStateT (parseUIArgs as) defaultOptions
-
-{-
-testOptions :: [String] -> IO ()
-testOptions as = do
-    dict <- flip runStateT defaultOptions $ parseUIArgs as
-    print dict
-
-main :: IO ()
-main = do
-    testOptions []
-    testOptions ["-f"]
-    testOptions ["-a"]
-    testOptions ["-a", "192.196.1.100", "-g", "fred"]
--}

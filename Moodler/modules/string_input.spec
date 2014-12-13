@@ -4,5 +4,5 @@ void init () {
     result = 0;
 }
 
-void exec(out const char *result) {
+inline void exec(out const char *result) {
 }

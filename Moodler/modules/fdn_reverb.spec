@@ -6,7 +6,7 @@ void init() {
     result = 0.0;
 }
 
-void exec(in control decay, in control hf_decay, in sample signal, out sample result) {
+inline void exec(in control decay, in control hf_decay, in sample signal, out sample result) {
     set_gain(&reverb, dt, decay);
     set_absorption(&reverb, dt, hf_decay);
     result = do_reverb(&reverb, signal);

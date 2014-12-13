@@ -32,7 +32,8 @@ import qualified Data.Map as M
 data Extracted a = Extracted {
             _initFn :: Maybe (CFunctionDef a),
             _execFn :: Maybe (CFunctionDef a),
-            _vars :: [CDeclaration a]
+            _vars :: [CDeclaration a],
+            _localFns :: M.Map String (CFunctionDef a)
         } deriving Show
 
 $( makeLenses ''Extracted )
@@ -50,6 +51,13 @@ type TranslationMonad a = StateT (Extracted a) IO
  -}
 declaratorDefines :: CDeclarator NodeInfo -> Maybe String
 declaratorDefines (CDeclr ident _ _ _ _) = fmap identToString ident
+
+isInlineSpec :: CDeclarationSpecifier NodeInfo -> Bool
+isInlineSpec (CTypeQual (CInlineQual _)) = True
+isInlineSpec _ = False
+
+isInline :: CFunctionDef NodeInfo -> Bool
+isInline (CFunDef specs _ _ _ _) = any isInlineSpec specs
 
 functionBody :: CFunctionDef NodeInfo -> CStatement NodeInfo
 functionBody (CFunDef _ _ _ body _) = body
@@ -72,11 +80,17 @@ extractPartsFromExtDecl (CDeclExt cdecl) = do
     vars %= (cdecl :)
     return ()
 
+-- If I introduce local functions
+-- they'll be extracted here
 extractPartsFromExtDecl (CFDefExt functionDef) = do
     when (functionDefDefines functionDef == Just "init") $
                                     initFn .= Just functionDef
     when (functionDefDefines functionDef == Just "exec") $
                                     execFn .= Just functionDef
+    let maybeFunctionName = functionDefDefines functionDef
+    case maybeFunctionName of
+        Nothing -> return ()
+        Just functionName -> localFns %= M.insert functionName functionDef
     return ()
 
 extractPartsFromExtDecl (CAsmExt _ _) = return ()
@@ -128,8 +142,6 @@ getNormalFromCDecl (CDecl spec _ _) = let normals = concatMap getNormal spec
 
 -- A CDeclaration is a complete C declaration
 -- spec is CDeclarationSpecifier
--- I think the variable name is the ident in the first position in one of
--- the triples.
 getAnInOut :: CDeclaration NodeInfo -> [(CDecl, Either String String)]
 getAnInOut cdecl@(CDecl spec triples _) = let quals = map getInOrOut spec
                                           in if "out" `elem` quals
@@ -178,7 +190,7 @@ identName = lens (\(Ident name _ _) -> name)
 data Vars = Vars { _states :: [String]
                  , _outs :: M.Map String CDecl
                  , _ins :: M.Map String CDecl
-                 , _connections :: M.Map String String
+                 , _connections :: M.Map String CExpr
                  }
 
 rewriteVar :: String -> Vars -> CExpr -> Either String CExpr
@@ -190,12 +202,14 @@ rewriteVar nodeName
            (CVar i@(Ident name _ _) i2)
     | name `elem` states || name `M.member` outs
         -- = return $ CVar (i & identName %~ (("state->" ++ nodeName ++ "_") ++)) i2
-        = return $ CVar (mkIdent nopos ("state->" ++ nodeName ++ "_" ++ name) (Name 0)) i2
-        -- = return $ CMember (CVar (mkIdent nopos "state" (Name 1000)) i2) (mkIdent nopos (nodeName++"_" ++ name) (Name 1001)) True i2
+        -- = return $ CVar (mkIdent nopos ("state->" ++ nodeName ++ "_" ++ name) (Name 0)) i2
+        = return $ CMember (CVar (mkIdent nopos "state" (Name 1000)) i2)
+                   (mkIdent nopos (nodeName ++ "." ++ name) (Name 1001))
+                   True i2
     | name `M.member` ins =
             case M.lookup name connections of
-                Nothing -> Left "error2"
-                Just inName -> return $ CVar (i & identName .~ inName) i2
+                Nothing -> Left "rewriteVar"
+                Just inName -> return inName -- return $ CVar (mkIdent nopos inName (Name 0)) undefNode
     | otherwise = return (CVar i i2)
 rewriteVar _ _ v = return v
 

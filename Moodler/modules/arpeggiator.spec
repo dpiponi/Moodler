@@ -17,6 +17,7 @@ int count_stack_address[12];
 int count_stack_pointer;
 int chord_offset;
 double note_offset;
+double sync;
 
 void init() {
     pc = 0;
@@ -25,6 +26,7 @@ void init() {
     last_reset = 0;
     playing = 0.0;
     chord_offset = 0;
+    sync = 0.0;
 }
 
 void exec(in __attribute__((normal("abc"))) __attribute__((colour("(0, 0, 1)"))) const char *pattern,
@@ -33,24 +35,27 @@ void exec(in __attribute__((normal("abc"))) __attribute__((colour("(0, 0, 1)")))
           in control root,
           in __attribute__((normal(-100.0))) control interval1,
           in __attribute__((normal(-100.0))) control interval2,
+          out control sync,
           out control result,
           out control gate) {
     const char *pattern2 = pattern;
+    sync = 0.0;
     if (pattern2 != last_pattern || (last_reset <= 0 && reset > 0)) {
         pc = 0;
         count_stack_pointer = 0;
         chord_offset = 0;
         note_offset = 0.0;
+        sync = 1.0;
     }
 
     np = 0;
     for (double octave = 0; np < 4; octave += 0.1) {
         note[np++] = root+octave;
         if (interval1 > -100.0) {
-            note[np++] = root+interval1+octave;
+            note[np++] = /*root+*/interval1+octave;
         }
         if (interval2 > -100.0) {
-            note[np++] = root+interval2+octave;
+            note[np++] = /*root+*/interval2+octave;
         }
     }
 
@@ -131,6 +136,7 @@ void exec(in __attribute__((normal("abc"))) __attribute__((colour("(0, 0, 1)")))
                     chord_offset = 0;
                     count_stack_pointer = 0;
                     note_offset = 0.0;
+                    sync = 1.0;
                 } else {
                     ++pc;
                 }

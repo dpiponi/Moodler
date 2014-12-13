@@ -8,6 +8,7 @@ import Control.Applicative
 import Control.Lens
 import Control.Monad
 import Control.Monad.State
+import Control.Monad.Writer
 import Control.Monad.Trans.Error
 import Data.Array.IArray
 import Foreign.C.String
@@ -16,6 +17,7 @@ import GHC.IO.Exception
 import Language.C.Data.Node
 import Sound.OSC
 import System.Posix
+import System.Directory
 import qualified Data.ByteString.Char8 as C
 import qualified Data.Map as M
 --import qualified Data.Set as S
@@ -53,12 +55,25 @@ recompile' numVoices dataPtrs set_fill_buffer = do
     moodlerDSO .= newDso
     pending <- use modulesPendingInit
     liftIO $ putStrLn $ "Moduled pending init = " ++ show pending
+    --
+    -- Note: initialising new module before
+    -- switching buffer filler.
     liftIO $ forM_ pending $ \nodeToClear ->
         withCString nodeToClear $ \nodeString ->
             forM_ [0..numVoices-1] $ \v ->
                 dsoInit2Fn newDso (dataPtrs!v) nodeString
     liftIO $ set_fill_buffer (dsoExecuteFn newDso)
     modulesPendingInit .= []
+
+dumpC :: MonadIO m => ErrorT String (StateT Moodler m) ()
+dumpC = do
+    synth <- use moodlerSynth
+    let output' = unJust "dumpC" $ M.lookup "out" synth
+    currentDirectory <- liftIO getCurrentDirectory
+    code' <- case execWriterT (gen currentDirectory synth output') of
+        Left e -> throwError e
+        Right f -> return f
+    liftIO $ putStrLn code'
 
 reset :: MonadIO m =>
          Synth -> Int -> ErrorT String (StateT Moodler m) ()
@@ -70,15 +85,6 @@ reset theStandard numVoices = do
     modulesPendingInit .= []
     keyTracker .= KeyTracker numVoices 0 (M.empty :: M.Map Int Int)
     
-
-{-
-recompile :: Int ->
-             Array Int (Ptr ()) -> (FunPtr () -> IO ()) ->
-             StateT Moodler IO ()
-recompile numVoices dataPtrs set_fill_buffer = do
-    Right x <- runErrorT (recompile' numVoices dataPtrs set_fill_buffer)
-    return x
--}
 
 setKeyboardState :: DSO -> Array Int (Ptr ()) ->
                     Float -> Int -> Int -> IO ()
@@ -143,6 +149,8 @@ handleMessage theStandard numVoices dataPtrs set_fill_buffer
             Just (Message "/reset" []) -> do
                 reset theStandard numVoices
                 recompile' numVoices dataPtrs set_fill_buffer
+
+            Just (Message "/dump" []) -> dumpC
 
             Just (Message "/synth" [ASCII_String packedSynthType,
                                     ASCII_String packedSynthName]) ->

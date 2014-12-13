@@ -82,7 +82,7 @@ void callback(void *custom_data, AudioQueueRef queue,
     for (int i = 0; i < numStates; ++i) {
         for (int k = 0; k < BUFFER_SIZE/sizeof(SAMPLE_TYPE); ++k) {
             sample_buffer[2*k] += moodler_buffer[i][k];
-            sample_buffer[2*k+1] += 0.6*moodler_buffer[i][k];
+            sample_buffer[2*k+1] += moodler_buffer[i][k];
         }
     }
 //    printf("Callback computed!\n");
