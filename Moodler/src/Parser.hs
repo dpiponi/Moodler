@@ -22,6 +22,8 @@ import qualified Data.Map as M
 --import Text.PrettyPrint
 --import Debug.Trace
 import Data.Maybe
+--import Data.Data.Lens
+--import Control.Lens.Prism
 
 import CGen
 
@@ -147,9 +149,24 @@ rewriteShaderDeclr :: String -> String -> String -> CDeclr -> CDeclr
 rewriteShaderDeclr execName structName argName (CDeclr _ ds b c d) =
     CDeclr (Just (cIdent execName)) (map (rewriteShaderDerivedDeclr structName argName) ds) b c d
 
+-- Some lenses
 funDeclrParams :: Lens' CDerivedDeclr (Either [Ident] ([CDecl], Bool))
 funDeclrParams = lens (\(CFunDeclr a _ _) -> a)
                       (\(CFunDeclr _ b c) a' -> CFunDeclr a' b c)
+
+declrIdent :: Lens' CDeclr (Maybe Ident)
+declrIdent = lens (\(CDeclr a _ _ _ _) -> a)
+                  (\(CDeclr _ b c d e) a' -> CDeclr a' b c d e)
+
+funDefDeclr :: Lens' CFunDef CDeclr
+funDefDeclr = lens (\(CFunDef _ b _ _ _) -> b)
+                   (\(CFunDef a _ c d e) b' -> CFunDef a b' c d e)
+
+funDefStat :: Lens' CFunDef CStat
+funDefStat = lens (\(CFunDef _ _ _ d _) -> d)
+                   (\(CFunDef a b c _ e) d' -> CFunDef a b c d' e)
+
+--declSpecTypeQual :: Lens' CDeclSpec  CType
 
 rewriteShaderDerivedDeclr :: String -> String -> CDerivedDeclr -> CDerivedDeclr
 rewriteShaderDerivedDeclr structName argName = funDeclrParams . _Right . _1 %~ rewriteShaderDecls structName argName
@@ -272,6 +289,7 @@ rewriteVarsEverywhere :: (Data b, Typeable b) =>
                          b -> b
 rewriteVarsEverywhere nodeName variables =
     everywhere (mkT (rewriteVar nodeName variables))
+--rewriteVarsEverywhere nodeName variables = biplate %~ rewriteVar nodeName variables
 
 rewriteVars :: String -> Vars -> 
                CFunctionDef NodeInfo -> CStat
@@ -279,44 +297,43 @@ rewriteVars nodeName variables
             (CFunDef _ _ _ stmt _) = 
     rewriteVarsEverywhere nodeName variables stmt
 
-rewriteVar2 :: String -> Vars -> CExpr -> Either String CExpr
+rewriteVar2 :: String -> Vars -> CExpr -> CExpr
 rewriteVar2 nodeTypeName
            _variables@Vars { _states = states
                            , _outs = outs }
            (CVar i@(Ident name _ _) i2)
     | name `elem` states || name `M.member` outs
-        = return $ CMember (CVar (mkIdent nopos nodeTypeName (Name 1000)) i2)
+        = CMember (CVar (mkIdent nopos nodeTypeName (Name 1000)) i2)
                    (mkIdent nopos name (Name 1001))
                    True i2
-    | otherwise = return (CVar i i2)
-rewriteVar2 _ _ v = return v
+    | otherwise = CVar i i2
+rewriteVar2 _ _ v = v
 
 rewriteVarsEverywhere2 :: (Data b, Typeable b) =>
                          String -> Vars ->
-                         b -> Either String b
+                         b -> b
 rewriteVarsEverywhere2 nodeName variables =
-    everywhereM (mkM (rewriteVar2 nodeName variables))
+    everywhere (mkT (rewriteVar2 nodeName variables))
 
 rewriteVars2 :: String -> Vars -> 
-               CFunctionDef NodeInfo -> Either String (CStatement NodeInfo)
+               CFunctionDef NodeInfo -> CStatement NodeInfo
 rewriteVars2 nodeName variables
             (CFunDef _ _ _ stmt _) = 
     rewriteVarsEverywhere2 nodeName variables stmt
 
 rewriteVarInStruct :: String -> Vars ->
-              CDeclr -> Either String CDeclr
+              CDeclr -> CDeclr
 rewriteVarInStruct nodeName
            _variables@Vars { _states = states
                            , _outs = outs }
-           (CDeclr (Just i@(Ident name _ _)) i1 i2 i3 i4)
+           d@(CDeclr (Just (Ident name _ _)) _ _ _ _)
     | name `elem` states || name `M.member` outs
-        = return $ CDeclr (Just (i & identName %~
-                        ((nodeName ++ "_") ++))) i1 i2 i3 i4
-    | otherwise = return (CDeclr (Just i) i1 i2 i3 i4)
-rewriteVarInStruct nodeName variables v = gmapM (rewriteVarsInStructEverywhere nodeName variables) v
+        = d & declrIdent . _Just . identName %~ ((nodeName ++ "_") ++)
+    | otherwise = d
+rewriteVarInStruct nodeName variables v = gmapT (rewriteVarsInStructEverywhere nodeName variables) v
 
 rewriteVarsInStructEverywhere :: (Data b, Typeable b) =>
                          String -> Vars ->
-                         b -> Either String b
+                         b -> b
 rewriteVarsInStructEverywhere nodeName variables =
-    everywhereM (mkM (rewriteVarInStruct nodeName variables))
+    everywhere (mkT (rewriteVarInStruct nodeName variables))

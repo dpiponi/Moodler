@@ -82,8 +82,7 @@ varsFromNodeType nodeType connections =
     in Vars states outs ins connections
 
 -- In node_exec() function
-instantiateExec3 :: NodeType NodeInfo -> M.Map String CExpr ->
-                   Either String CStat
+instantiateExec3 :: NodeType NodeInfo -> M.Map String CExpr -> CStat
 instantiateExec3 nodeType connections = do
     let e = _execCode nodeType
     let variables = varsFromNodeType nodeType connections 
@@ -100,7 +99,7 @@ inlineExec nodeName nodeType connections =
 instantiateExec2 :: String -> String -> [String] -> M.Map String CExpr -> CStat
 instantiateExec2 nodeName typeName inputNames connections =
     cExpr $ cCall (cVar (cIdent (typeName ++ "_exec")))
-                           (map (\name -> fromJust (M.lookup name connections) ) inputNames ++ [cAddr (cVar (cIdent "state") `cArrow` cIdent nodeName)])
+                  (map (\name -> fromJust (M.lookup name connections)) inputNames ++ [cAddr (cVar (cIdent "state") `cArrow` cIdent nodeName)])
 
 instantiateInit :: String -> NodeType NodeInfo -> CStat
 instantiateInit nodeName nodeType =
@@ -183,22 +182,13 @@ genStruct moduleList synth = do
     tell ";\n"
     --tell "} state;\n"
 
-    {- This is misguided. Node type doesn't uniquely determine code.
-     - But it would work if the ins are passed as arguments.
-     - Hmmm... -}
-    -- Generate qper-module functions
-    forM_ uniqNodeTypes $ \nodeType@NodeType { _execCode = execFunDef, _nodeTypeName = typeName } ->
-        --when (nodeName /= "out") $ do
-            --Module { _getNodeType = nodeType@NodeType { _execCode = execFunDef, _nodeTypeName = typeName }, _inputNodes = connections } <- lookupM "genStruct1" name synth
-            unless (_isInlined nodeType) $ do
-                --tell $ "void " ++ name ++ "_exec(struct State *state) {\n"
-                --let connections' = M.mapWithKey (nameOfOutput (nodeType ^. inNames)) connections
-                codeBody <- lift $ instantiateExec3 nodeType undefined
-                let CFunDef declspecs declr decls _ n = execFunDef
-                let newFunctionDef = CFunDef declspecs
-                                             (rewriteShaderDeclr (typeName ++ "_exec") typeName typeName declr)
-                                             decls codeBody n
-                tell (render (pretty newFunctionDef))
+    forM_ uniqNodeTypes $ \nodeType@NodeType { _execCode = execFunDef
+                                             , _nodeTypeName = typeName } ->
+        unless (_isInlined nodeType) $ do
+            let codeBody = instantiateExec3 nodeType undefined
+            let newFunctionDef = execFunDef & funDefDeclr %~ rewriteShaderDeclr (typeName ++ "_exec") typeName typeName
+                                            & funDefStat .~ codeBody
+            tell (render (pretty newFunctionDef))
 
 nameOfOutput :: M.Map String CDecl -> String -> Out -> CExpr
 nameOfOutput inDecls inName Disconnected =
@@ -209,9 +199,7 @@ nameOfOutput inDecls inName Disconnected =
                       (getNormalFromCDecl cdecl)
 
 nameOfOutput _ _ (Out name' name'') =
-                cDot (cArrow (cVar (cIdent "state"))
-                             (cIdent name'))
-                     (cIdent name'')
+        cVar (cIdent "state") `cArrow` cIdent name' `cDot` cIdent name''
 
 structType :: CTypeSpec
 structType = CSUType (CStruct CStructTag (Just (cIdent "State")) Nothing [] undefNode)
