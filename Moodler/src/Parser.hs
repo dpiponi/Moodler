@@ -19,10 +19,13 @@ import Language.C.Data.Position
 import Language.C.Data.Name
 import qualified Data.Map as M
 --import Language.C.Pretty
+--import Text.PrettyPrint
 --import Debug.Trace
 
+import CGen
+
 {-
- - We want three things from a .spec file:
+ - We want three things from a .msl file:
  - (1) A list of global variables.
  -     These will become part of the state struct.
  - (2) An initialisation function for the state struct.
@@ -49,10 +52,10 @@ type TranslationMonad a = StateT (Extracted a) IO
  -
  - This function extracts just the underlying symbol as a string.
  -}
-declaratorDefines :: CDeclarator NodeInfo -> Maybe String
+declaratorDefines :: CDeclr -> Maybe String
 declaratorDefines (CDeclr ident _ _ _ _) = fmap identToString ident
 
-isInlineSpec :: CDeclarationSpecifier NodeInfo -> Bool
+isInlineSpec :: CDeclSpec -> Bool
 isInlineSpec (CTypeQual (CInlineQual _)) = True
 isInlineSpec _ = False
 
@@ -83,6 +86,8 @@ extractPartsFromExtDecl (CDeclExt cdecl) = do
 -- If I introduce local functions
 -- they'll be extracted here
 extractPartsFromExtDecl (CFDefExt functionDef) = do
+    --let CFunDef declspecs declr decls stat n = functionDef
+    --let newFunctionDef = CFunDef declspecs (rewriteShaderDeclr "fred" "jim" "john" declr) decls stat n
     when (functionDefDefines functionDef == Just "init") $
                                     initFn .= Just functionDef
     when (functionDefDefines functionDef == Just "exec") $
@@ -102,17 +107,8 @@ extractModuleParts (CTranslUnit extDecls _) =
 idents :: (Data a, Typeable a) => a -> [String]
 idents = everything (++) ([] `mkQ` (return . identToString))
 
--- XXX Note `partitionDeclSpecs`
--- https://hackage.haskell.org/package/language-c-0.4.7/docs/Language-C-Syntax-AST.html#g:3
-getInOrOut :: CDeclarationSpecifier NodeInfo -> String
---getInOrOut (CTypeSpec (CTypeDef ident _)) = identToString ident
-getInOrOut (CTypeQual (CAttrQual (CAttr (Ident "direction" _ _)
-                                        [CConst (CStrConst (CString "out" _) _)]
-                                        _)
-                                        )) = "out" -- show (identToString ident, map pretty cexpr)
-getInOrOut _ = ""
 
-getColour :: CDeclarationSpecifier NodeInfo -> [String]
+getColour :: CDeclSpec -> [String]
 --getInOrOut (CTypeSpec (CTypeDef ident _)) = identToString ident
 getColour (CTypeQual (CAttrQual (CAttr (Ident "colour" _ _)
                                         [CConst (CStrConst (CString colour _) _)]
@@ -120,7 +116,7 @@ getColour (CTypeQual (CAttrQual (CAttr (Ident "colour" _ _)
                                         )) = [colour]
 getColour _ = []
 
-getNormal :: CDeclarationSpecifier NodeInfo -> [CExpr]
+getNormal :: CDeclSpec -> [CExpr]
 --getInOrOut (CTypeSpec (CTypeDef ident _)) = identToString ident
 getNormal (CTypeQual (CAttrQual (CAttr (Ident "normal" _ _)
                                         [expr]
@@ -140,23 +136,73 @@ getNormalFromCDecl (CDecl spec _ _) = let normals = concatMap getNormal spec
                                                     then Nothing
                                                     else Just (head normals)
 
+{-
+ - CFunDef [CDeclSpec] (CDeclarator a) [CDeclration a] CStat NodeInfo
+ -  qualifiers --^       ^      ^
+ -  declaration for fun -+      |
+ -  arguments ------------------+
+ -}
+rewriteShaderDeclr :: String -> String -> String -> CDeclr -> CDeclr
+rewriteShaderDeclr execName structName argName (CDeclr _ ds b c d) =
+    CDeclr (Just (cIdent execName)) (map (rewriteShaderDerivedDeclr structName argName) ds) b c d
+
+rewriteShaderDerivedDeclr :: String -> String -> CDerivedDeclr -> CDerivedDeclr
+rewriteShaderDerivedDeclr structName argName (CFunDeclr (Right (as, a)) b c) =
+    CFunDeclr (Right (rewriteShaderDecls structName argName as, a)) b c
+rewriteShaderDerivedDeclr _ _ a = a
+
+-- Rewrite the function args
+rewriteShaderDecls :: String -> String -> [CDecl] -> [CDecl]
+rewriteShaderDecls structName argName args =
+    map removeAttrsFromCDecl (filter isAnIn args) ++ [cPtrToState structName argName]
+
+isAnIn :: CDecl -> Bool
+isAnIn (CDecl specs _ _) = any declSpecIsAnIn specs
+
+declSpecIsAnIn :: CDeclSpec -> Bool
+declSpecIsAnIn (CTypeQual (CAttrQual (CAttr (Ident "direction" _ _)
+                                        [CConst (CStrConst (CString "out" _) _)]
+                                        _)
+                                        )) = True
+declSpecIsAnIn _ = False
+
+declSpecIsAnAttr :: CDeclSpec -> Bool
+declSpecIsAnAttr (CTypeQual (CAttrQual _)) = True
+declSpecIsAnAttr _ = False
+
+removeAttrsFromCDecl :: CDecl -> CDecl
+removeAttrsFromCDecl (CDecl specs ts i) = CDecl (filter (not . declSpecIsAnAttr) specs) ts i
+
+--
+-- XXX Note `partitionDeclSpecs`
+-- https://hackage.haskell.org/package/language-c-0.4.7/docs/Language-C-Syntax-AST.html#g:3
+getInOrOut :: CDeclSpec -> String
+--getInOrOut (CTypeSpec (CTypeDef ident _)) = identToString ident
+getInOrOut (CTypeQual (CAttrQual (CAttr (Ident "direction" _ _)
+                                        [CConst (CStrConst (CString "out" _) _)]
+                                        _)
+                                        )) = "out" -- show (identToString ident, map pretty cexpr)
+getInOrOut _ = ""
+
 -- A CDeclaration is a complete C declaration
 -- spec is CDeclarationSpecifier
-getAnInOut :: CDeclaration NodeInfo -> [(CDecl, Either String String)]
+getAnInOut :: CDecl -> [(CDecl, Either String String)]
 getAnInOut cdecl@(CDecl spec triples _) = let quals = map getInOrOut spec
                                           in if "out" `elem` quals
                                                 then [(cdecl, Right $ head $ idents triples)]
                                                 else [(cdecl, Left $ head $ idents triples)]
 
-getInOut :: CDerivedDeclarator NodeInfo -> [(CDecl, Either String String)]
+-- Right => new style
+getInOut :: CDerivedDeclr -> [(CDecl, Either String String)]
 getInOut (CFunDeclr (Right (as, _)) _ _) = concatMap getAnInOut as
 getInOut _ = []
 
-getArgs :: CDeclarator NodeInfo -> [(CDecl, Either String String)]
+getArgs :: CDeclr -> [(CDecl, Either String String)]
 getArgs (CDeclr _ ds _ _ _) = concatMap getInOut ds
 
 -- Throws away arg type
-getInsAndOuts :: CFunctionDef NodeInfo -> ([(CDecl, String)], [(CDecl, String)])
+-- decl :: CDeclr = CDeclr _ [CDerivedDeclar] _ attrs _
+getInsAndOuts :: CFunDef -> ([(CDecl, String)], [(CDecl, String)])
 getInsAndOuts (CFunDef _ decl _ _ _) = dezip' $ getArgs decl
 
 dezip :: [Either a b] -> ([a], [b])
@@ -169,7 +215,7 @@ dezip' [] = ([], [])
 dezip' ((d, Left a) : cs) = let (as, bs) = dezip' cs in ((d, a) : as, bs)
 dezip' ((d, Right b) : cs) = let (as, bs) = dezip' cs in (as, (d, b) : bs)
 
-varDefinedInDeclaration :: CDeclaration NodeInfo -> String
+varDefinedInDeclaration :: CDecl -> String
 varDefinedInDeclaration (CDecl _ a _) = head $ idents a
 
 identName :: Lens' Ident String

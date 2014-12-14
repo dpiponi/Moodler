@@ -68,16 +68,7 @@ synthPreamble panelName synthName topOffset = do
     --tellInd 4 "parent panel lab"
     tellInd 4 $ unwords ["name <- new'", show synthName]
 
-{-
-plop :: CDecl -> CDecl
-plop (CDecl as triples nodeinfo) =
-    CDecl as triples' nodeinfo
-    where triples' = filter f triples
-          f (Just (CDeclr (Just _) _ _ _ _), _, _) = False
-          f _ = True
-          -}
-
--- Auto-generate UI script for a .spec module
+-- Auto-generate UI script for a .msl module
 synthScript :: String -> [(CDecl, String)] -> [(CDecl, String)] -> String
 synthScript synthName ins outs = do
     let numIns = length ins

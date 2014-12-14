@@ -64,7 +64,7 @@ type SynthBuilder a = State Synth a
 loadSynthTypes :: String ->
                   ErrorT String IO (M.Map String (NodeType NodeInfo))
 loadSynthTypes dir = do
-    moduleSpecs <- liftIO $ filter (isSuffixOf ".spec") <$>
+    moduleSpecs <- liftIO $ filter (isSuffixOf ".msl") <$>
                                             getDirectoryContents dir
     moduleSpecList <- forM moduleSpecs $ \moduleSpec -> do
         let primTypeName = fst $ splitDot moduleSpec
