@@ -28,6 +28,7 @@ import Text
 
 data NodeType a = NodeType {
     _nodeTypeName :: String,
+    _inList :: [String],
     _inNames :: M.Map String CDecl,
     _outNames :: M.Map String CDecl,
     _stateNames :: [String],
@@ -156,6 +157,7 @@ loadNodeType primTypeName dir fileName' = do
         e' <- execFunction
         i' <- i
         Just $ return $ NodeType primTypeName
+                                 (map snd ins)
                                  (M.fromList $ map swap ins)
                                  (M.fromList $ map swap outs)
                                  states vs i' e' (isInline e')

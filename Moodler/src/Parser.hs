@@ -154,10 +154,13 @@ rewriteShaderDerivedDeclr _ _ a = a
 -- Rewrite the function args
 rewriteShaderDecls :: String -> String -> [CDecl] -> [CDecl]
 rewriteShaderDecls structName argName args =
-    map removeAttrsFromCDecl (filter isAnIn args) ++ [cPtrToState structName argName]
+    map removeAttrsFromCDecl (filter isAnOut args) ++ [cPtrToState structName argName]
 
 isAnIn :: CDecl -> Bool
 isAnIn (CDecl specs _ _) = any declSpecIsAnIn specs
+
+isAnOut :: CDecl -> Bool
+isAnOut (CDecl specs _ _) = any declSpecIsAnOut specs
 
 declSpecIsAnIn :: CDeclSpec -> Bool
 declSpecIsAnIn (CTypeQual (CAttrQual (CAttr (Ident "direction" _ _)
@@ -165,6 +168,13 @@ declSpecIsAnIn (CTypeQual (CAttrQual (CAttr (Ident "direction" _ _)
                                         _)
                                         )) = True
 declSpecIsAnIn _ = False
+
+declSpecIsAnOut :: CDeclSpec -> Bool
+declSpecIsAnOut (CTypeQual (CAttrQual (CAttr (Ident "direction" _ _)
+                                        [CConst (CStrConst (CString "in" _) _)]
+                                        _)
+                                        )) = True
+declSpecIsAnOut _ = False
 
 declSpecIsAnAttr :: CDeclSpec -> Bool
 declSpecIsAnAttr (CTypeQual (CAttrQual _)) = True
@@ -270,6 +280,40 @@ rewriteVars :: String -> Vars ->
 rewriteVars nodeName variables
             (CFunDef _ _ _ stmt _) = 
     rewriteVarsEverywhere nodeName variables stmt
+
+rewriteVar2 :: String -> Vars -> CExpr -> Either String CExpr
+rewriteVar2 nodeTypeName
+           _variables@Vars { _states = states
+                           , _outs = outs
+                           , _ins = ins
+                           , _connections = connections }
+           (CVar i@(Ident name _ _) i2)
+    | name `elem` states || name `M.member` outs
+        -- = return $ CVar (i & identName %~ (("state->" ++ nodeName ++ "_") ++)) i2
+        -- = return $ CVar (mkIdent nopos ("state->" ++ nodeName ++ "_" ++ name) (Name 0)) i2
+        = return $ CMember (CVar (mkIdent nopos nodeTypeName (Name 1000)) i2)
+                   (mkIdent nopos name (Name 1001))
+                   True i2
+                   {-
+    | name `M.member` ins =
+            case M.lookup name connections of
+                Nothing -> Left "rewriteVar"
+                Just inName -> return inName -- return $ CVar (mkIdent nopos inName (Name 0)) undefNode
+                -}
+    | otherwise = return (CVar i i2)
+rewriteVar2 _ _ v = return v
+
+rewriteVarsEverywhere2 :: (Data b, Typeable b) =>
+                         String -> Vars ->
+                         b -> Either String b
+rewriteVarsEverywhere2 nodeName variables =
+    everywhereM (mkM (rewriteVar2 nodeName variables))
+
+rewriteVars2 :: String -> Vars -> 
+               CFunctionDef NodeInfo -> Either String (CStatement NodeInfo)
+rewriteVars2 nodeName variables
+            (CFunDef _ _ _ stmt _) = 
+    rewriteVarsEverywhere2 nodeName variables stmt
 
 rewriteVarInStruct :: String -> Vars ->
               CDeclr -> Either String CDeclr

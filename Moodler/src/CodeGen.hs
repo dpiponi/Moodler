@@ -81,7 +81,19 @@ varsFromNodeType nodeType connections =
         outs = _outNames nodeType
     in Vars states outs ins connections
 
--- Create inner piece of C code corresponding to the selected node.
+-- In node_exec() function
+instantiateExec3 :: NodeType NodeInfo -> M.Map String CExpr ->
+                   Either String CStat
+instantiateExec3 nodeType connections = do
+    let e = _execCode nodeType
+    let variables = varsFromNodeType nodeType connections 
+    rewriteVars2 (_nodeTypeName nodeType) variables e
+    --rewritten <- rewriteVars nodeName variables e
+    --return $ render (pretty rewritten)
+--    return $ concatMap (\s -> render (pretty s) ++ "\n") $
+--                            splitCompound rewritten
+
+-- Inlined in exec()
 instantiateExec1 :: String -> NodeType NodeInfo -> M.Map String CExpr ->
                    Either String CStat
 instantiateExec1 nodeName nodeType connections = do
@@ -93,10 +105,11 @@ instantiateExec1 nodeName nodeType connections = do
 --    return $ concatMap (\s -> render (pretty s) ++ "\n") $
 --                            splitCompound rewritten
 
-instantiateExec2 :: String -> Either String CStat
-instantiateExec2 nodeName =
-    return $ cExpr $ cCall (cVar (cIdent (nodeName ++ "_exec")))
-                           [cVar (cIdent "state")]
+-- Call to node_exec()
+instantiateExec2 :: String -> String -> [String] -> M.Map String CExpr -> Either String CStat
+instantiateExec2 nodeName typeName inputNames connections =
+    return $ cExpr $ cCall (cVar (cIdent (typeName ++ "_exec")))
+                           (map (\name -> fromJust (M.lookup name connections) ) inputNames ++ [cAddr ((cVar (cIdent "state")) `cArrow` (cIdent nodeName))])
 {-
     let e = _execCode nodeType
     let variables = varsFromNodeType nodeType connections 
@@ -162,10 +175,12 @@ instantiateState2 nodeName primTypeName = do
 
 genStruct :: [String] -> Synth -> WriterT String (Either String) ()
 genStruct moduleList synth = do
+    -- Get all nodes used in synth
     nodeTypes <-
             forM moduleList $ \name -> do
                 (Module _ nodeType _ _) <- lookupM "genStruct" name synth
                 return nodeType
+    -- Get all node types used in synth
     let uniqNodeTypes = uniqBy (compare `on` _nodeTypeName) nodeTypes
     members1 <-
             forM uniqNodeTypes $ \nodeType -> lift $ instantiateState1 nodeType
@@ -192,16 +207,19 @@ genStruct moduleList synth = do
     {- This is misguided. Node type doesn't uniquely determine code.
      - But it would work if the ins are passed as arguments.
      - Hmmm... -}
-    -- Generate per-module function
-    forM_ moduleList $ \name ->
-        when (name /= "out") $ do
-            Module { _getNodeType = nodeType, _inputNodes = connections } <- lookupM "genStruct1" name synth
+    -- Generate qper-module functions
+    forM_ uniqNodeTypes $ \nodeType@NodeType { _execCode = execFunDef, _nodeTypeName = typeName } ->
+        --when (nodeName /= "out") $ do
+            --Module { _getNodeType = nodeType@NodeType { _execCode = execFunDef, _nodeTypeName = typeName }, _inputNodes = connections } <- lookupM "genStruct1" name synth
             unless (_isInlined nodeType) $ do
-                tell $ "void " ++ name ++ "_exec(struct State *state) {\n"
-                let connections' = M.mapWithKey (nameOfOutput (nodeType ^. inNames)) connections
-                codeBody <- lift $ instantiateExec1 name nodeType connections'
-                tell (render(pretty codeBody))
-                tell "}\n"
+                --tell $ "void " ++ name ++ "_exec(struct State *state) {\n"
+                --let connections' = M.mapWithKey (nameOfOutput (nodeType ^. inNames)) connections
+                codeBody <- lift $ instantiateExec3 nodeType undefined
+                let CFunDef declspecs declr decls stat n = execFunDef
+                let newFunctionDef = CFunDef declspecs
+                                             (rewriteShaderDeclr (typeName ++ "_exec") typeName typeName declr)
+                                             decls codeBody n
+                tell (render (pretty newFunctionDef))
 
 nameOfOutput :: M.Map String CDecl -> String -> Out -> CExpr
 nameOfOutput inDecls inName Disconnected =
@@ -250,12 +268,12 @@ genExec :: [(String, t)] -> M.Map String Module ->
            WriterT String (Either String) ()
 genExec y synth = do
     compoundParts <- forM y $ \(name, _) -> do
-        (Module { _getNodeType = nodeType, _inputNodes = connections }) <-
+        (Module { _getNodeType = nodeType@NodeType { _inList = inputNames, _nodeTypeName = typeName  }, _inputNodes = connections }) <-
                 lookupM "genExec" name synth
         let connections' = M.mapWithKey (nameOfOutput (nodeType ^. inNames)) connections
         if name == "out" || _isInlined nodeType
             then lift $ instantiateExec1 name nodeType connections'
-            else lift $ instantiateExec2 name
+            else lift $ instantiateExec2 name typeName inputNames connections'
     let compoundStatement = CCompound []
                                       (map CBlockStmt compoundParts)
                                       undefNode
@@ -394,7 +412,7 @@ data DSO = DSO { dl :: DL
 makeDso :: String -> IO DSO
 makeDso code = do
     print "---"
-    putStr code
+    --putStr code
     print "---"
     --let tmpDir = "gensrc" ++ show (hash code)
     --createDirectoryIfMissing False tmpDir
