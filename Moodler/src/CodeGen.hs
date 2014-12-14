@@ -88,46 +88,25 @@ instantiateExec3 nodeType connections = do
     let e = _execCode nodeType
     let variables = varsFromNodeType nodeType connections 
     rewriteVars2 (_nodeTypeName nodeType) variables e
-    --rewritten <- rewriteVars nodeName variables e
-    --return $ render (pretty rewritten)
---    return $ concatMap (\s -> render (pretty s) ++ "\n") $
---                            splitCompound rewritten
 
 -- Inlined in exec()
-instantiateExec1 :: String -> NodeType NodeInfo -> M.Map String CExpr ->
-                   Either String CStat
-instantiateExec1 nodeName nodeType connections = do
+inlineExec :: String -> NodeType NodeInfo -> M.Map String CExpr -> CStat
+inlineExec nodeName nodeType connections =
     let e = _execCode nodeType
-    let variables = varsFromNodeType nodeType connections 
-    rewriteVars nodeName variables e
-    --rewritten <- rewriteVars nodeName variables e
-    --return $ render (pretty rewritten)
---    return $ concatMap (\s -> render (pretty s) ++ "\n") $
---                            splitCompound rewritten
+        variables = varsFromNodeType nodeType connections 
+    in rewriteVars nodeName variables e
 
 -- Call to node_exec()
-instantiateExec2 :: String -> String -> [String] -> M.Map String CExpr -> Either String CStat
+instantiateExec2 :: String -> String -> [String] -> M.Map String CExpr -> CStat
 instantiateExec2 nodeName typeName inputNames connections =
-    return $ cExpr $ cCall (cVar (cIdent (typeName ++ "_exec")))
-                           (map (\name -> fromJust (M.lookup name connections) ) inputNames ++ [cAddr ((cVar (cIdent "state")) `cArrow` (cIdent nodeName))])
-{-
-    let e = _execCode nodeType
-    let variables = varsFromNodeType nodeType connections 
-    rewriteVars nodeName variables e
-    --rewritten <- rewriteVars nodeName variables e
-    --return $ render (pretty rewritten)
---    return $ concatMap (\s -> render (pretty s) ++ "\n") $
---                            splitCompound rewritten
---                            -}
+    cExpr $ cCall (cVar (cIdent (typeName ++ "_exec")))
+                           (map (\name -> fromJust (M.lookup name connections) ) inputNames ++ [cAddr (cVar (cIdent "state") `cArrow` cIdent nodeName)])
 
-instantiateInit :: String -> NodeType NodeInfo -> Either String CStat
-instantiateInit nodeName nodeType = do
+instantiateInit :: String -> NodeType NodeInfo -> CStat
+instantiateInit nodeName nodeType =
     let i = _initCode nodeType
-    let variables = varsFromNodeType nodeType M.empty
-    rewriteVars nodeName variables i
-    --return $ render $ pretty rewritten
-
---generateCStruct :: Either
+        variables = varsFromNodeType nodeType M.empty
+    in rewriteVars nodeName variables i
 
 genIncludes :: MonadWriter String m =>
                [String] -> m ()
@@ -215,7 +194,7 @@ genStruct moduleList synth = do
                 --tell $ "void " ++ name ++ "_exec(struct State *state) {\n"
                 --let connections' = M.mapWithKey (nameOfOutput (nodeType ^. inNames)) connections
                 codeBody <- lift $ instantiateExec3 nodeType undefined
-                let CFunDef declspecs declr decls stat n = execFunDef
+                let CFunDef declspecs declr decls _ n = execFunDef
                 let newFunctionDef = CFunDef declspecs
                                              (rewriteShaderDeclr (typeName ++ "_exec") typeName typeName declr)
                                              decls codeBody n
@@ -272,8 +251,8 @@ genExec y synth = do
                 lookupM "genExec" name synth
         let connections' = M.mapWithKey (nameOfOutput (nodeType ^. inNames)) connections
         if name == "out" || _isInlined nodeType
-            then lift $ instantiateExec1 name nodeType connections'
-            else lift $ instantiateExec2 name typeName inputNames connections'
+            then return $ inlineExec name nodeType connections'
+            else return $ instantiateExec2 name typeName inputNames connections'
     let compoundStatement = CCompound []
                                       (map CBlockStmt compoundParts)
                                       undefNode
@@ -320,7 +299,7 @@ genInit2 moduleList synth = do
 
     forM_ moduleList $ \name -> do
         (Module _ nodeType _ _) <- lookupM "error 2.5" name synth
-        initSource <- lift $ instantiateInit name nodeType
+        let initSource = instantiateInit name nodeType
         tell $ "if (!strcmp(node, \"" ++ name ++
                "\")) {\n"
         --tell $ "printf(\"Clearing %s\\n\"," ++ show name ++ ");\n"
