@@ -33,6 +33,7 @@ import Synth
 import Module
 import Parser
 import CGen
+import CLens
 import Utils
 
 inValues :: (Ord a, Ord b) => M.Map a b -> [b]
