@@ -25,9 +25,10 @@ import System.FilePath.Posix
 --import Language.C.Pretty
 
 import Text
+import MoodlerSymbols
 
 data NodeType a = NodeType {
-    _nodeTypeName :: String,
+    _nodeTypeName :: ModuleTypeName,
     _inList :: [String],
     _inNames :: M.Map String CDecl,
     _outNames :: M.Map String CDecl,
@@ -64,10 +65,21 @@ synthPreamble panelName synthName topOffset = do
     tellInd 4 $ unwords ["lab <- label'",
                           show synthName,
                           xyoffset topOffset,
-                          "(Outside panel)"] -- XXX Create in place
-                          --"(Inside plane)"] -- XXX Create in place
-    --tellInd 4 "parent panel lab"
+                          "(Outside panel)"]
     tellInd 4 $ unwords ["name <- new'", show synthName]
+
+genScriptPlugs :: String -> String -> Int -> Int -> [(CDecl, String)] -> Writer String ()
+genScriptPlugs name command xoffset outOffset outs =
+    forM_ (zip [outOffset, outOffset+50 ..] outs) $
+                                \(offset, (outputType, eachOutput)) -> do
+         tellInd 4 $ unwords
+                [ name, "<-", command, "(name ++ ",
+                  show ("." ++ eachOutput) ++ ")",
+                  xyoffset (xoffset, -offset),
+                  "(Outside panel)" ] -- XXX Create in place
+         let outCol = getColourFromCDecl outputType
+         F.forM_ outCol $ \col ->
+             tellInd 4 $ unwords [ "setColour", name, show col]
 
 -- Auto-generate UI script for a .msl module
 synthScript :: String -> [(CDecl, String)] -> [(CDecl, String)] -> String
@@ -84,30 +96,8 @@ synthScript synthName ins outs = do
             else "panel_3x1.png"
     execWriter $ do
         synthPreamble panelName synthName topOffset
-        forM_ (zip [inOffset, inOffset+50 ..] ins) $
-                                    \(offset, (inputType, eachInput)) -> do
-             tellInd 4 $ unwords
-                    [ "inp <- plugin' (name ++",
-                      show ("." ++ eachInput) ++ ")",
-                      xyoffset (-21, -offset),
-                      "(Outside panel)" ]
-                      --"(Inside plane)" ]
-             let inCol = getColourFromCDecl inputType
-             F.forM_ inCol $ \col ->
-                tellInd 4 $ unwords [ "setColour", "inp", show col]
-             --tellInd 4 "parent panel inp" -- XXX Create in place
-        forM_ (zip [outOffset, outOffset+50 ..] outs) $
-                                    \(offset, (outputType, eachOutput)) -> do
-             tellInd 4 $ unwords
-                    [ "out <- plugout' (name ++ ",
-                      show ("." ++ eachOutput) ++ ")",
-                      xyoffset (20, -offset),
-                      "(Outside panel)" ] -- XXX Create in place
-                      --"(Inside plane)" ] -- XXX Create in place
-             let outCol = getColourFromCDecl outputType
-             F.forM_ outCol $ \col ->
-                 tellInd 4 $ unwords [ "setColour", "out", show col]
-             --tellInd 4 "parent panel out"
+        genScriptPlugs "inp" "plugin'" (-21) inOffset ins
+        genScriptPlugs "out" "plugout'" 20 outOffset outs
         tellInd 4 "recompile"
         tellInd 4 "return ()"
 
@@ -118,10 +108,9 @@ predefines =
     , ("sample", "__attribute__((colour(\"#sample\"))) double")
     , ("control", "__attribute__((colour(\"#control\"))) double")
     ]
-
-loadNodeType :: String -> String -> String -> ErrorT String IO (NodeType NodeInfo)
-loadNodeType primTypeName dir fileName' = do
-    let fileName = combine dir fileName'
+ 
+preprocessFile :: MonadIO m => FilePath -> m B.ByteString
+preprocessFile fileName = do
     rawCode <- liftIO $ readFile fileName
     code <- liftIO $ runCpphs
                      defaultCpphsOptions -- XXX Use `defines` to set "out"
@@ -130,33 +119,32 @@ loadNodeType primTypeName dir fileName' = do
                                                      }
                      , defines = predefines
                      } fileName rawCode
-    --liftIO $ putStrLn "Parsing:"
-    --liftIO $ putStr code
-    let typeNames = [] ++
-                    builtinTypeNames
-    let input = B.pack code
+    return $ B.pack code
+
+loadNodeType :: String -> String -> String -> ErrorT String IO (NodeType NodeInfo)
+loadNodeType primTypeName dir fileName' = do
+    let fileName = combine dir fileName'
+    input <- preprocessFile fileName
     let pos = position 0 "" 0 0
     let x = either (Left . show) Right $
                     execParser translUnitP input pos
-                               typeNames newNameSupply
+                               builtinTypeNames newNameSupply
     (ast, _) <- case x of
         Left e -> throwError e
         Right v -> return v
-    (_, Extracted i execFunction vs _) <- liftIO $ runStateT
+    (_, Extracted { _initFn = i, _execFn = execFunction, _vars = vs }) <- liftIO $ runStateT
                 (extractModuleParts ast) (Extracted Nothing Nothing [] M.empty)
     let states = map varDefinedInDeclaration vs
     let (ins, outs) = getInsAndOuts (fromJust execFunction)
 
     let synthName = fst (splitDot fileName')
     let script = synthScript synthName ins outs
-    --liftIO $ putStrLn $ "In scripts/" ++ synthName ++ ".hs"
-    --liftIO $ putStr script
     liftIO $ writeFile ("scripts/_" ++ synthName ++ ".hs") script
 
     fromMaybe (throwError "loadNodeType failed") $ do
         e' <- execFunction
         i' <- i
-        Just $ return $ NodeType primTypeName
+        Just $ return $ NodeType (ModuleTypeName primTypeName)
                                  (map snd ins)
                                  (M.fromList $ map swap ins)
                                  (M.fromList $ map swap outs)

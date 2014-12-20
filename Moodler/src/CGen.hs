@@ -25,6 +25,9 @@ cLAnd e f = CBinary CLndOp e f undefNode
 cLe :: CExpr -> CExpr -> CExpr
 cLe e f = CBinary CLeOp e f undefNode
 
+cPlus :: CExpr -> CExpr -> CExpr
+cPlus e f = CBinary CAddOp e f undefNode
+
 cExpr :: CExpr -> CStat
 cExpr e = CExpr (Just e) undefNode
 
@@ -50,3 +53,43 @@ cPtrToState :: String -> String -> CDecl
 cPtrToState structName argName  = 
     CDecl [CTypeSpec (CSUType (CStruct CStructTag (Just (cIdent structName)) Nothing [] undefNode) undefNode)]
           [(Just (CDeclr (Just (cIdent argName)) [CPtrDeclr [] undefNode] Nothing [] undefNode), Nothing, Nothing)] undefNode
+
+cPtrTo :: CTypeSpec -> Ident -> CDecl
+cPtrTo t i = 
+  CDecl [CTypeSpec t]
+        [(Just (CDeclr (Just i) [CPtrDeclr [] undefNode] Nothing [] undefNode),
+          Nothing,
+          Nothing)
+        ] undefNode
+
+cConstPtrTo :: CTypeSpec -> Ident -> CDecl
+cConstPtrTo t i = 
+  CDecl [CTypeSpec t, CTypeQual (CConstQual undefNode)]
+        [(Just (CDeclr (Just i) [CPtrDeclr [] undefNode] Nothing [] undefNode),
+          Nothing,
+          Nothing)
+        ] undefNode
+
+structType :: Ident -> CTypeSpec
+structType i = CSUType (CStruct CStructTag (Just i) Nothing [] undefNode)
+             undefNode
+
+cCompound :: [CDecl] -> [CStat] -> CStat
+cCompound ds ss = CCompound [] (map CBlockDecl ds ++ map CBlockStmt ss) undefNode
+
+cTranslUnit :: [CDecl] -> [CFunDef] -> CTranslUnit
+cTranslUnit ds fs = CTranslUnit (map CDeclExt ds ++ map CFDefExt fs) undefNode
+
+cIf :: CExpr -> CStat -> Maybe CStat -> CStat
+cIf cond ifTrue ifFalse = CIf cond ifTrue ifFalse undefNode
+
+cReturn :: Maybe CExpr -> CStat
+cReturn s = CReturn s undefNode
+
+cOffsetOf :: CDecl -> Ident -> CExpr
+cOffsetOf d i = CBuiltinExpr (CBuiltinOffsetOf d
+                                  [CMemberDesig i undefNode]
+                                  undefNode)
+
+cV :: String -> CExpr
+cV s = cVar (cIdent s)

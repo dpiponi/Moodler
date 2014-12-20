@@ -5,10 +5,12 @@ import Control.Monad.State
 import Language.C.Data.Node
 import Control.Monad.Trans.Error
 --import Control.Monad.Identity
-import Control.Monad.Morph
+--import Control.Monad.Morph
+import Data.Maybe
 
 import Synth
 import Module
+import MoodlerSymbols
 
 standardSynth :: M.Map String (NodeType NodeInfo) ->
                  ErrorT String (State Synth) ()
@@ -33,6 +35,7 @@ standardSynth synthTypes = {-flip execState M.empty $ -} do
 -}
         --zeroSynth <- hoist lift $ getSynth synthTypes "zero"
         --lift $ addSynth "zero" $ Module "zero" zeroSynth M.empty
-        outSynth <- hoist lift $ getSynth synthTypes "out"
-        lift $ addSynth "out" $ Module "out" outSynth
-                 (M.fromList [("value", Disconnected)])
+        let outSynth = fromJust $ M.lookup "out" synthTypes
+        let outModuleMaker = Module (ModuleName "out") outSynth (M.fromList [("value", Disconnected)])
+        lift $ addSynth (ModuleName "out") outModuleMaker
+                 

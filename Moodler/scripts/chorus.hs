@@ -4,7 +4,7 @@ do
     root <- currentPlane
     audio_id10  <-  new' "audio_id"
     audio_id11  <-  new' "audio_id"
-    delay436  <-  new' "delay4"
+    delay436  <-  new' "delay_4"
     id49  <-  new' "id"
     id50  <-  new' "id"
     id51  <-  new' "id"
@@ -64,7 +64,7 @@ do
     setColour in511 "#control"
     in512 <- plugin' (delay436 ! "signal") (84.0,-636.0) (Outside container507)
     setColour in512 "#sample"
-    label513 <- label' "delay4" (84.0,-468.0) (Outside container507)
+    label513 <- label' "delay_4" (84.0,-468.0) (Outside container507)
     out514 <- plugout' (delay436 ! "result1") (132.0,-468.0) (Outside container507)
     setColour out514 "#sample"
     out515 <- plugout' (delay436 ! "result2") (132.0,-516.0) (Outside container507)

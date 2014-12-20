@@ -27,6 +27,7 @@ import Control.Monad.Morph
 --import StandardSynth
 
 import CodeGen
+import MoodlerSymbols
 import KeyTracker
 import Module
 import Synth
@@ -47,7 +48,8 @@ recompile' :: MonadIO m => Int ->
               ErrorT String (StateT Moodler m) ()
 recompile' numVoices dataPtrs set_fill_buffer = do
     newSynth <- use moodlerSynth
-    let output' = unJust "recompile" $ M.lookup "out" newSynth
+    -- We know "out" exists so maybe not look it up but store globally XXX
+    let output' = unJust "recompile" $ M.lookup (ModuleName "out") newSynth
     newDso <- hoist liftIO $ makeDSOFromSynth newSynth output'
     -- XXX Need to kill old DSO when appropriate.
     -- Can't unload immediately because exec() may still
@@ -68,17 +70,17 @@ recompile' numVoices dataPtrs set_fill_buffer = do
 dumpC :: MonadIO m => ErrorT String (StateT Moodler m) ()
 dumpC = do
     synth <- use moodlerSynth
-    let output' = unJust "dumpC" $ M.lookup "out" synth
+    -- XXX ??? Store "out" globally in Moodler
+    let output' = unJust "dumpC" $ M.lookup (ModuleName "out") synth
     currentDirectory <- liftIO getCurrentDirectory
-    code' <- case execWriterT (gen currentDirectory synth output') of
-        Left e -> throwError e
-        Right f -> return f
+    let code' = execWriter (gen currentDirectory synth output')
     liftIO $ putStrLn code'
 
 reset :: MonadIO m =>
          Synth -> Int -> ErrorT String (StateT Moodler m) ()
 reset theStandard numVoices = do
-    output <- maybe (throwError "No output") return $ M.lookup "out" theStandard
+    -- Get "out" from Moodler?
+    output <- maybe (throwError "No output") return $ M.lookup (ModuleName "out") theStandard
     dso <- hoist liftIO $ makeDSOFromSynth theStandard output
     moodlerDSO .= dso
     moodlerSynth .= theStandard
@@ -106,10 +108,10 @@ handleInput knobName synthTypes = do
     oldSynth <- use moodlerSynth
     let newNumber = M.size oldSynth
     inputSynth <- hoist generalize $ getSynth synthTypes "input"
-    let newKnob = Module knobName
+    let newKnob = Module (ModuleName knobName)
                          inputSynth
                          M.empty newNumber
-    let newSynth = M.insert knobName newKnob oldSynth
+    let newSynth = M.insert (ModuleName knobName) newKnob oldSynth
     moodlerSynth .= newSynth
 
 addNewModule :: MonadIO m => String -> String ->
@@ -128,8 +130,8 @@ addNewModule synthType synthName synthTypes = do
             zip (map fst $ M.toList ins) (repeat Disconnected)
     -- XXX Deal with M.empty
     newSynth <- hoist generalize $ getSynth synthTypes synthType
-    let newModule = Module synthName newSynth inputs newNumber
-    let aNewSynth = M.insert synthName newModule oldSynth
+    let newModule = Module (ModuleName synthName) newSynth inputs newNumber
+    let aNewSynth = M.insert (ModuleName synthName) newModule oldSynth
     moodlerSynth .= aNewSynth
     modulesPendingInit %= (synthName :)
 
@@ -181,12 +183,12 @@ handleMessage theStandard numVoices dataPtrs set_fill_buffer
             Just (Message "/connect" [a, b, c, d]) -> do
                 let [a', b', c', d'] =
                         (C.unpack . d_ascii_string) <$> [a, b, c, d]
-                moodlerSynth %= connect a' b' c' d'
+                moodlerSynth %= connect (ModuleName a') b' (ModuleName c') d'
 
             Just (Message "/disconnect" [c, d]) -> do
                 let [c', d'] =
                         (C.unpack . d_ascii_string) <$> [c, d]
-                moodlerSynth %= disconnect c' d'
+                moodlerSynth %= disconnect (ModuleName c') d'
 
 
             Just (Message ('/':'8':'/':'p':'u':'s':'h':ds) [Float v]) -> do

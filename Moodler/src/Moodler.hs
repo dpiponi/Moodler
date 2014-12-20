@@ -21,6 +21,7 @@ import CodeGen
 import OSCRecv
 import StandardSynth
 import KeyTracker
+import MoodlerSymbols
 
 ipAddress :: String
 --ipAddress = "192.168.10.31"
@@ -52,7 +53,8 @@ main = do
         synthTypes <- loadSynthTypes modulesDirectory
         let synth0  = runErrorT $ standardSynth synthTypes
         let (_, theStandard) = runState synth0 M.empty
-        output <- maybe (throwError "No output") return $ M.lookup "out" theStandard
+        -- XXX Global out?
+        output <- maybe (throwError "No output") return $ M.lookup (ModuleName "out") theStandard
         dso <- makeDSOFromSynth theStandard output
 
         liftIO $ do

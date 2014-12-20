@@ -14,7 +14,7 @@ import Control.Monad.State
 import Language.C.Syntax.AST
 import Language.C.Syntax.Constants
 import Language.C.Data.Ident
-import Language.C.Data.Node
+--import Language.C.Data.Node
 --import Language.C.Data.Position
 --import Language.C.Data.Name
 import qualified Data.Map as M
@@ -36,16 +36,16 @@ import CLens
  - (3) The part that executes.
  -     The executable parts of each synth are stitched together.
  -}
-data Extracted a = Extracted {
-            _initFn :: Maybe (CFunctionDef a),
-            _execFn :: Maybe (CFunctionDef a),
-            _vars :: [CDeclaration a],
-            _localFns :: M.Map String (CFunctionDef a)
+data Extracted = Extracted {
+            _initFn :: Maybe CFunDef,
+            _execFn :: Maybe CFunDef,
+            _vars :: [CDecl],
+            _localFns :: M.Map String CFunDef
         } deriving Show
 
 $(makeLenses ''Extracted)
 
-type TranslationMonad a = StateT (Extracted a) IO
+--type TranslationMonad = StateT Extracted IO
 
 {-
  - A declarator is something like
@@ -63,60 +63,56 @@ isInlineSpec :: CDeclSpec -> Bool
 isInlineSpec (CTypeQual (CInlineQual _)) = True
 isInlineSpec _ = False
 
-isInline :: CFunctionDef NodeInfo -> Bool
+isInline :: CFunDef -> Bool
 isInline (CFunDef specs _ _ _ _) = any isInlineSpec specs
 
-functionDefDefines :: CFunctionDef NodeInfo -> Maybe String
+functionDefDefines :: CFunDef -> Maybe String
 functionDefDefines (CFunDef _ decl _ _ _) = declaratorDefines decl
 
 {-
  - Extract the three needed parts from the .msl file.
  -}
-extractPartsFromExtDecl :: CExtDecl -> TranslationMonad NodeInfo ()
+extractPartsFromExtDecl :: CExtDecl -> StateT Extracted IO ()
 extractPartsFromExtDecl (CDeclExt cdecl) = do
     vars %= (cdecl :)
     return ()
 
--- If I introduce local functions
--- they'll be extracted here
 extractPartsFromExtDecl (CFDefExt functionDef) = do
     when (functionDefDefines functionDef == Just "init") $
                                     initFn .= Just functionDef
     when (functionDefDefines functionDef == Just "exec") $
                                     execFn .= Just functionDef
-    let maybeFunctionName = functionDefDefines functionDef
-    case maybeFunctionName of
+    -- A start on local functions.
+    case functionDefDefines functionDef of
         Nothing -> return ()
         Just functionName -> localFns %= M.insert functionName functionDef
-    return ()
 
 extractPartsFromExtDecl (CAsmExt _ _) = return ()
 
-extractModuleParts :: CTranslUnit -> TranslationMonad NodeInfo ()
+extractModuleParts :: CTranslUnit -> StateT Extracted IO ()
 extractModuleParts (CTranslUnit extDecls _) = 
     mapM_ extractPartsFromExtDecl extDecls
 
-getColour :: CAttr -> Maybe String
-getColour (CAttr (Ident "colour" _ _) [CConst (CStrConst (CString colour _) _)]
-                                        _) = Just colour
-getColour _ = Nothing
-
-getNormal :: CAttr -> Maybe CExpr
-getNormal (CAttr (Ident "normal" _ _) [expr] _) = Just expr
-getNormal _ = Nothing
-
-getInfoFromAttrs :: (CAttr -> Maybe a) -> CDecl -> Maybe a
-getInfoFromAttrs f (CDecl spec _ _) = let (_, quals', _, _, _) = partitionDeclSpecs spec
-                                          cols = mapMaybe f quals'
-                                      in if null cols
-                                                    then Nothing
-                                                    else Just (head cols)
-
 getColourFromCDecl :: CDecl -> Maybe String
-getColourFromCDecl = getInfoFromAttrs getColour
+getColourFromCDecl = getFirstColour . getAttrs
 
 getNormalFromCDecl :: CDecl -> Maybe CExpr
-getNormalFromCDecl = getInfoFromAttrs getNormal
+getNormalFromCDecl = getFirstNormal . getAttrs
+
+decomposeAttr :: CAttr -> (String, [CExpr])
+decomposeAttr (CAttr (Ident name _ _) es _) = (name, es)
+
+getAttrs :: CDecl -> [(String, [CExpr])]
+getAttrs decl = decl ^.. declSpecifier . to partitionDeclSpecs
+                                       ._2 . each . to decomposeAttr
+
+getFirstNormal :: [(String, [CExpr])] -> Maybe CExpr
+getFirstNormal as = lookup "normal" as ^? each . each
+
+getFirstColour :: [(String, [CExpr])] -> Maybe String
+getFirstColour as = lookup "colour" as ^? each . each
+                                               . exprConst . constString
+                                               . to getCString
 
 {-
  - CFunDef [CDeclSpec] (CDeclarator a) [CDeclration a] CStat NodeInfo
@@ -167,11 +163,7 @@ declSpecIsAnAttr _ = False
 removeAttrsFromCDecl :: CDecl -> CDecl
 removeAttrsFromCDecl (CDecl specs ts i) = CDecl (filter (not . declSpecIsAnAttr) specs) ts i
 
---
--- XXX Note `partitionDeclSpecs`
--- https://hackage.haskell.org/package/language-c-0.4.7/docs/Language-C-Syntax-AST.html#g:3
 getInOrOut :: CAttr -> String
---getInOrOut (CTypeSpec (CTypeDef ident _)) = identToString ident
 getInOrOut (CAttr (Ident "direction" _ _)
                                         [CConst (CStrConst (CString "out" _) _)]
                                         _)
@@ -181,8 +173,6 @@ getInOrOut _ = ""
 idents :: (Data a, Typeable a) => a -> [String]
 idents = everything (++) ([] `mkQ` (return . identToString))
 
--- A CDeclaration is a complete C declaration
--- spec is CDeclarationSpecifier
 getAnInOut :: CDecl -> [(CDecl, Either String String)]
 getAnInOut cdecl@(CDecl spec triples _) = let (_, quals', _, _, _) = partitionDeclSpecs spec
                                               quals = map getInOrOut quals'
@@ -216,10 +206,6 @@ dezip' ((d, Right b) : cs) = let (as, bs) = dezip' cs in (as, (d, b) : bs)
 varDefinedInDeclaration :: CDecl -> String
 varDefinedInDeclaration (CDecl _ a _) = head $ idents a
 
-identName :: Lens' Ident String
-identName = lens (\(Ident name _ _) -> name)
-                 (\(Ident _ num info) name -> Ident name num info)
-
 data Vars = Vars { _states :: [String]
                  , _outs :: M.Map String CDecl
                  , _ins :: M.Map String CDecl
@@ -245,8 +231,8 @@ rewriteVarsEverywhere nodeName variables =
     everywhere (mkT (rewriteVar nodeName variables))
 
 rewriteVars :: String -> Vars -> 
-               CFunctionDef NodeInfo -> CStat
-rewriteVars nodeName variables stat = stat ^. funDefStat
+               CFunDef -> CStat
+rewriteVars nodeName variables def = def ^. funDefStat
                                     & biplate %~ rewriteVarsEverywhere nodeName variables
 
 rewriteVar2 :: String -> Vars -> CExpr -> CExpr
@@ -259,30 +245,14 @@ rewriteVar2 nodeTypeName
     | otherwise = v
 rewriteVar2 _ _ v = v
 
-rewriteVarsEverywhere2 :: (Data b, Typeable b) =>
-                         String -> Vars ->
-                         b -> b
+rewriteVarsEverywhere2 :: String -> Vars ->
+                         CExpr -> CExpr
 rewriteVarsEverywhere2 nodeName variables =
     everywhere (mkT (rewriteVar2 nodeName variables))
 
 rewriteVars2 :: String -> Vars -> 
-               CFunctionDef NodeInfo -> CStatement NodeInfo
-rewriteVars2 nodeName variables fundef =
-    rewriteVarsEverywhere2 nodeName variables (fundef ^. funDefStat)
-
-rewriteVarInStruct :: String -> Vars ->
-              CDeclr -> CDeclr
-rewriteVarInStruct nodeName
-           _variables@Vars { _states = states
-                           , _outs = outs }
-           d@(CDeclr (Just (Ident name _ _)) _ _ _ _)
-    | name `elem` states || name `M.member` outs
-        = d & declrIdent . _Just . identName %~ ((nodeName ++ "_") ++)
-    | otherwise = d
-rewriteVarInStruct nodeName variables v = gmapT (rewriteVarsInStructEverywhere nodeName variables) v
-
-rewriteVarsInStructEverywhere :: (Data b, Typeable b) =>
-                         String -> Vars ->
-                         b -> b
-rewriteVarsInStructEverywhere nodeName variables =
-    everywhere (mkT (rewriteVarInStruct nodeName variables))
+               CFunDef -> CStat
+--rewriteVars2 nodeName variables fundef =
+--    rewriteVarsEverywhere2 nodeName variables (fundef ^. funDefStat)
+rewriteVars2 nodeName variables def = def ^. funDefStat
+                                        & biplate %~ rewriteVarsEverywhere2 nodeName variables

@@ -20,13 +20,22 @@ void exec(in control freq, in sample signal, out sample result) {
     double freq2 = clamp(-1.0, 0.65, freq);
     double w = 2*M_PI*signal_to_frequency(freq2);
 
-    double a1 = (-4*cos(dt*w))/(2 + sqrt(2)*sin(dt*w));
-    double a2 = (2 - sqrt(2)*sin(dt*w))/(2 + sqrt(2)*sin(dt*w));
+    double r0 = 0.5*dt*w;
+    const double r1 = sqrt(2.0);
+    double r2 = sin(r0);
+    double r3 = cos(r0);
+    double r4 = 1.0/r3;
+    double r5 = r2*r4;
+    double r7 = r1*r2*r3;
+    double r8 = 1.0/(1.0+r7);
+    double r9 = 2.0*r3*r3;
+    double r10 = r9-r3;
 
-    double temp1 = cos((dt*w)/2.);
-    double temp2 = 1/temp1;
-    double b0 = 1/(sqrt(2)*tan((dt*w)/2.) + temp2*temp2);
-    double b1 = -(4*temp1*temp1)/(2 + sqrt(2)*sin(dt*w));
+    double a1 = -2.0*r10*r8;
+    double a2 = (1.0-r7)*r8;
+
+    double b0 = 1/(r1*r5+r4*r4);
+    double b1 = -r9*r8;
     double b2 = b0;
 
     x0 = signal;
