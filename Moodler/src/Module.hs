@@ -29,9 +29,9 @@ import MoodlerSymbols
 
 data NodeType a = NodeType {
     _nodeTypeName :: ModuleTypeName,
-    _inList :: [String],
-    _inNames :: M.Map String CDecl,
-    _outNames :: M.Map String CDecl,
+    _inList :: [InName],
+    _inNames :: M.Map InName CDecl,
+    _outNames :: M.Map OutName CDecl,
     _stateNames :: [String],
     _stateDecls :: [CDeclaration a],
     _initCode :: CFunctionDef a,
@@ -82,7 +82,7 @@ genScriptPlugs name command xoffset outOffset outs =
              tellInd 4 $ unwords [ "setColour", name, show col]
 
 -- Auto-generate UI script for a .msl module
-synthScript :: String -> [(CDecl, String)] -> [(CDecl, String)] -> String
+synthScript :: String -> [(CDecl, InName)] -> [(CDecl, OutName)] -> String
 synthScript synthName ins outs = do
     let numIns = length ins
     let numOuts = length outs
@@ -96,8 +96,8 @@ synthScript synthName ins outs = do
             else "panel_3x1.png"
     execWriter $ do
         synthPreamble panelName synthName topOffset
-        genScriptPlugs "inp" "plugin'" (-21) inOffset ins
-        genScriptPlugs "out" "plugout'" 20 outOffset outs
+        genScriptPlugs "inp" "plugin'" (-21) inOffset (map (_2 %~ _getInName) ins)
+        genScriptPlugs "out" "plugout'" 20 outOffset (map (_2 %~ _getOutName) outs)
         tellInd 4 "recompile"
         tellInd 4 "return ()"
 

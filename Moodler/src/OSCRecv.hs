@@ -183,12 +183,12 @@ handleMessage theStandard numVoices dataPtrs set_fill_buffer
             Just (Message "/connect" [a, b, c, d]) -> do
                 let [a', b', c', d'] =
                         (C.unpack . d_ascii_string) <$> [a, b, c, d]
-                moodlerSynth %= connect (ModuleName a') b' (ModuleName c') d'
+                moodlerSynth %= connect (ModuleName a') (OutName b') (ModuleName c') (InName d')
 
             Just (Message "/disconnect" [c, d]) -> do
                 let [c', d'] =
                         (C.unpack . d_ascii_string) <$> [c, d]
-                moodlerSynth %= disconnect (ModuleName c') d'
+                moodlerSynth %= disconnect (ModuleName c') (InName d')
 
 
             Just (Message ('/':'8':'/':'p':'u':'s':'h':ds) [Float v]) -> do

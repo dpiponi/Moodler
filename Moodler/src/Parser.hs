@@ -27,6 +27,7 @@ import Data.Data.Lens
 
 import CGen
 import CLens
+import MoodlerSymbols
 
 {-
  - We want three things from a .msl file:
@@ -173,24 +174,24 @@ getInOrOut _ = ""
 idents :: (Data a, Typeable a) => a -> [String]
 idents = everything (++) ([] `mkQ` (return . identToString))
 
-getAnInOut :: CDecl -> [(CDecl, Either String String)]
+getAnInOut :: CDecl -> [(CDecl, Either InName OutName)]
 getAnInOut cdecl@(CDecl spec triples _) = let (_, quals', _, _, _) = partitionDeclSpecs spec
                                               quals = map getInOrOut quals'
                                           in if "out" `elem` quals
-                                                then [(cdecl, Right $ head $ idents triples)]
-                                                else [(cdecl, Left $ head $ idents triples)]
+                                                then [(cdecl, Right $ OutName $ head $ idents triples)]
+                                                else [(cdecl, Left $ InName $ head $ idents triples)]
 
 -- Right => new style
-getInOut :: CDerivedDeclr -> [(CDecl, Either String String)]
+getInOut :: CDerivedDeclr -> [(CDecl, Either InName OutName)]
 getInOut (CFunDeclr (Right (as, _)) _ _) = concatMap getAnInOut as
 getInOut _ = []
 
-getArgs :: CDeclr -> [(CDecl, Either String String)]
+getArgs :: CDeclr -> [(CDecl, Either InName OutName)]
 getArgs (CDeclr _ ds _ _ _) = concatMap getInOut ds
 
 -- Throws away arg type
 -- decl :: CDeclr = CDeclr _ [CDerivedDeclar] _ attrs _
-getInsAndOuts :: CFunDef -> ([(CDecl, String)], [(CDecl, String)])
+getInsAndOuts :: CFunDef -> ([(CDecl, InName)], [(CDecl, OutName)])
 getInsAndOuts (CFunDef _ decl _ _ _) = dezip' $ getArgs decl
 
 dezip :: [Either a b] -> ([a], [b])
@@ -207,9 +208,9 @@ varDefinedInDeclaration :: CDecl -> String
 varDefinedInDeclaration (CDecl _ a _) = head $ idents a
 
 data Vars = Vars { _states :: [String]
-                 , _outs :: M.Map String CDecl
-                 , _ins :: M.Map String CDecl
-                 , _connections :: M.Map String CExpr
+                 , _outs :: M.Map OutName CDecl
+                 , _ins :: M.Map InName CDecl
+                 , _connections :: M.Map InName CExpr
                  }
 
 rewriteVar :: String -> Vars -> CExpr -> CExpr
@@ -219,9 +220,9 @@ rewriteVar nodeName
                            , _ins = ins
                            , _connections = connections }
            v@(CVar (Ident name _ _) _)
-    | name `elem` states || name `M.member` outs
+    | name `elem` states || OutName name `M.member` outs
         = cVar (cIdent "state") `cArrow` cIdent nodeName `cDot` cIdent name
-    | name `M.member` ins = fromMaybe v (M.lookup name connections)
+    | InName name `M.member` ins = fromMaybe v (M.lookup (InName name) connections)
     | otherwise = v
 rewriteVar _ _ v = v
 
@@ -240,7 +241,7 @@ rewriteVar2 nodeTypeName
            _variables@Vars { _states = states
                            , _outs = outs }
            v@(CVar i@(Ident name _ _) _)
-    | name `elem` states || name `M.member` outs =
+    | name `elem` states || OutName name `M.member` outs =
         cVar (cIdent nodeTypeName) `cArrow` i
     | otherwise = v
 rewriteVar2 _ _ v = v

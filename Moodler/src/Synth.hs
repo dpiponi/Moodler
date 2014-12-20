@@ -21,13 +21,13 @@ import MoodlerSymbols
 -- after Out is created.
 data Out = Disconnected
          | Out { _outModuleName :: ModuleName
-               , _outModuleOut :: String
+               , _outModuleOut :: OutName
                } deriving (Eq, Ord)
 
 instance Show Out where
     show Disconnected = "<0>"
     show Out { _outModuleName = a, _outModuleOut = c} =
-                                            _getModuleName a ++ "." ++ c
+                                            _getModuleName a ++ "." ++ _getOutName c
 
 {-
 instance Eq Out where
@@ -47,7 +47,7 @@ instance Ord Out where
 -- as modules are added
 data Module = Module { _getNodeName :: ModuleName
                      , _getNodeType :: NodeType NodeInfo
-                     , _inputNodes :: M.Map String Out
+                     , _inputNodes :: M.Map InName Out
                      , _moduleNumber :: Int
                      } deriving Show
 $(makeLenses ''Out)
@@ -63,14 +63,14 @@ dumpSynth synth = do
         putStrLn $ _getModuleName modName ++ ":"
         print $ _inputNodes modl
 
-connect :: ModuleName -> String -> ModuleName -> String -> Synth -> Synth
+connect :: ModuleName -> OutName -> ModuleName -> InName -> Synth -> Synth
 connect outNodeName outField inNode inField synth =
     ix inNode . inputNodes . ix inField .~ Out outNodeName outField $ synth 
 
 -- We want to pass synthTypes into here and use that to
 -- set up normalled value. Maybe.
 -- -- XXX
-disconnect :: ModuleName -> String -> Synth -> Synth
+disconnect :: ModuleName -> InName -> Synth -> Synth
 disconnect inNode inField synth =
     ix inNode . inputNodes . ix inField .~ Disconnected $ synth 
 
