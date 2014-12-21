@@ -257,3 +257,7 @@ rewriteVars2 :: String -> Vars ->
 --    rewriteVarsEverywhere2 nodeName variables (fundef ^. funDefStat)
 rewriteVars2 nodeName variables def = def ^. funDefStat
                                         & biplate %~ rewriteVarsEverywhere2 nodeName variables
+
+isStatementEmpty :: CStat -> Bool
+isStatementEmpty (CCompound _ [] _) = True
+isStatementEmpty _ = False

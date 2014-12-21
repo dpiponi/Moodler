@@ -332,3 +332,16 @@ static inline void sort2(double *a, double *b) {
         *b = t;
     }
 }
+
+struct NodeRecord {
+    const char *key;
+    int value;
+};
+
+struct StateRecord {
+    const char *key;
+    struct NodeRecord *value1;
+    int value2;
+};
+
+int get_address(struct StateRecord *address_table, const char *node, const char *field);

@@ -1,6 +1,17 @@
 {-# LANGUAGE FlexibleContexts, ForeignFunctionInterface #-}
 
-module CodeGen where
+module CodeGen(DSO
+              , createFn
+              , dl
+              , dsoExecuteFn
+              , dsoInit2Fn
+              , dsoSetFn
+              , dsoSetStringFn
+              , gen
+              , makeDSOFromSynth
+              , setStateVar
+              , setStringStateVar
+              ) where
 
 import Control.Lens hiding (set)
 import Control.Monad.State
@@ -25,7 +36,6 @@ import System.Posix.DynamicLinker
 import System.Process
 import Text.PrettyPrint
 import qualified Data.Map as M
-import qualified Data.Set as S
 
 import CGen
 import CLens
@@ -33,42 +43,21 @@ import Module
 import MoodlerSymbols
 import Parser
 import Synth
+import TopologicalSort
 import Utils
-
-emptyStatement :: CStat -> Bool
-emptyStatement (CCompound _ [] _) = True
-emptyStatement _ = False
-
-inValues :: (Ord a, Ord b) => M.Map a b -> [b]
-inValues = map snd . S.toList . S.fromList . M.toList
-
--- Topological sort of synth nodes working backwards from
--- output.
-orderNodes :: Synth -> Module -> M.Map ModuleName (Int, Module)
-orderNodes synth out' =
-    snd $ execState (orderNodes' synth out') (0, M.empty) where
-    orderNodes' :: M.Map ModuleName Module -> Module ->
-                   State (Int, M.Map ModuleName (Int, Module)) ()
-    orderNodes' synth' modl@Module { _getNodeName = name
-                                  , _inputNodes = inputs} = do
-        (level, dict) <- get
-        unless (name `M.member` dict) $ do
-             put (level+1, M.insert name (level, modl) dict)
-             forM_ (inValues inputs) $ \outNode ->
-                case outNode of
-                    Out nodeName _ -> 
-                        let node = fromMaybe (error ("failed to find "++_getModuleName nodeName++" in a "++_getModuleName name)) (M.lookup nodeName synth')
-                        in orderNodes' synth' node
-                    Disconnected -> return ()
 
 foreign import ccall "dynamic"  
   mkCreate :: FunPtr (IO (Ptr ())) -> IO (Ptr ())
+  {-
 foreign import ccall "dynamic"  
   mkInit :: FunPtr (Ptr () -> IO ()) -> Ptr () -> IO ()
+  -}
 foreign import ccall "dynamic"  
   mkInit2 :: FunPtr (Ptr () -> CString -> IO ()) -> Ptr () -> CString -> IO ()
+  {-
 foreign import ccall "dynamic"  
   mkExecute :: FunPtr (Ptr () -> IO ()) -> Ptr () -> IO ()
+  -}
 foreign import ccall "dynamic"  
   mkSet :: FunPtr (Ptr () -> CString -> CString -> CDouble -> IO ()) ->
                    Ptr () -> CString -> CString -> CDouble -> IO ()
@@ -76,8 +65,10 @@ foreign import ccall "dynamic"
   mkSetString :: FunPtr (Ptr () -> CString -> CString -> CString -> IO ()) ->
                          Ptr () -> CString -> CString -> CString -> IO ()
 
+{-
 concatMapM :: Monad m => (a -> m [b]) -> [a] -> m [b]
 concatMapM f xs = liftM concat (mapM f xs)
+-}
 
 varsFromNodeType :: NodeType a -> M.Map InName CExpr -> Vars
 varsFromNodeType nodeType connections =
@@ -87,25 +78,27 @@ varsFromNodeType nodeType connections =
     in Vars states outs ins connections
 
 -- In node_exec() function
-instantiateExec3 :: NodeType NodeInfo -> M.Map InName CExpr -> CStat
-instantiateExec3 nodeType connections = do
+execBody :: NodeType NodeInfo -> M.Map InName CExpr -> CStat
+execBody nodeType connections = do
     let e = _execCode nodeType
     let variables = varsFromNodeType nodeType connections 
     rewriteVars2 (_getModuleTypeName (_nodeTypeName nodeType)) variables e
 
 -- Inlined in exec()
-inlineExec :: ModuleName -> NodeType NodeInfo -> M.Map InName CExpr -> Maybe CStat
-inlineExec nodeName nodeType connections =
+execInlined :: ModuleName -> NodeType NodeInfo -> M.Map InName CExpr ->
+               Maybe CStat
+execInlined nodeName nodeType connections =
     let e = _execCode nodeType
-    in if not (emptyStatement (e ^. funDefStat))
+    in if not (isStatementEmpty (e ^. funDefStat))
         then let variables = varsFromNodeType nodeType connections 
         in Just (rewriteVars (_getModuleName nodeName) variables e)
     else Nothing
 
 -- Call to node_exec()
 -- Why are inputNames separated from their connections?
-instantiateExec2 :: ModuleName -> NodeType NodeInfo -> ModuleTypeName -> [InName] -> M.Map InName Out -> CStat
-instantiateExec2 nodeName nodeType typeName inputNames connections =
+execCall :: ModuleName -> NodeType NodeInfo -> ModuleTypeName -> [InName] ->
+            M.Map InName Out -> CStat
+execCall nodeName nodeType typeName inputNames connections =
     cExpr $ cCall (cVar (cIdent (_getModuleTypeName typeName ++ "_exec")))
                   (map (\inputName ->
                             let x = fromMaybe Disconnected (M.lookup inputName connections)
@@ -179,13 +172,21 @@ genStruct moduleList = do
         tell (render (pretty helper))
         tell "\n"
 
+        let helper_table = addressHelperTable nodeType
+        tell (render (pretty helper_table))
+        tell "\n"
+
     forM_ uniqNodeTypes $ \nodeType@NodeType { _execCode = execFunDef
                                              , _nodeTypeName = typeName } ->
         unless (_isInlined nodeType) $ do
-            let codeBody = instantiateExec3 nodeType undefined
+            let codeBody = execBody nodeType undefined
             let newFunctionDef = execFunDef & funDefDeclr %~ rewriteShaderDeclr (_getModuleTypeName typeName ++ "_exec") (_getModuleTypeName typeName) (_getModuleTypeName typeName)
                                             & funDefStat .~ codeBody
             tell (render (pretty newFunctionDef))
+
+    let table = addressTable moduleList
+    tell (render (pretty table))
+    tell "\n"
 
 cExprForOut :: M.Map InName CDecl -> InName -> Out -> CExpr
 cExprForOut inDecls inName Disconnected =
@@ -212,36 +213,39 @@ executeFunction stmt =
                     Nothing [] undefNode)
             [] (CCompound [] [CBlockStmt stmt] undefNode) undefNode
 
-genExec :: [Module] -> Writer String ()
-genExec sortedPrimitives = do
-    compoundParts <- forM sortedPrimitives $ \node -> do
-        -- inputNodes maps from names of "in" arguments to
-        -- an "Out" from an earlier node.
-        let name = _getNodeName node
-        let nodeType@NodeType {_inList = inputNames
-                                , _nodeTypeName = typeName
-                               } = _getNodeType node
-        let connections = _inputNodes node
-        let connections' = M.mapWithKey (cExprForOut (nodeType ^. inNames)) connections
-        if _getModuleName name == "out" || _isInlined nodeType
-            then return $ inlineExec name nodeType connections'
-            else return $ Just (instantiateExec2 name nodeType typeName
-                                {-(map fst $ M.toList connections)-} inputNames connections)
-    let compoundStatement = CCompound []
-                                      (map CBlockStmt (catMaybes compoundParts))
-                                      undefNode
-
+mainLoop :: CStat -> CStat
+mainLoop stat = 
     let iIdent = cIdent "i"
-    let iVar = cVar iIdent
-    let loop = CFor (Right (CDecl [CTypeSpec (CIntType undefNode)]
+        iVar = cVar iIdent
+    in CFor (Right (CDecl [CTypeSpec (CIntType undefNode)]
                                   [(Just (CDeclr (Just iIdent) [] Nothing [] undefNode),
                                     Just (CInitExpr (intConst 0) undefNode),
                                     Nothing)]
                                   undefNode))
-                    (Just (iVar `cLe` intConst 256))
-                    (Just (cPreInc iVar))
-                    compoundStatement
-                    undefNode
+            (Just (iVar `cLe` intConst 256))
+            (Just (cPreInc iVar))
+            stat
+            undefNode
+
+genExec :: [Module] -> Writer String ()
+genExec sortedPrimitives = do
+    compoundParts <- forM sortedPrimitives $ \node -> do
+        let name = _getNodeName node
+        let nodeType@NodeType { _inList = inputNames
+                              , _nodeTypeName = typeName
+                              } = _getNodeType node
+        let connections = _inputNodes node
+        let connections' = M.mapWithKey (cExprForOut (nodeType ^. inNames))
+                                        connections
+        if _getModuleName name == "out" || _isInlined nodeType
+            then return $ execInlined name nodeType connections'
+            else return $ Just (execCall name nodeType typeName
+                                         inputNames connections)
+    let compoundStatement = CCompound []
+                                      (map CBlockStmt (catMaybes compoundParts))
+                                      undefNode
+
+    let loop = mainLoop compoundStatement
     let function = executeFunction loop
     tell (render (pretty function))
 
@@ -268,15 +272,31 @@ addressHelperFunction n stmts =
 
 genAddressHelper :: NodeType a -> CFunDef
 genAddressHelper nodeType =
-    let stateVars = _stateNames nodeType
-        name = _nodeTypeName nodeType
+    let name = _nodeTypeName nodeType
         name' = _getModuleTypeName name
-        stmts = flip map stateVars $ \varName ->
+        stmts = flip map (_stateNames nodeType) $ \varName ->
                     cIf (cLNeg (strcmp [cV "field", stringConst varName]))
                                    (cReturn (Just (cOffsetOf (structName name') (cIdent varName))))
                                    Nothing
     in addressHelperFunction (name' ++ "_address")
                                          (stmts ++ [cReturn (Just (intConst (-1)))])
+
+addressHelperTable :: NodeType a -> CExtDecl
+addressHelperTable nodeType =
+    let stateVars = _stateNames nodeType
+        name = _nodeTypeName nodeType
+        name' = _getModuleTypeName name
+        stmts = flip map stateVars $ \varName ->
+                    (varName, cOffsetOf (structName name') (cIdent varName))
+    in makeTable "NodeRecord" (name' ++ "_address_table") stmts
+
+addressTable :: [Module] -> CExtDecl
+addressTable modules =
+    let stmts = map f modules :: [(String, CExpr, CExpr)]
+        f node = (_getModuleName (_getNodeName node),
+                  cV (_getModuleTypeName (_nodeTypeName (_getNodeType node)) ++ "_address_table"),
+                  cOffsetOf structState (cIdent (_getModuleName (_getNodeName node))))
+    in makeTable2 "StateRecord" "address_table" stmts
 
 -- Create C function to return offset into state corresponding
 -- to fields.
@@ -289,14 +309,6 @@ addressType =
               ], False))
               [] undefNode
 
-addressFunction :: [CStat] -> CFunDef
-addressFunction stmts = 
-    CFunDef [CTypeSpec (CIntType undefNode)]
-            (CDeclr (Just (cIdent "address"))
-                    [addressType]
-                    Nothing [] undefNode)
-            [] (CCompound [] (map CBlockStmt stmts) undefNode) undefNode
-
 strcmp :: [CExpr] -> CExpr
 strcmp = cCall (cVar (cIdent "strcmp"))
 
@@ -305,18 +317,14 @@ structState = CDecl [CTypeSpec (CSUType (CStruct CStructTag
               (Just (mkIdent nopos "State" (Name 0)))
               Nothing [] undefNode) undefNode)] [] undefNode
 
-genAddress :: [Module] -> CFunDef
-genAddress moduleList =
-    let stmts = flip map moduleList $ \node ->
-                    let name = _getNodeName node
-                    in cIf (cLNeg (strcmp [cV "node", stringConst (_getModuleName name)]))
-                           (cReturn (Just (cCall (cV (_getModuleTypeName (_nodeTypeName (_getNodeType node)) ++ "_address"))
-                                                 [cV "field"]
-                                           `cPlus`
-                                           cOffsetOf structState (cIdent (_getModuleName name)))
-                        ))
-                        Nothing
-    in addressFunction (stmts ++ [cReturn (Just (intConst (-1)))])
+genAddress :: CFunDef
+genAddress =
+    let stmt = cReturn (Just (cCall (cV "get_address") [cV "address_table", cV "node", cV "field" ]))
+    in CFunDef [CTypeSpec (CIntType undefNode)]
+            (CDeclr (Just (cIdent "address"))
+                    [addressType]
+                    Nothing [] undefNode)
+            [] (cCompound [] [stmt]) undefNode
 
 init2Type :: CDerivedDeclr
 init2Type =
@@ -393,13 +401,6 @@ genCreate = do
 sampleRate :: Double
 sampleRate = 1.0/48000
 
-sortedNodes :: Synth -> Module -> [Module]
-sortedNodes synth out' = 
-    let x :: [(ModuleName, (Int, Module))]
-        x = M.toList $ orderNodes synth out'
-    -- Sorted topologically
-    in  map (snd . snd) (sortBy (flip compare `on` (fst . snd)) x)
-
 -- Create entire C source code unit.
 gen :: String -> Synth -> Module ->
        Writer String ()
@@ -411,15 +412,81 @@ gen currentDirectory synth out' = do
     let sortedPrimitives = sortedNodes synth out'
     genHeaders currentDirectory
     tell $ "const double dt = " ++ show sampleRate ++ ";\n"
+    {-
+    tell (render (pretty (makeRecordType "NodeRecord" (CIntType undefNode))))
+    tell "\n"
+    tell (render (pretty (makeRecord2PtrType "StateRecord" (structType (cIdent "NodeRecord")) (CIntType undefNode))))
+    tell "\n"
+    -}
     genStruct moduleList
     genCreate
     --genInit moduleList synth
     genInit2 moduleList
     genExec sortedPrimitives
-    let address = genAddress moduleList
+    let address = genAddress
     tell (render (pretty address))
     genSet
     genSetString
+
+{-
+makeRecordType :: String -> CTypeSpec -> CExtDecl
+makeRecordType name t =
+    let keyType = CDecl [CTypeQual (CConstQual undefNode),CTypeSpec (CCharType undefNode)] [(Just (CDeclr (Just (cIdent "key")) [CPtrDeclr [] undefNode] Nothing [] undefNode),Nothing,Nothing)] undefNode
+        valueType = CDecl [CTypeSpec t] [(Just (CDeclr (Just (cIdent "value")) [] Nothing [] undefNode),Nothing,Nothing)] undefNode
+    in CDeclExt (CDecl [CTypeSpec (CSUType (CStruct CStructTag (Just (cIdent name)) (Just [
+                keyType, valueType
+                ]) [] undefNode) undefNode)] [] undefNode)
+    -}
+
+{-
+makeRecord2Type :: String -> CTypeSpec -> CExtDecl
+makeRecord2Type name t =
+    let keyType = CDecl [CTypeQual (CConstQual undefNode),CTypeSpec (CCharType undefNode)] [(Just (CDeclr (Just (cIdent "key")) [CPtrDeclr [] undefNode] Nothing [] undefNode),Nothing,Nothing)] undefNode
+        value1Type = CDecl [CTypeSpec t] [(Just (CDeclr (Just (cIdent "value1")) [] Nothing [] undefNode),Nothing,Nothing)] undefNode
+        value2Type = CDecl [CTypeSpec t] [(Just (CDeclr (Just (cIdent "value2")) [] Nothing [] undefNode),Nothing,Nothing)] undefNode
+    in CDeclExt (CDecl [CTypeSpec (CSUType (CStruct CStructTag (Just (cIdent name)) (Just [
+                keyType, value1Type, value2Type
+                ]) [] undefNode) undefNode)] [] undefNode)
+
+makeRecordPtrType :: String -> CTypeSpec -> CExtDecl
+makeRecordPtrType name t =
+    let keyType = CDecl [CTypeQual (CConstQual undefNode),CTypeSpec (CCharType undefNode)] [(Just (CDeclr (Just (cIdent "key")) [CPtrDeclr [] undefNode] Nothing [] undefNode),Nothing,Nothing)] undefNode
+        valueType = CDecl [CTypeSpec t] [(Just (CDeclr (Just (cIdent "value")) [CPtrDeclr [] undefNode] Nothing [] undefNode),Nothing,Nothing)] undefNode
+    in CDeclExt (CDecl [CTypeSpec (CSUType (CStruct CStructTag (Just (cIdent name)) (Just [
+                keyType, valueType
+                ]) [] undefNode) undefNode)] [] undefNode)
+    -}
+
+{-
+makeRecord2PtrType :: String -> CTypeSpec -> CTypeSpec -> CExtDecl
+makeRecord2PtrType name t1 t2 =
+    let keyType = CDecl [CTypeQual (CConstQual undefNode),CTypeSpec (CCharType undefNode)] [(Just (CDeclr (Just (cIdent "key")) [CPtrDeclr [] undefNode] Nothing [] undefNode),Nothing,Nothing)] undefNode
+        value1Type = CDecl [CTypeSpec t1] [(Just (CDeclr (Just (cIdent "value1")) [CPtrDeclr [] undefNode] Nothing [] undefNode),Nothing,Nothing)] undefNode
+        value2Type = CDecl [CTypeSpec t2] [(Just (CDeclr (Just (cIdent "value2")) [] Nothing [] undefNode),Nothing,Nothing)] undefNode
+    in CDeclExt (CDecl [CTypeSpec (CSUType (CStruct CStructTag (Just (cIdent name)) (Just [
+                keyType, value1Type, value2Type
+                ]) [] undefNode) undefNode)] [] undefNode)
+    -}
+
+makeTable :: String -> String -> [(String, CExpr)] -> CExtDecl
+makeTable typeName name entries =
+    let cEntry (k, v) = ([],CInitList [([],CInitExpr (stringConst k) undefNode),([],CInitExpr v undefNode)] undefNode)
+        cEntries = map cEntry entries ++ [([],CInitList [([],CInitExpr (intConst 0) undefNode),([],CInitExpr (intConst 0) undefNode)] undefNode)]
+    in CDeclExt (CDecl [CTypeSpec (CSUType (CStruct CStructTag (Just (cIdent typeName)) Nothing [] undefNode) undefNode)] [(Just (CDeclr (Just (cIdent name)) [CArrDeclr [] (CNoArrSize False) undefNode] Nothing [] undefNode),Just (CInitList cEntries undefNode),Nothing)] undefNode)
+
+makeTable2 :: String -> String -> [(String, CExpr, CExpr)] -> CExtDecl
+makeTable2 typeName name entries =
+    let cEntry (k, v1, v2) = ([],CInitList [
+                                        ([],CInitExpr (stringConst k) undefNode),
+                                        ([],CInitExpr v1 undefNode),
+                                        ([],CInitExpr v2 undefNode)
+                                    ] undefNode)
+        cEntries = map cEntry entries ++ [([],CInitList [
+                                            ([],CInitExpr (intConst 0) undefNode),
+                                            ([],CInitExpr (intConst 0) undefNode),
+                                            ([],CInitExpr (intConst 0) undefNode)
+                                            ] undefNode)]
+    in CDeclExt (CDecl [CTypeSpec (CSUType (CStruct CStructTag (Just (cIdent typeName)) Nothing [] undefNode) undefNode)] [(Just (CDeclr (Just (cIdent name)) [CArrDeclr [] (CNoArrSize False) undefNode] Nothing [] undefNode),Just (CInitList cEntries undefNode),Nothing)] undefNode)
 
 compile :: String -> String -> IO ()
 compile sourceName libraryName = do
@@ -437,9 +504,9 @@ compile sourceName libraryName = do
     return ()
 
 type CreateFn = IO (Ptr ())
-type InitFn = Ptr () -> IO ()
+--type InitFn = Ptr () -> IO ()
 type Init2Fn = Ptr () -> CString -> IO ()
-type ExecuteFn = Ptr () -> IO ()
+--type ExecuteFn = Ptr () -> IO ()
 type SetFn = Ptr () -> CString -> CString -> CDouble -> IO ()
 type SetStringFn = Ptr () -> CString -> CString -> CString -> IO ()
 

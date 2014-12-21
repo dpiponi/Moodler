@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "moodler_lib.h"
 
@@ -5152,3 +5153,28 @@ int transitions[22][8] = {
     /* 20  vio    */  { -1, -1, -1, -1, -1, 9,  12, 15  },  /* DIMINISHED6 */
     /* 21  viio   */  { -1, -1, -1, -1, -1, 11, 14, 17  }   /* DIMINISHED7 */
 };
+
+int get_address(struct StateRecord *address_table, const char *node, const char *field) {
+    int i = 0;
+    while (1) {
+        struct StateRecord *state_record = address_table+i;
+        ++i;
+        int offset = state_record->value2;
+        if (!state_record->key) {
+            return -1;
+        }
+        if (!strcmp(node, state_record->key)) {
+            int j = 0;
+            while (1) {
+                struct NodeRecord *node_record = state_record->value1+j;
+                ++j;
+                if (!node_record->key) {
+                    return -1;
+                }
+                if (!strcmp(field, node_record->key)) {
+                    return offset+node_record->value;
+                }
+            }
+        }
+    }
+}

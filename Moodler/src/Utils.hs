@@ -1,6 +1,6 @@
 module Utils where
 
---import qualified Data.Map as M
+import qualified Data.Map as M
 import qualified Data.Set as S
 import Data.List
 
@@ -45,3 +45,9 @@ uniqBy cmp as = presortedUniqBy cmp (sortBy cmp as)
 unJust :: String -> Maybe a -> a
 unJust msg Nothing = error ("Failed in unJust: " ++ msg)
 unJust _ (Just a) = a
+
+uniqueValues :: (Ord a, Ord b) => M.Map a b -> [b]
+uniqueValues = map snd . S.toList . S.fromList . M.toList
+
+unique :: (Ord b) => [b] -> [b]
+unique = S.toList . S.fromList
