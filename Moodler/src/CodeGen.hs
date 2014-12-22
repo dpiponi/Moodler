@@ -85,14 +85,16 @@ execBody nodeType connections = do
     rewriteVars2 (_getModuleTypeName (_nodeTypeName nodeType)) variables e
 
 -- Inlined in exec()
+-- XXX Return list of CStat
 execInlined :: ModuleName -> NodeType NodeInfo -> M.Map InName CExpr ->
-               Maybe CStat
+               [CStat]
 execInlined nodeName nodeType connections =
     let e = _execCode nodeType
     in if not (isStatementEmpty (e ^. funDefStat))
         then let variables = varsFromNodeType nodeType connections 
-        in Just (rewriteVars (_getModuleName nodeName) variables e)
-    else Nothing
+                 e' = rewriteVars (_getModuleName nodeName) variables e
+             in fromMaybe [e'] (justStmts e')
+    else []
 
 -- Call to node_exec()
 -- Why are inputNames separated from their connections?
@@ -239,10 +241,10 @@ genExec sortedPrimitives = do
                                         connections
         if _getModuleName name == "out" || _isInlined nodeType
             then return $ execInlined name nodeType connections'
-            else return $ Just (execCall name nodeType typeName
-                                         inputNames connections)
+            else return [execCall name nodeType typeName
+                                         inputNames connections]
     let compoundStatement = CCompound []
-                                      (map CBlockStmt (catMaybes compoundParts))
+                                      (map CBlockStmt (concat compoundParts))
                                       undefNode
 
     let loop = mainLoop compoundStatement

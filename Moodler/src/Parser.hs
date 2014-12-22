@@ -261,3 +261,19 @@ rewriteVars2 nodeName variables def = def ^. funDefStat
 isStatementEmpty :: CStat -> Bool
 isStatementEmpty (CCompound _ [] _) = True
 isStatementEmpty _ = False
+
+oneLiner :: CStat -> Maybe CStat
+oneLiner (CCompound _ [CBlockStmt stmt] _) = Just stmt
+oneLiner _ = Nothing
+
+isBlockStmt :: CBlockItem -> Bool
+isBlockStmt (CBlockStmt _) = True
+isBlockStmt _ = False
+
+getBlockStmt :: CBlockItem -> Maybe CStat
+getBlockStmt (CBlockStmt s) = Just s
+getBlockStmt _ = Nothing
+
+justStmts :: CStat -> Maybe [CStat]
+justStmts (CCompound _ bs _) = if all isBlockStmt bs then Just (mapMaybe getBlockStmt bs) else Nothing
+justStmts _ = Nothing
