@@ -2,7 +2,6 @@ module StandardSynth where
 
 import qualified Data.Map as M
 import Control.Monad.State
-import Language.C.Data.Node
 import Control.Monad.Trans.Error
 --import Control.Monad.Identity
 --import Control.Monad.Morph
@@ -12,7 +11,7 @@ import Synth
 import Module
 import MoodlerSymbols
 
-standardSynth :: M.Map String (NodeType NodeInfo) ->
+standardSynth :: M.Map String NodeType ->
                  ErrorT String (State Synth) ()
 standardSynth synthTypes = {-flip execState M.empty $ -} do
 {-

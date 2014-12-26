@@ -5178,3 +5178,19 @@ int get_address(struct StateRecord *address_table, const char *node, const char 
         }
     }
 }
+
+void init_node(struct State *state, struct StateRecord *address_table, const char *node) {
+    int i = 0;
+    while (1) {
+        struct StateRecord *state_record = address_table+i;
+        ++i;
+        int offset = state_record->value2;
+        if (!state_record->key) {
+            return;
+        }
+        if (!strcmp(node, state_record->key)) {
+            (*(void (*)(struct State *, const char *))state_record->value3)((struct State *)((char *)state+offset), node);
+            return;
+        }
+    }
+}

@@ -10,7 +10,6 @@ import Data.Maybe
 import qualified Data.Foldable as F
 --import Language.C.Data.Ident
 import Language.C.Data.Name
-import Language.C.Data.Node
 import Language.C.Data.Position
 import Language.C.Parser
 import Language.C.Syntax.AST
@@ -27,15 +26,15 @@ import System.FilePath.Posix
 import Text
 import MoodlerSymbols
 
-data NodeType a = NodeType {
+data NodeType = NodeType {
     _nodeTypeName :: ModuleTypeName,
     _inList :: [InName],
     _inNames :: M.Map InName CDecl,
     _outNames :: M.Map OutName CDecl,
     _stateNames :: [String],
-    _stateDecls :: [CDeclaration a],
-    _initCode :: CFunctionDef a,
-    _execCode :: CFunctionDef a,
+    _stateDecls :: [CDecl],
+    _initCode :: CFunDef,
+    _execCode :: CFunDef,
     _isInlined :: Bool
 } deriving Show
 
@@ -121,7 +120,7 @@ preprocessFile fileName = do
                      } fileName rawCode
     return $ B.pack code
 
-loadNodeType :: String -> String -> String -> ErrorT String IO (NodeType NodeInfo)
+loadNodeType :: String -> String -> String -> ErrorT String IO NodeType
 loadNodeType primTypeName dir fileName' = do
     let fileName = combine dir fileName'
     input <- preprocessFile fileName

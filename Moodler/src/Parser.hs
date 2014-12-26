@@ -277,3 +277,23 @@ getBlockStmt _ = Nothing
 justStmts :: CStat -> Maybe [CStat]
 justStmts (CCompound _ bs _) = if all isBlockStmt bs then Just (mapMaybe getBlockStmt bs) else Nothing
 justStmts _ = Nothing
+
+rewriteVarInit :: String -> Vars -> CExpr -> CExpr
+rewriteVarInit nodeName
+           _variables@Vars { _states = states
+                           , _outs = outs }
+           v@(CVar (Ident name _ _) _)
+    | name `elem` states || OutName name `M.member` outs
+        = cVar (cIdent nodeName) `cArrow` cIdent name
+    | otherwise = v
+rewriteVarInit _ _ v = v
+
+rewriteVarsInitEverywhere :: String -> Vars ->
+                         CExpr -> CExpr
+rewriteVarsInitEverywhere nodeName variables =
+    everywhere (mkT (rewriteVarInit nodeName variables))
+
+rewriteInitVars :: String -> Vars -> 
+               CFunDef -> CStat
+rewriteInitVars nodeName variables def = def ^. funDefStat
+                                    & biplate %~ rewriteVarsInitEverywhere nodeName variables

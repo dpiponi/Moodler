@@ -342,6 +342,11 @@ struct StateRecord {
     const char *key;
     struct NodeRecord *value1;
     int value2;
+    void (*value3)(void *);
 };
 
+struct State;
+
 int get_address(struct StateRecord *address_table, const char *node, const char *field);
+
+void init_node(struct State *state, struct StateRecord *address_table, const char *node);

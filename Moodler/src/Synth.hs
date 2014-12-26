@@ -4,7 +4,6 @@ module Synth where
 
 import Control.Lens
 import qualified Data.Map as M
-import Language.C.Data.Node
 import Control.Monad.State
 --import Data.Maybe
 import Data.List
@@ -27,7 +26,7 @@ data Out = Disconnected
 instance Show Out where
     show Disconnected = "<0>"
     show Out { _outModuleName = a, _outModuleOut = c} =
-                                            _getModuleName a ++ "." ++ _getOutName c
+            _getModuleName a ++ "." ++ _getOutName c
 
 {-
 instance Eq Out where
@@ -46,7 +45,7 @@ instance Ord Out where
 -- _moduleNumber used to maintain consistent ordering
 -- as modules are added
 data Module = Module { _getNodeName :: ModuleName
-                     , _getNodeType :: NodeType NodeInfo
+                     , _getNodeType :: NodeType
                      , _inputNodes :: M.Map InName Out
                      , _moduleNumber :: Int
                      } deriving Show
@@ -80,14 +79,14 @@ out os = let (moduleName, outName) = splitDot os
          in Out (ModuleName moduleName) outName
          -}
 
-getSynth :: M.Map String (NodeType NodeInfo) -> String -> ErrorT String Identity (NodeType NodeInfo)
+getSynth :: M.Map String NodeType -> String -> ErrorT String Identity NodeType
 getSynth synths t = maybe (error $ "no synth " ++ t) return $
                             M.lookup t synths
 
 type SynthBuilder a = State Synth a
 
 loadSynthTypes :: String ->
-                  ErrorT String IO (M.Map String (NodeType NodeInfo))
+                  ErrorT String IO (M.Map String NodeType)
 loadSynthTypes dir = do
     moduleSpecs <- liftIO $ filter (isSuffixOf ".msl") <$>
                                             getDirectoryContents dir

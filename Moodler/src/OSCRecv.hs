@@ -14,7 +14,6 @@ import Data.Array.IArray
 import Foreign.C.String
 import Foreign.Ptr
 import GHC.IO.Exception
-import Language.C.Data.Node
 import Sound.OSC
 import System.Posix
 import System.Directory
@@ -100,7 +99,7 @@ setKeyboardState dso' dataPtrs v i ds' = do
                 "result" freq
 
 handleInput :: MonadIO m => String ->
-               M.Map String (NodeType NodeInfo) ->
+               M.Map String NodeType ->
                ErrorT String (StateT Moodler m) ()
 handleInput knobName synthTypes = do
     -- XXX Make sure name is unique!
@@ -115,7 +114,7 @@ handleInput knobName synthTypes = do
     moodlerSynth .= newSynth
 
 addNewModule :: MonadIO m => String -> String ->
-                            M.Map String (NodeType NodeInfo) ->
+                            M.Map String NodeType ->
                             ErrorT String (StateT Moodler m) ()
 addNewModule synthType synthName synthTypes = do
     -- XXX Make sure name is unique!
@@ -137,7 +136,7 @@ addNewModule synthType synthName synthTypes = do
 
 handleMessage :: MonadIO m => Synth -> Int -> Array Int (Ptr ()) ->
                               (FunPtr () -> IO ()) ->
-                              M.Map String (NodeType NodeInfo) ->
+                              M.Map String NodeType ->
                               Maybe Message ->
                               StateT Moodler m ()
 handleMessage theStandard numVoices dataPtrs set_fill_buffer

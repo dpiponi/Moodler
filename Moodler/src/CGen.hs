@@ -107,3 +107,6 @@ cOffsetOf d i = CBuiltinExpr (CBuiltinOffsetOf d
 
 cV :: String -> CExpr
 cV s = cVar (cIdent s)
+
+cInitExpr :: CExpr -> CInit
+cInitExpr e = CInitExpr e undefNode
