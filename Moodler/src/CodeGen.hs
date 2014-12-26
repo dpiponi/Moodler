@@ -48,27 +48,14 @@ import Utils
 
 foreign import ccall "dynamic"  
   mkCreate :: FunPtr (IO (Ptr ())) -> IO (Ptr ())
-  {-
-foreign import ccall "dynamic"  
-  mkInit :: FunPtr (Ptr () -> IO ()) -> Ptr () -> IO ()
-  -}
 foreign import ccall "dynamic"  
   mkInit2 :: FunPtr (Ptr () -> CString -> IO ()) -> Ptr () -> CString -> IO ()
-  {-
-foreign import ccall "dynamic"  
-  mkExecute :: FunPtr (Ptr () -> IO ()) -> Ptr () -> IO ()
-  -}
 foreign import ccall "dynamic"  
   mkSet :: FunPtr (Ptr () -> CString -> CString -> CDouble -> IO ()) ->
                    Ptr () -> CString -> CString -> CDouble -> IO ()
 foreign import ccall "dynamic"  
   mkSetString :: FunPtr (Ptr () -> CString -> CString -> CString -> IO ()) ->
                          Ptr () -> CString -> CString -> CString -> IO ()
-
-{-
-concatMapM :: Monad m => (a -> m [b]) -> [a] -> m [b]
-concatMapM f xs = liftM concat (mapM f xs)
--}
 
 varsFromNodeType :: NodeType a -> M.Map InName CExpr -> Vars
 varsFromNodeType nodeType connections =
@@ -77,12 +64,11 @@ varsFromNodeType nodeType connections =
         outs = _outNames nodeType
     in Vars states outs ins connections
 
--- In node_exec() function
 execBody :: NodeType NodeInfo -> M.Map InName CExpr -> CStat
 execBody nodeType connections = do
     let e = _execCode nodeType
     let variables = varsFromNodeType nodeType connections 
-    rewriteVars2 (_getModuleTypeName (_nodeTypeName nodeType)) variables e
+    rewriteVars2 (_nodeTypeName nodeType) variables e
 
 -- Inlined in exec()
 -- XXX Return list of CStat
@@ -129,10 +115,10 @@ definePrimitiveStructType :: NodeType NodeInfo -> CDecl
 definePrimitiveStructType nodeType =
     let decls = _stateDecls nodeType
         members = decls
-        stateStruct1 = CStruct CStructTag
-                      (Just (mkIdent nopos (_getModuleTypeName (_nodeTypeName nodeType)) (Name 0)))
-                      (Just members) [] undefNode
-        stateType1 = CSUType stateStruct1 undefNode
+        stateStruct1 = structType
+                          (cIdent (_getModuleTypeName (_nodeTypeName nodeType)))
+                          (Just members)
+        stateType1 = stateStruct1
         decl1 = CDecl [CTypeSpec stateType1]
                    [(Nothing, Nothing, Nothing)]
                    undefNode
@@ -202,7 +188,7 @@ executeType :: CDerivedDeclr
 executeType =
     CFunDeclr (Right (
               [
-                  cPtrTo (structType (cIdent "State")) (cIdent "state"),
+                  cPtrTo (structType (cIdent "State") Nothing) (cIdent "state"),
                   cPtrTo (CShortType undefNode) (cIdent "buffer")
               ], False))
               [] undefNode
@@ -277,11 +263,10 @@ genAddressHelper nodeType =
     let name = _nodeTypeName nodeType
         name' = _getModuleTypeName name
         stmts = flip map (_stateNames nodeType) $ \varName ->
-                    cIf (cLNeg (strcmp [cV "field", stringConst varName]))
-                                   (cReturn (Just (cOffsetOf (structName name') (cIdent varName))))
-                                   Nothing
+                    cIf1 (cLNeg (strcmp [cV "field", stringConst varName]))
+                         (cReturn1 (cOffsetOf (structName name') (cIdent varName)))
     in addressHelperFunction (name' ++ "_address")
-                                         (stmts ++ [cReturn (Just (intConst (-1)))])
+                             (stmts ++ [cReturn1 (intConst (-1))])
 
 addressHelperTable :: NodeType a -> CExtDecl
 addressHelperTable nodeType =
@@ -332,7 +317,7 @@ init2Type :: CDerivedDeclr
 init2Type =
     CFunDeclr (Right (
               [
-                  cPtrTo (structType (cIdent "State")) (cIdent "state"),
+                  cPtrTo (structType (cIdent "State") Nothing) (cIdent "state"),
                   cConstPtrTo (CCharType undefNode) (cIdent "node")
               ], False))
               [] undefNode

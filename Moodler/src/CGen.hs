@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 module CGen where
 
 import Language.C.Data.Node
@@ -70,8 +71,9 @@ cConstPtrTo t i =
           Nothing)
         ] undefNode
 
-structType :: Ident -> CTypeSpec
-structType i = CSUType (CStruct CStructTag (Just i) Nothing [] undefNode)
+-- `struct i`
+structType :: Ident -> Maybe [CDecl] -> CTypeSpec
+structType i ds = CSUType (CStruct CStructTag (Just i) ds [] undefNode)
              undefNode
 
 cCompound :: [CDecl] -> [CStat] -> CStat
@@ -83,8 +85,20 @@ cTranslUnit ds fs = CTranslUnit (map CDeclExt ds ++ map CFDefExt fs) undefNode
 cIf :: CExpr -> CStat -> Maybe CStat -> CStat
 cIf cond ifTrue ifFalse = CIf cond ifTrue ifFalse undefNode
 
+cIf1 :: CExpr -> CStat -> CStat
+cIf1 cond ifTrue = CIf cond ifTrue Nothing undefNode
+
+cIf2 :: CExpr -> CStat -> CStat -> CStat
+cIf2 cond ifTrue ifFalse = CIf cond ifTrue (Just ifFalse) undefNode
+
 cReturn :: Maybe CExpr -> CStat
 cReturn s = CReturn s undefNode
+
+cReturn0 :: CStat
+cReturn0 = CReturn Nothing undefNode
+
+cReturn1 :: CExpr -> CStat
+cReturn1 s = CReturn (Just s) undefNode
 
 cOffsetOf :: CDecl -> Ident -> CExpr
 cOffsetOf d i = CBuiltinExpr (CBuiltinOffsetOf d

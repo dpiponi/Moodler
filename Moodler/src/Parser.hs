@@ -236,8 +236,8 @@ rewriteVars :: String -> Vars ->
 rewriteVars nodeName variables def = def ^. funDefStat
                                     & biplate %~ rewriteVarsEverywhere nodeName variables
 
-rewriteVar2 :: String -> Vars -> CExpr -> CExpr
-rewriteVar2 nodeTypeName
+rewriteVar2 :: ModuleTypeName -> Vars -> CExpr -> CExpr
+rewriteVar2 ModuleTypeName { _getModuleTypeName = nodeTypeName }
            _variables@Vars { _states = states
                            , _outs = outs }
            v@(CVar i@(Ident name _ _) _)
@@ -246,12 +246,12 @@ rewriteVar2 nodeTypeName
     | otherwise = v
 rewriteVar2 _ _ v = v
 
-rewriteVarsEverywhere2 :: String -> Vars ->
+rewriteVarsEverywhere2 :: ModuleTypeName -> Vars ->
                          CExpr -> CExpr
 rewriteVarsEverywhere2 nodeName variables =
     everywhere (mkT (rewriteVar2 nodeName variables))
 
-rewriteVars2 :: String -> Vars -> 
+rewriteVars2 :: ModuleTypeName -> Vars -> 
                CFunDef -> CStat
 --rewriteVars2 nodeName variables fundef =
 --    rewriteVarsEverywhere2 nodeName variables (fundef ^. funDefStat)
