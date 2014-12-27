@@ -132,21 +132,12 @@ genStruct moduleList =
 
     in cTranslUnit (primitiveStructTypes ++ [stateStruct]) []
 
-genStruct2 :: [Module] -> Writer String ()
-genStruct2 moduleList = do
-    let nodeTypes = map _getNodeType moduleList
-    let uniqNodeTypes = uniqBy (compare `on` _nodeTypeName) nodeTypes
-    forM_ uniqNodeTypes $ \nodeType -> do
-    {-
-        let helper = genAddressHelper nodeType
-        tell (render (pretty helper))
-        tell "\n"
-        -}
+genStruct2 :: [NodeType] -> CTranslUnit
+genStruct2 uniqNodeTypes = 
+    CTranslUnit (map addressHelperTable uniqNodeTypes) undefNode
 
-        let helper_table = addressHelperTable nodeType
-        tell (render (pretty helper_table))
-        tell "\n"
-
+genStruct3 :: [NodeType] -> Writer String ()
+genStruct3 uniqNodeTypes = 
     forM_ uniqNodeTypes $ \nodeType@NodeType { _execCode = execFunDef
                                              , _nodeTypeName = typeName } ->
         unless (_isInlined nodeType) $ do
@@ -155,9 +146,6 @@ genStruct2 moduleList = do
                                             & funDefStat .~ codeBody
             tell (render (pretty newFunctionDef))
 
-    let table = addressTable moduleList
-    tell (render (pretty table))
-    tell "\n"
 
 cExprForOut :: M.Map InName CDecl -> InName -> Out -> CExpr
 cExprForOut inDecls inName Disconnected =
@@ -352,7 +340,15 @@ gen currentDirectory synth out' = do
     let nodeTypes = map _getNodeType moduleList
     let uniqNodeTypes = uniqBy (compare `on` _nodeTypeName) nodeTypes
     genInit2Helper uniqNodeTypes
-    genStruct2 moduleList
+    let table = genStruct2 uniqNodeTypes
+    tell (render (pretty table))
+    tell "\n"
+    genStruct3 uniqNodeTypes
+
+    let table' = addressTable moduleList
+    tell (render (pretty table'))
+    tell "\n"
+
     genCreate
     --genInit moduleList synth
     genInit2 --moduleList
