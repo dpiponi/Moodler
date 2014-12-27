@@ -50,10 +50,13 @@ cArrow e n = CMember e n True undefNode
 cVar :: Ident -> CExpr
 cVar n = CVar n undefNode
 
-cPtrToState :: String -> String -> CDecl
-cPtrToState structName argName  = 
+--cInitExpr :: CExpr -> CInitializer
+--cInitExpr e = cInitExpr e undefNode
+
+cPtrToState :: String -> String -> Maybe CExpr -> CDecl
+cPtrToState structName argName initExpr = 
     CDecl [CTypeSpec (CSUType (CStruct CStructTag (Just (cIdent structName)) Nothing [] undefNode) undefNode)]
-          [(Just (CDeclr (Just (cIdent argName)) [CPtrDeclr [] undefNode] Nothing [] undefNode), Nothing, Nothing)] undefNode
+          [(Just (CDeclr (Just (cIdent argName)) [CPtrDeclr [] undefNode] Nothing [] undefNode), fmap cInitExpr initExpr, Nothing)] undefNode
 
 cPtrTo :: CTypeSpec -> Ident -> CDecl
 cPtrTo t i = 

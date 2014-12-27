@@ -12,7 +12,6 @@
         + Primitives
     * "Hidden" attribute for module parameter?
     * #includes in modules
-    * Pending FFI issues: Don't need to dlopen audio.so. Just access directly from FFI.
     * Consider storing default values in temporaries.
 
 * modules

@@ -135,7 +135,7 @@ rewriteShaderDerivedDeclr structName argName = funDeclrParams . _Right . _1 %~ r
 -- Rewrite the function args
 rewriteShaderDecls :: String -> String -> [CDecl] -> [CDecl]
 rewriteShaderDecls structName argName args =
-    map removeAttrsFromCDecl (filter isAnOut args) ++ [cPtrToState structName argName]
+    map removeAttrsFromCDecl (filter isAnOut args) ++ [cPtrToState structName argName Nothing]
 
 isAnIn :: CDecl -> Bool
 isAnIn (CDecl specs _ _) = any declSpecIsAnIn specs
@@ -297,3 +297,4 @@ rewriteInitVars :: String -> Vars ->
                CFunDef -> CStat
 rewriteInitVars nodeName variables def = def ^. funDefStat
                                     & biplate %~ rewriteVarsInitEverywhere nodeName variables
+                                    & cCompoundItems %~ (CBlockDecl (cPtrToState nodeName nodeName (Just (cV (nodeName ++ "0")))) :)

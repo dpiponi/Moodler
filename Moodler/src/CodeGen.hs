@@ -250,6 +250,7 @@ structName n = CDecl [CTypeSpec (CSUType (CStruct CStructTag
                      (Just (mkIdent nopos n (Name 0)))
                      Nothing [] undefNode) undefNode)] [] undefNode
 
+{-
 addressHelperType :: CDerivedDeclr
 addressHelperType =
     CFunDeclr (Right (
@@ -275,6 +276,7 @@ genAddressHelper nodeType =
                          (cReturn1 (cOffsetOf (structName name') (cIdent varName)))
     in addressHelperFunction (name' ++ "_address")
                              (stmts ++ [cReturn1 (intConst (-1))])
+                             -}
 
 addressHelperTable :: NodeType -> CExtDecl
 addressHelperTable nodeType =
@@ -306,8 +308,10 @@ addressType =
               ], False))
               [] undefNode
 
+{-
 strcmp :: [CExpr] -> CExpr
 strcmp = cCall (cVar (cIdent "strcmp"))
+-}
 
 structState :: CDecl
 structState = CDecl [CTypeSpec (CSUType (CStruct CStructTag
@@ -346,7 +350,7 @@ init2HelperType :: String -> CDerivedDeclr
 init2HelperType name =
     CFunDeclr (Right (
               [
-                  cPtrTo (structType (cIdent name) Nothing) (cIdent name)
+                  cPtrTo (CVoidType undefNode) (cIdent (name ++ "0"))
               ], False))
               [] undefNode
 
@@ -363,13 +367,7 @@ genInit2Helper moduleList = --do
                         --name = _getNodeName node
                         typeName = _getModuleTypeName (_nodeTypeName node)
 
-{-
-                    in cIf (cLNeg (strcmp [cV "node", stringConst (_getModuleName name)]))
-                                   initSource
-                                   Nothing
--}
-
-                    in CFunDef [CTypeSpec (CIntType undefNode)]
+                    in CFunDef [CTypeSpec (CVoidType undefNode)]
                             (CDeclr (Just (cIdent (typeName ++ "_init")))
                                     [init2HelperType typeName]
                                     Nothing [] undefNode)

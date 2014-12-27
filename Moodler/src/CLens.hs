@@ -51,3 +51,8 @@ declSpecifier = lens (\(CDecl a _ _) -> a)
 attrIdent :: Lens' CAttr Ident
 attrIdent = lens (\(CAttr a _ _) -> a)
                  (\(CAttr _ b c) a' -> CAttr a' b c)
+
+-- XXX: dangerous
+cCompoundItems :: Lens' CStat [CBlockItem]
+cCompoundItems = lens (\(CCompound _ b _) -> b)
+                      (\(CCompound a _ c) b' -> CCompound a b' c)
