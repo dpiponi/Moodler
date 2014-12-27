@@ -17,7 +17,7 @@ import Control.Monad.State
 
 import Audio
 import Synth
-import CodeGen
+import CodeBuild
 import OSCRecv
 import StandardSynth
 import KeyTracker

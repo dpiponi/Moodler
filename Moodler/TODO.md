@@ -2,6 +2,7 @@
     * Properly integrate oscilloscope
     * Sliders could be better
     * Ensure panel_proxy.png is loaded when needed
+
 * moodler
     * Is topological sort in reverse?
     * More C ASTs and fewer strings.
@@ -11,7 +12,7 @@
         + SharedObject instead of DSO
         + Primitives
     * "Hidden" attribute for module parameter?
-    * #includes in modules
+    * #includes and libs for modules
     * Consider storing default values in temporaries.
 
 * modules
