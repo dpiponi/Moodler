@@ -58,22 +58,18 @@ foreign import ccall "dynamic"
                          Ptr () -> CString -> CString -> CString -> IO ()
 
 varsFromNodeType :: NodeType -> M.Map InName CExpr -> Vars
-varsFromNodeType nodeType connections =
-    let states = _stateNames nodeType
-        ins = _inNames nodeType
-        outs = _outNames nodeType
-    in Vars states outs ins connections
+varsFromNodeType NodeType { _stateNames = states
+                          , _inNames = ins
+                          , _outNames = outs } = Vars states outs ins
 
 execBody :: NodeType -> M.Map InName CExpr -> CStat
-execBody nodeType connections = do
-    let e = _execCode nodeType
+execBody nodeType@NodeType { _execCode = e
+                           , _nodeTypeName = typeName } connections =
     let variables = varsFromNodeType nodeType connections 
-    rewriteVars2 (_nodeTypeName nodeType) variables e
+    in rewriteVars2 typeName variables e
 
 -- Inlined in exec()
--- XXX Return list of CStat
-execInlined :: ModuleName -> NodeType -> M.Map InName CExpr ->
-               [CStat]
+execInlined :: ModuleName -> NodeType -> M.Map InName CExpr -> [CStat]
 execInlined nodeName nodeType connections =
     let e = _execCode nodeType
     in if not (isStatementEmpty (e ^. funDefStat))
@@ -94,18 +90,10 @@ execCall nodeName nodeType typeName inputNames connections =
                         ) inputNames ++
                    [cAddr (cVar (cIdent "state") `cArrow` cIdent (_getModuleName nodeName))])
 
-{-
-instantiateInit :: ModuleName -> NodeType -> CStat
-instantiateInit nodeName nodeType =
-    let i = _initCode nodeType
-        variables = varsFromNodeType nodeType M.empty
-    in rewriteVars (_getModuleName nodeName) variables i
-    -}
-
 genIncludes :: MonadWriter String m =>
                [String] -> m ()
 genIncludes includes = forM_ includes $ \include ->
-    tell $ "#include<" ++ include ++ ">\n"
+    tell $ "#include <" ++ include ++ ">\n"
 
 genHeaders :: MonadWriter String m => String -> m ()
 genHeaders libDirectory = do
@@ -114,48 +102,35 @@ genHeaders libDirectory = do
 
 -- Generate elements of struct corresponding to one primitive module.
 definePrimitiveStructType :: NodeType -> CDecl
-definePrimitiveStructType nodeType =
-    let decls = _stateDecls nodeType
-        members = decls
-        stateStruct1 = structType
-                          (cIdent (_getModuleTypeName (_nodeTypeName nodeType)))
-                          (Just members)
-        stateType1 = stateStruct1
-        decl1 = CDecl [CTypeSpec stateType1]
-                   [(Nothing, Nothing, Nothing)]
-                   undefNode
-    in decl1
+definePrimitiveStructType NodeType { _nodeTypeName = name
+                                   , _stateDecls = decls } =
+    let stateStruct1 = structType (cIdent (_getModuleTypeName name))
+                                  (Just decls)
+    in CDecl [CTypeSpec stateStruct1] [(Nothing, Nothing, Nothing)] undefNode
 
 definePrimitiveStruct :: ModuleName -> ModuleTypeName -> CDecl
 definePrimitiveStruct nodeName primTypeName =
-    --let variables = varsFromNodeType nodeType M.empty
-    --members <- mapM (rewriteVarsInStructEverywhere nodeName variables) decls
-    let stateStruct2 = CStruct CStructTag
-                      (Just (mkIdent nopos (_getModuleTypeName primTypeName) (Name 0)))
-                      Nothing [] undefNode
-        stateType2 = CSUType stateStruct2 undefNode
-        decl2 = CDecl [CTypeSpec stateType2]
-                   [(Just (CDeclr (Just (cIdent (_getModuleName nodeName))) [] Nothing [] undefNode), Nothing, Nothing)]
-                   undefNode
-    in decl2
+    let stateType2 = structType (cIdent (_getModuleTypeName primTypeName)) Nothing
+    in CDecl [CTypeSpec stateType2]
+             [(Just (CDeclr (Just (cIdent (_getModuleName nodeName))) [] Nothing [] undefNode), Nothing, Nothing)]
+             undefNode
 
-genStruct :: [Module] -> Writer String ()
-genStruct moduleList = do
+genStruct :: [Module] -> CTranslUnit
+genStruct moduleList =
     -- Get all nodes used in synth
     let nodeTypes = map _getNodeType moduleList
-    let uniqNodeTypes = uniqBy (compare `on` _nodeTypeName) nodeTypes
-    let primitiveStructTypes = map definePrimitiveStructType uniqNodeTypes
+        uniqNodeTypes = uniqBy (compare `on` _nodeTypeName) nodeTypes
+        primitiveStructTypes = map definePrimitiveStructType uniqNodeTypes
 
-    let members2 = flip map moduleList $ \node -> 
+        members2 = flip map moduleList $ \node -> 
             let name = _getNodeName node
             in definePrimitiveStruct name (_nodeTypeName (_getNodeType node))
 
-    let stateStruct = CDecl [CTypeSpec (CSUType (CStruct CStructTag
+        stateStruct = CDecl [CTypeSpec (CSUType (CStruct CStructTag
                       (Just (cIdent "State"))
                       (Just members2) [] undefNode) undefNode)] [] undefNode
 
-    tell (render (pretty (cTranslUnit (primitiveStructTypes ++ [stateStruct]) [])))
-    tell "\n"
+    in cTranslUnit (primitiveStructTypes ++ [stateStruct]) []
 
 genStruct2 :: [Module] -> Writer String ()
 genStruct2 moduleList = do
@@ -250,34 +225,6 @@ structName n = CDecl [CTypeSpec (CSUType (CStruct CStructTag
                      (Just (mkIdent nopos n (Name 0)))
                      Nothing [] undefNode) undefNode)] [] undefNode
 
-{-
-addressHelperType :: CDerivedDeclr
-addressHelperType =
-    CFunDeclr (Right (
-              [
-                  cConstPtrTo (CCharType undefNode) (cIdent "field")
-              ], False))
-              [] undefNode
-
-addressHelperFunction :: String -> [CStat] -> CFunDef
-addressHelperFunction n stmts = 
-    CFunDef [CTypeSpec (CIntType undefNode)]
-            (CDeclr (Just (cIdent n))
-                    [addressHelperType]
-                    Nothing [] undefNode)
-            [] (CCompound [] (map CBlockStmt stmts) undefNode) undefNode
-
-genAddressHelper :: NodeType -> CFunDef
-genAddressHelper nodeType =
-    let name = _nodeTypeName nodeType
-        name' = _getModuleTypeName name
-        stmts = flip map (_stateNames nodeType) $ \varName ->
-                    cIf1 (cLNeg (strcmp [cV "field", stringConst varName]))
-                         (cReturn1 (cOffsetOf (structName name') (cIdent varName)))
-    in addressHelperFunction (name' ++ "_address")
-                             (stmts ++ [cReturn1 (intConst (-1))])
-                             -}
-
 addressHelperTable :: NodeType -> CExtDecl
 addressHelperTable nodeType =
     let stateVars = _stateNames nodeType
@@ -308,11 +255,6 @@ addressType =
               ], False))
               [] undefNode
 
-{-
-strcmp :: [CExpr] -> CExpr
-strcmp = cCall (cVar (cIdent "strcmp"))
--}
-
 structState :: CDecl
 structState = CDecl [CTypeSpec (CSUType (CStruct CStructTag
               (Just (mkIdent nopos "State" (Name 0)))
@@ -326,25 +268,6 @@ genAddress =
                     [addressType]
                     Nothing [] undefNode)
             [] (cCompound [] [stmt]) undefNode
-
-{-
-init2Type :: CDerivedDeclr
-init2Type =
-    CFunDeclr (Right (
-              [
-                  cPtrTo (structType (cIdent "State") Nothing) (cIdent "state"),
-                  cConstPtrTo (CCharType undefNode) (cIdent "node")
-              ], False))
-              [] undefNode
-
-init2Function :: [CStat] -> CFunDef
-init2Function clauses = 
-    CFunDef [CTypeSpec (CVoidType undefNode)]
-            (CDeclr (Just (cIdent "init2"))
-                    [init2Type]
-                    Nothing [] undefNode)
-            [] (CCompound [] (map CBlockStmt clauses) undefNode) undefNode
-              -}
 
 init2HelperType :: String -> CDerivedDeclr
 init2HelperType name =
@@ -377,22 +300,6 @@ genInit2Helper moduleList = --do
         tell (render (pretty function))
         tell "\n"
 
--- No need to inline these!
-{-
-genInit2 :: [Module] -> Writer String ()
-genInit2 moduleList = --do
-    let clauses = flip map moduleList $ \node -> 
-                    let initSource = instantiateInit name (_getNodeType node)
-                        name = _getNodeName node
-
-                    in cIf (cLNeg (strcmp [cV "node", stringConst (_getModuleName name)]))
-                                   initSource
-                                   Nothing
-        function = init2Function clauses
-    in do
-        tell (render (pretty function))
-        tell "\n"
-        -}
 genInit2 :: Writer String ()
 genInit2 = do
     tell "void init2(struct State *state, const char *node) {\n"
@@ -439,7 +346,9 @@ gen currentDirectory synth out' = do
     let sortedPrimitives = sortedNodes synth out'
     genHeaders currentDirectory
     tell $ "const double dt = " ++ show sampleRate ++ ";\n"
-    genStruct moduleList
+    let structs = genStruct moduleList
+    tell (render (pretty structs))
+    tell "\n"
     let nodeTypes = map _getNodeType moduleList
     let uniqNodeTypes = uniqBy (compare `on` _nodeTypeName) nodeTypes
     genInit2Helper uniqNodeTypes
@@ -513,10 +422,11 @@ data DSO = DSO { dl :: DL
                , dsoSetStringFn :: SetStringFn }
 
 makeDso :: String -> IO DSO
-makeDso code = do
+makeDso code = {-do
     print "---"
     putStr code
     print "---"
+    -}
     --let tmpDir = "gensrc" ++ show (hash code)
     --createDirectoryIfMissing False tmpDir
     withSystemTempDirectory
