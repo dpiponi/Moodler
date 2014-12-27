@@ -132,9 +132,8 @@ genStruct moduleList =
 
     in cTranslUnit (primitiveStructTypes ++ [stateStruct]) []
 
-genStruct2 :: [NodeType] -> CTranslUnit
-genStruct2 uniqNodeTypes = 
-    CTranslUnit (map addressHelperTable uniqNodeTypes) undefNode
+genStruct2 :: [NodeType] -> [CExtDecl]
+genStruct2 = map addressHelperTable
 
 genShaderFunctions :: [NodeType] -> [CExtDecl]
 genShaderFunctions uniqNodeTypes = 
@@ -344,20 +343,20 @@ gen currentDirectory synth out' = do
     tell "\n"
     let nodeTypes = map _getNodeType moduleList
     let uniqNodeTypes = uniqBy (compare `on` _nodeTypeName) nodeTypes
-    let initialisers = genInitialisers uniqNodeTypes
+    let initialisers = genInitialisers uniqNodeTypes :: [CExtDecl]
+    {-
     forM_ initialisers $ \initialiser -> do
         tell (render (pretty initialiser))
         tell "\n"
-    let table = genStruct2 uniqNodeTypes
-    tell (render (pretty table))
-    tell "\n"
-    let defs = genShaderFunctions uniqNodeTypes
-    forM_ defs $ \def -> do
-        tell (render (pretty def))
-        tell "\n"
+        -}
 
-    let table' = addressTable moduleList
-    tell (render (pretty table'))
+    let table = genStruct2 uniqNodeTypes :: [CExtDecl]
+    let defs = genShaderFunctions uniqNodeTypes :: [CExtDecl]
+
+    let units = initialisers ++ table ++ defs ++ [addressTable moduleList]
+    let sourceCode = CTranslUnit units undefNode
+
+    tell (render (pretty sourceCode))
     tell "\n"
 
     genCreate
