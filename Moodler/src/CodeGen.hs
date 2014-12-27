@@ -115,7 +115,7 @@ definePrimitiveStruct nodeName primTypeName =
              [(Just (CDeclr (Just (cIdent (_getModuleName nodeName))) [] Nothing [] undefNode), Nothing, Nothing)]
              undefNode
 
-genStruct :: [Module] -> CTranslUnit
+genStruct :: [Module] -> [CExtDecl]
 genStruct moduleList =
     -- Get all nodes used in synth
     let nodeTypes = map _getNodeType moduleList
@@ -130,7 +130,7 @@ genStruct moduleList =
                       (Just (cIdent "State"))
                       (Just members2) [] undefNode) undefNode)] [] undefNode
 
-    in cTranslUnit (primitiveStructTypes ++ [stateStruct]) []
+    in map CDeclExt (primitiveStructTypes ++ [stateStruct])
 
 genStruct2 :: [NodeType] -> [CExtDecl]
 genStruct2 = map addressHelperTable
@@ -338,9 +338,11 @@ gen currentDirectory synth out' = do
     let sortedPrimitives = sortedNodes synth out'
     genHeaders currentDirectory
     tell $ "const double dt = " ++ show sampleRate ++ ";\n"
-    let structs = genStruct moduleList
+    let structs = genStruct moduleList :: [CExtDecl]
+    {-
     tell (render (pretty structs))
     tell "\n"
+    -}
     let nodeTypes = map _getNodeType moduleList
     let uniqNodeTypes = uniqBy (compare `on` _nodeTypeName) nodeTypes
     let initialisers = genInitialisers uniqNodeTypes :: [CExtDecl]
@@ -353,7 +355,7 @@ gen currentDirectory synth out' = do
     let table = genStruct2 uniqNodeTypes :: [CExtDecl]
     let defs = genShaderFunctions uniqNodeTypes :: [CExtDecl]
 
-    let units = initialisers ++ table ++ defs ++ [addressTable moduleList]
+    let units = structs ++ initialisers ++ table ++ defs ++ [addressTable moduleList]
     let sourceCode = CTranslUnit units undefNode
 
     tell (render (pretty sourceCode))
