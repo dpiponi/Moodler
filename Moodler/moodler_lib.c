@@ -5194,3 +5194,11 @@ void init_node(struct State *state, struct StateRecord *address_table, const cha
         }
     }
 }
+
+/*
+extern struct StateRecord *address_table;
+
+void init2(struct State *state, const char *node) {
+    init_node(state, address_table, node);
+}
+*/

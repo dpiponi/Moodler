@@ -136,16 +136,18 @@ genStruct2 :: [NodeType] -> CTranslUnit
 genStruct2 uniqNodeTypes = 
     CTranslUnit (map addressHelperTable uniqNodeTypes) undefNode
 
-genStruct3 :: [NodeType] -> Writer String ()
-genStruct3 uniqNodeTypes = 
-    forM_ uniqNodeTypes $ \nodeType@NodeType { _execCode = execFunDef
-                                             , _nodeTypeName = typeName } ->
-        unless (_isInlined nodeType) $ do
-            let codeBody = execBody nodeType undefined
-            let newFunctionDef = execFunDef & funDefDeclr %~ rewriteShaderDeclr (_getModuleTypeName typeName ++ "_exec") (_getModuleTypeName typeName) (_getModuleTypeName typeName)
-                                            & funDefStat .~ codeBody
-            tell (render (pretty newFunctionDef))
-
+genShaderFunctions :: [NodeType] -> [CExtDecl]
+genShaderFunctions uniqNodeTypes = 
+    let defs = flip map uniqNodeTypes $ \nodeType@NodeType { _execCode = execFunDef
+                                             , _nodeTypeName = typeName
+                                             , _isInlined = inlined } ->
+                if inlined
+                    then Nothing
+                    else let codeBody = execBody nodeType undefined
+                             typeString = _getModuleTypeName typeName
+                         in Just $ CFDefExt $ execFunDef & funDefDeclr %~ rewriteShaderDeclr (typeString ++ "_exec") typeString typeString
+                                                         & funDefStat .~ codeBody
+    in catMaybes defs
 
 cExprForOut :: M.Map InName CDecl -> InName -> Out -> CExpr
 cExprForOut inDecls inName Disconnected =
@@ -186,28 +188,28 @@ mainLoop stat =
             stat
             undefNode
 
-genExec :: [Module] -> Writer String ()
-genExec sortedPrimitives = do
-    compoundParts <- forM sortedPrimitives $ \node -> do
-        let name = _getNodeName node
-        let nodeType@NodeType { _inList = inputNames
-                              , _nodeTypeName = typeName
-                              } = _getNodeType node
-        let connections = _inputNodes node
-        let connections' = M.mapWithKey (cExprForOut (nodeType ^. inNames))
-                                        connections
-        if _getModuleName name == "out" || _isInlined nodeType
-            then return $ execInlined name nodeType connections'
-            else return [execCall name nodeType typeName
-                                         inputNames connections]
-    let compoundStatement = CCompound []
+genExec :: [Module] -> CExtDecl
+genExec sortedPrimitives =
+    let compoundParts =
+            flip map sortedPrimitives $ \node ->
+                let name = _getNodeName node
+                    nodeType@NodeType { _inList = inputNames
+                                      , _nodeTypeName = typeName
+                                      } = _getNodeType node
+                    connections = _inputNodes node
+                    connections' = M.mapWithKey (cExprForOut (nodeType ^. inNames))
+                                                connections
+                in if _getModuleName name == "out" || _isInlined nodeType
+                    then execInlined name nodeType connections'
+                    else [execCall name nodeType typeName
+                                                 inputNames connections]
+        compoundStatement = CCompound []
                                       (map CBlockStmt (concat compoundParts))
                                       undefNode
 
-    let loop = mainLoop compoundStatement
-    let function = executeFunction loop
-    tell (render (pretty function))
-
+        loop = mainLoop compoundStatement
+    in CFDefExt $ executeFunction loop
+    
 structName :: String -> CDecl
 structName n = CDecl [CTypeSpec (CSUType (CStruct CStructTag
                      (Just (mkIdent nopos n (Name 0)))
@@ -271,8 +273,8 @@ instantiateInitHelper nodeName nodeType =
         variables = varsFromNodeType nodeType M.empty
     in rewriteInitVars (_getModuleTypeName nodeName) variables i
 
-genInit2Helper :: [NodeType] -> Writer String ()
-genInit2Helper moduleList = --do
+genInitialisers :: [NodeType] -> [CExtDecl]
+genInitialisers moduleList = --do
     let clauses = flip map moduleList $ \node -> 
                     let initSource = instantiateInitHelper (_nodeTypeName node) node
                         --name = _getNodeName node
@@ -283,10 +285,13 @@ genInit2Helper moduleList = --do
                                     [init2HelperType typeName]
                                     Nothing [] undefNode)
                             [] initSource undefNode
+    in map CFDefExt clauses
 
+{-
     in forM_ clauses $ \function -> do
         tell (render (pretty function))
         tell "\n"
+        -}
 
 genInit2 :: Writer String ()
 genInit2 = do
@@ -339,11 +344,17 @@ gen currentDirectory synth out' = do
     tell "\n"
     let nodeTypes = map _getNodeType moduleList
     let uniqNodeTypes = uniqBy (compare `on` _nodeTypeName) nodeTypes
-    genInit2Helper uniqNodeTypes
+    let initialisers = genInitialisers uniqNodeTypes
+    forM_ initialisers $ \initialiser -> do
+        tell (render (pretty initialiser))
+        tell "\n"
     let table = genStruct2 uniqNodeTypes
     tell (render (pretty table))
     tell "\n"
-    genStruct3 uniqNodeTypes
+    let defs = genShaderFunctions uniqNodeTypes
+    forM_ defs $ \def -> do
+        tell (render (pretty def))
+        tell "\n"
 
     let table' = addressTable moduleList
     tell (render (pretty table'))
@@ -352,9 +363,12 @@ gen currentDirectory synth out' = do
     genCreate
     --genInit moduleList synth
     genInit2 --moduleList
-    genExec sortedPrimitives
+    let exec = genExec sortedPrimitives
+    tell (render (pretty exec))
+    tell "\n"
     let address = genAddress
     tell (render (pretty address))
+    tell "\n"
     genSet
     genSetString
 
