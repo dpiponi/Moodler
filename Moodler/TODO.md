@@ -12,7 +12,6 @@
     * "Hidden" attribute for module parameter?
     * #includes and libs for modules
     * Consider storing default values in temporaries.
-    * Proper stereo
 
 * modules
     * Hilbert transform
