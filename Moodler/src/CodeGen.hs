@@ -100,18 +100,13 @@ genStateStruct moduleList =
                 in definePrimitiveStruct name (_nodeTypeName (_getNodeType node))
     in CDeclExt $ CDecl [CTypeSpec (structType (cIdent "State") (Just members2))] [] undefNode
 
-genShaderFunctions :: [NodeType] -> [CExtDecl]
-genShaderFunctions uniqNodeTypes = 
-    let defs = flip map uniqNodeTypes $ \nodeType@NodeType { _execCode = execFunDef
-                                             , _nodeTypeName = typeName
-                                             , _isInlined = inlined } ->
-                if inlined
-                    then Nothing
-                    else let codeBody = execBody nodeType undefined
-                             typeString = _getModuleTypeName typeName
-                         in Just $ CFDefExt $ execFunDef & funDefDeclr %~ rewriteShaderDeclr (typeString ++ "_exec") typeString typeString
-                                                         & funDefStat .~ codeBody
-    in catMaybes defs
+genShaderFunctions :: NodeType -> CExtDecl
+genShaderFunctions nodeType@NodeType { _execCode = execFunDef
+                                     , _nodeTypeName = typeName } =
+    let codeBody = execBody nodeType undefined
+        typeString = _getModuleTypeName typeName
+    in CFDefExt $ execFunDef & funDefDeclr %~ rewriteShaderDeclr (typeString ++ "_exec") typeString typeString
+                                    & funDefStat .~ codeBody
 
 cExprForOut :: M.Map InName CDecl -> InName -> Out -> CExpr
 cExprForOut inDecls inName Disconnected =
@@ -234,28 +229,20 @@ instantiateInitHelper nodeName nodeType =
         variables = varsFromNodeType nodeType M.empty
     in rewriteInitVars (_getModuleTypeName nodeName) variables i
 
-genInitialisers :: [NodeType] -> [CExtDecl]
-genInitialisers moduleList = --do
-    let clauses = flip map moduleList $ \node -> 
-                    let initSource = instantiateInitHelper (_nodeTypeName node) node
-                        --name = _getNodeName node
-                        typeName = _getModuleTypeName (_nodeTypeName node)
+genInitialisers :: NodeType -> CExtDecl
+genInitialisers node = --do
+      let initSource = instantiateInitHelper (_nodeTypeName node) node
+          --name = _getNodeName node
+          typeName = _getModuleTypeName (_nodeTypeName node)
 
-                    in CFunDef [CTypeSpec (CVoidType undefNode)]
-                            (CDeclr (Just (cIdent (typeName ++ "_init")))
-                                    [init2HelperType typeName]
-                                    Nothing [] undefNode)
-                            [] initSource undefNode
-    in map CFDefExt clauses
+      in CFDefExt $ CFunDef [CTypeSpec (CVoidType undefNode)]
+                      (CDeclr (Just (cIdent (typeName ++ "_init")))
+                              [init2HelperType typeName]
+                              Nothing [] undefNode)
+                      [] initSource undefNode
 
-{-
-    in forM_ clauses $ \function -> do
-        tell (render (pretty function))
-        tell "\n"
-        -}
-
-genInit2 :: Writer String ()
-genInit2 = do
+genInit :: Writer String ()
+genInit = do
     tell "void init2(struct State *state, const char *node) {\n"
     tell "    init_node(state, address_table, node);\n"
     tell "}\n"
@@ -289,40 +276,9 @@ genCreate = do
 sampleRate :: Double
 sampleRate = 1.0/48000
 
--- Create entire C source code unit.
-gen :: String -> Synth -> Module ->
-       Writer String ()
-gen currentDirectory synth out' = do
-    let moduleList = sortBy (compare `on` _moduleNumber) $ M.elems synth
-    -- Sorted topologically
-    let sortedPrimitives = topologicalSort synth out'
-    genHeaders currentDirectory
-    tell $ "const double dt = " ++ show sampleRate ++ ";\n"
-
-    let nodeTypes = map _getNodeType moduleList :: [NodeType]
-    let uniqNodeTypes = uniqBy (compare `on` _nodeTypeName) nodeTypes :: [NodeType]
-
-    let structs = map genNodeStruct uniqNodeTypes :: [CExtDecl]
-    let stateStruct = genStateStruct moduleList :: CExtDecl
-    let initialisers = genInitialisers uniqNodeTypes :: [CExtDecl]
-    let table = map genNodeAddressTable  uniqNodeTypes :: [CExtDecl]
-    let defs = genShaderFunctions uniqNodeTypes :: [CExtDecl]
-    let exec = genExec sortedPrimitives :: CExtDecl
-    let address = genAddress :: CExtDecl
-    let units = structs ++ [stateStruct] ++ initialisers ++ table ++ defs ++ [addressTable moduleList] ++ [exec] ++ [address]
-    let sourceCode = CTranslUnit units undefNode
-
-    tell (render (pretty sourceCode))
-    tell "\n"
-
-    genInit2 --moduleList
-    genCreate
-    genSet
-    genSetString
-
 makeNodeTable :: String -> String -> [(String, CExpr)] -> CExtDecl
 makeNodeTable typeName name entries =
-    let cEntry (k, v) = ([],CInitList [
+    let cEntry (k, v) = ([], CInitList [
                                         ([], CInitExpr (stringConst k) undefNode),
                                         ([], CInitExpr v undefNode)
                                       ] undefNode)
@@ -330,19 +286,56 @@ makeNodeTable typeName name entries =
         cEntries = map cEntry entries ++ [([], CInitList [zeroInit, zeroInit] undefNode)]
     in CDeclExt (CDecl [CTypeSpec (
         structType (cIdent typeName) Nothing
-    )] [(Just (CDeclr (Just (cIdent name)) [CArrDeclr [] (CNoArrSize False) undefNode] Nothing [] undefNode), Just (CInitList cEntries undefNode), Nothing)] undefNode)
+    )] [(Just (CDeclr (Just (cIdent name)) [
+            CArrDeclr [] (CNoArrSize False) undefNode] Nothing [] undefNode),
+        Just (CInitList cEntries undefNode), Nothing)] undefNode)
 
 makeStateTable :: String -> String -> [(String, CExpr, CExpr, CExpr)] -> CExtDecl
 makeStateTable typeName name entries =
-    let cEntry (k, v1, v2, v3) = ([], CInitList [
-                                        ([],cInitExpr (stringConst k)),
-                                        ([],cInitExpr v1),
-                                        ([],cInitExpr v2),
-                                        ([],cInitExpr v3)
-                                    ] undefNode)
+    let f e = ([], cInitExpr e)
+        cEntry (k, v1, v2, v3) =
+                ([], CInitList (map f [stringConst k, v1, v2, v3]) undefNode)
         zeroInit = ([], cInitExpr (intConst 0))
         cEntries = map cEntry entries ++
                         [([], CInitList (replicate 4 zeroInit) undefNode)]
     in CDeclExt (CDecl [CTypeSpec (structType (cIdent typeName) Nothing)]
-                       [(Just (CDeclr (Just (cIdent name)) [CArrDeclr [] (CNoArrSize False) undefNode] Nothing [] undefNode),Just (CInitList cEntries undefNode),Nothing)]
+                       [(Just (CDeclr (Just (cIdent name)) [
+                            CArrDeclr [] (CNoArrSize False) undefNode]
+                                      Nothing [] undefNode),
+                        Just (CInitList cEntries undefNode), Nothing)]
                        undefNode)
+
+-- Create entire C source code unit.
+gen :: String -> Synth -> Module ->
+       Writer String ()
+gen currentDirectory synth out' = do
+    genHeaders currentDirectory
+    tell $ "const double dt = " ++ show sampleRate ++ ";\n"
+
+    let moduleList = sortBy (compare `on` _moduleNumber) $ M.elems synth
+    let sortedPrimitives = topologicalSort synth out'
+
+    let nodeTypes = map _getNodeType moduleList
+    let uniqNodeTypes = uniqBy (compare `on` _nodeTypeName) nodeTypes
+    let inlineNodeTypes = filter (not . _isInlined) uniqNodeTypes
+
+    let nodeStructs = map genNodeStruct uniqNodeTypes
+    let stateStruct = genStateStruct moduleList
+    let initialisers = map genInitialisers uniqNodeTypes
+    let table = map genNodeAddressTable uniqNodeTypes
+    let defs = map genShaderFunctions inlineNodeTypes
+    let exec = genExec sortedPrimitives
+    let address = genAddress
+
+    let units = nodeStructs ++ [stateStruct] ++ initialisers ++ table
+                            ++ defs ++ [addressTable moduleList]
+                            ++ [address] ++ [exec]
+    let sourceCode = CTranslUnit units undefNode
+
+    tell (render (pretty sourceCode))
+    tell "\n"
+
+    genInit --moduleList
+    genCreate
+    genSet
+    genSetString
