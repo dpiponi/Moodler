@@ -8,5 +8,5 @@ void init() {
 
 inline void exec(in control delay, in sample signal, out sample result) {
     delay_line_insert(&delay_line, signal);
-    result = delay_line_read(&delay_line, 1, delay/dt);
+    result = delay_line_read(&delay_line, 5, delay/dt);
 }

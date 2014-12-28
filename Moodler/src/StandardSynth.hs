@@ -35,6 +35,6 @@ standardSynth synthTypes = {-flip execState M.empty $ -} do
         --zeroSynth <- hoist lift $ getSynth synthTypes "zero"
         --lift $ addSynth "zero" $ Module "zero" zeroSynth M.empty
         let outSynth = fromJust $ M.lookup "out" synthTypes
-        let outModuleMaker = Module (ModuleName "out") outSynth (M.fromList [(InName "value", Disconnected)])
+        let outModuleMaker = Module (ModuleName "out") outSynth (M.fromList [(InName "value", Disconnected), (InName "left", Disconnected), (InName "right", Disconnected)])
         lift $ addSynth (ModuleName "out") outModuleMaker
                  

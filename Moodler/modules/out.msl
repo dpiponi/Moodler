@@ -1,6 +1,10 @@
 void init() {
 }
 
-inline void exec(in sample value) {
-    buffer[i] = (short)(32767.0*tanh(value));
+inline void exec(in sample value, in sample left, in sample right) {
+/*    buffer[i] = (short)(32767.0*tanh(value));*/
+    double l = value+left;
+    double r = value+right;
+    buffer[2*i] = (short)(32767.0*tanh(l));
+    buffer[2*i+1] = (short)(32767.0*tanh(r));
 }
