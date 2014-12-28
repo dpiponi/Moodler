@@ -4,25 +4,13 @@ module CodeGen(gen) where
 
 import Control.Lens hiding (set)
 import Control.Monad.State
---import Control.Monad.Trans.Error
 import Control.Monad.Writer
 import Data.Function
---import Data.Hashable
 import Data.List
 import Data.Maybe
---import Foreign.C.String
---import Foreign.C.Types
---import Foreign.Ptr
---import Language.C.Data.Ident
---import Language.C.Data.Name
 import Language.C.Data.Node
---import Language.C.Data.Position
 import Language.C.Pretty
 import Language.C.Syntax.AST
---import System.Directory
---import System.IO.Temp
---import System.Posix.DynamicLinker
---import System.Process
 import Text.PrettyPrint
 import qualified Data.Map as M
 

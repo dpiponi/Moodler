@@ -5078,7 +5078,8 @@ void init_square(struct Square *state) {
     state->last_sync = 0.0;
 }
 
-sample step_square(struct Square *state, double dt, sample frequency, sample pwm, sample sync) {
+sample step_square(struct Square *state, double dt, sample frequency,
+                   sample pwm, sample sync) {
     double period = 1.0/frequency;
     double sync_time;
     double normalised_f = frequency*dt;
@@ -5107,10 +5108,12 @@ sample step_square(struct Square *state, double dt, sample frequency, sample pwm
         }
         if (state->y > 0) {
             //fprintf(stderr, "Down at %f\n", state->output_time);
-            add_discontinuity0(&state->limited, state->output_time-state->this_sample, -2);
+            add_discontinuity0(&state->limited,
+                               state->output_time-state->this_sample, -2);
         } else {
             //fprintf(stderr, "Up at %f\n", state->output_time);
-            add_discontinuity0(&state->limited, state->output_time-state->this_sample, 2);
+            add_discontinuity0(&state->limited,
+                               state->output_time-state->this_sample, 2);
         }
         if (state->y > 0) {
             state->output_time += pwm*period/dt;
@@ -5189,7 +5192,8 @@ void init_node(struct State *state, struct StateRecord *address_table, const cha
             return;
         }
         if (!strcmp(node, state_record->key)) {
-            (*(void (*)(struct State *, const char *))state_record->value3)((struct State *)((char *)state+offset), node);
+            (*(void (*)(struct State *, const char *))state_record->value3)(
+                                (struct State *)((char *)state+offset), node);
             return;
         }
     }

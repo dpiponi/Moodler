@@ -4,8 +4,6 @@
     * Ensure panel_proxy.png is loaded when needed
 
 * moodler
-    * Is topological sort in reverse?
-    * More C ASTs and fewer strings.
     * local enums?
     * Need consistent naming:
         + A synth is a collection of modules
@@ -14,5 +12,8 @@
     * "Hidden" attribute for module parameter?
     * #includes and libs for modules
     * Consider storing default values in temporaries.
+    * Proper stereo
 
 * modules
+    * Hilbert transform
+    * Complex signal support

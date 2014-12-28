@@ -46,17 +46,12 @@ compile sourceName libraryName = do
                   ++ " -dynamiclib -lm -std=gnu99 -Wno-logical-op-parentheses moodler_lib.o "
                   ++ unwords extra_libs ++ " " ++ sourceName
                   ++ " -o " ++ libraryName
-    --print $ "Running " ++ command
     compileHandle <- runCommand command
-    --print $ "Compiling to " ++ libraryName
     void $ waitForProcess compileHandle
-    --print $ "Done compiling to " ++ libraryName
     return ()
 
 type CreateFn = IO (Ptr ())
---type InitFn = Ptr () -> IO ()
 type Init2Fn = Ptr () -> CString -> IO ()
---type ExecuteFn = Ptr () -> IO ()
 type SetFn = Ptr () -> CString -> CString -> CDouble -> IO ()
 type SetStringFn = Ptr () -> CString -> CString -> CString -> IO ()
 
@@ -70,33 +65,25 @@ data DSO = DSO { dl :: DL
                , dsoSetStringFn :: SetStringFn }
 
 makeDso :: String -> IO DSO
-makeDso code = --do
-{-
-    print "---"
-    putStr code
-    print "---"
-    -}
+makeDso code =
     --let tmpDir = "gensrc" ++ show (hash code)
     --createDirectoryIfMissing False tmpDir
     withSystemTempDirectory
         ("gensrc" ++ show (hash code) ++ ".") $ \tmpDir -> do
         let tmpSrcFile = tmpDir ++ "/gen.c"
         let tmpSoFile = tmpDir ++ "/gen.so"
-        --print tmpDir
         writeFile tmpSrcFile code
         compile tmpSrcFile tmpSoFile
         so <- dlopen tmpSoFile [RTLD_NOW, RTLD_LOCAL]
-        --print $ "Loaded lib " ++ tmpSoFile
 
         create <- dlsym so "create"
-        --ini <- dlsym so "init"
         ini2 <- dlsym so "init2"
         execute <- dlsym so "execute"
         set <- dlsym so "set"
         setString <- dlsym so "set_string"
 
-        return $ DSO so (mkCreate create) {-(mkInit ini)-} (mkInit2 ini2) execute (mkSet set)
-                                                                    (mkSetString setString)
+        return $ DSO so (mkCreate create) (mkInit2 ini2) execute (mkSet set)
+                                          (mkSetString setString)
     -- End of tmp dir bit
 
 setStateVar :: SetFn -> Ptr () -> String -> String -> Float -> IO ()
@@ -113,7 +100,8 @@ setStringStateVar set dataPtr nodeName stateVar value =
                 set dataPtr nodeString stateString valueString
 
 makeDSOFromSynth :: Synth -> Module -> ErrorT String IO DSO
-makeDSOFromSynth synth out' = do
+makeDSOFromSynth synth out = do
     currentDirectory <- liftIO getCurrentDirectory
-    let code' = execWriter (gen currentDirectory synth out')
-    liftIO $ makeDso code'
+    let code = execWriter (gen currentDirectory synth out)
+    --liftIO $ putStrLn code
+    liftIO $ makeDso code
