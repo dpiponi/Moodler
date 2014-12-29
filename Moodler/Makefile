@@ -1,4 +1,4 @@
-all: audio.so moodler_lib.o delay_line.o reverb.o
+all: audio.so moodler_lib.o delay_line.o reverb.o hilbert.o
 
 #Bridge
 
@@ -13,3 +13,6 @@ delay_line.o: delay_line.h delay_line.c
 
 reverb.o: reverb.h reverb.c
 	clang -ffast-math -O3 -c reverb.c
+
+hilbert.o: hilbert.h hilbert.c
+	clang -ffast-math -O3 -c hilbert.c

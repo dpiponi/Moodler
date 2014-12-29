@@ -2,6 +2,7 @@
 
 #include "reverb.h"
 #include "delay_line.h"
+#include "hilbert.h"
 
 typedef double sample;
 

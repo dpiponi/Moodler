@@ -1,9 +1,9 @@
-extern double hilbert_kernel[511];
+extern double hilbert_kernel[513];
 
 struct Hilbert {
-    double data[511];
+    double data[513];
     int ptr;
 };
 
-void hilbert_init(struct Hilbert *hilbert);
-void hilbert_exec(struct Hilbert *hilbert, double sample, double *i, double *q);
+void hilbert_state_init(struct Hilbert *hilbert);
+void hilbert_state_exec(struct Hilbert *hilbert, double sample, double *i, double *q);

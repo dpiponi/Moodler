@@ -40,7 +40,7 @@ foreign import ccall "dynamic"
 
 compile :: String -> String -> IO ()
 compile sourceName libraryName = do
-    let extra_libs = ["delay_line.o", "reverb.o"]
+    let extra_libs = ["delay_line.o", "reverb.o", "hilbert.o"]
     let clang_options = ["-O3", "-ffast-math"]
     let command = "clang " ++ unwords clang_options
                   ++ " -dynamiclib -lm -std=gnu99 -Wno-logical-op-parentheses moodler_lib.o "

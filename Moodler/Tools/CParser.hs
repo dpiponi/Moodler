@@ -6,5 +6,6 @@ import Language.C.Parser
 main :: IO ()
 main = do
     code <- B.getContents
-    let Right (parsed, _) = execParser translUnitP code (position 0 "" 0 0) builtinTypeNames newNameSupply
-    print parsed
+    case execParser translUnitP code (position 0 "" 0 0) builtinTypeNames newNameSupply of
+        Right parsed -> print parsed
+        Left e -> print e
