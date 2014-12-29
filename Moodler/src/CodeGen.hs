@@ -63,7 +63,7 @@ genIncludes includes = forM_ includes $ \include ->
 
 genHeaders :: MonadWriter String m => String -> m ()
 genHeaders libDirectory = do
-    genIncludes ["stdio.h", "stdlib.h", "stddef.h", "string.h", "math.h"]
+    genIncludes ["stdio.h", "stdlib.h", "stddef.h", "string.h", "math.h", "complex.h"]
     tell $ "#include \"" ++ libDirectory ++ "/moodler_lib.h\"\n"
 
 -- Generate elements of struct corresponding to one primitive module.
