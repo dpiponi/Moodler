@@ -14,5 +14,3 @@
     * Consider storing default values in temporaries.
 
 * modules
-    * Hilbert transform
-    * Complex signal support
