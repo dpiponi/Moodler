@@ -5,7 +5,7 @@
 	<key>ApplicationVersion</key>
 	<array>
 		<string>com.omnigroup.OmniGraffle6</string>
-		<string>159.1.0.220921</string>
+		<string>159.2.0.222945</string>
 	</array>
 	<key>CreationDate</key>
 	<string>2014-09-03 15:42:32 +0000</string>
@@ -38,7 +38,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2014-12-13 19:04:03 +0000</string>
+	<string>2014-12-31 16:35:43 +0000</string>
 	<key>Modifier</key>
 	<string>Dan Piponi</string>
 	<key>NotesVisible</key>
@@ -38726,7 +38726,57 @@
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{84, 228}, {192, 48}}</string>
+					<string>{{210, 330}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>15</real>
+					</dict>
+					<key>ID</key>
+					<integer>684</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{234, 330}, {12, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>MesloLGL-RegularForPowerline</string>
+						<key>Size</key>
+						<real>15</real>
+					</dict>
+					<key>ID</key>
+					<integer>682</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{84, 228}, {192, 42}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FontInfo</key>
@@ -38734,7 +38784,7 @@
 						<key>Font</key>
 						<string>Geneva</string>
 						<key>Size</key>
-						<real>23</real>
+						<real>15</real>
 					</dict>
 					<key>ID</key>
 					<integer>680</integer>
@@ -38744,12 +38794,14 @@
 						<dict>
 							<key>Color</key>
 							<dict>
+								<key>a</key>
+								<string>0.58</string>
 								<key>b</key>
-								<string>1</string>
+								<string>0.507583</string>
 								<key>g</key>
-								<string>0.898784</string>
+								<string>0.715105</string>
 								<key>r</key>
-								<string>0.775672</string>
+								<string>1</string>
 							</dict>
 						</dict>
 						<key>shadow</key>
@@ -38762,11 +38814,11 @@
 							<key>GapColor</key>
 							<dict>
 								<key>b</key>
-								<string>0.846749</string>
+								<string>0.504844</string>
 								<key>g</key>
-								<string>0.248575</string>
+								<string>0.684055</string>
 								<key>r</key>
-								<string>0.239548</string>
+								<string>0.846749</string>
 							</dict>
 							<key>GapRatio</key>
 							<real>0.5</real>
@@ -38779,7 +38831,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{84, 174}, {192, 48}}</string>
+					<string>{{84, 168}, {192, 42}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FontInfo</key>
@@ -38787,7 +38839,7 @@
 						<key>Font</key>
 						<string>Geneva</string>
 						<key>Size</key>
-						<real>23</real>
+						<real>15</real>
 					</dict>
 					<key>ID</key>
 					<integer>679</integer>
@@ -38797,12 +38849,14 @@
 						<dict>
 							<key>Color</key>
 							<dict>
+								<key>a</key>
+								<string>0.58</string>
 								<key>b</key>
-								<string>1</string>
+								<string>0.507583</string>
 								<key>g</key>
-								<string>0.898784</string>
+								<string>0.715105</string>
 								<key>r</key>
-								<string>0.775672</string>
+								<string>1</string>
 							</dict>
 						</dict>
 						<key>shadow</key>
@@ -38815,11 +38869,11 @@
 							<key>GapColor</key>
 							<dict>
 								<key>b</key>
-								<string>0.846749</string>
+								<string>0.504844</string>
 								<key>g</key>
-								<string>0.248575</string>
+								<string>0.684055</string>
 								<key>r</key>
-								<string>0.239548</string>
+								<string>0.846749</string>
 							</dict>
 							<key>GapRatio</key>
 							<real>0.5</real>
@@ -38832,7 +38886,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{84, 120}, {192, 48}}</string>
+					<string>{{84, 108}, {192, 42}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FontInfo</key>
@@ -38840,7 +38894,7 @@
 						<key>Font</key>
 						<string>Geneva</string>
 						<key>Size</key>
-						<real>23</real>
+						<real>15</real>
 					</dict>
 					<key>ID</key>
 					<integer>664</integer>
@@ -38850,12 +38904,14 @@
 						<dict>
 							<key>Color</key>
 							<dict>
+								<key>a</key>
+								<string>0.58</string>
 								<key>b</key>
-								<string>1</string>
+								<string>0.507583</string>
 								<key>g</key>
-								<string>0.898784</string>
+								<string>0.715105</string>
 								<key>r</key>
-								<string>0.775672</string>
+								<string>1</string>
 							</dict>
 						</dict>
 						<key>shadow</key>
@@ -38868,11 +38924,11 @@
 							<key>GapColor</key>
 							<dict>
 								<key>b</key>
-								<string>0.846749</string>
+								<string>0.504844</string>
 								<key>g</key>
-								<string>0.248575</string>
+								<string>0.684055</string>
 								<key>r</key>
-								<string>0.239548</string>
+								<string>0.846749</string>
 							</dict>
 							<key>GapRatio</key>
 							<real>0.5</real>
@@ -38885,7 +38941,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{198.5625, 280}, {58, 37}}</string>
+					<string>{{210.5625, 298}, {42, 28}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -38897,7 +38953,7 @@
 						<key>Font</key>
 						<string>Geneva</string>
 						<key>Size</key>
-						<real>23</real>
+						<real>15</real>
 					</dict>
 					<key>ID</key>
 					<integer>678</integer>
@@ -38930,7 +38986,7 @@
 \deftab720
 \pard\pardeftab720
 
-\f0\fs46 \cf0 Sync}</string>
+\f0\fs30 \cf0 Sync}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -38945,7 +39001,7 @@
 						<key>Font</key>
 						<string>MesloLGL-RegularForPowerline</string>
 						<key>Size</key>
-						<real>20</real>
+						<real>15</real>
 					</dict>
 					<key>ID</key>
 					<integer>677</integer>
@@ -38962,7 +39018,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{177.5, 315}, {81, 37}}</string>
+					<string>{{165.5, 321}, {36, 28}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -38974,7 +39030,7 @@
 						<key>Font</key>
 						<string>Geneva</string>
 						<key>Size</key>
-						<real>23</real>
+						<real>15</real>
 					</dict>
 					<key>ID</key>
 					<integer>673</integer>
@@ -39007,14 +39063,14 @@
 \deftab720
 \pard\pardeftab720\qr
 
-\f0\fs46 \cf0 Trigger}</string>
+\f0\fs30 \cf0 Out}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{258, 294}, {12, 12}}</string>
+					<string>{{258, 306}, {12, 12}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FontInfo</key>
@@ -39022,7 +39078,7 @@
 						<key>Font</key>
 						<string>MesloLGL-RegularForPowerline</string>
 						<key>Size</key>
-						<real>20</real>
+						<real>15</real>
 					</dict>
 					<key>ID</key>
 					<integer>672</integer>
@@ -39039,7 +39095,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{132, 76}, {109, 41}}</string>
+					<string>{{143, 76}, {75, 31}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -39051,7 +39107,7 @@
 						<key>Font</key>
 						<string>Geneva</string>
 						<key>Size</key>
-						<real>26</real>
+						<real>17</real>
 					</dict>
 					<key>ID</key>
 					<integer>671</integer>
@@ -39082,14 +39138,14 @@
 \deftab720
 \pard\pardeftab720\qc
 
-\f0\fs52 \cf0 Rhythms}</string>
+\f0\fs34 \cf0 Rhythms}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{102.5625, 318.5}, {67, 37}}</string>
+					<string>{{102.5625, 324.5}, {47, 28}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -39101,7 +39157,7 @@
 						<key>Font</key>
 						<string>Geneva</string>
 						<key>Size</key>
-						<real>23</real>
+						<real>15</real>
 					</dict>
 					<key>ID</key>
 					<integer>670</integer>
@@ -39134,7 +39190,7 @@
 \deftab720
 \pard\pardeftab720
 
-\f0\fs46 \cf0 Clock}</string>
+\f0\fs30 \cf0 Clock}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -39149,7 +39205,7 @@
 						<key>Font</key>
 						<string>MesloLGL-RegularForPowerline</string>
 						<key>Size</key>
-						<real>20</real>
+						<real>15</real>
 					</dict>
 					<key>ID</key>
 					<integer>669</integer>
@@ -39166,7 +39222,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{102.5625, 281}, {64, 37}}</string>
+					<string>{{102.5625, 299}, {45, 28}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -39178,7 +39234,7 @@
 						<key>Font</key>
 						<string>Geneva</string>
 						<key>Size</key>
-						<real>23</real>
+						<real>15</real>
 					</dict>
 					<key>ID</key>
 					<integer>660</integer>
@@ -39211,14 +39267,14 @@
 \deftab720
 \pard\pardeftab720
 
-\f0\fs46 \cf0 Reset}</string>
+\f0\fs30 \cf0 Reset}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{90, 294}, {12, 12}}</string>
+					<string>{{90, 306}, {12, 12}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FontInfo</key>
@@ -39226,7 +39282,7 @@
 						<key>Font</key>
 						<string>MesloLGL-RegularForPowerline</string>
 						<key>Size</key>
-						<real>20</real>
+						<real>15</real>
 					</dict>
 					<key>ID</key>
 					<integer>381</integer>
@@ -39234,6 +39290,88 @@
 					<string>Circle</string>
 					<key>Style</key>
 					<dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{96, 132}, {168, 168}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>ID</key>
+					<integer>685</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Color</key>
+							<dict>
+								<key>b</key>
+								<string>0.633248</string>
+								<key>g</key>
+								<string>1</string>
+								<key>r</key>
+								<string>0.994411</string>
+							</dict>
+							<key>FillType</key>
+							<integer>3</integer>
+							<key>GradientColor</key>
+							<dict>
+								<key>b</key>
+								<string>0.252625</string>
+								<key>g</key>
+								<string>0.710054</string>
+								<key>r</key>
+								<string>0.90116</string>
+							</dict>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{90, 126}, {180, 180}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>ID</key>
+					<integer>686</integer>
+					<key>Shape</key>
+					<string>Circle</string>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Color</key>
+							<dict>
+								<key>b</key>
+								<string>0.0185785</string>
+								<key>g</key>
+								<string>0.329457</string>
+								<key>r</key>
+								<string>0.485894</string>
+							</dict>
+							<key>FillType</key>
+							<integer>3</integer>
+							<key>GradientColor</key>
+							<dict>
+								<key>b</key>
+								<string>0.224026</string>
+								<key>g</key>
+								<string>0.633249</string>
+								<key>r</key>
+								<string>0.804845</string>
+							</dict>
+						</dict>
 						<key>shadow</key>
 						<dict>
 							<key>Draws</key>
@@ -39253,7 +39391,7 @@
 						<key>Font</key>
 						<string>Geneva</string>
 						<key>Size</key>
-						<real>23</real>
+						<real>15</real>
 					</dict>
 					<key>ID</key>
 					<integer>658</integer>
@@ -39264,35 +39402,11 @@
 							<key>Color</key>
 							<dict>
 								<key>b</key>
-								<string>1</string>
+								<string>0.524656</string>
 								<key>g</key>
-								<string>0.704858</string>
+								<string>0.664684</string>
 								<key>r</key>
-								<string>0.572174</string>
-							</dict>
-							<key>FillType</key>
-							<integer>6</integer>
-							<key>GradientAngle</key>
-							<real>0.0</real>
-							<key>GradientColor</key>
-							<dict>
-								<key>b</key>
-								<string>0.388522</string>
-								<key>g</key>
-								<string>0.884236</string>
-								<key>r</key>
-								<string>1</string>
-							</dict>
-							<key>PlasticCurve</key>
-							<real>0.31420379877090454</real>
-							<key>PlasticHighlight</key>
-							<dict>
-								<key>b</key>
-								<string>1</string>
-								<key>g</key>
-								<string>1</string>
-								<key>r</key>
-								<string>1</string>
+								<string>0.699061</string>
 							</dict>
 						</dict>
 						<key>shadow</key>
@@ -41990,7 +42104,7 @@
 		<key>Expanded_Canvases</key>
 		<array/>
 		<key>Frame</key>
-		<string>{{563, 249}, {1680, 1024}}</string>
+		<string>{{309, 315}, {1680, 1024}}</string>
 		<key>ShowInfo</key>
 		<true/>
 		<key>ShowRuler</key>
@@ -42002,7 +42116,7 @@
 		<key>TopSlabHeight</key>
 		<real>346</real>
 		<key>VisibleRegion</key>
-		<string>{{0, 0}, {561, 426}}</string>
+		<string>{{0, 0}, {560.5, 426}}</string>
 		<key>Zoom</key>
 		<real>2</real>
 		<key>ZoomValues</key>

@@ -23,13 +23,15 @@ void init() {
     sync = 0.0;
 }
 
-void exec(in __attribute__((normal("abc"))) __attribute__((colour("(0, 0, 1)"))) const char *pattern,
+void exec(in __attribute__((normal("x"))) __attribute__((colour("(0, 0, 1)"))) const char *pattern,
           in control trigger,
           in control reset,
           out control sync,
           out control gate) {
     const char *pattern2 = pattern;
     sync = 0.0;
+
+    /* Reset */
     if (pattern2 != last_pattern || (last_reset <= 0 && reset > 0)) {
         pc = 0;
         count_stack_pointer = 0;
