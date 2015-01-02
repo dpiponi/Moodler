@@ -6,6 +6,7 @@ import Sound.OSC
 import System.Posix.DynamicLinker
 import Data.IORef
 import qualified Data.Map as M
+import qualified Data.Set as S
 --import Data.Maybe
 import Control.Monad.Trans.Error
 import Data.Array.IArray
@@ -75,7 +76,7 @@ main = do
             setFillBuffer audioPlayer (dsoExecuteFn dso)
             startAudioPlayer audioPlayer
 
-            let tracker = KeyTracker numVoices 0 (M.empty :: M.Map Int Int)
+            let tracker = KeyTracker 0 numVoices S.empty
             pMoodler <- newIORef $ Moodler theStandard dso [] tracker
             let transport = udpServer ipAddress socket
             void $ withTransport transport $ forever $ do

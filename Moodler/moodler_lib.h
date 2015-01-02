@@ -351,3 +351,7 @@ struct State;
 int get_address(struct StateRecord *address_table, const char *node, const char *field);
 
 void init_node(struct State *state, struct StateRecord *address_table, const char *node);
+
+void set_cc(int m, float n);
+void init_cc();
+float get_cc(int m);

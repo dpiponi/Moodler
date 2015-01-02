@@ -1,0 +1,9 @@
+double result;
+
+void init() {
+}
+
+void exec(in __attribute__((colour("(1,0,1)"))) double _Complex signal,
+          out sample result) {
+    result = cimag(signal);
+}

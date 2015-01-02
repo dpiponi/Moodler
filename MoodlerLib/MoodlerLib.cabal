@@ -16,8 +16,7 @@ source-repository head
 library
   hs-source-dirs:   src
   build-depends:    base >= 4 && < 5, containers, lens, mtl,
-                    bmp, unix, free, either, filepath,
-                    mmorph
+                    bmp, unix, free, either, filepath
   exposed-modules:
     Sound.MoodlerLib.UiLib
     Sound.MoodlerLib.Symbols

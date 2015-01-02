@@ -6,6 +6,7 @@ module CodeBuild(DSO
                 , dsoExecuteFn
                 , dsoInit2Fn
                 , dsoSetFn
+                , dsoSetCCFn
                 , dsoSetStringFn
                 , makeDSOFromSynth
                 , setStateVar
@@ -28,15 +29,15 @@ import CodeGen
 import Synth
 
 foreign import ccall "dynamic"  
-  mkCreate :: FunPtr (IO (Ptr ())) -> IO (Ptr ())
+  mkCreate :: FunPtr CreateFn -> CreateFn
 foreign import ccall "dynamic"  
-  mkInit2 :: FunPtr (Ptr () -> CString -> IO ()) -> Ptr () -> CString -> IO ()
+  mkInit2 :: FunPtr Init2Fn -> Init2Fn
 foreign import ccall "dynamic"  
-  mkSet :: FunPtr (Ptr () -> CString -> CString -> CDouble -> IO ()) ->
-                   Ptr () -> CString -> CString -> CDouble -> IO ()
+  mkSet :: FunPtr SetFn -> SetFn
 foreign import ccall "dynamic"  
-  mkSetString :: FunPtr (Ptr () -> CString -> CString -> CString -> IO ()) ->
-                         Ptr () -> CString -> CString -> CString -> IO ()
+  mkSetCC :: FunPtr SetCCFn -> SetCCFn
+foreign import ccall "dynamic"  
+  mkSetString :: FunPtr SetStringFn -> SetStringFn
 
 compile :: String -> String -> IO ()
 compile sourceName libraryName = do
@@ -53,6 +54,7 @@ compile sourceName libraryName = do
 type CreateFn = IO (Ptr ())
 type Init2Fn = Ptr () -> CString -> IO ()
 type SetFn = Ptr () -> CString -> CString -> CDouble -> IO ()
+type SetCCFn = Int -> CFloat -> IO ()
 type SetStringFn = Ptr () -> CString -> CString -> CString -> IO ()
 
 -- Represents a DSO loaded into memory along with Haskell wrappers
@@ -61,6 +63,7 @@ data DSO = DSO { dl :: DL
                , createFn :: CreateFn
                , dsoInit2Fn :: Init2Fn
                , dsoExecuteFn :: FunPtr ()
+               , dsoSetCCFn :: SetCCFn
                , dsoSetFn :: SetFn
                , dsoSetStringFn :: SetStringFn }
 
@@ -79,10 +82,13 @@ makeDso code =
         create <- dlsym so "create"
         ini2 <- dlsym so "init2"
         execute <- dlsym so "execute"
+        setCC <- dlsym so "set_cc"
         set <- dlsym so "set"
         setString <- dlsym so "set_string"
 
-        return $ DSO so (mkCreate create) (mkInit2 ini2) execute (mkSet set)
+        return $ DSO so (mkCreate create) (mkInit2 ini2) execute
+                                          (mkSetCC setCC)
+                                          (mkSet set)
                                           (mkSetString setString)
     -- End of tmp dir bit
 

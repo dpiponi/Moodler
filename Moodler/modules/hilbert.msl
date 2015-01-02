@@ -1,0 +1,13 @@
+struct Hilbert hilbert_state;
+_Complex double result;
+
+void init() {
+    hilbert_state_init(&hilbert_state);
+}
+
+void exec(in sample signal,
+          out __attribute__((colour("(1,0,1)"))) double _Complex result) {
+    double i, q;
+    hilbert_state_exec(&hilbert_state, signal, &i, &q);
+    result = i+I*q;
+}

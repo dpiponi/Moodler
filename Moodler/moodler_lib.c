@@ -5206,3 +5206,19 @@ void init2(struct State *state, const char *node) {
     init_node(state, address_table, node);
 }
 */
+
+static float cc[256];
+
+void init_cc() {
+    for (int i = 0; i < 256; ++i) {
+        cc[i] = 0;
+    }
+}
+
+void set_cc(int m, float n) {
+    cc[m] = n;
+}
+
+float get_cc(int m) {
+    return cc[m];
+}

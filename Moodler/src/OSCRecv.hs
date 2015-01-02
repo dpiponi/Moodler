@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell #-}
-
 -- Receive OSC commands and apply them to current synth.
 
 module OSCRecv where
@@ -19,7 +18,7 @@ import System.Posix
 import System.Directory
 import qualified Data.ByteString.Char8 as C
 import qualified Data.Map as M
---import qualified Data.Set as S
+import qualified Data.Set as S
 import Control.Monad.Morph
 --import Control.Monad.Reader
 --import Data.Functor.Identity
@@ -40,7 +39,7 @@ data Moodler = Moodler { _moodlerSynth :: Synth
 $(makeLenses ''Moodler)
 
 keyToFreq :: Int -> Float
-keyToFreq ds' = 0.1*(fromIntegral ds'-13)/12.0
+keyToFreq ds' = 0.1*(fromIntegral ds'-12)/12.0
 
 -- Try making this use ErrorT?
 recompile' :: MonadIO m => Int ->
@@ -85,7 +84,7 @@ reset theStandard numVoices = do
     moodlerDSO .= dso
     moodlerSynth .= theStandard
     modulesPendingInit .= []
-    keyTracker .= KeyTracker numVoices 0 (M.empty :: M.Map Int Int)
+    keyTracker .= KeyTracker 0 numVoices S.empty
     
 
 setKeyboardState :: DSO -> Array Int (Ptr ()) ->
@@ -195,22 +194,26 @@ handleMessage theStandard numVoices dataPtrs set_fill_buffer
                 --liftIO $ putStrLn $ "Key " ++ ds ++ ": " ++ show v
                 dso' <- use moodlerDSO
                 oldTracker <- use keyTracker
+                liftIO $ print $ "v = " ++ show v
                 newTracker <- liftIO $ flip execStateT oldTracker $
                     if v > 0
-                        then downKey (read ds::Int) $ 
-                            setKeyboardState dso' dataPtrs v
-                        else upKey (read ds::Int) $
-                            setKeyboardState dso' dataPtrs v
+                        then downKey (read ds::Int) v $ 
+                            setKeyboardState dso' dataPtrs
+                        else upKey (read ds::Int) v $
+                            setKeyboardState dso' dataPtrs
                 keyTracker .= newTracker
 
             Just (Message ('/':'8':'/':'r':'o':'t':'a':'r':'y':ds)
                           [Float v]) -> do
                 let knob = read ds :: Int
                 dso' <- use moodlerDSO
+                liftIO $ dsoSetCCFn dso' knob (realToFrac v)
+                {-
                 forM_ [0..numVoices-1] $ \i ->
                     liftIO $ setStateVar (dsoSetFn dso') (dataPtrs!i)
                                     ("p8_rotary" ++ show knob)
                                     "result" v
+                                    -}
 
             _ -> liftIO $ putStrLn $ "Ignored msg: " ++ show msg
     case x of

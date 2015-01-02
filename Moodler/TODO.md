@@ -2,6 +2,7 @@
     * Properly integrate oscilloscope
     * Sliders could be better
     * Ensure panel_proxy.png is loaded when needed
+    * Arbitrary CC inputs
 
 * moodler
     * local enums?
@@ -11,5 +12,6 @@
         + Primitives
     * #includes and libs for modules
     * Consider storing default values in temporaries.
+    * num voices command line arg
 
 * modules

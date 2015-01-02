@@ -1,0 +1,9 @@
+double result;
+
+void init() {
+    result = 0.0;
+}
+
+inline inline void exec(in sample channel, out sample result) {
+    result = get_cc((int)channel);
+}
