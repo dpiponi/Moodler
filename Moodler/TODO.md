@@ -2,7 +2,6 @@
     * Properly integrate oscilloscope
     * Sliders could be better
     * Ensure panel_proxy.png is loaded when needed
-    * Arbitrary CC inputs
 
 * moodler
     * local enums?
@@ -15,3 +14,5 @@
     * num voices command line arg
 
 * modules
+    * complex arithmetic
+    * complex oscillator
