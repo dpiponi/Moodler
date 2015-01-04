@@ -42,6 +42,6 @@ handleMessage M.PMMsg { M.status = 224, M.data1 = 0,  M.data2 = n } = do
     print $ "Tilt/bend " ++ show n
     O.withTransport (O.openUDP "127.0.0.1" 7777) $
         O.sendMessage $
-            O.message "/8/rotary16" [O.float (fromIntegral n/127.0 :: Double)]
+            O.message "/8/rotary16" [O.float (fromIntegral n/64.0-1.0 :: Double)]
 
 handleMessage m = print m

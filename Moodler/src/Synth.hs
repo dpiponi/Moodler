@@ -91,6 +91,7 @@ loadSynthTypes dir = do
     moduleSpecs <- liftIO $ filter (isSuffixOf ".msl") <$>
                                             getDirectoryContents dir
     moduleSpecList <- forM moduleSpecs $ \moduleSpec -> do
+        liftIO $ putStrLn $ "Compiling " ++ show moduleSpec
         let primTypeName = fst $ splitDot moduleSpec
         loadedModule <- loadNodeType primTypeName dir moduleSpec
         return (primTypeName, loadedModule)

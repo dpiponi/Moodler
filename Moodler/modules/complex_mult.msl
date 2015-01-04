@@ -1,0 +1,10 @@
+double _Complex result;
+
+void init() {
+}
+
+inline void exec(in __attribute__((colour("(1, 0, 1)"))) double _Complex x,
+          in __attribute__((colour("(1, 0, 1)"))) double _Complex y,
+          out __attribute__((colour("(1, 0, 1)"))) double _Complex result) {
+    result = (double _Complex)x * (double _Complex)y;
+}

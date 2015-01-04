@@ -1,0 +1,18 @@
+double *tape;
+int write_head;
+double result;
+
+void init() {
+    tape = malloc(0x10000*sizeof(double));
+    result = 0.0;
+    write_head = 0;
+}
+
+inline void exec(in __attribute__((colour("(0, 1, 0)"))) int read_head,
+                 in sample signal,
+                 out __attribute__((colour("(0, 1, 0)"))) int write_head,
+                 out sample result) {
+    tape[(write_head+1) & 0xffff] = signal;
+    write_head = (write_head+1) & 0xffff;
+    result = tape[read_head & 0xffff];
+}
