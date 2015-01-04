@@ -24,6 +24,7 @@ import System.Posix.DynamicLinker
 import Control.Monad.Writer
 import System.Process
 import Control.Monad.Trans.Error
+import qualified Data.Set as S
 
 import CodeGen
 import Synth
@@ -41,7 +42,7 @@ foreign import ccall "dynamic"
 
 compile :: String -> [String] -> String -> IO ()
 compile sourceName linkList libraryName = do
-    let extra_libs = "delay_line.o" : linkList
+    let extra_libs = S.toList (S.fromList linkList)
     let clang_options = ["-O3", "-ffast-math"]
     let command = "clang " ++ unwords clang_options
                   ++ " -dynamiclib -lm -std=gnu99 -Wno-logical-op-parentheses moodler_lib.o "

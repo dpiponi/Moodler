@@ -1,5 +1,6 @@
 #pragma include "reverb.h"
 #pragma link "reverb.o"
+#pragma link "delay_line.o"
 
 struct Reverb reverb;
 double result;

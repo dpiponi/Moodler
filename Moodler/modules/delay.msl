@@ -1,3 +1,6 @@
+#pragma include "delay_line.h"
+#pragma link "delay_line.o"
+
 struct DelayLine delay_line;
 double result;
 

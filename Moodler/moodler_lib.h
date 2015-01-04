@@ -1,7 +1,5 @@
 #include <math.h>
 
-#include "delay_line.h"
-
 typedef double sample;
 
 // 0.1 "V"/Octave
