@@ -39,9 +39,9 @@ foreign import ccall "dynamic"
 foreign import ccall "dynamic"  
   mkSetString :: FunPtr SetStringFn -> SetStringFn
 
-compile :: String -> String -> IO ()
-compile sourceName libraryName = do
-    let extra_libs = ["delay_line.o", "reverb.o", "hilbert.o"]
+compile :: String -> [String] -> String -> IO ()
+compile sourceName linkList libraryName = do
+    let extra_libs = "delay_line.o" : linkList
     let clang_options = ["-O3", "-ffast-math"]
     let command = "clang " ++ unwords clang_options
                   ++ " -dynamiclib -lm -std=gnu99 -Wno-logical-op-parentheses moodler_lib.o "
@@ -67,8 +67,8 @@ data DSO = DSO { dl :: DL
                , dsoSetFn :: SetFn
                , dsoSetStringFn :: SetStringFn }
 
-makeDso :: String -> IO DSO
-makeDso code =
+makeDso :: String -> [String] -> IO DSO
+makeDso code linkList =
     --let tmpDir = "gensrc" ++ show (hash code)
     --createDirectoryIfMissing False tmpDir
     withSystemTempDirectory
@@ -76,7 +76,7 @@ makeDso code =
         let tmpSrcFile = tmpDir ++ "/gen.c"
         let tmpSoFile = tmpDir ++ "/gen.so"
         writeFile tmpSrcFile code
-        compile tmpSrcFile tmpSoFile
+        compile tmpSrcFile linkList tmpSoFile
         so <- dlopen tmpSoFile [RTLD_NOW, RTLD_LOCAL]
 
         create <- dlsym so "create"
@@ -108,6 +108,6 @@ setStringStateVar set dataPtr nodeName stateVar value =
 makeDSOFromSynth :: Synth -> Module -> ErrorT String IO DSO
 makeDSOFromSynth synth out = do
     currentDirectory <- liftIO getCurrentDirectory
-    let code = execWriter (gen currentDirectory synth out)
+    let (linkList, code) = runWriter (gen currentDirectory synth out)
     liftIO $ putStrLn code
-    liftIO $ makeDso code
+    liftIO $ makeDso code linkList

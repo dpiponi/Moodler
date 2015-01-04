@@ -1,6 +1,5 @@
 #include <math.h>
 
-#include "reverb.h"
 #include "delay_line.h"
 
 typedef double sample;

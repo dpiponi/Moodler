@@ -1,3 +1,6 @@
+#pragma include "reverb.h"
+#pragma link "reverb.o"
+
 struct Reverb reverb;
 double result;
 

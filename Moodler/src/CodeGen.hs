@@ -300,7 +300,7 @@ makeStateTable typeName name entries =
 
 -- Create entire C source code unit.
 gen :: String -> Synth -> Module ->
-       Writer String ()
+       Writer String [String]
 gen currentDirectory synth out' = do
 
     let moduleList = sortBy (compare `on` _moduleNumber) $ M.elems synth
@@ -336,3 +336,4 @@ gen currentDirectory synth out' = do
     genCreate
     genSet
     genSetString
+    return linkList
