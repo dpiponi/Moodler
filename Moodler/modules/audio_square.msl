@@ -1,3 +1,7 @@
+#pragma include "audio_square.h"
+#pragma link "band_limited.o"
+#pragma link "audio_square.o"
+
 double started;
 struct Square square_state;
 double result;

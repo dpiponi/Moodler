@@ -1,3 +1,7 @@
+#pragma include "audio_sin.h"
+#pragma link "band_limited.o"
+#pragma link "audio_sin.o"
+
 double started;
 struct Sin sin_state;
 double result;

@@ -3,6 +3,10 @@
  * http://kevin.mcguireclan.net/papers/ArpEggWeb/ArpEgg.htm
  * There's no rewriting going on here, just a simple machine_state machine.
  */
+
+#pragma include "progression.h"
+#pragma link "progression.o"
+
 int pc;
 const char *last_pattern;
 double last_trigger;

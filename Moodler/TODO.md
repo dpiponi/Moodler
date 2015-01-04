@@ -9,7 +9,6 @@
         + A synth is a collection of modules
         + SharedObject instead of DSO
         + Primitives
-    * #includes and libs for modules
     * Consider storing default values in temporaries.
     * num voices command line arg
 

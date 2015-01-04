@@ -1,4 +1,5 @@
 #include <math.h>
+#include "band_limited.h"
 
 typedef double sample;
 
@@ -243,70 +244,9 @@ static sample downsample_4(sample *y) {
     return t;
 }
 
-extern double ctable0[258];
-extern double ctable1[258];
-extern double cwtable0[16][258];
-extern double cwtable1[16][258];
-
-struct BandLimited {
-    double data[64];
-    int ptr;
-};
-
-static void init_band_limited(struct BandLimited *limited) {
-    for (int i = 0; i < 64; ++i) {
-        limited->data[i] = 0;
-    }
-    limited->ptr = 0;
-}
-
-static void add_sample(struct BandLimited *limited, double x) {
-    limited->data[limited->ptr] += x;
-}
-
 static double lerp(double x, double a, double b) {
     return (1-x)*a+x*b;
 }
-
-static double get_sample(struct BandLimited *limited) {
-    int ioffset = (limited->ptr-32) & 63;
-    double x = limited->data[ioffset];
-    limited->data[ioffset] = 0.0;
-    limited->ptr = (limited->ptr+1) & 63;
-    return x;
-}
-
-extern void add_discontinuity0(struct BandLimited *limited,
-                        double offset, double x);
-extern void add_discontinuity1(struct BandLimited *limited, double offset, sample x);
-extern void add_discontinuity0w(struct BandLimited *limited, double offset,
-                         double omega, sample x);
-extern void add_discontinuity1w(struct BandLimited *limited, double offset,
-                         double omega, sample x);
-
-struct Sin {
-    struct BandLimited limited;
-    sample result;
-    double phase;
-    sample last_sync;
-};
-
-void init_sin(struct Sin *state);
-sample step_sin(struct Sin *state, double dt, sample frequency, sample sync);
-
-struct Square {
-    double started;
-    struct BandLimited limited;
-    double this_sample;
-    double output_time;
-    double last_output_time;
-    double y;
-    double result;
-    double last_sync;
-};
-
-void init_square(struct Square *state);
-sample step_square(struct Square *state, double dt, sample frequency, sample pwm, sample sync);
 
 inline double interp(double lambda, double x, double y) {
     return (1-lambda)*x+lambda*y;
@@ -319,8 +259,6 @@ inline int correct_mod(int a, int b) {
     int ret = a % b;
     return ret < 0 ? ret+b : ret;
 }
-
-extern int transitions[22][8];
 
 static inline void sort2(double *a, double *b) {
     if (*a > *b) {

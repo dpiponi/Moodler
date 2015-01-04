@@ -1,3 +1,6 @@
+#pragma include "band_limited.h"
+#pragma link "band_limited.o"
+
 double started;
 struct BandLimited limited;
 double this_sample;

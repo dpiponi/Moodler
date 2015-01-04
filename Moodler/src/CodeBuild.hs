@@ -29,16 +29,11 @@ import qualified Data.Set as S
 import CodeGen
 import Synth
 
-foreign import ccall "dynamic"  
-  mkCreate :: FunPtr CreateFn -> CreateFn
-foreign import ccall "dynamic"  
-  mkInit2 :: FunPtr Init2Fn -> Init2Fn
-foreign import ccall "dynamic"  
-  mkSet :: FunPtr SetFn -> SetFn
-foreign import ccall "dynamic"  
-  mkSetCC :: FunPtr SetCCFn -> SetCCFn
-foreign import ccall "dynamic"  
-  mkSetString :: FunPtr SetStringFn -> SetStringFn
+foreign import ccall "dynamic" mkCreate :: FunPtr CreateFn -> CreateFn
+foreign import ccall "dynamic" mkInit2 :: FunPtr Init2Fn -> Init2Fn
+foreign import ccall "dynamic" mkSet :: FunPtr SetFn -> SetFn
+foreign import ccall "dynamic" mkSetCC :: FunPtr SetCCFn -> SetCCFn
+foreign import ccall "dynamic" mkSetString :: FunPtr SetStringFn -> SetStringFn
 
 compile :: String -> [String] -> String -> IO ()
 compile sourceName linkList libraryName = do
@@ -48,6 +43,7 @@ compile sourceName linkList libraryName = do
                   ++ " -dynamiclib -lm -std=gnu99 -Wno-logical-op-parentheses moodler_lib.o "
                   ++ unwords extra_libs ++ " " ++ sourceName
                   ++ " -o " ++ libraryName
+    liftIO $ putStrLn $ "Building with: " ++ show command
     compileHandle <- runCommand command
     void $ waitForProcess compileHandle
     return ()
