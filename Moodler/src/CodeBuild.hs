@@ -109,5 +109,5 @@ makeDSOFromSynth :: Synth -> Module -> ErrorT String IO DSO
 makeDSOFromSynth synth out = do
     currentDirectory <- liftIO getCurrentDirectory
     let code = execWriter (gen currentDirectory synth out)
-    --liftIO $ putStrLn code
+    liftIO $ putStrLn code
     liftIO $ makeDso code

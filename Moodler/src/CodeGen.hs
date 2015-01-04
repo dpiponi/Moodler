@@ -61,10 +61,15 @@ genIncludes :: MonadWriter String m =>
 genIncludes includes = forM_ includes $ \include ->
     tell $ "#include <" ++ include ++ ">\n"
 
-genHeaders :: MonadWriter String m => String -> m ()
-genHeaders libDirectory = do
+genIncludes' :: MonadWriter String m =>
+                String -> [String] -> m ()
+genIncludes' libDirectory includes = forM_ includes $ \include ->
+    tell $ "#include \"" ++ libDirectory ++ "/" ++ include ++ "\"\n"
+
+genHeaders :: MonadWriter String m => String -> [String] -> m ()
+genHeaders libDirectory includeList = do
     genIncludes ["stdio.h", "stdlib.h", "stddef.h", "string.h", "math.h", "complex.h"]
-    tell $ "#include \"" ++ libDirectory ++ "/moodler_lib.h\"\n"
+    genIncludes' libDirectory ("moodler_lib.h" : includeList)
 
 -- Generate elements of struct corresponding to one primitive module.
 genNodeStruct :: NodeType -> CExtDecl
@@ -297,14 +302,18 @@ makeStateTable typeName name entries =
 gen :: String -> Synth -> Module ->
        Writer String ()
 gen currentDirectory synth out' = do
-    genHeaders currentDirectory
-    tell $ "const double dt = " ++ show sampleRate ++ ";\n"
 
     let moduleList = sortBy (compare `on` _moduleNumber) $ M.elems synth
     let sortedPrimitives = topologicalSort synth out'
 
     let nodeTypes = map _getNodeType moduleList
     let uniqNodeTypes = uniqBy (compare `on` _nodeTypeName) nodeTypes
+    let includeList = concatMap _nodeInclude uniqNodeTypes
+
+    genHeaders currentDirectory includeList
+    tell $ "const double dt = " ++ show sampleRate ++ ";\n"
+
+    let linkList = concatMap _nodeLink uniqNodeTypes
     let inlineNodeTypes = filter (not . _isInlined) uniqNodeTypes
 
     let nodeStructs = map genNodeStruct uniqNodeTypes

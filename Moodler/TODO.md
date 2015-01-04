@@ -14,4 +14,3 @@
     * num voices command line arg
 
 * modules
-    * complex oscillator

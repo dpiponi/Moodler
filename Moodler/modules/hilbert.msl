@@ -1,3 +1,6 @@
+#pragma include "hilbert.h"
+#pragma link "hilbert.o"
+
 struct Hilbert hilbert_state;
 _Complex double result;
 

@@ -25,6 +25,7 @@ import System.FilePath.Posix
 
 import Text
 import MoodlerSymbols
+import ParsePragma
 
 data NodeType = NodeType {
     _nodeTypeName :: ModuleTypeName,
@@ -35,7 +36,9 @@ data NodeType = NodeType {
     _stateDecls :: [CDecl],
     _initCode :: CFunDef,
     _execCode :: CFunDef,
-    _isInlined :: Bool
+    _isInlined :: Bool,
+    _nodeInclude :: [String],
+    _nodeLink :: [String]
 } deriving Show
 
 $(makeLenses ''NodeType)
@@ -108,9 +111,10 @@ predefines =
     , ("control", "__attribute__((colour(\"#control\"))) double")
     ]
  
-preprocessFile :: MonadIO m => FilePath -> m B.ByteString
+preprocessFile :: MonadIO m => FilePath -> m (B.ByteString, [String], [String])
 preprocessFile fileName = do
     rawCode <- liftIO $ readFile fileName
+    let (include, link) = parsePragma rawCode
     code <- liftIO $ runCpphs
                      defaultCpphsOptions -- XXX Use `defines` to set "out"
                      { boolopts = defaultBoolOptions { locations = False
@@ -118,12 +122,12 @@ preprocessFile fileName = do
                                                      }
                      , defines = predefines
                      } fileName rawCode
-    return $ B.pack code
+    return (B.pack code, include, link)
 
 loadNodeType :: String -> String -> String -> ErrorT String IO NodeType
 loadNodeType primTypeName dir fileName' = do
     let fileName = combine dir fileName'
-    input <- preprocessFile fileName
+    (input, include, link) <- preprocessFile fileName
     let pos = position 0 "" 0 0
     let x = either (Left . show) Right $
                     execParser translUnitP input pos
@@ -148,3 +152,4 @@ loadNodeType primTypeName dir fileName' = do
                                  (M.fromList $ map swap ins)
                                  (M.fromList $ map swap outs)
                                  states vs i' e' (isInline e')
+                                 include link

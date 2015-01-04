@@ -8,6 +8,16 @@ withJust :: Monad m => Maybe a -> (a -> m ()) -> m ()
 withJust Nothing _ = return ()
 withJust (Just a) f = f a
 
+dezip :: [Either a b] -> ([a], [b])
+dezip [] = ([], [])
+dezip (Left a : cs) = let (as, bs) = dezip cs in (a:as, bs)
+dezip (Right b : cs) = let (as, bs) = dezip cs in (as, b:bs)
+
+dezip' :: [(c, Either a b)] -> ([(c, a)], [(c, b)])
+dezip' [] = ([], [])
+dezip' ((d, Left a) : cs) = let (as, bs) = dezip' cs in ((d, a) : as, bs)
+dezip' ((d, Right b) : cs) = let (as, bs) = dezip' cs in (as, (d, b) : bs)
+
 {-
 -- Find the key of an element of a map whose value
 -- satisfies some property.

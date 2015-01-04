@@ -1,0 +1,13 @@
+double phase;
+double result;
+
+void init() {
+    phase = 0.0;
+}
+
+inline void exec(in control rate,
+                 out __attribute__((colour("(1,0,1)"))) double _Complex result) {
+    result = cos(phase)+I*sin(phase);
+
+    phase += 2*M_PI*rate*dt;
+}

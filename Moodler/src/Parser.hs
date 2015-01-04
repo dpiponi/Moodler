@@ -28,6 +28,7 @@ import Data.Data.Lens
 import CGen
 import CLens
 import MoodlerSymbols
+import Utils
 
 {-
  - We want three things from a .msl file:
@@ -193,16 +194,6 @@ getArgs (CDeclr _ ds _ _ _) = concatMap getInOut ds
 -- decl :: CDeclr = CDeclr _ [CDerivedDeclar] _ attrs _
 getInsAndOuts :: CFunDef -> ([(CDecl, InName)], [(CDecl, OutName)])
 getInsAndOuts (CFunDef _ decl _ _ _) = dezip' $ getArgs decl
-
-dezip :: [Either a b] -> ([a], [b])
-dezip [] = ([], [])
-dezip (Left a : cs) = let (as, bs) = dezip cs in (a:as, bs)
-dezip (Right b : cs) = let (as, bs) = dezip cs in (as, b:bs)
-
-dezip' :: [(c, Either a b)] -> ([(c, a)], [(c, b)])
-dezip' [] = ([], [])
-dezip' ((d, Left a) : cs) = let (as, bs) = dezip' cs in ((d, a) : as, bs)
-dezip' ((d, Right b) : cs) = let (as, bs) = dezip' cs in (as, (d, b) : bs)
 
 varDefinedInDeclaration :: CDecl -> String
 varDefinedInDeclaration (CDecl _ a _) = head $ idents a
