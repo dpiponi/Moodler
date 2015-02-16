@@ -1,4 +1,4 @@
-all: audio.so moodler_lib.o delay_line.o reverb.o hilbert.o progression.o audio_square.o band_limited.o audio_sin.o
+all: audio.so moodler_lib.o delay_line.o reverb.o hilbert.o progression.o audio_square.o band_limited.o audio_sin.o ladder.o
 
 #Bridge
 
@@ -28,3 +28,6 @@ audio_sin.o: audio_sin.h audio_sin.c
 
 band_limited.o: band_limited.h band_limited.c
 	clang -ffast-math -O3 -c band_limited.c
+
+ladder.o: ladder.h ladder.c
+	clang -ffast-math -O3 -c ladder.c
