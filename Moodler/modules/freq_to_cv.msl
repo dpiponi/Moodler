@@ -1,9 +1,9 @@
-double cv;
+double result;
 
 void init() {
 }
 
 inline void exec(in control freq,
-                 out control cv) {
-    cv = frequency_to_signal(freq);
+          out control result) {
+    result = frequency_to_signal(freq);
 }

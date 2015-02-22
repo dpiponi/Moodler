@@ -1,6 +1,3 @@
-#pragma include "ladder.h"
-#pragma link "ladder.o"
-
 double result;
 
 double y0;

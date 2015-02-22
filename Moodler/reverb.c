@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "reverb.h"
 #include "moodler_lib.h"
 
 void reverb_fini(Reverb *reverb) {

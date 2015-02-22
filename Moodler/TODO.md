@@ -11,6 +11,5 @@
         + Primitives
     * Consider storing default values in temporaries.
     * num voices command line arg
-    * More splitting of moodler_lib
 
 * modules
