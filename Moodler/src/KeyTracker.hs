@@ -64,7 +64,7 @@ upKey key _ setSynth = do
     let numActives = S.size actives
     let currentKeys = S.toList $ S.filter ((== key) . _keyName) actives
     case currentKeys of
-        [] -> error "No current keys"
+        [] -> liftIO $ putStrLn "No current keys"
         currentKey : _ -> 
             if numActives <= nSynths
                 then do -- simply release
