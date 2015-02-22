@@ -1,0 +1,18 @@
+#pragma include "quantise.h"
+#pragma include "quantise.o"
+
+double result;
+
+void init() {
+    result = 0.0;
+}
+
+void exec(in sample scale, in sample signal, out sample result) {
+    {
+        int i = (int)(signal*120.0)+120;
+        int n = i%12;
+        int o = i/12;
+        n = quantise(scale, n);
+        result = (12*o+n-120)/120.0;
+    }
+}
