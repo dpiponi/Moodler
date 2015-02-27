@@ -7,8 +7,13 @@ main :: IO ()
 main = do
     n <- M.countDevices
     print n
-    Just m <- M.getDefaultInputDeviceID
-    print m
+    -- Just m_default <- M.getDefaultInputDeviceID
+    forM_ [0..(n-1)] $ \i -> do
+        d <- M.getDeviceInfo i
+        when (M.input d) $ putStrLn ("[" ++ show i ++ "] " ++ show (M.name d))
+    putStrLn "Choose:"
+    inputM <- getLine
+    let m = read inputM
     info <- M.getDeviceInfo m
     print info
     Left s <- M.openInput m
