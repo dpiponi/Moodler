@@ -38,7 +38,7 @@ modulesDirectory :: String
 modulesDirectory = "modules"
 
 numVoices :: Int
-numVoices = 4
+numVoices = 1
 
 adapt :: MonadIO m => IORef a -> StateT a m b -> m b
 adapt ref code = do
