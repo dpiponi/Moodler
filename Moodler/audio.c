@@ -1,9 +1,12 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include "portaudio.h"
 
+/*
 #include <AudioToolbox/AudioQueue.h>
 #include <CoreAudio/CoreAudioTypes.h>
 #include <CoreFoundation/CFRunLoop.h>
-
+*/
 /*
  * I consider a single stereo sample to have two values in it.
  */
@@ -48,9 +51,17 @@ void set_fill_buffer(void (*fill)(void *state, SAMPLE_TYPE *)) {
     fill_buffer = fill;
 }
 
-void callback(void *custom_data, AudioQueueRef queue,
+int callback(const void *input,
+             void *output,
+             unsigned long frameCount,
+             const PaStreamCallbackTimeInfo *timeInfo,
+             PaStreamCallbackFlags statusFlags,
+             void *userData) {
+    /*
+        void *custom_data, AudioQueueRef queue,
               AudioQueueBufferRef buffer) {
-    SAMPLE_TYPE *sample_buffer = (SAMPLE_TYPE *)buffer->mAudioData;
+              */
+    SAMPLE_TYPE *sample_buffer = (SAMPLE_TYPE *)output;
 
     /*
      * Clear the audio buffer for filling.
@@ -69,14 +80,10 @@ void callback(void *custom_data, AudioQueueRef queue,
              */
             fill_buffer(states[i], moodler_buffer[i]+k*NUM_CHANNELS*samplesPerBlock);
         }
-        //for (int i = 0; i < samplesPerBlock; ++i) {
-        //    printf("%d\n", sample_buffer[i]);
-        //}
     }
 
     /*
      * Sum the buffers we computed into the destination buffer
-     * XXX Make more efficient.
      */
     for (int i = 0; i < numStates; ++i) {
         for (int k = 0; k < samplesPerBuffer; ++k) {
@@ -84,7 +91,8 @@ void callback(void *custom_data, AudioQueueRef queue,
             sample_buffer[2*k+1] += moodler_buffer[i][2*k+1];
         }
     }
-        
+    return paContinue;
+/*        
     AudioQueueEnqueueBuffer(queue, buffer, 0, NULL);
         
     if (count > SAMPLE_RATE * 10) {
@@ -92,11 +100,11 @@ void callback(void *custom_data, AudioQueueRef queue,
         AudioQueueDispose(queue, false);
         CFRunLoopStop(CFRunLoopGetCurrent());
     }
-    
+*/    
 }
 
 void play() {
-    int i;
+/*    int i;
 
     AudioStreamBasicDescription format;
     AudioQueueRef queue;
@@ -123,4 +131,45 @@ void play() {
     }
     AudioQueueStart(queue, NULL);
     CFRunLoopRun();    
+*/
+    PaStreamParameters outputParameters;
+    PaStream *stream;
+    PaError err;
+//    paTestData data;
+    int i;
+
+    err = Pa_Initialize();
+    if( err != paNoError ) goto error;
+
+    outputParameters.device = Pa_GetDefaultOutputDevice(); /* default output device */
+    if (outputParameters.device == paNoDevice) {
+      fprintf(stderr,"Error: No default output device.\n");
+      goto error;
+    }
+    outputParameters.channelCount = 2;       /* stereo output */
+    outputParameters.sampleFormat = paInt16; /* 16 bit int output */
+    outputParameters.suggestedLatency = Pa_GetDeviceInfo(
+         outputParameters.device)->defaultLowOutputLatency;
+    outputParameters.hostApiSpecificStreamInfo = NULL;
+
+    err = Pa_OpenStream(
+              &stream,
+              NULL, /* no input */
+              &outputParameters,
+              SAMPLE_RATE,
+              samplesPerBuffer,
+              paClipOff,  /* we won't output out of range samples so don't bother clipping them */
+              callback,
+              NULL);
+    if( err != paNoError ) goto error;
+
+    err = Pa_StartStream( stream );
+    if( err != paNoError ) goto error;
+    return;
+error:
+    Pa_Terminate();
+    fprintf( stderr, "An error occured while using the portaudio stream\n" );
+    fprintf( stderr, "Error number: %d\n", err );
+    fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ) );
+    return;
 }
