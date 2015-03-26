@@ -3,19 +3,12 @@
 #include "portaudio.h"
 
 /*
-#include <AudioToolbox/AudioQueue.h>
-#include <CoreAudio/CoreAudioTypes.h>
-#include <CoreFoundation/CFRunLoop.h>
-*/
-/*
  * I consider a single stereo sample to have two values in it.
  */
 
 #define NUM_CHANNELS 2
-#define NUM_BUFFERS 3
 #define BUFFER_SIZE 2048*NUM_CHANNELS /* bytes */
 #define SAMPLE_TYPE short
-#define MAX_NUMBER 32767
 #define SAMPLE_RATE 48000
 #define MAX_VOICES 16
 
@@ -57,10 +50,7 @@ int callback(const void *input,
              const PaStreamCallbackTimeInfo *timeInfo,
              PaStreamCallbackFlags statusFlags,
              void *userData) {
-    /*
-        void *custom_data, AudioQueueRef queue,
-              AudioQueueBufferRef buffer) {
-              */
+
     SAMPLE_TYPE *sample_buffer = (SAMPLE_TYPE *)output;
 
     /*
@@ -92,50 +82,12 @@ int callback(const void *input,
         }
     }
     return paContinue;
-/*        
-    AudioQueueEnqueueBuffer(queue, buffer, 0, NULL);
-        
-    if (count > SAMPLE_RATE * 10) {
-        AudioQueueStop(queue, false);
-        AudioQueueDispose(queue, false);
-        CFRunLoopStop(CFRunLoopGetCurrent());
-    }
-*/    
 }
 
 void play() {
-/*    int i;
-
-    AudioStreamBasicDescription format;
-    AudioQueueRef queue;
-    AudioQueueBufferRef buffers[NUM_BUFFERS];
-
-    format.mSampleRate       = SAMPLE_RATE;
-    format.mFormatID         = kAudioFormatLinearPCM;
-    format.mFormatFlags      = kLinearPCMFormatFlagIsSignedInteger |
-                               kAudioFormatFlagIsPacked;
-    format.mBitsPerChannel   = 8*sizeof(SAMPLE_TYPE);
-    format.mChannelsPerFrame = NUM_CHANNELS;
-    format.mBytesPerFrame    = sizeof(SAMPLE_TYPE)*NUM_CHANNELS;
-    format.mFramesPerPacket  = 1;
-    format.mBytesPerPacket   = format.mBytesPerFrame*format.mFramesPerPacket;
-    format.mReserved         = 0;
-    
-    AudioQueueNewOutput(&format, callback, NULL, CFRunLoopGetCurrent(),
-                        kCFRunLoopCommonModes, 0, &queue);
-    
-    for (i = 0; i < NUM_BUFFERS; i++) {
-        AudioQueueAllocateBuffer(queue, BUFFER_SIZE, &buffers[i]);
-        buffers[i]->mAudioDataByteSize = BUFFER_SIZE;
-        callback(NULL, queue, buffers[i]);
-    }
-    AudioQueueStart(queue, NULL);
-    CFRunLoopRun();    
-*/
     PaStreamParameters outputParameters;
     PaStream *stream;
     PaError err;
-//    paTestData data;
     int i;
 
     err = Pa_Initialize();
@@ -166,6 +118,7 @@ void play() {
     err = Pa_StartStream( stream );
     if( err != paNoError ) goto error;
     return;
+
 error:
     Pa_Terminate();
     fprintf( stderr, "An error occured while using the portaudio stream\n" );
