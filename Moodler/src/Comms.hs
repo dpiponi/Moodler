@@ -70,10 +70,8 @@ sendConnectMessage' outPoint inPoint = do
     sendOSCMsg msg
 
 sendDisconnectMessage :: (MonadIO m, MonadState GlossWorld m) =>
-                      String -> m ()
+                         String -> m ()
 sendDisconnectMessage inPoint = do
-    --idName <- use (inner . uiElements . ix i . name)
-    --sendConnectMessage' "zero.result"
     let (c, d) = splitDot inPoint
     let msg = message "/disconnect" $ string <$> [c, d]
     sendOSCMsg msg
