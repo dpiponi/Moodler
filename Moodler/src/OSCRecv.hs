@@ -35,7 +35,9 @@ import Utils
 data Moodler = Moodler { _moodlerSynth :: Synth
                        , _moodlerDSO :: DSO
                        , _modulesPendingInit :: [String]
-                       , _keyTracker :: KeyTracker Int }
+                       , _keyTracker :: KeyTracker Int
+                       , _aliases :: M.Map String String
+                       }
 $(makeLenses ''Moodler)
 
 keyToFreq :: Int -> Float

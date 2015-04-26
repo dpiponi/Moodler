@@ -130,6 +130,10 @@ instance Applicative Ui where
 new :: String -> String -> Ui ()
 new s1 s2 = New s1 s2 (return ())
 
+-- XXX This will be wrong.
+-- Not supposed to use newIds from same pool
+-- as element ids.
+-- Especially without checking uniqueness.
 new' :: String -> Ui String
 new' s1 = do
     s2 <- newId s1 -- kludge until we have SynthIds
@@ -150,7 +154,7 @@ plugin s1 s2 p creationParent = PlugIn s1 s2 p creationParent return
 
 plugin' :: String -> (Float, Float) -> Location -> Ui UiId
 plugin' s2 p creationParent = do
-    s1 <- newId "in"
+    s1 <- newId "plugin"
     PlugIn s1 s2 p creationParent return
 
 plugout :: UiId -> String -> (Float, Float) -> Location -> Ui UiId
@@ -158,7 +162,7 @@ plugout s1 s2 p creationParent = PlugOut s1 s2 p creationParent return
 
 plugout' :: String -> (Float, Float) -> Location -> Ui UiId
 plugout' s2 p creationParent = do
-    s1 <- newId "out"
+    s1 <- newId "plugout"
     PlugOut s1 s2 p creationParent return
 
 knob :: UiId -> String -> (Float, Float) -> KnobStyle -> Location -> Ui UiId
