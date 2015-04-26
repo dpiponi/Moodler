@@ -191,6 +191,14 @@ handleMessage theStandard numVoices dataPtrs set_fill_buffer
                         (C.unpack . d_ascii_string) <$> [c, d]
                 moodlerSynth %= disconnect (ModuleName c') (InName d')
 
+            Just (Message "/alias" [c, d]) -> do
+                let [c', d'] =
+                        (C.unpack . d_ascii_string) <$> [c, d]
+                aliases %= M.insert c' d'
+
+            Just (Message "/unalias" [c]) -> do
+                let c' = C.unpack (d_ascii_string c)
+                aliases %= M.delete c'
 
             Just (Message ('/':'8':'/':'p':'u':'s':'h':ds) [Float v]) -> do
                 --liftIO $ putStrLn $ "Key " ++ ds ++ ": " ++ show v
