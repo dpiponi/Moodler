@@ -23,6 +23,7 @@ import Control.Monad.Morph
 --import Control.Monad.Reader
 --import Data.Functor.Identity
 --import StandardSynth
+import Data.Maybe
 
 import CodeGen
 import CodeBuild
@@ -39,6 +40,9 @@ data Moodler = Moodler { _moodlerSynth :: Synth
                        , _aliases :: M.Map String String
                        }
 $(makeLenses ''Moodler)
+
+redirect :: M.Map String String -> String -> String
+redirect aliasMap alias = fromMaybe alias (M.lookup alias aliasMap)
 
 keyToFreq :: Int -> Float
 keyToFreq ds' = 0.1*(fromIntegral ds'-12)/12.0
@@ -144,6 +148,7 @@ handleMessage :: MonadIO m => Synth -> Int -> Array Int (Ptr ()) ->
 handleMessage theStandard numVoices dataPtrs set_fill_buffer
               synthTypes msg = do
     --liftIO $ putStrLn $ "received: " ++ show msg
+    aliasMap <- use aliases
     x <- runErrorT $
         case msg of
             Just (Message "/input" [ASCII_String a]) ->
@@ -163,17 +168,19 @@ handleMessage theStandard numVoices dataPtrs set_fill_buffer
 
             Just (Message "/set" [a, b, Float f]) ->  do
                 let [a', b'] = (C.unpack . d_ascii_string) <$> [a, b]
+                let a'' = redirect aliasMap a'
                 dso' <- use moodlerDSO
                 liftIO $
                     forM_ [0..numVoices-1] $ \v ->
-                        setStateVar (dsoSetFn dso') (dataPtrs!v) a' b' f
+                        setStateVar (dsoSetFn dso') (dataPtrs!v) a'' b' f
 
             Just (Message "/set" [a, b, ASCII_String f]) ->  do
                 let [a', b'] = (C.unpack . d_ascii_string) <$> [a, b]
+                let a'' = redirect aliasMap a'
                 dso' <- use moodlerDSO
                 liftIO $
                     forM_ [0..numVoices-1] $ \v ->
-                            setStringStateVar (dsoSetStringFn dso') (dataPtrs!v) a' b' (C.unpack f)
+                            setStringStateVar (dsoSetStringFn dso') (dataPtrs!v) a'' b' (C.unpack f)
 
             Just (Message "/recompile" []) ->
                 recompile' numVoices dataPtrs set_fill_buffer
@@ -184,12 +191,15 @@ handleMessage theStandard numVoices dataPtrs set_fill_buffer
             Just (Message "/connect" [a, b, c, d]) -> do
                 let [a', b', c', d'] =
                         (C.unpack . d_ascii_string) <$> [a, b, c, d]
-                moodlerSynth %= connect (ModuleName a') (OutName b') (ModuleName c') (InName d')
+                let a'' = redirect aliasMap a'
+                let c'' = redirect aliasMap c'
+                moodlerSynth %= connect (ModuleName a'') (OutName b') (ModuleName c'') (InName d')
 
             Just (Message "/disconnect" [c, d]) -> do
                 let [c', d'] =
                         (C.unpack . d_ascii_string) <$> [c, d]
-                moodlerSynth %= disconnect (ModuleName c') (InName d')
+                let c'' = redirect aliasMap c'
+                moodlerSynth %= disconnect (ModuleName c'') (InName d')
 
             Just (Message "/alias" [c, d]) -> do
                 let [c', d'] =

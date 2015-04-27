@@ -414,12 +414,12 @@ def main():
     knob_pins = [18, 19, 20, 21, 22, 23]
     oldknobs = [-1.0 for k in knob_pins]
     knob_targets = {
-        (18, 'input44', 'result', (0.0, 10)),
-        (19, 'input36', 'result', (0.0, 0.25)),
-        (20, 'input41', 'result', (0.0, 0.02)),
-        (21, 'input43', 'result', (0.0, 1.0)),
-        (22, 'input434', 'result', (0.0, 1.0)),
-        (23, 'input435', 'result', (0.0, 1.0))
+        (18, 'fred', 'result', (0.0, 1.0)),
+        #(19, 'input36', 'result', (0.0, 0.25)),
+        #(20, 'input41', 'result', (0.0, 0.02)),
+        #(21, 'input43', 'result', (0.0, 1.0)),
+        #(22, 'input434', 'result', (0.0, 1.0)),
+        #(23, 'input435', 'result', (0.0, 1.0))
     }
 
     while True:
@@ -427,7 +427,9 @@ def main():
         for (k, a, b, (lo, hi)) in knob_targets:
             value = net.readknob(6, k)
             if abs(value-oldknobs[i]) > 0.01:
-                send_set(client, a, b, rescale(0, 255.0, lo, hi, value))
+                rescaled = rescale(0.0, 255.0, lo, hi, value)
+                print value, rescaled
+                send_set(client, a, b, rescaled)
                 oldknobs[i] = value
             i = i+1
 
