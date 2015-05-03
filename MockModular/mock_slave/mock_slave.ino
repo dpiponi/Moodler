@@ -36,8 +36,8 @@ int target;
 int result;
 int value;
 
-const int input_begin = 18;
-const int input_end = 26;
+const int input_begin = 5;
+const int input_end = 13;
 
 const int output_begin = 2;
 const int output_end = 13;

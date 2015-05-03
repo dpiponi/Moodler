@@ -416,7 +416,7 @@ def main():
     output_slaves = [5]
     analogue_slaves = [6]
     # Mapping from port ids to port numbers.
-    inputs = {4: [18, 19, 20, 21, 22, 23]}
+    inputs = {4: [5, 6, 7, 8, 9, 10, 11, 12]}
     outputs = {5: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
     analogues = {6: [18, 19, 20, 21, 22, 23]}
 
