@@ -36,7 +36,7 @@ int target;
 int result;
 int value;
 
-const int input_begin = 5;
+const int input_begin = 2;
 const int input_end = 13;
 
 const int output_begin = 2;
@@ -92,7 +92,8 @@ void loop() {
               io_bit <<= 1;
             }
             result = _result;
-            Serial.write(result);
+            Serial.write(result & 255);
+            Serial.write(result >> 8);
             state = AWAITING_COMMAND;
 
           } else if (input == PROTOCOL_WRITES) {

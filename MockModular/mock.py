@@ -236,7 +236,9 @@ class Network(object):
 	        #time.sleep(DELAY)
 		self.writebyte(slave, PROTOCOL_READ_ALL)
 		#time.sleep(DELAY)
-		value = self.readbyte(slave)
+		value_lo = self.readbyte(slave)
+		value_hi = self.readbyte(slave)
+                value = value_lo | (value_hi << 8)
 		if self.verbose:
 		    print "Read from slave:", value
 		return value
@@ -416,7 +418,7 @@ def main():
     output_slaves = [5]
     analogue_slaves = [6]
     # Mapping from port ids to port numbers.
-    inputs = {4: [5, 6, 7, 8, 9, 10, 11, 12]}
+    inputs = {4: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
     outputs = {5: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
     analogues = {6: [18, 19, 20, 21, 22, 23]}
 
