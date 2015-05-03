@@ -92,7 +92,7 @@ def send_disconnect(client, a, b):
 
 # PROTOCOL_RESET could clash with genuine sending of 255
 
-DELAY = 0.0001
+DELAY = 0.0002
 PROTOCOL_RESET = 255
 PROTOCOL_WRITE = 0
 PROTOCOL_READ = 1
@@ -101,14 +101,19 @@ PROTOCOL_READ_ALL = 3
 PROTOCOL_WRITES = 4
 PROTOCOL_ECHO = 5
 PROTOCOL_READ_ANALOGUE = 6
+PROTOCOL_MODE_INPUT = 7
+PROTOCOL_MODE_PULLUP = 8
+PROTOCOL_MODE_OUTPUT = 9
 
 class Network(object):
     """Real network"""
-    def __init__(self, input_slaves, output_slaves, analogue_slaves, inputs, outputs, verbose = False):
+    def __init__(self, input_slaves, output_slaves, analogue_slaves, inputs, outputs, analogues, verbose = False):
         self.input_slaves = input_slaves
         self.output_slaves = output_slaves
+        self.analogue_slaves = analogue_slaves
         self.inputs = inputs
         self.outputs = outputs
+        self.analogues = analogues
 	# self.bus = smbus.SMBus(1)
 	self.verbose = verbose
         self.bytes_out = 0
@@ -123,20 +128,19 @@ class Network(object):
             print "Opening port", self.dev[slave]
             self.ports[slave] = serial.Serial(self.dev[slave], 115200)
             print "Opened"
-            self.writebyte(slave, PROTOCOL_RESET)
-            time.sleep(DELAY)
+            for i in range(4):
+                self.writebyte(slave, PROTOCOL_RESET)
+                time.sleep(DELAY)
 
-
-        a = 0
-        slave = 5
-        while 0:
-            self.writebyte(slave, PROTOCOL_RESET)
-            self.writebyte(slave, PROTOCOL_ECHO)
-            self.writebyte(slave, a)
-            if self.readbyte(slave)!=(a ^ 0xff):
-                print "Error!"
-            # print a
-            a = (a+1) & 0x7f
+        for input_slave in input_slaves:
+            for input_pin in self.inputs[input_slave]:
+                self.set_pullup_mode(input_slave, input_pin)
+        for output_slave in output_slaves:
+            for output_pin in self.outputs[output_slave]:
+                self.set_output_mode(output_slave, output_pin)
+        for analogue_slave in analogue_slaves:
+            for analogue_pin in self.analogues[analogue_slave]:
+                self.set_input_mode(analogue_slave, analogue_pin)
 
     def get_list_of_slaves(self):
         """Get list of all slaves on bus"""
@@ -161,11 +165,23 @@ class Network(object):
         return ord(c)
 
     def readknob(self, slave, input_pin):
-        self.writebyte(slave, PROTOCOL_READ_ANALOGUE);
+        self.writebyte(slave, PROTOCOL_READ_ANALOGUE)
         # time.sleep(DELAY)
         self.writebyte(slave, input_pin)
         # time.sleep(DELAY)
         return self.readbyte(slave)
+
+    def set_input_mode(self, slave, input_pin):
+        self.writebyte(slave, PROTOCOL_MODE_INPUT)
+        self.writebyte(slave, input_pin)
+
+    def set_pullup_mode(self, slave, input_pin):
+        self.writebyte(slave, PROTOCOL_MODE_PULLUP)
+        self.writebyte(slave, input_pin)
+
+    def set_output_mode(self, slave, output_pin):
+        self.writebyte(slave, PROTOCOL_MODE_OUTPUT)
+        self.writebyte(slave, output_pin)
 
     def set_slave_all_outs(self, slave, value):
         """Set all outputs to given value for selected slave"""
@@ -188,8 +204,8 @@ class Network(object):
                 pass
 
     # Each output port is is set according to whether the port id
-    # contains bits given in `value`.
-    def set_slave_outs(self, slave, value):
+    # contains bits given in `bit_mask`.
+    def set_slave_outs(self, slave, bit_mask):
         """Set all outputs for selected slave"""
 	if self.verbose:
 	    print "Setting slave", slave, "outputs to mask", value
@@ -199,7 +215,10 @@ class Network(object):
 	        #time.sleep(DELAY)
 	        self.writebyte(slave, PROTOCOL_WRITES)
 	        #time.sleep(DELAY)
-	        self.writebyte(slave, value)
+	        self.writebyte(slave, bit_mask & 255)
+	        self.writebyte(slave, bit_mask >> 8)
+                #print "Setting ", "{0:b}".format(bit_mask & 255)
+                #print "Setting ", "{0:b}".format(bit_mask >> 8)
 	        #time.sleep(DELAY)
 	        return
             except IOError as err:
@@ -271,7 +290,9 @@ def get_connectivity(net, input_slaves, output_slaves, inputs, outputs):
                     inputs[input_slave][inp] += address
 
     # Switch on matching output for every slave
+    # print "Inputs"
     for io_bit in range(IO_ADDRESS_WIDTH):
+        # print "io_bit=",io_bit
         for output_slave in output_slaves:
             output_mask = 0
             mask_bit = 1
@@ -280,24 +301,27 @@ def get_connectivity(net, input_slaves, output_slaves, inputs, outputs):
                     output_mask |= mask_bit
                 mask_bit <<= 1
             net.set_slave_outs(output_slave, output_mask)
+            # print "output_slave=",output_slave, "output_mask=","{0:b}".format(output_mask)
             time.sleep(0.0001)
 
         for input_slave in input_slaves:
             input_bits = net.get_slave_all_ins(input_slave)
+            # print "input_slave=",input_slave, "input_bits=", "{0:b}".format(input_bits)
             for i, inp in enumerate(inputs[input_slave]):
                 if not (input_bits & (1 << i)):
                     address = 1 << io_bit
                     # print slave, "got 1 input on", inp, "adding", address
                     inputs[input_slave][inp] += address
 
-    return {slave: {inp: (value/(1 << IO_ADDRESS_WIDTH),
+    result = {slave: {inp: (value/(1 << IO_ADDRESS_WIDTH),
                           value % (1 << IO_ADDRESS_WIDTH))
                          for inp, value in inputs[slave].items()
                          for input_slave in [value/(1 << IO_ADDRESS_WIDTH)]
                          for input_inp in [value % (1 << IO_ADDRESS_WIDTH)]
                          if input_slave > 0}
-            for slave in inputs}
-    #return inputs
+              for slave in inputs}
+    print result
+    return result
 
 def non_empy_list_of_elements(elems):
     while True:
@@ -393,19 +417,31 @@ def main():
     analogue_slaves = [6]
     # Mapping from port ids to port numbers.
     inputs = {4: [18, 19, 20, 21, 22, 23]}
-    outputs = {5: [7, 8, 9, 10, 11, 12]}
+    outputs = {5: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
+    analogues = {6: [18, 19, 20, 21, 22, 23]}
 
     net = Network(input_slaves=input_slaves,
                   output_slaves=output_slaves,
                   analogue_slaves=analogue_slaves,
     		  inputs=inputs,
-    		  outputs=outputs, verbose=False)
+    		  outputs=outputs,
+                  analogues=analogues,
+                  verbose=False)
     inputs = {}
     outputs = {}
     for input_slave in input_slaves:
         inputs[input_slave] = net.get_input_list(input_slave)
     for output_slave in output_slaves:
         outputs[output_slave] = net.get_output_list(output_slave)
+
+    while False:
+        print "Off"
+        net.set_slave_outs(5, 0);
+        print net.get_slave_all_ins(4)
+        print "On"
+        net.set_slave_outs(5, 65535);
+        print net.get_slave_all_ins(4)
+        time.sleep(1.0)
 
     last_message = 0
 
@@ -414,7 +450,13 @@ def main():
     knob_pins = [18, 19, 20, 21, 22, 23]
     oldknobs = [-1.0 for k in knob_pins]
     knob_targets = {
-        (18, 'fred', 'result', (0.0, 1.0)),
+        (18, '18', 'result', (0.0, 1.0)),
+        (19, '19', 'result', (0.0, 1.0)),
+        (20, '20', 'result', (0.0, 1.0)),
+        (21, '21', 'result', (0.0, 1.0)),
+        (21, '21', 'result', (0.0, 1.0)),
+        (22, '22', 'result', (0.0, 1.0)),
+        (23, '23', 'result', (0.0, 1.0)),
         #(19, 'input36', 'result', (0.0, 0.25)),
         #(20, 'input41', 'result', (0.0, 0.02)),
         #(21, 'input43', 'result', (0.0, 1.0)),
