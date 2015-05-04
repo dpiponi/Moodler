@@ -344,24 +344,12 @@ def changes(client, old_connectivity, connectivity):
 #         (4, 19): ('vca26', 'signal'), # vca in
 #     }
     in_out_map = {
-        # (5, 12): ('5', '12'), # ladder in
-        # (5, 9): ('5', '9'),
-        # (5, 10): ('5', '10'),
-        (5, 7): ('id30', 'result'), 
-        (5, 8): ('id28', 'result'), 
-        (5, 9): ('id19', 'result'),
-        (5, 10): ('id17', 'result'),
-        (5, 11): ('lfo50', 'square_result'),
-        (5, 12): ('lfo50', 'sin_result'),
-
-        # (4, 18): ('4', '18'), 
-        # (4, 23): ('4', '23')
-        (4, 18): ('rescale51', 'signal'),
-        (4, 19): ('rescale52', 'signal'),
-        #(4, 20): ('4', '20'),
-        #(4, 21): ('4', '21'),
-        (4, 22): ('sum56', 'signal1'),
-        (4, 23): ('sum56', 'signal2')
+        (4, 12): ('in-1', 'signal'), 
+        (4, 11): ('in-2', 'signal'), 
+        (4, 10): ('in-3', 'signal'), 
+        (5, 12): ('out-13', 'result'),
+        (5, 11): ('out-14', 'result'),
+        (5, 10): ('out-15', 'result') 
     }
 
     for slave, inputs in old_connectivity.iteritems():

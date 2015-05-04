@@ -194,12 +194,14 @@ handleMessage theStandard numVoices dataPtrs set_fill_buffer
                 let a'' = redirect aliasMap a'
                 let c'' = redirect aliasMap c'
                 moodlerSynth %= connect (ModuleName a'') (OutName b') (ModuleName c'') (InName d')
+                liftIO $ print $ "connect " ++ a' ++ "." ++ b' ++ " -> " ++ c' ++ "." ++ d'
 
             Just (Message "/disconnect" [c, d]) -> do
                 let [c', d'] =
                         (C.unpack . d_ascii_string) <$> [c, d]
                 let c'' = redirect aliasMap c'
                 moodlerSynth %= disconnect (ModuleName c'') (InName d')
+                liftIO $ print $ "disconnect " ++ c' ++ "." ++ d'
 
             Just (Message "/alias" [c, d]) -> do
                 let [c', d'] =

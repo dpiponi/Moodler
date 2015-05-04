@@ -67,4 +67,6 @@ do
     alias "knob-4" input23
     alias "knob-5" input32
     alias "knob-6" input31
+    alias "in-1" id7
+    alias "out13" id8
     return ()
