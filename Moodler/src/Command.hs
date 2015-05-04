@@ -387,3 +387,11 @@ evalUi (Location c cfn) = do
 evalUi (Input prompt cfn) = do
     inp <- getInput "" prompt
     evalUi (cfn inp)
+
+evalUi (Alias aliasName synthName cfn) = do
+    synthAlias aliasName synthName
+    evalUi cfn
+
+evalUi (UnAlias aliasName cfn) = do
+    synthUnAlias aliasName
+    evalUi cfn

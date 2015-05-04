@@ -9,7 +9,7 @@ import Control.Monad.Writer
 import Data.Tuple
 import Graphics.Gloss.Interface.IO.Game
 import qualified Data.List as L
---import qualified Data.Map as M
+import qualified Data.Map as M
 import qualified Data.Set as S
 
 import Sound.MoodlerLib.Symbols
@@ -236,9 +236,9 @@ saveSelection maybeMouseLocn = do
 
 codeWorld' ::
     (Functor m, MonadIO m, MonadState GlossWorld m) =>
-    S.Set UiId -> [String] -> [UiId]
+    S.Set UiId -> [String] -> [UiId] -> M.Map String String
     -> StateT (S.Set UiId) (WriterT (Multi String String) m) ()
-codeWorld' everythingSaved synths needsSaving = do
+codeWorld' everythingSaved synths needsSaving aliasesToSave = do
         multiTellLn "preamble" 0 "do"
         multiTellLn "preamble" 4 "restart"
         --multiTellLn "preamble" 4 "let (x, y) = (0, 0)"
@@ -268,12 +268,16 @@ codeWorld' everythingSaved synths needsSaving = do
 
         saveSelection' everythingSaved Nothing needsSaving
         --saveBindings
+        forM_ (M.toList aliasesToSave) $ \(aliasName, synthName) ->
+            multiTellLn "aliases" 4 $
+                unwords ["alias", show aliasName, synthName]
 
 codeSections :: [String]
 codeSections = ["preamble", "synth", "module",
                 "cables", "midamble", "settings",
-                "postamble"]
+                "aliases", "postamble"]
 
+-- Need more effort on saving aliases XXX
 codeWorld :: (Functor m, MonadIO m, MonadState GlossWorld m)
                  => m String
 codeWorld = do
@@ -289,8 +293,9 @@ codeWorld = do
     let everythingSavedSet = S.fromList everythingSaved
     let needsSaving = [item | (item, elt) <- zip everythingSaved selElts,
                               inOrOutParent (elt ^. ur . parent) `S.notMember` everythingSavedSet]
+    aliasesToSave <- use (inner . aliases)
     sections <- execWriterT (evalStateT (
-            codeWorld' everythingSavedSet synths needsSaving
+            codeWorld' everythingSavedSet synths needsSaving aliasesToSave
         ) S.empty)
     return $ collate codeSections sections
 

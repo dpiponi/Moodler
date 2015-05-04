@@ -13,6 +13,8 @@ module Wiring(synthConnect,
               synthQuit,
               synthRecompile,
               synthReset,
+              synthAlias,
+              synthUnAlias,
               undoPoint,
               performUndo, 
               performRedo
@@ -39,6 +41,7 @@ emptyWorld' :: UiId -> UIElement -> World
 emptyWorld' rootID root =
     World { _uiElements = M.fromList [(rootID, root)]
           , _synthList = []
+          , _aliases = M.empty
           }
 
 emptyGlossWorld' :: GlossWorld
@@ -127,6 +130,22 @@ deleteCable selectedIn = do
             connect src selectedIn c'
             --sendRecompileMessage
             return (Just c)
+
+-- XXX Do undo
+synthAlias :: (Functor m, MonadIO m, MonadState GlossWorld m,
+              InputHandler m) =>
+              String -> String -> m ()
+synthAlias aliasName synthName = do
+    inner . aliases %= M.insert aliasName synthName
+    sendAliasMessage aliasName synthName
+
+-- XXX Do undo
+synthUnAlias :: (Functor m, MonadIO m, MonadState GlossWorld m,
+                InputHandler m) =>
+                String -> m ()
+synthUnAlias aliasName = do
+    inner . aliases %= M.delete aliasName
+    sendUnAliasMessage aliasName 
 
 connect :: (MonadState GlossWorld m, MonadIO m, Functor m) =>
            UiId -> UiId -> UiId -> m ()

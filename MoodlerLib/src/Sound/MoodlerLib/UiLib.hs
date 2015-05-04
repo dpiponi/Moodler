@@ -63,6 +63,8 @@ data Ui a = Return a
           | SendBack UiId (Ui a)
           | BringFront UiId (Ui a)
           | SetPicture UiId String (Ui a)
+          | Alias String String (Ui a)
+          | UnAlias String (Ui a)
           deriving (Typeable, Functor)
 
 instance Monad Ui where
@@ -122,6 +124,8 @@ instance Monad Ui where
     Rename s0 s1 cont >>= f = Rename s0 s1 (cont >>= f)
     Unparent s0 cont >>= f = Unparent s0 (cont >>= f)
     Input s0 cont >>= f = Input s0 ((>>= f) . cont)
+    Alias s0 s1 cont >>= f = Alias s0 s1 (cont >>= f)
+    UnAlias s0 cont >>= f = UnAlias s0 (cont >>= f)
 
 instance Applicative Ui where
     pure = return
@@ -339,3 +343,9 @@ currentPlane = CurrentPlane return
 
 switch :: UiId -> Ui ()
 switch p = Switch p (return ())
+
+alias :: String -> String -> Ui ()
+alias s0 s1 = Alias s0 s1 (return ())
+
+unalias :: String -> Ui ()
+unalias s0 = UnAlias s0 (return ())

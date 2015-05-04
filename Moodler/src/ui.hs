@@ -82,6 +82,7 @@ emptyWorld :: UiId -> UIElement -> World
 emptyWorld rootID root =
     World { _uiElements = M.fromList [(rootID, root)]
           , _synthList = []
+          , _aliases = M.empty
           }
 
 emptyUndo :: World -> UndoInfo

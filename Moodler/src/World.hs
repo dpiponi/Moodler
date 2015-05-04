@@ -32,6 +32,7 @@ data Zero
 -- World is intended to reflect the state of the synth on the server
 data World = World { _uiElements :: M.Map UiId UIElement
                    , _synthList :: [(String, String)]
+                   , _aliases :: M.Map String String
                    -- XXX What are connections?
                    -- , _connections :: [(String, String)]
                    }
@@ -96,6 +97,13 @@ continueGetString prompt completions inputString afterCursor = do
     gadget .= stringGadget longestCompletion inputString afterCursor prompt
     handleGetString completions inputString afterCursor prompt
 
+handleGetString'' :: String -> [String] -> String -> String -> String ->
+                     MoodlerM (Maybe String)
+handleGetString'' afterCursor' completions inputString' prompt inputString = do
+    let longestCompletion = if null afterCursor' then longestMatchingPrefix completions inputString' else inputString
+    gadget .= stringGadget longestCompletion inputString' afterCursor' prompt
+    handleGetString completions inputString' afterCursor' prompt
+
 handleGetString' :: [String] -> String -> String -> String -> Event ->
                     MoodlerM (Maybe String)
 handleGetString' _ inputString afterCursor _ (EventKey (SpecialKey KeyEnter)
@@ -148,9 +156,7 @@ handleGetString' completions inputString afterCursor prompt
         then do
             let inputString' = inputString ++ [head afterCursor]
             let afterCursor' = tail afterCursor
-            let longestCompletion = if null afterCursor' then longestMatchingPrefix completions inputString' else inputString
-            gadget .= stringGadget longestCompletion inputString' afterCursor' prompt
-            handleGetString completions inputString' afterCursor' prompt
+            handleGetString'' afterCursor' completions inputString' prompt inputString
         else handleGetString completions inputString afterCursor prompt
 
 handleGetString' completions inputString afterCursor prompt
@@ -158,9 +164,7 @@ handleGetString' completions inputString afterCursor prompt
                     Down _ _) = do
     let inputString' = ""
     let afterCursor' = inputString ++ afterCursor
-    let longestCompletion = if null afterCursor' then longestMatchingPrefix completions inputString' else inputString
-    gadget .= stringGadget longestCompletion inputString' afterCursor' prompt
-    handleGetString completions inputString' afterCursor' prompt
+    handleGetString'' afterCursor' completions inputString' prompt inputString
 
 handleGetString' completions inputString afterCursor prompt
                     (EventKey (SpecialKey KeyEnd)
@@ -189,7 +193,7 @@ grey50 = makeColor 0.5 0.5 0.5 1.0
 stringGadget :: String -> String -> String -> String -> B.Transform -> Picture
 stringGadget completion inputString afterCursor prompt _ =
     let displayedString = prompt ++ inputString ++ "|" ++ afterCursor
-        displayedCompletion = if null afterCursor then prompt ++ inputString ++ "|" ++ (drop (length inputString) completion) else ""
+        displayedCompletion = if null afterCursor then prompt ++ inputString ++ "|" ++ drop (length inputString) completion else ""
     in
         translate 0 10 (color (B.transparentBlack 0.8) (rectangleSolid 600 50)) <>
         translate (-300) 0 (scale 0.3 0.3 (color grey50 $ text displayedCompletion)) <>

@@ -9,6 +9,8 @@ module Comms(sendConnectMessage,
              sendRecompileMessage,
              sendResetMessage,
              sendQuitMessage,
+             sendAliasMessage,
+             sendUnAliasMessage,
              SendCommand(..),
              interpretSend,
              recordUndo
@@ -125,3 +127,13 @@ sendResetMessage reason = do
 sendQuitMessage :: (MonadIO m, MonadState GlossWorld m) => m ()
 sendQuitMessage =
     sendOSCMsg (message "/quit" [])
+
+sendAliasMessage :: (MonadIO m, MonadState GlossWorld m) =>
+                    String -> String -> m ()
+sendAliasMessage aliasName synthName =
+    sendOSCMsg (message "/alias" [string aliasName, string synthName])
+
+sendUnAliasMessage :: (MonadIO m, MonadState GlossWorld m) =>
+                      String -> m ()
+sendUnAliasMessage aliasName =
+    sendOSCMsg (message "/unalias" [string aliasName])

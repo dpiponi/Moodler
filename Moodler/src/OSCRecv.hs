@@ -205,6 +205,7 @@ handleMessage theStandard numVoices dataPtrs set_fill_buffer
                 let [c', d'] =
                         (C.unpack . d_ascii_string) <$> [c, d]
                 aliases %= M.insert c' d'
+                liftIO $ print $ "alias " ++ c' ++ " -> " ++ d'
 
             Just (Message "/unalias" [c]) -> do
                 let c' = C.unpack (d_ascii_string c)
