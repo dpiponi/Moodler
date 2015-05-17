@@ -259,6 +259,8 @@ genSetString = do
     tell "    printf(\"set %s.%s(%d)=%s\\n\",node,field,offset,value);\n"
     tell "}\n"
 
+--- XXX Allocating 1MB for state.
+-- This needs to be managed at some point.
 genCreate :: Writer String ()
 genCreate = do
     tell "struct State *create() {\n"

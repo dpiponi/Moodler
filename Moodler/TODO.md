@@ -2,6 +2,7 @@
     * Properly integrate oscilloscope
     * Sliders could be better
     * Ensure panel_proxy.png is loaded when needed
+    * Needs to save aliases on 'alt-w' as well as on 'alt-s'
 
 * moodler
     * local enums?

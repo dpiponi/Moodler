@@ -198,11 +198,15 @@ saveItems parentId everythingSaved mouseLocn curSel =
 
 saveSelection' :: (Functor m, MonadIO m, MonadState GlossWorld m)
                   => S.Set UiId -> Maybe Point -> [UiId] ->
+                      M.Map String String ->
                       StateT (S.Set UiId) ( WriterT (Multi String String) m) ()
-saveSelection' everythingSaved maybeMouseLocn curSel = do
+saveSelection' everythingSaved maybeMouseLocn curSel aliasesToSave = do
     multiTellLn "postamble" 4 "return ()"
     multiTellLn "midamble" 4 "recompile"
     saveItems (Inside (UiId "root")) everythingSaved maybeMouseLocn curSel
+    forM_ (M.toList aliasesToSave) $ \(aliasName, synthName) ->
+        multiTellLn "aliases" 4 $
+            unwords ["alias", show aliasName, synthName]
 
 selectionCode :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                  Maybe Point -> [UiId] -> StateT (S.Set UiId) (
@@ -215,15 +219,17 @@ selectionCode maybeMouseLocn sel = do
     everythingSaved <- lift $ getAllContainerProxyDescendants sel
     needsSaving <- lift $ getMinimalParents everythingSaved sel
     synths <- lift $ synthsUsedInItems everythingSaved
+    allAliases <- lift $ use (inner . aliases)
+    let aliasesToSave = M.filter (`elem` synths) allAliases
     sList <- lift $ use (inner . synthList)
 
     forM_ synths $ \synthName -> do
-        let synthType = unJust "saveSelection" $
+        let synthType = unJust ("saveSelection: " ++ synthName) $
                     lookup synthName (map swap sList)
         multiTellLn "synth" 4 $
                 unwords [synthName,
                 " <- ", "new'", show synthType]
-    saveSelection' (S.fromList everythingSaved) maybeMouseLocn needsSaving
+    saveSelection' (S.fromList everythingSaved) maybeMouseLocn needsSaving aliasesToSave
 
 saveSelection :: (Functor m, MonadIO m, MonadState GlossWorld m)
                  => Maybe Point -> m String
@@ -266,11 +272,11 @@ codeWorld' everythingSaved synths needsSaving aliasesToSave = do
                         unwords [synthName, "<-", "new'",
                                  show synthType]
 
-        saveSelection' everythingSaved Nothing needsSaving
+        saveSelection' everythingSaved Nothing needsSaving aliasesToSave
         --saveBindings
-        forM_ (M.toList aliasesToSave) $ \(aliasName, synthName) ->
-            multiTellLn "aliases" 4 $
-                unwords ["alias", show aliasName, synthName]
+--         forM_ (M.toList aliasesToSave) $ \(aliasName, synthName) ->
+--             multiTellLn "aliases" 4 $
+--                 unwords ["alias", show aliasName, synthName]
 
 codeSections :: [String]
 codeSections = ["preamble", "synth", "module",
@@ -293,7 +299,8 @@ codeWorld = do
     let everythingSavedSet = S.fromList everythingSaved
     let needsSaving = [item | (item, elt) <- zip everythingSaved selElts,
                               inOrOutParent (elt ^. ur . parent) `S.notMember` everythingSavedSet]
-    aliasesToSave <- use (inner . aliases)
+    allAliases <- use (inner . aliases)
+    let aliasesToSave = M.filter (`S.member` S.fromList synths) allAliases
     sections <- execWriterT (evalStateT (
             codeWorld' everythingSavedSet synths needsSaving aliasesToSave
         ) S.empty)

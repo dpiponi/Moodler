@@ -24,7 +24,7 @@ enum Protocol {
   PROTOCOL_READ_ALL = 3,
   PROTOCOL_WRITES = 4,
   PROTOCOL_ECHO = 5,
-  PROTOCOL_READ_ANALOGUE = 6,
+  PROTOCOL_READ_ANALOGUE = 6,in
   PROTOCOL_MODE_INPUT = 7,
   PROTOCOL_MODE_PULLUP = 8,
   PROTOCOL_MODE_OUTPUT = 9
@@ -36,11 +36,17 @@ int target;
 int result;
 int value;
 
-const int input_begin = 2;
-const int input_end = 13;
+int num_inputs = 11;
+const int inputs[11] = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 
-const int output_begin = 2;
-const int output_end = 13;
+int num_outputs = 11;
+const int outputs[11] = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+
+//const int input_begin = 2;
+//const int input_end = 13;
+
+//const int output_begin = 2;
+//const int output_end = 13;
 
 // callback for received data
 void loop() {

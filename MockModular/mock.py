@@ -119,9 +119,9 @@ class Network(object):
         self.bytes_out = 0
         self.bytes_in = 0
         self.dev = {
-            4: "/dev/tty.usbmodem1d11351",
-            5: "/dev/tty.usbmodem1d11361",
-            6: "/dev/tty.usbmodem1d11371"
+            4: "/dev/tty.usbmodem144451",
+            5: "/dev/tty.usbmodem144461",
+            6: "/dev/tty.usbmodem144471"
             }
         self.ports = {}
         for slave in union(union(input_slaves, output_slaves), analogue_slaves):
@@ -347,9 +347,26 @@ def changes(client, old_connectivity, connectivity):
         (4, 12): ('in-1', 'signal'), 
         (4, 11): ('in-2', 'signal'), 
         (4, 10): ('in-3', 'signal'), 
+        (4, 9): ('in-4', 'signal'), 
+        (4, 8): ('in-5', 'signal'), 
+        (4, 7): ('in-6', 'signal'), 
+        (4, 6): ('in-7', 'signal'), 
+        (4, 5): ('in-8', 'signal'), 
+        (4, 4): ('in-9', 'signal'), 
+        (4, 3): ('in-10', 'signal'), 
+        (4, 2): ('in-11', 'signal'), 
+
         (5, 12): ('out-13', 'result'),
         (5, 11): ('out-14', 'result'),
-        (5, 10): ('out-15', 'result') 
+        (5, 10): ('out-15', 'result'),
+        (5, 9): ('out-16', 'result'),
+        (5, 8): ('out-17', 'result'),
+        (5, 7): ('out-18', 'result'),
+        (5, 6): ('out-19', 'result'),
+        (5, 5): ('out-20', 'result'),
+        (5, 4): ('out-21', 'result'),
+        (5, 3): ('out-22', 'result'),
+        (5, 2): ('out-23', 'result') 
     }
 
     for slave, inputs in old_connectivity.iteritems():

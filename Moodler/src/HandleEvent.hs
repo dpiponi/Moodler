@@ -159,6 +159,7 @@ handleDefault' (EventKey (Char 'Z') Down Modifiers { alt = Down } _) = do
 handleDefault' (EventKey (Char 'p') Down _ _) = do
     es <- use currentSelection
     (container, contentss) <- findContainer es
+    liftIO $ print (container, contentss)
     forM_ contentss $ \content -> reparent (Outside container) content
     handleDefault
 
