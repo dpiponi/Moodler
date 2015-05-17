@@ -1,10 +1,12 @@
 Modular synth:
 
-Some audio samples at: https://soundcloud.com/dan-piponi
+Some audio samples at:
+* https://soundcloud.com/dan-piponi
+
 Some video samples at:
-https://www.youtube.com/watch?v=g0AjuX6BpB8
-https://www.youtube.com/watch?v=Qg68Aqh60d0
-https://www.youtube.com/watch?v=qHGytYsQ69U
+* https://www.youtube.com/watch?v=g0AjuX6BpB8
+* https://www.youtube.com/watch?v=Qg68Aqh60d0
+* https://www.youtube.com/watch?v=qHGytYsQ69U
 
 (Note I'm not a musician or sound designer.)
 
