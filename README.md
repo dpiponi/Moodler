@@ -1,22 +1,24 @@
 Modular synth:
 
-![screenshot1](https://raw.github.com/dpiponi/Moodler/master/screenshot1.png)
+Some audio samples at: https://soundcloud.com/dan-piponi
+Some video samples at:
+https://www.youtube.com/watch?v=g0AjuX6BpB8
+https://www.youtube.com/watch?v=Qg68Aqh60d0
+https://www.youtube.com/watch?v=qHGytYsQ69U
 
-Runs (if you're lucky) on MacOS X
+(Note I'm not a musician or sound designer.)
 
-Read `doc/intro.html` for installation info and manual.
+Runs on MacOS X
+Builds with ghc 7.8.4
+Your mileage may vary with other versions and platforms.
+It's challenging to get all the right library dependencies with cabal.
+It doesn't like to run in a sandbox because the hint library version I'm
+using doesn't run in a sandbox.
+
+Read `Moodler/doc/intro.html` for installation info and manual.
 
 NOTES
 -----
-I've made an update that slighly changes the scripting library.
-These means all saves and scripts are now invalidated.
-The vim script update1.vim seems to be able to correctly update most
-saves and scripts but it just uses heursitics to guess the types of certain
-objects from the variable name used.
-If your previous persion of Sound.MoodlerLib.Symbols didn't define the
-`Location` type and the new one does all scripts will need upgrading.
-I doubt this actually matters to anyone yet.
-
 Things you can try
 ------------------
 * Try grabbing the output ends of cables and plugging them in elsewhere.
@@ -40,8 +42,7 @@ You can also
   (apart from the graphics, for which I use Omnigraffle) from more primitive
  components.
 
-This is "research" code. Most things are buggy.
-Not really suitable for use by anyone other than me yet.
+This is "research" code, not a polished application.
 
 I'll write a proper tutorial when the code stabilises a bit.
 
