@@ -94,13 +94,6 @@ defaultClick' p i = do
         Image {} -> do
             doSelection i
             handleDefault
-        -- Switch plane
-        {-
-        Proxy {} -> do
-            --let pl = Plane newPlane
-            planes .= i
-            handleDefault
-            -}
         Selector { _setting = oldSetting,
                    _options = opts } -> do
             let newSetting = (floor oldSetting+1) `mod` length opts
@@ -110,18 +103,6 @@ defaultClick' p i = do
         TextBox { } -> 
             handleTextBox i
 
-{-
-ctrlClick' :: Point -> UiId -> MoodlerM Zero
-ctrlClick' p i = do
-    elt <- getElementById "ctrlClick'" i
-    case elt of
-        -- XXX Need to select images/containers correctly.
-        Container {} -> do
-            planes .= i
-            handleDefault
-        _ -> defaultClick' p i
-        -}
-
 elementDisplayName :: UIElement -> String
 elementDisplayName In { _displayName = n} = n
 elementDisplayName Knob { _displayName = n} = n
@@ -130,7 +111,9 @@ elementDisplayName e = e ^. ur . name
 hoverGadget :: Point -> UIElement -> B.Transform -> Picture
 hoverGadget (ex, ey) elt xform = 
      let txt = elementDisplayName elt
-     in pictureTransformer xform $ translate ex (ey+25) $ scale 0.5 0.5 $ B.textInBox (B.transparentBlack 0.7) white txt
+     in pictureTransformer xform $
+        translate ex (ey+25) $ scale 0.5 0.5 $
+        B.textInBox (B.transparentBlack 0.7) white txt
 
 handleDefault' :: Event -> MoodlerM Zero
 handleDefault' (EventMotion p) = do
@@ -163,11 +146,13 @@ handleDefault' (EventKey (Char 'p') Down _ _) = do
     forM_ contentss $ \content -> reparent (Outside container) content
     handleDefault
 
-handleDefault' (EventKey (Char '+') Down Modifiers { shift = Down, alt = Down, ctrl = Up } _) = do
+handleDefault' (EventKey (Char '+')
+                         Down Modifiers { shift = Down, alt = Down, ctrl = Up } _) = do
     rootTransform %= (B.Transform (0, 0) 1.5 <>)
     handleDefault
 
-handleDefault' (EventKey (Char '-') Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
+handleDefault' (EventKey (Char '-')
+               Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
     rootTransform %= (B.Transform (0, 0) (1/1.5) <>)
     handleDefault
 
@@ -256,25 +241,15 @@ handleDefault' (EventKey (Char 'g') Down _ proxyLocation) = do
     makeGroup p sel proxyLocation
     handleDefault
 
-{-
-handleDefault' (EventKey (Char 't') Down _ labelLocation) = do
-    p <- use planes
-    void $
-        newUIElement (Label p False False labelLocation .
-                      unUiId)
-    handleDefault
--}
-
 -- Shift mouse down
 -- Starts MultiSelection
 handleDefault' (EventKey (MouseButton LeftButton) Down
                     (Modifiers {alt = Up, shift = Down, ctrl = Up})
                     p) = do
     selectionPlane <- use planes
-    e <- selectedByPoint selectionPlane p
-    case e of
+    elementId <- selectedByPoint selectionPlane p
+    case elementId of
         Just i -> do
-            --guiState .= MultiSelection (S.singleton i)
             sel <- use currentSelection
             if i `elem` sel
                 then do
@@ -354,11 +329,6 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
                 In {} -> do
                     doSelection i
                     handleDefault
-                    {-
-                Proxy {} -> do
-                    doSelection i
-                    handleDefault
-                    -}
                 Knob {} -> do
                     highlightJust i
                     handleDraggingCable handleDefault i p p
@@ -409,12 +379,6 @@ handleTextBox selectedTextBox = do
             W.synthSetString selectedTextBox txt
     handleDefault
 
-{-
-handleTextBox' :: UiId -> Event -> MoodlerM Zero
-handleTextBox' selectedTextBox e =
-    elt <- getElementById "handletextBox" selectedTextBox
-    -}
-
 selectEverythingInRegion :: (MonadIO m, MonadState GlossWorld m) =>
                             Point -> Point -> m ()
 selectEverythingInRegion p0 p1 = do
@@ -427,26 +391,25 @@ selectEverythingInRegion p0 p1 = do
 handleDraggingRegion :: Point -> Point ->
                            MoodlerM Zero
 handleDraggingRegion p1 p2 = do
-    e <- {-MoodlerM-} liftF $ GetEvent id
+    e <- liftF $ GetEvent id
     handleDraggingRegion' p1 p2 e
 
 -- Mouse motion during region drag
 handleDraggingRegion' :: Point -> Point -> Event ->
                            MoodlerM Zero
 handleDraggingRegion' f z (EventMotion p) = do
-    gadget .= \xform -> pictureTransformer xform $
-                                    color black (rect z p)
+    gadget .= \xform -> pictureTransformer xform $ color black (rect z p)
     selectEverythingInRegion f p
     handleDraggingRegion f z
 
 -- Finished dragging
 handleDraggingRegion' f _
     (EventKey (MouseButton LeftButton) Up _ p) = do
-    if f /= p
-        then selectEverythingInRegion f p
-        else do
+    if f == p
+        then do
             unhighlightEverything
             currentSelection .= []
+        else selectEverythingInRegion f p
     gadget .= const blank
     handleDefault
 
@@ -455,7 +418,7 @@ handleDraggingRegion' a b _ = handleDraggingRegion a b
 handleDraggingKnob :: UiId -> Float -> Point -> 
                         MoodlerM Zero
 handleDraggingKnob selectedKnob v (x0, y0) = do
-    e <- {-MoodlerM-} liftF $ GetEvent id
+    e <- liftF $ GetEvent id
     handleDraggingKnob' selectedKnob v (x0, y0) e
 
 knobMapping :: Float -> Point -> Float
@@ -509,12 +472,7 @@ handleDraggingSlider' selectedSlider (EventMotion p) = do
     let newV = unUiAngle (_knobMin elt) (_knobMax elt) ((snd p-snd sliderLoc)/15.0) :: Float
     let lowLimit = _knobMin elt
     let highLimit = _knobMax elt
-    let v0 = case lowLimit of
-            Nothing -> newV
-            Just lo -> max newV lo
-    let v1 = case highLimit of
-            Nothing -> v0
-            Just hi -> min v0 hi
+    let v1 = clampToRange lowLimit highLimit newV
     gadget .= \xform -> pictureTransformer xform $
                                     translate (fst sliderLoc+150) (snd sliderLoc) (
         color (B.transparentBlack 0.8) (rectangleSolid 250 100) <>

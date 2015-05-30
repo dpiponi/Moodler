@@ -184,17 +184,16 @@ removeAllCablesFromTo src dst cs = do
         when (s == src) $ do
             let newCs = filter (not . cableIsFrom src) cs
             srcName <- use (inner . uiElements . ix src . ur . name)
-            if null newCs
-                then do 
+            let undoCommand = SendConnect srcName dstName
+            redoCommand <- case newCs of
+                [] -> do
                     sendDisconnectMessage dstName
-                    recordUndo (SendConnect srcName dstName)
-                               (SendDisconnect dstName)
-                else do
-                    let Cable newSrc : _ = newCs
+                    return (SendDisconnect dstName)
+                Cable newSrc : _ -> do
                     newSrcName <- use (inner . uiElements . ix newSrc . ur . name)
                     sendConnectMessage newSrcName dstName
-                    recordUndo (SendConnect srcName dstName)
-                               (SendConnect newSrcName dstName)
+                    return (SendConnect newSrcName dstName)
+            recordUndo undoCommand redoCommand
             inner . uiElements . ix dst . cablesIn .= newCs
     inner . uiElements . ix dst %= removeCablesFrom src
 
@@ -207,7 +206,6 @@ removeAllCablesFrom i = do
         case elt of
             In { _cablesIn = cs } -> removeAllCablesFromTo i eltId cs
             _ -> return ()
-    -- sendRecompileMessage
 
 synthSet :: (Functor m, MonadIO m,
             MonadState GlossWorld m) =>
