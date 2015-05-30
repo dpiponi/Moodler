@@ -13,5 +13,5 @@ do
                     forM_ knobs $ \k -> do
                         t <- getType k
                         case t of
-                            KnobType -> set k v
+                            KnobType -> void $ set k v
                             _ -> return ()

@@ -61,3 +61,12 @@ uniqueValues = map snd . S.toList . S.fromList . M.toList
 
 unique :: (Ord b) => [b] -> [b]
 unique = S.toList . S.fromList
+
+clampToRange :: Ord a => Maybe a -> Maybe a -> a -> a
+clampToRange lowLimit highLimit value =
+    let v0 = case lowLimit of
+            Nothing -> value
+            Just lo -> max value lo
+    in case highLimit of
+            Nothing -> v0
+            Just hi -> min v0 hi

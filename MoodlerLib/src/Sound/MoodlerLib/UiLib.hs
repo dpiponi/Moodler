@@ -29,7 +29,7 @@ data Ui a = Return a
           | Mouse ((Float, Float) -> Ui a)
           -- | Args ([String] -> Ui a)
           | NewId String (UiId -> Ui a)
-          | Set UiId Float (Ui a)
+          | Set UiId Float (Bool -> Ui a)
           | SetString UiId String (Ui a)
           | SetColour UiId String (Ui a)
           | GetColour UiId (Maybe String -> Ui a)
@@ -93,7 +93,7 @@ instance Monad Ui where
     GetParent s1 cont >>= f = GetParent s1 ((>>= f) . cont)
     GetRoot cont >>= f = GetRoot ((>>= f) . cont)
     NewId s1 cont >>= f = NewId s1 ((>>= f) . cont)
-    Set t v cont >>= f = Set t v (cont >>= f)
+    Set t v cont >>= f = Set t v ((>>= f) . cont)
     SetString t v cont >>= f = SetString t v (cont >>= f)
     SetColour t v cont >>= f = SetColour t v (cont >>= f)
     SetLow t v cont >>= f = SetLow t v (cont >>= f)
@@ -256,8 +256,8 @@ getRoot = GetRoot return
 newId :: String -> Ui UiId
 newId s1 = NewId s1 return
 
-set :: UiId -> Float -> Ui ()
-set t v = Set t v (return ())
+set :: UiId -> Float -> Ui Bool
+set t v = Set t v return
 
 setString :: UiId -> String -> Ui ()
 setString t v = SetString t v (return ())

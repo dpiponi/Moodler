@@ -8,7 +8,7 @@ Some video samples at:
 * https://www.youtube.com/watch?v=Qg68Aqh60d0
 * https://www.youtube.com/watch?v=qHGytYsQ69U
 
-(Note I'm not a musician or sound designer.)
+(Note: I'm not a musician or sound designer.)
 
 Runs on MacOS X
 Builds with ghc 7.8.4

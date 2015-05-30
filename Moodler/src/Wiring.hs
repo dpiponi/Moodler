@@ -215,17 +215,20 @@ removeAllCablesFrom i = do
 
 synthSet :: (Functor m, MonadIO m,
             MonadState GlossWorld m) =>
-            UiId -> Float -> m ()
+            UiId -> Float -> m Bool
 synthSet t v = do
     -- Note this is using fact that string is monoid
     -- Not good! XXX
     elt <- getElementById "synthSet" t
-    let knobName = UIElement._name (_ur elt)
-    inner . uiElements . ix t . UIElement.setting .= v
-    sendSetMessage knobName v
-    let oldValue = UIElement._setting elt
-    recordUndo (SendSet knobName oldValue)
-               (SendSet knobName v)
+    case elt ^? UIElement.setting of
+        Nothing -> return False
+        Just oldValue -> do
+            let knobName = UIElement._name (_ur elt)
+            inner . uiElements . ix t . UIElement.setting .= v
+            sendSetMessage knobName v
+            recordUndo (SendSet knobName oldValue)
+                       (SendSet knobName v)
+            return True
 
 synthSetString :: (Functor m, MonadIO m,
                   MonadState GlossWorld m) =>

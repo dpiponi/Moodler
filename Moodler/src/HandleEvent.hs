@@ -105,7 +105,7 @@ defaultClick' p i = do
                    _options = opts } -> do
             let newSetting = (floor oldSetting+1) `mod` length opts
             W.undoPoint
-            W.synthSet i (fromIntegral newSetting)
+            void $ W.synthSet i (fromIntegral newSetting)
             handleDefault
         TextBox { } -> 
             handleTextBox i
@@ -472,12 +472,7 @@ handleDraggingKnob' selectedKnob v p0@(x0, y0) (EventMotion p) = do
         Just e -> do
             let lowLimit = _knobMin e
             let highLimit = _knobMax e
-            let v0 = case lowLimit of
-                    Nothing -> newV
-                    Just lo -> max newV lo
-            let v1 = case highLimit of
-                    Nothing -> v0
-                    Just hi -> min v0 hi
+            let v1 = clampToRange lowLimit highLimit newV
             gadget .= \xform -> pictureTransformer xform $
                                             translate (x0+150) y0 (
                 color (B.transparentBlack 0.8) (rectangleSolid 250 100) <>
@@ -485,7 +480,7 @@ handleDraggingKnob' selectedKnob v p0@(x0, y0) (EventMotion p) = do
                     color green $ text (showFFloat (Just 4) v1 "")) <>
                 translate (-80) 0 (scale 0.27 0.27 $
                         color red $ text (showNote v1)))
-            W.synthSet selectedKnob v1
+            void $ W.synthSet selectedKnob v1
             handleDraggingKnob selectedKnob v p0
 
 handleDraggingKnob' selectedKnob _ _
@@ -502,14 +497,9 @@ handleDraggingSlider selectedSlider (_, y0) = do
     elt <- getElementById "handleDraggingSlider" selectedSlider
     let sliderLoc = elt ^. ur . loc . _2 :: Float
     let v = unUiAngle (_knobMin elt) (_knobMax elt) ((y0-sliderLoc)/15.0) :: Float
-    W.synthSet selectedSlider v
+    void $ W.synthSet selectedSlider v
     e <- liftF $ GetEvent id
     handleDraggingSlider' selectedSlider e
-
-{-
-knobMapping :: Float -> Point -> Float
-knobMapping v (dx, dy) = v+0.01*dx*exp (0.01*dy)
--}
 
 handleDraggingSlider' :: UiId -> Event -> MoodlerM Zero
 handleDraggingSlider' selectedSlider (EventMotion p) = do
@@ -532,7 +522,7 @@ handleDraggingSlider' selectedSlider (EventMotion p) = do
             color green $ text (showFFloat (Just 4) v1 "")) <>
         translate (-80) 0 (scale 0.27 0.27 $
                 color red $ text (showNote v1)))
-    W.synthSet selectedSlider v1
+    void $ W.synthSet selectedSlider v1
     handleDraggingSlider selectedSlider p
 
 handleDraggingSlider' selectedSlider

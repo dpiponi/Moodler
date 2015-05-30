@@ -264,8 +264,9 @@ evalUi (U.Check cfn) = do
         else "Consistency problem"
     evalUi cfn
 
-evalUi (Set t v cfn) =
-    synthSet t v >> evalUi cfn
+evalUi (Set t v cfn) = do
+    succeeded <- synthSet t v
+    evalUi (cfn succeeded)
 
 evalUi (SetString t v cfn) =
     synthSetString t v >> evalUi cfn
