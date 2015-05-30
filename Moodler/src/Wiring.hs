@@ -67,13 +67,11 @@ emptyGlossWorld' =
                   , _newName = 0
                   , _mouseLoc = (0, 0)
                   , _planes = rootID
-                  --, _cmdArgs = []
                   , _rootPlane = rootID
                   , _keyMatcher = initKeyMatcher
                   , _pics = M.empty
                   , _gadget = const blank
                   , _currentSelection = []
-                  -- , _previousSelection = Nothing
                   , _rootTransform = Transform (0, 0) 1
                   , _cont = Pure undefined
                   , _undoInfo = UndoInfo
@@ -92,14 +90,13 @@ synthConnect s1 s2 = do
     s2Name <- use (inner . uiElements . ix s2 . ur . name)
     sendConnectMessage s1Name s2Name
     previousCables <- use (inner . uiElements . ix s2 . cablesIn)
-    if null previousCables -- XXX case
-        then recordUndo (SendDisconnect s2Name)
-                        (SendConnect s1Name s2Name)
-        else do
-            let (Cable o : _) = previousCables
+    undoCommand <- case previousCables of
+        [] -> return (SendDisconnect s2Name)
+        Cable o : _ -> do
             oName <- use (inner . uiElements . ix o . ur . name)
-            recordUndo (SendConnect oName s2Name)
-                       (SendConnect s1Name s2Name)
+            return (SendConnect oName s2Name)
+    let redoCommand = SendConnect s1Name s2Name
+    recordUndo undoCommand redoCommand
     inner . uiElements . ix s2 . cablesIn %= (Cable.Cable s1 :)
 
 synthNew :: (Functor m, MonadIO m, MonadState GlossWorld m,
@@ -119,16 +116,14 @@ deleteCable selectedIn = do
             inner . uiElements . ix selectedIn . cablesIn .= []
             selectedInName <- use (inner . uiElements . ix selectedIn . ur . name)
             sendDisconnectMessage selectedInName
-            --deleteCable' c selectedIn
             c'Name <- use (inner . uiElements . ix c' . ur . name)
             recordUndo (SendConnect c'Name selectedInName)
                        (SendDisconnect selectedInName)
-            --sendRecompileMessage
             return (Just c)
+        -- Not sure why this lacks `recordUndo`. Seems to work.
         (c@(Cable c') : rc@(Cable src : _)) -> do
             inner . uiElements . ix selectedIn . cablesIn .= rc
             connect src selectedIn c'
-            --sendRecompileMessage
             return (Just c)
 
 -- XXX Do undo
@@ -157,6 +152,7 @@ connect src dst oldSrc = do
             recordUndo (SendConnect oldSrcName dstName)
                        (SendConnect srcName dstName)
 
+-- XXX Resurrect this
 rotateCables :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                 UiId -> m ()
 rotateCables selectedIn = do

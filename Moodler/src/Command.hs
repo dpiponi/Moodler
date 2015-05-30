@@ -2,7 +2,6 @@
 
 module Command where
 
---import Codec.BMP
 import Control.Applicative
 import Control.Exception
 import Control.Lens
@@ -12,12 +11,10 @@ import Graphics.Gloss.Data.Color
 import qualified Language.Haskell.Interpreter as I
 import qualified Data.Map as M
 import qualified Data.Set as S
---import Data.Monoid
 
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.Quantise
 import Sound.MoodlerLib.UiLib as U
---import Sound.MoodlerLib.UiLibElement
 
 import Check
 import Wiring
@@ -33,7 +30,6 @@ import Codec.Picture
 import qualified Codec.Picture.Types as P
 import KeyMatcher
 import KeyStrokes
---import UiLibElement
 
 alertGadget :: String -> B.Transform -> Picture
 alertGadget alt _ = 
@@ -75,48 +71,49 @@ getPic bmpName = do
                 return $ Right (width, height)
         Left e -> return $ Left ("\"" ++ imageFileName ++ "\" didn't load: " ++ e)
 
+commandImportList :: [String]
+commandImportList = 
+        [ "Prelude",
+          "Control.Monad",
+          "Text.Read",
+          "Sound.MoodlerLib.Symbols",
+          "Sound.MoodlerLib.UiLib",
+          "Sound.MoodlerLib.UiLibElement",
+          "Sound.MoodlerLib.Quantise"]
+
 execCommand :: (InputHandler m, Functor m, MonadIO m,
                 MonadState GlossWorld m) =>
                String -> m ()
 execCommand cmd = do
-    x <- liftIO $ I.runInterpreter $ do
+    commandResult <- liftIO $ I.runInterpreter $ do
         I.set [I.searchPath I.:= ["src"]]
-        I.setImports [ "Prelude",
-                       "Control.Monad",
-                       "Text.Read",
-                       "Sound.MoodlerLib.Symbols",
-                       "Sound.MoodlerLib.UiLib",
-                       "Sound.MoodlerLib.UiLibElement",
-                       "Sound.MoodlerLib.Quantise"]
+        I.setImports commandImportList
         I.interpret cmd (I.as :: Ui ())
-    case x of
-        Left err -> case err of
-            I.UnknownError e -> doAlert $ "Unknown error: " ++ e
-            I.WontCompile es -> doAlert $ show (map I.errMsg es)
-            I.NotAllowed e   -> doAlert $ "Not allowed: " ++ e
-            I.GhcException e -> doAlert $ "GHC exception: " ++ e
-        Right y -> evalUi y
+    case commandResult of
+        Left err -> doAlert $ case err of
+            I.UnknownError e -> "Unknown error: " ++ e
+            I.WontCompile es -> show (map I.errMsg es)
+            I.NotAllowed e   -> "Not allowed: " ++ e
+            I.GhcException e -> "GHC exception: " ++ e
+        Right commandTree -> evalUi commandTree
 
 safeReadFile :: String -> IO (Either String String)
 safeReadFile f = 
-   catch (Right <$> readFile f) $ \e -> do
-        let err = show (e :: IOException)
+   catch (Right <$> readFile f) $ \exception -> do
+        let err = show (exception :: IOException)
         return $ Left err
 
 execScript :: (InputHandler m, Functor m, MonadIO m,
                MonadState GlossWorld m) =>
                String -> String -> m String
 execScript dir f = do -- use proper dir API XXX
-    --liftIO $ putStrLn $ "Exec: " ++ dir ++ "/" ++ f ++ ".hs"
     let fileName = dir ++ "/" ++ f ++ ".hs"
     cmds <- liftIO $ safeReadFile fileName
     case cmds of
         Left err  -> do
             liftIO $ putStrLn err
             gadget .= alertGadget err
-        Right cmd ->
-            --cmdArgs .= arguments
-            execCommand cmd
+        Right cmd -> execCommand cmd
     return fileName
 
 evalUi :: (Functor m, MonadIO m, MonadState GlossWorld m,
