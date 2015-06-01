@@ -72,7 +72,6 @@ data UndoInfo = UndoInfo { _innerHistory :: [World]
                          }
 
 $(makeLenses ''UndoInfo)
-
 $(makeLenses ''GlossWorld)
 
 type MoodlerM = FreeT MoodlerF (StateT GlossWorld IO)
@@ -86,21 +85,27 @@ handleGetString :: [String] -> String -> String -> String ->
                    MoodlerM (Maybe String)
 handleGetString completions inputString afterCursor prompt = do
     e <- liftF $ GetEvent id
-    let longestCompletion = if null afterCursor then longestMatchingPrefix completions inputString else inputString
+    let longestCompletion = if null afterCursor
+        then longestMatchingPrefix completions inputString
+        else inputString
     gadget .= stringGadget longestCompletion inputString afterCursor prompt
     handleGetString' completions inputString afterCursor prompt e
 
 continueGetString :: String -> [String] -> String -> String ->
                      MoodlerM (Maybe String)
 continueGetString prompt completions inputString afterCursor = do
-    let longestCompletion = if null afterCursor then longestMatchingPrefix completions inputString else inputString
+    let longestCompletion = if null afterCursor
+        then longestMatchingPrefix completions inputString
+        else inputString
     gadget .= stringGadget longestCompletion inputString afterCursor prompt
     handleGetString completions inputString afterCursor prompt
 
 handleGetString'' :: String -> [String] -> String -> String -> String ->
                      MoodlerM (Maybe String)
 handleGetString'' afterCursor' completions inputString' prompt inputString = do
-    let longestCompletion = if null afterCursor' then longestMatchingPrefix completions inputString' else inputString
+    let longestCompletion = if null afterCursor'
+        then longestMatchingPrefix completions inputString'
+        else inputString
     gadget .= stringGadget longestCompletion inputString' afterCursor' prompt
     handleGetString completions inputString' afterCursor' prompt
 
@@ -133,7 +138,9 @@ handleGetString' completions inputString afterCursor prompt (EventKey
 handleGetString' completions inputString afterCursor prompt
                     (EventKey (SpecialKey KeyTab)
                     Down _ _) = do
-    let longestCompletion = if null afterCursor then longestMatchingPrefix completions inputString else inputString
+    let longestCompletion = if null afterCursor
+        then longestMatchingPrefix completions inputString
+        else inputString
     gadget .= stringGadget longestCompletion inputString afterCursor prompt
     handleGetString completions longestCompletion afterCursor prompt
 
@@ -193,7 +200,9 @@ grey50 = makeColor 0.5 0.5 0.5 1.0
 stringGadget :: String -> String -> String -> String -> B.Transform -> Picture
 stringGadget completion inputString afterCursor prompt _ =
     let displayedString = prompt ++ inputString ++ "|" ++ afterCursor
-        displayedCompletion = if null afterCursor then prompt ++ inputString ++ "|" ++ drop (length inputString) completion else ""
+        displayedCompletion = if null afterCursor
+            then prompt ++ inputString ++ "|" ++ drop (length inputString) completion
+            else ""
     in
         translate 0 10 (color (B.transparentBlack 0.8) (rectangleSolid 600 50)) <>
         translate (-300) 0 (scale 0.3 0.3 (color grey50 $ text displayedCompletion)) <>
@@ -211,11 +220,11 @@ colourById w e =
                                           (_uiElements (_inner w))
     in _dataColour elt
 
-newtype WorldMonad a = WorldMonad { runWorldMonad ::
-                                            StateT GlossWorld IO a }
+newtype WorldMonad a = WorldMonad { runWorldMonad :: StateT GlossWorld IO a }
                         deriving (Monad, MonadState GlossWorld,
                                   MonadIO, Functor)
 
+-- This prevents splitting out handleGetString
 instance InputHandler WorldMonad where
     getInput _ _ = return Nothing
 
