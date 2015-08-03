@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module TopologicalSort(topologicalSort) where
 
 import Control.Monad.State

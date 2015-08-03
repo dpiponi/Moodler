@@ -261,6 +261,7 @@ evalUi (U.Check cfn) = do
         else "Consistency problem"
     evalUi cfn
 
+-- Set command doesn't check
 evalUi (Set t v cfn) = do
     succeeded <- synthSet t v
     evalUi (cfn succeeded)

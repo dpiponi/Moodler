@@ -1,0 +1,15 @@
+#pragma include "delay_int_line.h"
+#pragma link "delay_int_line.o"
+
+struct DelayIntLine delay_line;
+double result;
+
+void init() {
+    delay_int_line_init(&delay_line, (int)(2.0/dt));
+    result = 0.0;
+}
+
+inline void exec(in control delay, in sample signal, out sample result) {
+    delay_int_line_insert(&delay_line, signal);
+    result = delay_int_line_read(&delay_line, (int)(delay/dt));
+}
