@@ -1,0 +1,27 @@
+double result1;
+double result2;
+double result3;
+double result4;
+
+void init() {
+    result1 = 0.0;
+    result2 = 0.0;
+    result3 = 0.0;
+    result4 = 0.0;
+}
+
+inline void exec(in sample signal0,
+                 in sample signal1,
+                 in sample signal2,
+                 in sample signal3,
+                 in sample signal4,
+                 out sample result1,
+                 out sample result2,
+                 out sample result3,
+                 out sample result4
+                 ) {
+    result1 = signal1+signal0;
+    result2 = signal2+signal0;
+    result3 = signal3+signal0;
+    result4 = signal4+signal0;
+}
