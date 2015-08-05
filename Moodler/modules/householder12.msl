@@ -26,8 +26,7 @@ void init() {
     result12 = 0.0;
 }
 
-inline void exec(in const char *label,
-                 in sample signal1,
+inline void exec(in sample signal1,
                  in sample signal2,
                  in sample signal3,
                  in sample signal4,
