@@ -72,7 +72,7 @@ synthPreamble panelName synthName topOffset = do
 
 genScriptPlugs :: String -> String -> Int -> Int -> [(CDecl, String)] -> Writer String ()
 genScriptPlugs name command xoffset outOffset outs =
-    forM_ (zip [outOffset, outOffset+50 ..] outs) $
+    forM_ (zip [outOffset, outOffset+48 ..] outs) $
                                 \(offset, (outputType, eachOutput)) -> do
          tellInd 4 $ unwords
                 [ name, "<-", command, "(name ++ ",
@@ -94,7 +94,7 @@ synthScript synthName ins outs = do
     let topOffset = (-25, 75 :: Float)
     -- XXX More sizes
     let panelName = if height >= 12
-            then "panel_8x1.png"
+            then "panel_9x1.png"
             else if height >= 10
                 then "panel_7x1.png"
                 else if height >= 8
