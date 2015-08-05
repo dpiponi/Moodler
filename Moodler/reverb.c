@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "moodler_lib.h"
+#include "reverb.h"
 
 void reverb_fini(Reverb *reverb) {
     /* ... */

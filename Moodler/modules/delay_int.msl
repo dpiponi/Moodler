@@ -11,5 +11,6 @@ void init() {
 
 inline void exec(in control delay, in sample signal, out sample result) {
     delay_int_line_insert(&delay_line, signal);
-    result = delay_int_line_read(&delay_line, (int)(delay/dt));
+    int int_delay = (int)(delay/dt+0.5);
+    result = delay_int_line_read(&delay_line, int_delay);
 }
