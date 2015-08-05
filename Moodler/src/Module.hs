@@ -93,9 +93,17 @@ synthScript synthName ins outs = do
     let outOffset = -25*numOuts+25
     let topOffset = (-25, 75 :: Float)
     -- XXX More sizes
-    let panelName = if height >= 4
-            then "panel_4x1.png"
-            else "panel_3x1.png"
+    let panelName = if height >= 12
+            then "panel_8x1.png"
+            else if height >= 10
+                then "panel_7x1.png"
+                else if height >= 8
+                    then "panel_6x1.png"
+                    else if height >= 6
+                        then "panel_5x1.png"
+                        else if height >= 4
+                            then "panel_4x1.png"
+                            else "panel_3x1.png"
     execWriter $ do
         synthPreamble panelName synthName topOffset
         genScriptPlugs "inp" "plugin'" (-21) inOffset (map (_2 %~ _getInName) ins)
