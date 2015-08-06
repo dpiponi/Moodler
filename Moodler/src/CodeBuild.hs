@@ -35,14 +35,22 @@ foreign import ccall "dynamic" mkSet :: FunPtr SetFn -> SetFn
 foreign import ccall "dynamic" mkSetCC :: FunPtr SetCCFn -> SetCCFn
 foreign import ccall "dynamic" mkSetString :: FunPtr SetStringFn -> SetStringFn
 
+compileCommand :: String -> [String] -> String -> String
+compileCommand sourceName extra_libs libraryName =
+    let clang_options = ["-O3",
+                         "-ffast-math",
+                         "-Wno-logical-op-parentheses",
+                         "-dynamiclib",
+                         "-std=gnu99",
+                         "-lm"]
+    in "clang " ++ unwords clang_options ++ " "
+                ++ unwords ("moodler_lib.o" : extra_libs) ++ " " ++ sourceName
+                ++ " -o " ++ libraryName
+
 compile :: String -> [String] -> String -> IO ()
 compile sourceName linkList libraryName = do
     let extra_libs = S.toList (S.fromList linkList)
-    let clang_options = ["-O3", "-ffast-math"]
-    let command = "clang " ++ unwords clang_options
-                  ++ " -dynamiclib -lm -std=gnu99 -Wno-logical-op-parentheses moodler_lib.o "
-                  ++ unwords extra_libs ++ " " ++ sourceName
-                  ++ " -o " ++ libraryName
+    let command = compileCommand sourceName extra_libs libraryName
     liftIO $ putStrLn $ "Building with: " ++ show command
     compileHandle <- runCommand command
     void $ waitForProcess compileHandle
@@ -90,6 +98,7 @@ makeDso code linkList =
                                           (mkSetString setString)
     -- End of tmp dir bit
 
+-- Set value in currently running audo generator
 setStateVar :: SetFn -> Ptr () -> String -> String -> Float -> IO ()
 setStateVar set dataPtr nodeName stateVar value =
     withCString nodeName $ \nodeString ->

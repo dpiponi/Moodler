@@ -10,7 +10,7 @@ type Box = (G.Point, G.Point)
 
 pointWithin :: G.Point -> Box -> Bool
 pointWithin (x0, y0) ((x1, y1), (x2, y2)) =
-    x0>=x1 && x0<=x2 && y0>=y1 && y0<=y2
+    x0 >= x1 && x0 <= x2 && y0 >= y1 && y0 <= y2
 
 normaliseBox :: Box -> Box
 normaliseBox ((x0, y0), (x1, y1)) =
@@ -31,6 +31,7 @@ rectToBox (x, y) w h =
     ((x-0.5*fromIntegral w, y-0.5*fromIntegral h),
      (x+0.5*fromIntegral w, y+0.5*fromIntegral h))
 
+-- Why do vertical lines disappear? Maybe == is too strict. XXX
 curve' :: Float -> G.Point -> G.Point -> [G.Point]
 curve' α (x0, y0) (x1, y1) | x0 == x1 = [(x0, y0), (x1, y1)]
                            | x0 > x1 = curve' α (x1, y1) (x0, y0)
