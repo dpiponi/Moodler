@@ -83,31 +83,41 @@ genScriptPlugs name command xoffset outOffset outs =
          F.forM_ outCol $ \col ->
              tellInd 4 $ unwords [ "setColour", name, show col]
 
+panelDetails :: Int -> (String, Int)
+panelDetails height =
+    if height >= 13
+        then ("panel_9x1.png", 9)
+        else if height >= 12
+                then ("panel_8x1.png", 8)
+                else if height >= 10
+                        then ("panel_7x1.png", 7)
+                        else if height >= 8
+                                then ("panel_6x1.png", 6)
+                                else if height >= 7
+                                        then ("panel_5x1.png", 5)
+                                        else if height >= 5
+                                            then ("panel_4x1.png", 4)
+                                            else if height >= 3
+                                                 then ("panel_3x1.png", 3)
+                                                 else if height >= 2
+                                                          then ("panel_2x1.png", 2)
+                                                          else ("panel_1x1.png", 1)
+
 -- Auto-generate UI script for a .msl module
 synthScript :: String -> [(CDecl, InName)] -> [(CDecl, OutName)] -> String
 synthScript synthName ins outs = do
     let numIns = length ins
     let numOuts = length outs
     let height = max numIns numOuts
-    let inOffset = -25*numIns+25
-    let outOffset = -25*numOuts+25
-    let topOffset = (-25, 75 :: Float)
+    let (panelName, panelHeight) = panelDetails height
+    let inOffset = -24*numIns+24
+    let outOffset = -24*numOuts+24
+    let topOffset = (-36, fromIntegral (36*panelHeight+12) :: Float)
     -- XXX More sizes
-    let panelName = if height >= 12
-            then "panel_9x1.png"
-            else if height >= 10
-                then "panel_7x1.png"
-                else if height >= 8
-                    then "panel_6x1.png"
-                    else if height >= 6
-                        then "panel_5x1.png"
-                        else if height >= 4
-                            then "panel_4x1.png"
-                            else "panel_3x1.png"
     execWriter $ do
         synthPreamble panelName synthName topOffset
-        genScriptPlugs "inp" "plugin'" (-21) inOffset (map (_2 %~ _getInName) ins)
-        genScriptPlugs "out" "plugout'" 20 outOffset (map (_2 %~ _getOutName) outs)
+        genScriptPlugs "inp" "plugin'" (-24) inOffset (map (_2 %~ _getInName) ins)
+        genScriptPlugs "out" "plugout'" 24 outOffset (map (_2 %~ _getOutName) outs)
         tellInd 4 "recompile"
         tellInd 4 "return ()"
 
