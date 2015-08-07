@@ -186,18 +186,15 @@ handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctr
     allSaves <- liftIO $ getAllScripts "saves"
     filename <- handleGetString allSaves "" "" "save: "
     case filename of
-        Just filename' ->
-            if filename' == ""
-                then do
-                    fileName' <- use projectFile
-                    liftIO $ putStrLn $ "filename = " ++ show fileName'
-                    saveWorld fileName'
-                    liftIO $ putStrLn $ "Saved \"" ++ fileName' ++ "\""
-                else do
-                    let filename'' = "saves/" ++ filename' ++ ".hs"
-                    projectFile .= filename''
-                    saveWorld filename''
-                    liftIO $ putStrLn $ "Saved \"" ++ filename'' ++ "\""
+        Just "" -> do
+            fileName' <- use projectFile
+            saveWorld fileName'
+            liftIO $ putStrLn $ "Saved \"" ++ fileName' ++ "\""
+        Just filename' -> do
+            let filename'' = "saves/" ++ filename' ++ ".hs"
+            projectFile .= filename''
+            saveWorld filename''
+            liftIO $ putStrLn $ "Saved \"" ++ filename'' ++ "\""
         Nothing -> return ()
     handleDefault
 
@@ -215,6 +212,8 @@ handleDefault' (EventKey (Char 'q') Down Modifiers { alt = Down } _) = do
     liftIO $ exitImmediately ExitSuccess
     handleDefault
 
+-- Supposed to rotate cables.
+-- Probably doesn't work since introducing undo.
 handleDefault' (EventKey (Char 'c') Down _ p) = do
     selectionPlane <- use planes
     e <- selectedByPoint selectionPlane p
@@ -230,6 +229,7 @@ handleDefault' (EventKey (Char 'c') Down _ p) = do
                 _ -> handleDefault
         Nothing -> handleDefault
 
+-- Output some info about the current selection.
 handleDefault' (EventKey (Char '?') Down _ p) = do
     selectionPlane <- use planes
     e <- selectedByPoint selectionPlane p
@@ -241,6 +241,7 @@ handleDefault' (EventKey (Char '?') Down _ p) = do
             handleDefault
         Nothing -> handleDefault
 
+-- Make group from current selection.
 handleDefault' (EventKey (Char 'g') Down _ proxyLocation) = do
     sel <- use currentSelection
     p <- use planes
@@ -369,8 +370,7 @@ handleDefault' (EventKey key Down mods _) = do
     keyMatcher .= matcher'
     handleDefault
 
-handleDefault' _ =
-    handleDefault
+handleDefault' _ = handleDefault
 
 handleTextBox :: UiId -> MoodlerM Zero
 handleTextBox selectedTextBox = do
@@ -400,7 +400,7 @@ handleDraggingRegion p1 p2 = do
 
 -- Mouse motion during region drag
 handleDraggingRegion' :: Point -> Point -> Event ->
-                           MoodlerM Zero
+                         MoodlerM Zero
 handleDraggingRegion' f z (EventMotion p) = do
     gadget .= \xform -> pictureTransformer xform $ color black (rect z p)
     selectEverythingInRegion f p
