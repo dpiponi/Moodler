@@ -66,6 +66,7 @@ data Ui a = Return a
           | SetPicture UiId String (Ui a)
           | Alias String String (Ui a)
           | UnAlias String (Ui a)
+          | SetOutput UiId (Ui a)
           deriving (Typeable, Functor)
 
 instance Monad Ui where
@@ -128,6 +129,7 @@ instance Monad Ui where
     Input s0 cont >>= f = Input s0 ((>>= f) . cont)
     Alias s0 s1 cont >>= f = Alias s0 s1 (cont >>= f)
     UnAlias s0 cont >>= f = UnAlias s0 (cont >>= f)
+    SetOutput s cont >>= f = SetOutput s (cont >>= f)
 
 instance Applicative Ui where
     pure = return
@@ -354,3 +356,6 @@ alias s0 s1 = Alias s0 s1 (return ())
 
 unalias :: String -> Ui ()
 unalias s0 = UnAlias s0 (return ())
+
+setOutput :: UiId -> Ui ()
+setOutput s0 = SetOutput s0 (return ())

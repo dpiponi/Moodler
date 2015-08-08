@@ -15,7 +15,7 @@ handleDraggingRoot handleDefault p0 = do
 
 handleDraggingRoot' :: MoodlerM Zero -> Point -> Event -> MoodlerM Zero
 handleDraggingRoot' handleDefault p0 (EventMotion p1) = do
-    rootTransform %= (B.Transform (p1-p0) 1 <>)
+    planeInfo . rootTransform %= (B.Transform (p1-p0) 1 <>)
     -- It's not obvious that the following line is correct.
     -- It's tempting to use p1.
     -- Remember that mouse coordinates have been transformed

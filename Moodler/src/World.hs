@@ -44,10 +44,14 @@ data SendCommand = SendConnect String String
                  | SendSetString String String
                  deriving Show
 
+data PlaneInfo = PlaneInfo { _planes :: UiId
+                           , _rootPlane :: UiId
+                           , _rootTransform :: B.Transform
+                           }
+
 data GlossWorld = GlossWorld { _inner :: World
                              , _mouseLoc :: (Float, Float)
-                             , _planes :: UiId
-                             , _rootPlane :: UiId
+                             , _planeInfo :: PlaneInfo
                              , _newName :: Int
                              , _showHidden :: Bool
                              , _pics :: M.Map String (Picture, Int, Int)
@@ -55,11 +59,10 @@ data GlossWorld = GlossWorld { _inner :: World
                              , _gadget :: B.Transform -> Picture
                              , _ipAddr :: String
                              , _projectFile :: String
-                             , _rootTransform :: B.Transform
                              , _keyMatcher :: KeyMatcher (Key, Modifiers) String
                              , _cont :: FreeF MoodlerF Zero
-                                (FreeT MoodlerF (StateT GlossWorld IO)
-                                    Zero)
+                                            (FreeT MoodlerF (StateT GlossWorld IO)
+                                                Zero)
                              , _undoInfo :: UndoInfo
                              }
 
@@ -73,6 +76,7 @@ data UndoInfo = UndoInfo { _innerHistory :: [World]
 
 $(makeLenses ''UndoInfo)
 $(makeLenses ''GlossWorld)
+$(makeLenses ''PlaneInfo)
 
 type MoodlerM = FreeT MoodlerF (StateT GlossWorld IO)
 

@@ -36,6 +36,7 @@ import HandleDraggingRoot
 import HandleDraggingSelection
 import HandleDraggingCable
 import HandleDraggingKnob
+import Comms
 
 -- Find a container somewhere in a list of ids.
 -- Assumes there is precisely one. XXX
@@ -121,6 +122,24 @@ labelGadget p f xform = do
         uncurry translate p
             (scale 0.05 0.05 (color black (text (show f))))
 
+handleListen :: [Cable] -> Event -> MoodlerM ()
+
+handleListen currentCables (EventKey (SpecialKey KeySpace) Up _ _) = do
+    liftIO $ print currentCables
+    case currentCables of
+        [] -> do
+            sendDisconnectMessage "out.value"
+            sendRecompileMessage "Finished listening"
+        Cable o : _ ->  do
+            oName <- use (inner . uiElements . ix o . ur . name)
+            sendConnectMessage oName "out.value"
+            sendRecompileMessage "Finished listening"
+    liftIO $ print "Finished listening"
+
+handleListen currentCables _ = do
+    e <- liftF $ GetEvent id
+    handleListen currentCables e
+
 handleDefault' :: Event -> MoodlerM Zero
 handleDefault' (EventMotion p) = do
     selectionPlane <- use planes
@@ -135,6 +154,32 @@ handleDefault' (EventMotion p) = do
 -- handleDefault' (EventKey (Char '"') Down _ _) = do
 --     showHidden %= not
 --     handleDefault
+
+handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
+    liftIO $ print "Hello"
+    selectionPlane <- use planes
+    (x, y) <- use mouseLoc
+    liftIO $ print (x, y)
+    maybeHoveringOver <- selectedByPoint selectionPlane (x, y)
+    case maybeHoveringOver of
+        Just hoveringOver -> do
+            elt <- getElementById "HandleEvent.hs" hoveringOver
+            liftIO $ print hoveringOver
+            liftIO $ print elt
+            case elt of
+                Out {} -> do
+                    liftIO $ print "An Out!"
+--                    synthConnect hoveringOver "
+                    let srcName = elt ^. ur . name
+                    currentCables <- use (inner . uiElements . ix (UiId "plugin69") . cablesIn)
+                    liftIO $ print $ "cables = " ++ show currentCables
+                    sendConnectMessage srcName "out.value"
+                    sendRecompileMessage "listen"
+                    e <- liftF $ GetEvent id
+                    handleListen currentCables e
+                _ -> return ()
+        Nothing -> return ()
+    handleDefault
 
 handleDefault' (EventKey (Char 'z') Down Modifiers { alt = Down } _) = do
     W.performUndo
