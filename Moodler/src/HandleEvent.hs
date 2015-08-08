@@ -332,7 +332,6 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
             elt <- getElementById "HandleEvent.hs" i
             case elt of
                 Container {} -> do
-                    liftIO $ putStrLn $ "ctrl-click on " ++ show i
                     planes .= i
                     handleDefault
                 Out {} -> do
