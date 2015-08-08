@@ -198,16 +198,16 @@ handleDefault' (EventKey (Char 'p') Down _ _) = do
     forM_ contentss $ \content -> reparent (Outside container) content
     handleDefault
 
--- XXX Make script+binding. Needs rootTransform command.
+-- XXX Make script+binding. Needs planeInfo . rootTransform command.
 handleDefault' (EventKey (Char '+')
                          Down Modifiers { shift = Down, alt = Down, ctrl = Up } _) = do
-    rootTransform %= (B.Transform (0, 0) 1.5 <>)
+    planeInfo . rootTransform %= (B.Transform (0, 0) 1.5 <>)
     handleDefault
 
--- XXX Make script+binding. Needs rootTransform command.
+-- XXX Make script+binding. Needs planeInfo . rootTransform command.
 handleDefault' (EventKey (Char '-')
                Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
-    rootTransform %= (B.Transform (0, 0) (1/1.5) <>)
+    planeInfo . rootTransform %= (B.Transform (0, 0) (1/1.5) <>)
     handleDefault
 
 -- XXX Can this become script+binding.

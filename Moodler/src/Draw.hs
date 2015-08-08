@@ -183,7 +183,7 @@ renderPlaneName firstPlane =
                                        white firstPlane
 
 renderWorld :: GlossWorld -> IO Picture
-renderWorld w@GlossWorld { _rootTransform = rootXform
+renderWorld w@GlossWorld { _planeInfo . rootTransform = rootXform
                          , _showHidden = showingHidden } =
     flip evalStateT w $ do
         wplanes0 <- use planes

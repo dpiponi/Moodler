@@ -52,7 +52,7 @@ eventHandler (EventKey a1 a2 a3 p) world@GlossWorld { _cont = m } =
         Pure a -> magic a
 
         Free (GetEvent handler) ->
-            let xform = world ^. rootTransform
+            let xform = world ^. planeInfo . rootTransform
                 p' = applyTransform (inverse xform) p
             in handleMousePosition world
                          (handler (EventKey a1 a2 a3 p')) p'
@@ -62,7 +62,7 @@ eventHandler (EventMotion p) world@GlossWorld { _cont = m } =
         Pure a -> magic a
 
         Free (GetEvent handler) -> 
-            let xform = world ^. rootTransform
+            let xform = world ^. planeInfo . rootTransform
                 p' = applyTransform (inverse xform) p
             in handleMousePosition world
                             (handler (EventMotion p')) p'
@@ -118,7 +118,7 @@ emptyGlossWorld =
                   , _pics = M.empty
                   , _gadget = const blank
                   , _currentSelection = []
-                  , _rootTransform = Transform (0, 0) 1
+                  , _planeInfo . rootTransform = Transform (0, 0) 1
                   , _cont = Free (GetEvent handleDefault')
                   , _undoInfo = emptyUndo innerWorld
                   }

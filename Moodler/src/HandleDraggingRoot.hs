@@ -27,7 +27,7 @@ handleDraggingRoot' handleDefault p0 (EventMotion p1) = do
 
 handleDraggingRoot' handleDefault p0
     (EventKey (MouseButton LeftButton) Up _ p1) = do
-    rootTransform %= (B.Transform (p1-p0) 1 <>)
+    planeInfo . rootTransform %= (B.Transform (p1-p0) 1 <>)
     handleDefault
 
 handleDraggingRoot' handleDefault a _ = handleDraggingRoot handleDefault a
