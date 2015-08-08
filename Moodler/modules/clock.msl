@@ -1,0 +1,19 @@
+double phase;
+double result;
+double last_sync;
+
+void init() {
+    phase = 0.0;
+    last_sync = 0.0;
+    result = 0.0;
+}
+
+void exec(in control sync, in control rate,
+          out control result) {
+    result = square_wave(0.5, phase);
+    phase += 2*M_PI*rate*dt;
+    if (last_sync <= 0 && sync > 0) {
+        phase = 0.0;
+    }
+    last_sync = sync;
+}
