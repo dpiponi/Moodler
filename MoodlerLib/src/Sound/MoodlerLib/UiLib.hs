@@ -41,6 +41,7 @@ data Ui a = Return a
           | Write String (Ui a)
           | Selection ([UiId] -> Ui a)
           | Hide UiId Bool (Ui a)
+          | ToggleHidden (Ui a)
           | Delete UiId (Ui a)
           | Bind String String (Ui a)
           | Location UiId ((Float, Float) -> Ui a)
@@ -105,6 +106,7 @@ instance Monad Ui where
     Write t cont >>= f = Write t (cont >>= f)
     Selection cont >>= f = Selection ((>>= f) . cont)
     Hide t h cont >>= f = Hide t h (cont >>= f)
+    ToggleHidden cont >>= f = ToggleHidden (cont >>= f)
     SendBack t cont >>= f = SendBack t (cont >>= f)
     BringFront t cont >>= f = BringFront t (cont >>= f)
     Delete t cont >>= f = Delete t (cont >>= f)
@@ -291,6 +293,9 @@ selection = Selection return
 
 hide :: UiId -> Ui ()
 hide t = Hide t True (return ())
+
+toggleHidden :: Ui ()
+toggleHidden = ToggleHidden (return ())
 
 sendBack :: UiId -> Ui ()
 sendBack t = SendBack t (return ())

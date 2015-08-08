@@ -132,9 +132,9 @@ handleDefault' (EventMotion p) = do
         Nothing -> gadget .= const blank
     handleDefault
 
-handleDefault' (EventKey (Char '"') Down _ _) = do
-    showHidden %= not
-    handleDefault
+-- handleDefault' (EventKey (Char '"') Down _ _) = do
+--     showHidden %= not
+--     handleDefault
 
 handleDefault' (EventKey (Char 'z') Down Modifiers { alt = Down } _) = do
     W.performUndo
@@ -144,7 +144,8 @@ handleDefault' (EventKey (Char 'Z') Down Modifiers { alt = Down } _) = do
     W.performRedo
     handleDefault
 
--- XXX Give this a key
+-- XXX Could this be script+keybinding?
+-- XXX Needs to deal gracefully with situation with /= 1 container.
 handleDefault' (EventKey (Char 'p') Down _ _) = do
     es <- use currentSelection
     (container, contentss) <- findContainer es
@@ -152,16 +153,21 @@ handleDefault' (EventKey (Char 'p') Down _ _) = do
     forM_ contentss $ \content -> reparent (Outside container) content
     handleDefault
 
+-- XXX Make script+binding. Needs rootTransform command.
 handleDefault' (EventKey (Char '+')
                          Down Modifiers { shift = Down, alt = Down, ctrl = Up } _) = do
     rootTransform %= (B.Transform (0, 0) 1.5 <>)
     handleDefault
 
+-- XXX Make script+binding. Needs rootTransform command.
 handleDefault' (EventKey (Char '-')
                Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
     rootTransform %= (B.Transform (0, 0) (1/1.5) <>)
     handleDefault
 
+-- XXX Can this become script+binding.
+-- Couldn't before because of hlint problem.
+-- But now that's fixed maybe this will work again.
 handleDefault' (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
     filename <- handleGetString allScripts "" "" "read: "
@@ -213,7 +219,7 @@ handleDefault' (EventKey (Char 'q') Down Modifiers { alt = Down } _) = do
     handleDefault
 
 -- Supposed to rotate cables.
--- Probably doesn't work since introducing undo.
+-- Probably doesn't work since introducing undo. XXX
 handleDefault' (EventKey (Char 'c') Down _ p) = do
     selectionPlane <- use planes
     e <- selectedByPoint selectionPlane p
@@ -242,6 +248,7 @@ handleDefault' (EventKey (Char '?') Down _ p) = do
         Nothing -> handleDefault
 
 -- Make group from current selection.
+-- Could it be script+keybinding?
 handleDefault' (EventKey (Char 'g') Down _ proxyLocation) = do
     sel <- use currentSelection
     p <- use planes

@@ -134,6 +134,9 @@ evalUi (Echo t cfn) =
 evalUi (Hide t h cfn) =
     inner . uiElements . ix t . ur . hidden .= h >> evalUi cfn
 
+evalUi (ToggleHidden cfn) =
+    showHidden %= not >> evalUi cfn
+
 evalUi (Delete t cfn) =
     T.deleteElement t >> evalUi cfn
 

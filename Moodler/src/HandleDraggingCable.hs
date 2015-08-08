@@ -31,7 +31,7 @@ wireCable handleDefault i selectedOut = do
 cableGadget :: Point -> Point -> B.Transform -> Picture
 cableGadget p0 p1 xform = 
     pictureTransformer xform $ color (makeColor 0.6 0.6 0.3 0.5)
-                              (B.curve 0.3 p0 p1)
+                                     (B.curve 0.3 p0 p1)
 
 handleDraggingCable :: MoodlerM Zero -> UiId -> Point -> Point -> MoodlerM Zero
 handleDraggingCable handleDefault src start end =
@@ -64,7 +64,7 @@ handleDraggingCable' handleDefault src start _ (EventMotion p) = do
                 In {} -> do
                     highlightElement hoveringOver
                     gadget .= cableGadget start p <>
-                                      hoverGadget' (elt ^. ur . loc) elt 
+                              hoverGadget' (elt ^. ur . loc) elt 
                 _ -> unhighlightEverything
         Nothing -> unhighlightEverything
     handleDraggingCable handleDefault src start p

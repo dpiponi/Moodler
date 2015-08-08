@@ -111,6 +111,7 @@ upKey key _ setSynth = do
                         Just synth -> lift $ setSynth 0 synth key
                 else do -- there were excess keys
                     kdelete currentKey
+                    -- Get most recent dormant key
                     let sortedDormants = sortBy (flip compare `on` _keyClock) $
                                 filter (isNothing . _keySynth) $ S.toList actives
                     case sortedDormants of
