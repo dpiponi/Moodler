@@ -287,7 +287,7 @@ codeSections = ["preamble", "synth", "module",
 codeWorld :: (Functor m, MonadIO m, MonadState GlossWorld m)
                  => m String
 codeWorld = do
-    root <- use rootPlane
+    root <- use (planeInfo . rootPlane)
     everything <- getAllContainerProxyDescendants [root]
     let everythingSaved = L.delete root everything
 

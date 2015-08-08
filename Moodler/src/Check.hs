@@ -19,7 +19,7 @@ checkEverythingAccessibleFromRoot :: (Functor m, MonadIO m,
                                      MonadState GlossWorld m) =>
                                      m Bool
 checkEverythingAccessibleFromRoot = do
-    root <- use rootPlane
+    root <- use (planeInfo . rootPlane)
     everything <- S.fromList <$> getAllContainerProxyDescendants [root]
     elts <- use (inner . uiElements)
     let k = M.keys elts
@@ -55,7 +55,7 @@ checkChildrenHaveCorrectParent' parentId childrenIds = do
 checkChildrenHaveCorrectParent :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                                   m Bool
 checkChildrenHaveCorrectParent = do
-    root <- use rootPlane
+    root <- use (planeInfo . rootPlane)
     rootElt <- getElementById "checkChildrenHaveCorrectParent" root
     case rootElt of
         Container { _inside = insideCts, _outside = outsideCts} -> do

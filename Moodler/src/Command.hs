@@ -122,11 +122,11 @@ evalUi :: (Functor m, MonadIO m, MonadState GlossWorld m,
 evalUi (Return a) = return a
 
 evalUi (CurrentPlane cfn) = do
-    p <- use planes
+    p <- use (planeInfo . planes)
     evalUi (cfn p)
 
 evalUi (Switch p cfn) =
-    planes .= p >> evalUi cfn
+    planeInfo . planes .= p >> evalUi cfn
 
 evalUi (Echo t cfn) =
     doAlert t >> evalUi cfn
@@ -308,7 +308,7 @@ evalUi (GetType s1 cfn) = do
 -- Is this right? XXX
 evalUi (GetParent s1 cfn) = do
     elts <- use (inner . uiElements)
-    root <- use rootPlane
+    root <- use (planeInfo . rootPlane)
     if s1 == root
         then evalUi (cfn (Inside root))
         else let a = case M.lookup s1 elts of
@@ -317,7 +317,7 @@ evalUi (GetParent s1 cfn) = do
              in evalUi (cfn a)
 
 evalUi (GetRoot cfn) = do
-    root <- use rootPlane
+    root <- use (planeInfo . rootPlane)
     evalUi (cfn (root::UiId))
 
 {-

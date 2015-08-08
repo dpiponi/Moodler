@@ -183,18 +183,18 @@ renderPlaneName firstPlane =
                                        white firstPlane
 
 renderWorld :: GlossWorld -> IO Picture
-renderWorld w@GlossWorld { _planeInfo . rootTransform = rootXform
+renderWorld w@GlossWorld { _planeInfo  = PlaneInfo { _rootTransform = rootXform }
                          , _showHidden = showingHidden } =
     flip evalStateT w $ do
-        wplanes0 <- use planes
+        wplanes0 <- use (planeInfo . planes)
         -- XXX Don't know if it's wise to have
-        -- uiids pointing no non-existent planes.
+        -- uiids pointing no non-existent planeInfo . planes.
         planeExists <- checkExists wplanes0
         wplanes <- if planeExists
             then return wplanes0
             else do
                 liftIO $ putStrLn "Plane don't exist!"
-                use rootPlane
+                use (planeInfo . rootPlane)
         thingsToDraw <- rootElementsOnPlane wplanes
         elementsToDraw <- getElementsById "renderWorld" thingsToDraw
         let elementsToDraw' = L.sortBy (compare `on` _depth . _ur) elementsToDraw

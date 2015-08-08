@@ -76,7 +76,7 @@ isContainer i = do
 
 unparent :: MonadState GlossWorld m => UiId -> m ()
 unparent childId = do
-    currentPlane <- use planes
+    currentPlane <- use (planeInfo . planes)
     reparent (Inside currentPlane) childId
 
 reparent :: MonadState GlossWorld m => Location -> UiId -> m ()

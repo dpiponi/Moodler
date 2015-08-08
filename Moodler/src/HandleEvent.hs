@@ -142,7 +142,7 @@ handleListen currentCables _ = do
 
 handleDefault' :: Event -> MoodlerM Zero
 handleDefault' (EventMotion p) = do
-    selectionPlane <- use planes
+    selectionPlane <- use (planeInfo . planes)
     maybeHoveringOver <- selectedByPoint selectionPlane p
     case maybeHoveringOver of
         Just hoveringOver -> do
@@ -157,7 +157,7 @@ handleDefault' (EventMotion p) = do
 
 handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
     liftIO $ print "Hello"
-    selectionPlane <- use planes
+    selectionPlane <- use (planeInfo . planes)
     (x, y) <- use mouseLoc
     liftIO $ print (x, y)
     maybeHoveringOver <- selectedByPoint selectionPlane (x, y)
@@ -266,7 +266,7 @@ handleDefault' (EventKey (Char 'q') Down Modifiers { alt = Down } _) = do
 -- Supposed to rotate cables.
 -- Probably doesn't work since introducing undo. XXX
 handleDefault' (EventKey (Char 'c') Down _ p) = do
-    selectionPlane <- use planes
+    selectionPlane <- use (planeInfo . planes)
     e <- selectedByPoint selectionPlane p
     case e of
         Just i -> do
@@ -282,7 +282,7 @@ handleDefault' (EventKey (Char 'c') Down _ p) = do
 
 -- Output some info about the current selection.
 handleDefault' (EventKey (Char '?') Down _ p) = do
-    selectionPlane <- use planes
+    selectionPlane <- use (planeInfo . planes)
     e <- selectedByPoint selectionPlane p
     case e of
         Just i -> do
@@ -296,7 +296,7 @@ handleDefault' (EventKey (Char '?') Down _ p) = do
 -- Could it be script+keybinding?
 handleDefault' (EventKey (Char 'g') Down _ proxyLocation) = do
     sel <- use currentSelection
-    p <- use planes
+    p <- use (planeInfo . planes)
     makeGroup p sel proxyLocation
     handleDefault
 
@@ -305,7 +305,7 @@ handleDefault' (EventKey (Char 'g') Down _ proxyLocation) = do
 handleDefault' (EventKey (MouseButton LeftButton) Down
                     (Modifiers {alt = Up, shift = Down, ctrl = Up})
                     p) = do
-    selectionPlane <- use planes
+    selectionPlane <- use (planeInfo . planes)
     elementId <- selectedByPoint selectionPlane p
     case elementId of
         Just i -> do
@@ -323,7 +323,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
 -- The normal/ordinary mouse down event
 handleDefault' (EventKey (MouseButton LeftButton) Down
     (Modifiers {alt = Up, shift = Up, ctrl = Up}) p) = do
-    selectionPlane <- use planes
+    selectionPlane <- use (planeInfo . planes)
     e <- selectedByPoint selectionPlane p
     case e of
         Just i -> do
@@ -338,7 +338,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
 handleDefault' (EventKey (MouseButton RightButton) Down
     (Modifiers {alt = Down, shift = Up, ctrl = Up}) p) = do
 
-    selectionPlane <- use planes
+    selectionPlane <- use (planeInfo . planes)
     e <- selectedByPoint selectionPlane p
     case e of
         Just i -> do
@@ -350,7 +350,7 @@ handleDefault' (EventKey (MouseButton RightButton) Down
 -- Start ordinary selection drag to move
 handleDefault' (EventKey (MouseButton LeftButton) Down
     (Modifiers {alt = Down, shift = Up, ctrl = Up}) p) = do
-    selectionPlane <- use planes
+    selectionPlane <- use (planeInfo . planes)
     e <- selectedByPoint selectionPlane p
     sel <- use currentSelection
     case e of
@@ -369,7 +369,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
 -- Cable drag with ctrl-mouse
 handleDefault' (EventKey (MouseButton LeftButton) Down
         (Modifiers {alt = Up, ctrl = Down, shift = Up}) p) = do
-    selectionPlane <- use planes
+    selectionPlane <- use (planeInfo . planes)
     e <- selectedByPoint selectionPlane p
     case e of
         Just i -> do
@@ -377,7 +377,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
             elt <- getElementById "HandleEvent.hs" i
             case elt of
                 Container {} -> do
-                    planes .= i
+                    planeInfo . planes .= i
                     handleDefault
                 Out {} -> do
                     highlightJust i
@@ -437,7 +437,7 @@ handleTextBox selectedTextBox = do
 selectEverythingInRegion :: (MonadIO m, MonadState GlossWorld m) =>
                             Point -> Point -> m ()
 selectEverythingInRegion p0 p1 = do
-    selectionPlane <- use planes
+    selectionPlane <- use (planeInfo . planes)
     s <- everythingInRegion selectionPlane p0 p1
     currentSelection .= s
     unhighlightEverything

@@ -201,7 +201,7 @@ everythingInRegion selectionPlane p0 p1 = do
         return $ uiElementWithinBox (p0, p1) elt
 
 addPlane :: MonadState GlossWorld m => UiId -> m ()
-addPlane plane = planes .= plane
+addPlane plane = planeInfo . planes .= plane
 
 -- When we make a group we may have to remove elements from their parents
 -- We only remove them if the parents aren't also in the newly formed

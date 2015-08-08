@@ -55,7 +55,7 @@ hoverGadget' (ex, ey) elt xform =
 handleDraggingCable' :: MoodlerM Zero -> UiId -> Point -> Point -> Event -> MoodlerM Zero
 handleDraggingCable' handleDefault src start _ (EventMotion p) = do
     gadget .= cableGadget start p
-    selectionPlane <- use planes
+    selectionPlane <- use (planeInfo . planes)
     maybeHoveringOver <- selectedByPoint selectionPlane p
     case maybeHoveringOver of
         Just hoveringOver -> do
@@ -72,7 +72,7 @@ handleDraggingCable' handleDefault src start _ (EventMotion p) = do
 -- Deal with the end of cable dragging
 handleDraggingCable' handleDefault selectedOut _ _
     (EventKey (MouseButton LeftButton) Up _ p) = do
-    selectionPlane <- use planes
+    selectionPlane <- use (planeInfo . planes)
     maybeElement <- selectedByPoint selectionPlane p
     case maybeElement of
         Just i -> do

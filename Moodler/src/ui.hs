@@ -112,13 +112,14 @@ emptyGlossWorld =
                   , _showHidden = False
                   , _newName = 0
                   , _mouseLoc = (0, 0)
-                  , _planes = rootID
-                  , _rootPlane = rootID
+                  , _planeInfo = PlaneInfo { _planes = rootID
+                                           , _rootPlane = rootID
+                                           , _rootTransform = Transform (0, 0) 1
+                                           }
                   , _keyMatcher = initKeyMatcher
                   , _pics = M.empty
                   , _gadget = const blank
                   , _currentSelection = []
-                  , _planeInfo . rootTransform = Transform (0, 0) 1
                   , _cont = Free (GetEvent handleDefault')
                   , _undoInfo = emptyUndo innerWorld
                   }
