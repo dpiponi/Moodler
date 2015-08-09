@@ -397,3 +397,7 @@ evalUi (Alias aliasName synthName cfn) = do
 evalUi (UnAlias aliasName cfn) = do
     synthUnAlias aliasName
     evalUi cfn
+
+evalUi (SetOutput i cfn) = do
+    outputId .= i
+    evalUi cfn

@@ -81,6 +81,7 @@ emptyGlossWorld' =
                       , _innerFuture = []
                       , _undoFuture = [([], [])]
                   }
+                  , _outputId = undefined
                   }
 
 synthConnect :: (Functor m, MonadIO m, MonadState GlossWorld m,

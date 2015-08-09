@@ -64,6 +64,7 @@ data GlossWorld = GlossWorld { _inner :: World
                                             (FreeT MoodlerF (StateT GlossWorld IO)
                                                 Zero)
                              , _undoInfo :: UndoInfo
+                             , _outputId :: UiId
                              }
 
 data UndoInfo = UndoInfo { _innerHistory :: [World]

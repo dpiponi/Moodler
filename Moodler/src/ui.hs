@@ -122,6 +122,7 @@ emptyGlossWorld =
                   , _currentSelection = []
                   , _cont = Free (GetEvent handleDefault')
                   , _undoInfo = emptyUndo innerWorld
+                  , _outputId = undefined
                   }
 
 launchGUI :: GlossWorld -> IO ()

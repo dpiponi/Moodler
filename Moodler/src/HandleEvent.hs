@@ -171,7 +171,8 @@ handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
                     liftIO $ print "An Out!"
 --                    synthConnect hoveringOver "
                     let srcName = elt ^. ur . name
-                    currentCables <- use (inner . uiElements . ix (UiId "plugin69") . cablesIn)
+                    outId <- use outputId
+                    currentCables <- use (inner . uiElements . ix outId . cablesIn)
                     liftIO $ print $ "cables = " ++ show currentCables
                     sendConnectMessage srcName "out.value"
                     sendRecompileMessage "listen"
