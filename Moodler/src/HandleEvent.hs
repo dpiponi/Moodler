@@ -116,6 +116,12 @@ hoverGadget (ex, ey) elt xform =
         translate ex (ey+25) $ scale 0.5 0.5 $
         B.textInBox (B.transparentBlack 0.7) white txt
 
+listenGadget :: Point -> B.Transform -> Picture
+listenGadget (ex, ey) xform = 
+     pictureTransformer xform $
+        translate ex ey $ scale 0.5 0.5 $
+        color (makeColor 0.3 0.8 0.3 0.8) $ thickCircle 35 15
+
 labelGadget :: Show a => (Float, Float) -> a -> B.Transform -> Picture
 labelGadget p f xform = do
     pictureTransformer xform $
@@ -134,6 +140,7 @@ handleListen currentCables (EventKey (SpecialKey KeySpace) Up _ _) = do
             oName <- use (inner . uiElements . ix o . ur . name)
             sendConnectMessage oName "out.value"
             sendRecompileMessage "Finished listening"
+    gadget .= const blank
     liftIO $ print "Finished listening"
 
 handleListen currentCables _ = do
@@ -169,6 +176,7 @@ handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
             case elt of
                 Out {} -> do
                     liftIO $ print "An Out!"
+                    gadget .= listenGadget (elt ^. ur . loc)
 --                    synthConnect hoveringOver "
                     let srcName = elt ^. ur . name
                     outId <- use outputId
