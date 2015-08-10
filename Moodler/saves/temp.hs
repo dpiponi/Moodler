@@ -169,6 +169,7 @@ do
     plugin155 <- plugin' (out ! "left") (1332.0,-1236.0) (Outside container153)
     setColour plugin155 "#sample"
     plugin156 <- plugin' (out ! "value") (1332.0,-1284.0) (Outside container153)
+    setOutput plugin156
     setColour plugin156 "#sample"
     container157 <- container' "panel_knob.png" (996.0,-1344.0) (Inside root)
     knob158 <- knob' (input93 ! "result") (984.0,-1344.0) (Outside container157)

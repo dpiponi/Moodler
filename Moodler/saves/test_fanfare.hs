@@ -263,6 +263,7 @@ do
     out186 <- plugout' (lfo95 ++ "." ++ "square_result") (-324.0,-60.0) (Outside container179)
     setColour out186 "#control"
     in187 <- plugin' (out ++ "." ++ "value") (432.0,24.0) (Inside root)
+    setOutput in187
     setColour in187 "#sample"
     in188 <- plugin' (id14 ++ "." ++ "signal") (168.0,48.0) (Inside root)
     setColour in188 "#sample"

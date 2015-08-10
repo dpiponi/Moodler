@@ -29,6 +29,7 @@ do
     setColour out17 "#sample"
     container3 <- container' "panel_out.png" (444.0,24.0) (Inside root)
     in4 <- plugin' (out ! "value") (420.0,24.0) (Outside container3)
+    setOutput in4
     setColour in4 "#sample"
     container5 <- container' "panel_3x1.png" (-168.0,132.0) (Inside root)
     in8 <- plugin' (audio_sin7 ! "freq") (-189.0,157.0) (Outside container5)

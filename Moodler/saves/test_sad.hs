@@ -977,6 +977,7 @@ do
     plugin610 <- plugin' (out ! "left") (744.0,132.0) (Outside container608)
     setColour plugin610 "#sample"
     plugin611 <- plugin' (out ! "value") (744.0,84.0) (Outside container608)
+    setOutput plugin611
     setColour plugin611 "#sample"
     container612 <- container' "panel_proxy.png" (207.5,391.5) (Inside root)
     container1143 <- container' "panel_butterworth_lp.png" (216.0,300.0) (Inside container612)

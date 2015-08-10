@@ -574,6 +574,7 @@ do
     out133 <- plugout' (id40 ++ "." ++ "result") (-893.0,146.0) (Inside proxy99)
     setColour out133 "#sample"
     in358 <- plugin' (out ++ "." ++ "value") (564.0,72.0) (Inside root)
+    setOutput in358
     setColour in358 "#sample"
     out359 <- plugout' (trigger ++ "." ++ "result") (-492.0,24.0) (Inside root)
     setColour out359 "#sample"

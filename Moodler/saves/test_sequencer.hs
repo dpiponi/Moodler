@@ -224,6 +224,7 @@ do
     out185 <- plugout' (lfo95 ++ "." ++ "sin_result") (-360.0,252.0) (Outside container179)
     out186 <- plugout' (lfo95 ++ "." ++ "square_result") (-300.0,252.0) (Outside container179)
     in187 <- plugin' (out ++ "." ++ "value") (432.0,24.0) (Inside root)
+    setOutput in187
     in188 <- plugin' (id14 ++ "." ++ "signal") (252.0,360.0) (Inside root)
     rename "frequency" in188
     in189 <- plugin' (id15 ++ "." ++ "signal") (252.0,300.0) (Inside root)

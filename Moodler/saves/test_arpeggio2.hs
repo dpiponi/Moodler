@@ -158,6 +158,7 @@ do
     textBox196 <- textBox' (string_input168 ! "result") (132.0,468.0) (Outside container169)
     container36 <- container' "panel_out.png" (444.0,24.0) (Inside root)
     in37 <- plugin' (out ! "value") (420.0,24.0) (Outside container36)
+    setOutput in37
     setColour in37 "#sample"
     container40 <- container' "panel_knob.png" (-348.0,132.0) (Inside root)
     in41 <- plugin' (id16 ! "signal") (-360.0,132.0) (Outside container40)

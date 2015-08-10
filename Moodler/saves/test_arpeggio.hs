@@ -2748,6 +2748,7 @@ do
     out1034 <- plugout' (vca404 ++ "." ++ "result") (1085.5,-212.0) (Inside proxy976)
     setColour out1034 "#sample"
     in1674 <- plugin' (out ++ "." ++ "value") (746.0,128.0) (Inside root)
+    setOutput in1674
     setColour in1674 "#sample"
     out1675 <- plugout' (keyboard ++ "." ++ "result") (-496.0,130.0) (Inside root)
     setColour out1675 "#control"

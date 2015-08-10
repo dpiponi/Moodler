@@ -207,6 +207,8 @@ saveSelection' everythingSaved maybeMouseLocn curSel aliasesToSave = do
     forM_ (M.toList aliasesToSave) $ \(aliasName, synthName) ->
         multiTellLn "aliases" 4 $
             unwords ["alias", show aliasName, synthName]
+    outId <- lift $ use outputId
+    multiTellLn "output" 4 $ unwords ["setOutput", unUiId outId]
 
 selectionCode :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                  Maybe Point -> [UiId] -> StateT (S.Set UiId) (
@@ -281,7 +283,7 @@ codeWorld' everythingSaved synths needsSaving aliasesToSave = do
 codeSections :: [String]
 codeSections = ["preamble", "synth", "module",
                 "cables", "midamble", "settings",
-                "aliases", "postamble"]
+                "aliases", "output", "postamble"]
 
 -- Need more effort on saving aliases XXX
 codeWorld :: (Functor m, MonadIO m, MonadState GlossWorld m)

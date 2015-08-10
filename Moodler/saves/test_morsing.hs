@@ -286,6 +286,7 @@ do
     plugin4 <- plugin' (out ! "left") (420.0,72.0) (Outside container3)
     setColour plugin4 "#sample"
     plugin5 <- plugin' (out ! "value") (420.0,24.0) (Outside container3)
+    setOutput plugin5
     setColour plugin5 "#sample"
     plugin6 <- plugin' (out ! "right") (420.0,-24.0) (Outside container3)
     setColour plugin6 "#sample"

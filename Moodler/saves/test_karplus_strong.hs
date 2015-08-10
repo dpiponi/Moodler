@@ -140,6 +140,7 @@ do
     setColour out105 "#sample"
     container106 <- container' "panel_out.png" (444.0,24.0) (Inside root)
     in107 <- plugin' (out ! "value") (420.0,24.0) (Outside container106)
+    setOutput in107
     setColour in107 "#sample"
     container108 <- container' "panel_delay.png" (228.0,132.0) (Inside root)
     in109 <- plugin' (sum80 ! "signal1") (180.0,12.0) (Outside container108)

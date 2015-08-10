@@ -188,6 +188,7 @@ do
     out104 <- plugout' (lfo18 ++ "." ++ "saw") (-288.0,-12.0) (Outside container97)
     setColour out104 "#control"
     in105 <- plugin' (out ++ "." ++ "value") (278.0,128.0) (Inside root)
+    setOutput in105
     setColour in105 "#sample"
     out106 <- plugout' (keyboard ++ "." ++ "result") (-496.0,130.0) (Inside root)
     setColour out106 "#control"
