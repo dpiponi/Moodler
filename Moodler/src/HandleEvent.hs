@@ -147,6 +147,17 @@ handleListen currentCables _ = do
     e <- liftF $ GetEvent id
     handleListen currentCables e
 
+listenTo :: UIElement -> FreeT MoodlerF (StateT GlossWorld IO) ()
+listenTo elt = do
+    let srcName = elt ^. ur . name
+    outId <- use outputId
+    currentCables <- use (inner . uiElements . ix outId . cablesIn)
+    liftIO $ print $ "cables = " ++ show currentCables
+    sendConnectMessage srcName "out.value"
+    sendRecompileMessage "listen"
+    e <- liftF $ GetEvent id
+    handleListen currentCables e
+
 handleDefault' :: Event -> MoodlerM Zero
 handleDefault' (EventMotion p) = do
     selectionPlane <- use (planeInfo . planes)
@@ -177,14 +188,7 @@ handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
                 Out {} -> do
                     liftIO $ print "An Out!"
                     gadget .= listenGadget (elt ^. ur . loc)
-                    let srcName = elt ^. ur . name
-                    outId <- use outputId
-                    currentCables <- use (inner . uiElements . ix outId . cablesIn)
-                    liftIO $ print $ "cables = " ++ show currentCables
-                    sendConnectMessage srcName "out.value"
-                    sendRecompileMessage "listen"
-                    e <- liftF $ GetEvent id
-                    handleListen currentCables e
+                    listenTo elt
                 In {} -> do
                     -- We can only listen to this In if it has a single
                     -- cable coming from an Out.
@@ -192,14 +196,7 @@ handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
                         [Cable srcId] -> do
                             gadget .= listenGadget (elt ^. ur . loc)
                             elt' <- getElementById "listen" srcId
-                            let srcName = elt' ^. ur . name
-                            outId <- use outputId
-                            currentCables <- use (inner . uiElements . ix outId . cablesIn)
-                            liftIO $ print $ "cables = " ++ show currentCables
-                            sendConnectMessage srcName "out.value"
-                            sendRecompileMessage "listen"
-                            e <- liftF $ GetEvent id
-                            handleListen currentCables e
+                            listenTo elt'
                         _ -> return ()
                 _ -> return ()
         Nothing -> return ()
@@ -371,9 +368,11 @@ handleDefault' (EventKey (MouseButton RightButton) Down
         Nothing -> return ()
     handleDefault
 
+{-
 handleDefault' (EventKey (MouseButton WheelUp) Down _ p) = do
     liftIO $ print "Wheel up!!!!"
     handleDefault
+    -}
 
 -- Start ordinary selection drag to move
 handleDefault' (EventKey (MouseButton LeftButton) Down
