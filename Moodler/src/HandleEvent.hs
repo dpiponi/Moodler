@@ -177,7 +177,6 @@ handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
                 Out {} -> do
                     liftIO $ print "An Out!"
                     gadget .= listenGadget (elt ^. ur . loc)
---                    synthConnect hoveringOver "
                     let srcName = elt ^. ur . name
                     outId <- use outputId
                     currentCables <- use (inner . uiElements . ix outId . cablesIn)
@@ -186,6 +185,22 @@ handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
                     sendRecompileMessage "listen"
                     e <- liftF $ GetEvent id
                     handleListen currentCables e
+                In {} -> do
+                    -- We can only listen to this In if it has a single
+                    -- cable coming from an Out.
+                    case elt ^. cablesIn of
+                        [Cable srcId] -> do
+                            gadget .= listenGadget (elt ^. ur . loc)
+                            elt' <- getElementById "listen" srcId
+                            let srcName = elt' ^. ur . name
+                            outId <- use outputId
+                            currentCables <- use (inner . uiElements . ix outId . cablesIn)
+                            liftIO $ print $ "cables = " ++ show currentCables
+                            sendConnectMessage srcName "out.value"
+                            sendRecompileMessage "listen"
+                            e <- liftF $ GetEvent id
+                            handleListen currentCables e
+                        _ -> return ()
                 _ -> return ()
         Nothing -> return ()
     handleDefault
