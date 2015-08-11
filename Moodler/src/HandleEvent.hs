@@ -356,6 +356,10 @@ handleDefault' (EventKey (MouseButton RightButton) Down
         Nothing -> return ()
     handleDefault
 
+handleDefault' (EventKey (MouseButton WheelUp) Down _ p) = do
+    liftIO $ print "Wheel up!!!!"
+    handleDefault
+
 -- Start ordinary selection drag to move
 handleDefault' (EventKey (MouseButton LeftButton) Down
     (Modifiers {alt = Down, shift = Up, ctrl = Up}) p) = do

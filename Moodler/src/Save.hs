@@ -198,17 +198,18 @@ saveItems parentId everythingSaved mouseLocn curSel =
 
 saveSelection' :: (Functor m, MonadIO m, MonadState GlossWorld m)
                   => S.Set UiId -> Maybe Point -> [UiId] ->
-                      M.Map String String ->
+                      M.Map String String -> Maybe UiId ->
                       StateT (S.Set UiId) ( WriterT (Multi String String) m) ()
-saveSelection' everythingSaved maybeMouseLocn curSel aliasesToSave = do
+saveSelection' everythingSaved maybeMouseLocn curSel aliasesToSave mOutId = do
     multiTellLn "postamble" 4 "return ()"
     multiTellLn "midamble" 4 "recompile"
     saveItems (Inside (UiId "root")) everythingSaved maybeMouseLocn curSel
     forM_ (M.toList aliasesToSave) $ \(aliasName, synthName) ->
         multiTellLn "aliases" 4 $
             unwords ["alias", show aliasName, synthName]
-    outId <- lift $ use outputId
-    multiTellLn "output" 4 $ unwords ["setOutput", unUiId outId]
+    case mOutId of
+        Nothing -> return ()
+        Just outId -> multiTellLn "output" 4 $ unwords ["setOutput", unUiId outId]
 
 selectionCode :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
                  Maybe Point -> [UiId] -> StateT (S.Set UiId) (
@@ -231,7 +232,7 @@ selectionCode maybeMouseLocn sel = do
         multiTellLn "synth" 4 $
                 unwords [synthName,
                 " <- ", "new'", show synthType]
-    saveSelection' (S.fromList everythingSaved) maybeMouseLocn needsSaving aliasesToSave
+    saveSelection' (S.fromList everythingSaved) maybeMouseLocn needsSaving aliasesToSave Nothing
 
 saveSelection :: (Functor m, MonadIO m, MonadState GlossWorld m)
                  => Maybe Point -> m String
@@ -274,7 +275,8 @@ codeWorld' everythingSaved synths needsSaving aliasesToSave = do
                         unwords [synthName, "<-", "new'",
                                  show synthType]
 
-        saveSelection' everythingSaved Nothing needsSaving aliasesToSave
+        outId <- lift $ use outputId
+        saveSelection' everythingSaved Nothing needsSaving aliasesToSave (Just outId)
         --saveBindings
 --         forM_ (M.toList aliasesToSave) $ \(aliasName, synthName) ->
 --             multiTellLn "aliases" 4 $

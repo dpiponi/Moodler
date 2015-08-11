@@ -119,9 +119,9 @@ class Network(object):
         self.bytes_out = 0
         self.bytes_in = 0
         self.dev = {
-            4: "/dev/tty.usbmodem144451",
-            5: "/dev/tty.usbmodem144461",
-            6: "/dev/tty.usbmodem144471"
+            4: "/dev/cu.usbmodem14251",
+            5: "/dev/cu.usbmodem14261",
+            6: "/dev/cu.usbmodem14271"
             }
         self.ports = {}
         for slave in union(union(input_slaves, output_slaves), analogue_slaves):
@@ -251,7 +251,7 @@ class Network(object):
 
 
 # Assuming no more than 16 inputs and 16 outputs on one module
-IO_ADDRESS_WIDTH = 4
+IO_ADDRESS_WIDTH = 5
 INPUT_RANGE = range(1 << IO_ADDRESS_WIDTH)
 SLAVE_ADDRESS_WIDTH = 4
 SLAVE_RANGE = range(1 << SLAVE_ADDRESS_WIDTH)
@@ -355,6 +355,11 @@ def changes(client, old_connectivity, connectivity):
         (4, 4): ('in-9', 'signal'), 
         (4, 3): ('in-10', 'signal'), 
         (4, 2): ('in-11', 'signal'), 
+        (4, 18): ('in-12', 'signal'), 
+        (4, 19): ('in-25', 'signal'), 
+        (4, 20): ('in-26', 'signal'), 
+        (4, 21): ('in-27', 'signal'), 
+        (4, 22): ('in-28', 'signal'), 
 
         (5, 12): ('out-13', 'result'),
         (5, 11): ('out-14', 'result'),
@@ -366,7 +371,12 @@ def changes(client, old_connectivity, connectivity):
         (5, 5): ('out-20', 'result'),
         (5, 4): ('out-21', 'result'),
         (5, 3): ('out-22', 'result'),
-        (5, 2): ('out-23', 'result') 
+        (5, 2): ('out-23', 'result'),
+        (5, 18): ('out-24', 'result'), 
+        (5, 19): ('out-29', 'result'),
+        (5, 20): ('out-30', 'result'),
+        (5, 21): ('out-31', 'result'),
+        (5, 22): ('out-32', 'result')
     }
 
     for slave, inputs in old_connectivity.iteritems():
@@ -423,9 +433,9 @@ def main():
     output_slaves = [5]
     analogue_slaves = [6]
     # Mapping from port ids to port numbers.
-    inputs = {4: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
-    outputs = {5: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
-    analogues = {6: [18, 19, 20, 21, 22, 23]}
+    inputs = {4: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 19, 20, 21, 22]}
+    outputs = {5: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 19, 20, 21, 22]}
+    analogues = {6: [18, 19, 20, 21, 22, 23, 24, 25]}
 
     net = Network(input_slaves=input_slaves,
                   output_slaves=output_slaves,
@@ -454,7 +464,7 @@ def main():
 
     connectivity = {4: {}, 5: {}, 6: {}} # XXX
     physical_connectivity = {4: {}, 5: {}, 6: {}} # XXX
-    knob_pins = [18, 19, 20, 21, 22, 23]
+    knob_pins = [18, 19, 20, 21, 22, 23, 24, 25]
     oldknobs = [-1.0 for k in knob_pins]
     knob_targets = {
         (18, 'knob-1', 'result', (0.0, 1.0)),
@@ -462,7 +472,9 @@ def main():
         (20, 'knob-3', 'result', (0.0, 1.0)),
         (21, 'knob-4', 'result', (0.0, 1.0)),
         (22, 'knob-5', 'result', (0.0, 1.0)),
-        (23, 'knob-6', 'result', (0.0, 1.0))
+        (23, 'knob-6', 'result', (0.0, 1.0)),
+        (24, 'knob-7', 'result', (0.0, 1.0)),
+        (25, 'knob-8', 'result', (0.0, 1.0))
         #(19, 'input36', 'result', (0.0, 0.25)),
         #(20, 'input41', 'result', (0.0, 0.02)),
         #(21, 'input43', 'result', (0.0, 1.0)),

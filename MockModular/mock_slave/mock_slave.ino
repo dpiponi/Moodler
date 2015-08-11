@@ -24,7 +24,7 @@ enum Protocol {
   PROTOCOL_READ_ALL = 3,
   PROTOCOL_WRITES = 4,
   PROTOCOL_ECHO = 5,
-  PROTOCOL_READ_ANALOGUE = 6,in
+  PROTOCOL_READ_ANALOGUE = 6,
   PROTOCOL_MODE_INPUT = 7,
   PROTOCOL_MODE_PULLUP = 8,
   PROTOCOL_MODE_OUTPUT = 9
@@ -36,11 +36,11 @@ int target;
 int result;
 int value;
 
-int num_inputs = 11;
-const int inputs[11] = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+int num_inputs = 16;
+const int inputs[16] = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 19, 20, 21, 22 };  
 
-int num_outputs = 11;
-const int outputs[11] = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+int num_outputs = 16;
+const int outputs[16] = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 18, 19, 20, 21, 22 };
 
 //const int input_begin = 2;
 //const int input_end = 13;
@@ -93,8 +93,8 @@ void loop() {
             // XXX Upgrade to 16 bit! XXX
             unsigned int _result = 0;
             unsigned int io_bit = 1;
-            for (int i = input_begin; i < input_end; ++i) {
-              _result |= digitalRead(i) ? io_bit : 0;
+            for (int i = 0; i < num_inputs; ++i) {
+              _result |= digitalRead(inputs[i]) ? io_bit : 0;
               io_bit <<= 1;
             }
             result = _result;
@@ -143,8 +143,8 @@ void loop() {
 
         // Set all outputs to given value
         case AWAITING_SET_ALL_VALUE:
-          for (target = output_begin; target < output_end; ++target) {
-            digitalWrite(target, input);
+          for (target = 0; target < num_outputs; ++target) {
+            digitalWrite(outputs[target], input);
             //digitalWrite(target, 0);
           }
           state = AWAITING_COMMAND;
@@ -164,9 +164,9 @@ void loop() {
             unsigned int mask = ((unsigned int)input << 8) | lo;
             //mask = 65535;
             unsigned int io_bit = 1;
-            for (target = output_begin; target < output_end; ++target) {
+            for (target = 0; target < num_outputs; ++target) {
               //pinMode(target, OUTPUT);
-              digitalWrite(target, mask & io_bit ? 1 : 0);
+              digitalWrite(outputs[target], mask & io_bit ? 1 : 0);
               io_bit <<= 1;
             }
             //digitalWrite(9,1);

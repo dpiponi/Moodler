@@ -1,6 +1,5 @@
 -- Set selected knobs to given value
 do
-    plane <- currentPlane
     knobs <- selection
     value <- input "value: "
     case value of
