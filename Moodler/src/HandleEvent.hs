@@ -128,8 +128,16 @@ labelGadget p f xform = do
         uncurry translate p
             (scale 0.05 0.05 (color black (text (show f))))
 
-handleListen :: [Cable] -> Event -> MoodlerM ()
+handleListenToKnob :: Event -> MoodlerM ()
+handleListenToKnob (EventKey (SpecialKey KeySpace) Up _ _) = do
+    gadget .= const blank
+    liftIO $ print "Finished listening"
 
+handleListenToKnob _ = do
+    e <- liftF $ GetEvent id
+    handleListenToKnob e
+
+handleListen :: [Cable] -> Event -> MoodlerM ()
 handleListen currentCables (EventKey (SpecialKey KeySpace) Up _ _) = do
     liftIO $ print currentCables
     case currentCables of
@@ -193,11 +201,15 @@ handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
                     -- We can only listen to this In if it has a single
                     -- cable coming from an Out.
                     case elt ^. cablesIn of
-                        [Cable srcId] -> do
+                        Cable srcId : _ -> do
                             gadget .= listenGadget (elt ^. ur . loc)
                             elt' <- getElementById "listen" srcId
                             listenTo elt'
                         _ -> return ()
+                Knob {} -> do
+                    gadget .= knobGadget (elt ^. ur . loc) (unJust "listen" $ elt ^? setting)
+                    e <- liftF $ GetEvent id
+                    handleListenToKnob e
                 _ -> return ()
         Nothing -> return ()
     handleDefault
