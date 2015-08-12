@@ -33,11 +33,12 @@ import Utils
 import World
 import Save
 import KeyMatcher
+import Comms
 import HandleDraggingRoot
 import HandleDraggingSelection
 import HandleDraggingCable
 import HandleDraggingKnob
-import Comms
+import HandleListen
 
 -- Find a container somewhere in a list of ids.
 -- Assumes there is precisely one. XXX
@@ -142,12 +143,6 @@ hoverGadget (ex, ey) elt xform =
      in pictureTransformer xform $
         translate ex (ey+25) $ scale 0.5 0.5 $
         B.textInBox (B.transparentBlack 0.7) white txt
-
-listenGadget :: Point -> B.Transform -> Picture
-listenGadget (ex, ey) xform = 
-     pictureTransformer xform $
-        translate ex ey $ scale 0.5 0.5 $
-        color (makeColor 0.3 0.8 0.3 0.8) $ thickCircle 35 15
 
 labelGadget :: Show a => (Float, Float) -> a -> B.Transform -> Picture
 labelGadget p f xform = do
