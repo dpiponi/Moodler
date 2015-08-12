@@ -10,7 +10,7 @@ import qualified Box as B
 
 handleDraggingRoot :: MoodlerM Zero -> Point -> MoodlerM Zero
 handleDraggingRoot handleDefault p0 = do
-    e <- liftF $ GetEvent id
+    e <- getEvent
     handleDraggingRoot' handleDefault p0 e
 
 handleDraggingRoot' :: MoodlerM Zero -> Point -> Event -> MoodlerM Zero

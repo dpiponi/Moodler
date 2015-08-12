@@ -35,7 +35,7 @@ knobMapping v (dx, dy) = v+0.01*dx*exp (0.01*dy)
 handleDraggingKnob :: MoodlerM Zero -> (Event -> MoodlerM Zero) -> UiId -> Float -> Point -> 
                         MoodlerM Zero
 handleDraggingKnob handleDefault handleDefault' selectedKnob v (x0, y0) = do
-    e <- liftF $ GetEvent id
+    e <- getEvent
     handleDraggingKnob' handleDefault handleDefault' selectedKnob v (x0, y0) e
 
 handleDraggingKnob' :: MoodlerM Zero -> (Event -> MoodlerM Zero) ->

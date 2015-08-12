@@ -29,7 +29,7 @@ handleDraggingSelection :: MoodlerM Zero -> Point ->
                            MoodlerM Zero
 handleDraggingSelection handleDefault p0' = do
     let p0 = quantise2 quantum p0'
-    e <- liftF $ GetEvent id
+    e <- getEvent
     handleDraggingSelection' handleDefault p0 e
 
 doDrag :: Point -> Point -> MoodlerM ()

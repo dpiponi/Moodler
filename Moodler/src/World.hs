@@ -86,10 +86,13 @@ class InputHandler m where
 
 $(makeLenses ''World)
 
+getEvent :: MoodlerM Event
+getEvent = liftF $ GetEvent id
+
 handleGetString :: [String] -> String -> String -> String ->
                    MoodlerM (Maybe String)
 handleGetString completions inputString afterCursor prompt = do
-    e <- liftF $ GetEvent id
+    e <- getEvent
     let longestCompletion = if null afterCursor
         then longestMatchingPrefix completions inputString
         else inputString

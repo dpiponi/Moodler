@@ -45,6 +45,32 @@ findContainer es = do
     (a, b) <- partitionM isContainer es
     return (head a, b)
 
+ctrlDrag :: UiId -> Point -> UIElement -> MoodlerM Zero
+ctrlDrag i _ Container {} = do
+    planeInfo . planes .= i
+    handleDefault
+ctrlDrag i p Out {} = do
+    highlightJust i
+    handleDraggingCable handleDefault i p p
+ctrlDrag i _ In {} = do
+    doSelection i
+    handleDefault
+ctrlDrag i p Knob {} = do
+    highlightJust i
+    handleDraggingCable handleDefault i p p
+ctrlDrag i p Selector {} = do
+    highlightJust i
+    handleDraggingCable handleDefault i p p
+ctrlDrag i _ Label {} = do
+    doSelection i
+    handleDefault
+ctrlDrag i _ Image {} = do
+    doSelection i
+    handleDefault
+ctrlDrag i p TextBox {} = do
+    highlightJust i
+    handleDraggingCable handleDefault i p p
+
 handleDefault :: MoodlerM Zero
 handleDefault = handleDefault' =<< {-MoodlerM-} liftF (GetEvent id)
 
@@ -134,7 +160,7 @@ handleListenToKnob (EventKey (SpecialKey KeySpace) Up _ _) = do
     liftIO $ print "Finished listening"
 
 handleListenToKnob _ = do
-    e <- liftF $ GetEvent id
+    e <- getEvent
     handleListenToKnob e
 
 handleListen :: [Cable] -> Event -> MoodlerM ()
@@ -152,7 +178,7 @@ handleListen currentCables (EventKey (SpecialKey KeySpace) Up _ _) = do
     liftIO $ print "Finished listening"
 
 handleListen currentCables _ = do
-    e <- liftF $ GetEvent id
+    e <- getEvent
     handleListen currentCables e
 
 listenTo :: UIElement -> FreeT MoodlerF (StateT GlossWorld IO) ()
@@ -163,7 +189,7 @@ listenTo elt = do
     liftIO $ print $ "cables = " ++ show currentCables
     sendConnectMessage srcName "out.value"
     sendRecompileMessage "listen"
-    e <- liftF $ GetEvent id
+    e <- getEvent
     handleListen currentCables e
 
 handleDefault' :: Event -> MoodlerM Zero
@@ -208,7 +234,7 @@ handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
                         _ -> return ()
                 Knob {} -> do
                     gadget .= knobGadget (elt ^. ur . loc) (unJust "listen" $ elt ^? setting)
-                    e <- liftF $ GetEvent id
+                    e <- getEvent
                     handleListenToKnob e
                 _ -> return ()
         Nothing -> return ()
@@ -386,7 +412,7 @@ handleDefault' (EventKey (MouseButton WheelUp) Down _ p) = do
     handleDefault
     -}
 
--- Start ordinary selection drag to move
+-- Start ordinary selection alt-drag to move
 handleDefault' (EventKey (MouseButton LeftButton) Down
     (Modifiers {alt = Down, shift = Up, ctrl = Up}) p) = do
     selectionPlane <- use (planeInfo . planes)
@@ -395,14 +421,9 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
     case e of
         Just i -> do
             bringToFront i
-            if i `elem` sel
-                then do
-                    W.undoPoint
-                    handleDraggingSelection handleDefault p
-                else do
-                    W.undoPoint
-                    doSelection i
-                    handleDraggingSelection handleDefault p
+            W.undoPoint
+            unless (i `elem` sel) $ doSelection i
+            handleDraggingSelection handleDefault p
         Nothing -> handleDraggingRoot handleDefault p
 
 -- Cable drag with ctrl-mouse
@@ -414,31 +435,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
         Just i -> do
             bringToFront i
             elt <- getElementById "HandleEvent.hs" i
-            case elt of
-                Container {} -> do
-                    planeInfo . planes .= i
-                    handleDefault
-                Out {} -> do
-                    highlightJust i
-                    handleDraggingCable handleDefault i p p
-                In {} -> do
-                    doSelection i
-                    handleDefault
-                Knob {} -> do
-                    highlightJust i
-                    handleDraggingCable handleDefault i p p
-                Selector {} -> do
-                    highlightJust i
-                    handleDraggingCable handleDefault i p p
-                Label {} -> do
-                    doSelection i
-                    handleDefault
-                Image {} -> do
-                    doSelection i
-                    handleDefault
-                TextBox {} -> do
-                    highlightJust i
-                    handleDraggingCable handleDefault i p p
+            ctrlDrag i p elt
         Nothing -> handleDefault
 
 handleDefault' (EventKey key Down
@@ -485,7 +482,7 @@ selectEverythingInRegion p0 p1 = do
 handleDraggingRegion :: Point -> Point ->
                            MoodlerM Zero
 handleDraggingRegion p1 p2 = do
-    e <- liftF $ GetEvent id
+    e <- getEvent
     handleDraggingRegion' p1 p2 e
 
 -- Mouse motion during region drag
@@ -516,7 +513,7 @@ handleDraggingSlider selectedSlider (_, y0) = do
     let sliderLoc = elt ^. ur . loc . _2 :: Float
     let v = unUiAngle (_knobMin elt) (_knobMax elt) ((y0-sliderLoc)/15.0) :: Float
     void $ W.synthSet selectedSlider v
-    e <- liftF $ GetEvent id
+    e <- getEvent
     handleDraggingSlider' selectedSlider e
 
 sliderGadget :: (Float, Float) -> Float -> B.Transform -> Picture
