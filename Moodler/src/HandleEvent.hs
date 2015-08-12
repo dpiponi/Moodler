@@ -94,43 +94,47 @@ clickOnIn' p i = do
             handleDraggingCable handleDefault src (_loc (_ur srcElt)) p
 
 -- Straightforward click on a UI element
-defaultClick' :: Point -> UiId -> MoodlerM Zero
-defaultClick' p i = do
-    elt <- getElementById "defaultClick'" i
-    case elt of
-        -- XXX Need to select images/containers correctly.
-        Container {} -> do
-            doSelection i
-            handleDraggingSelection handleDefault p
-        Out {} -> do
-            highlightJust i
-            gadget .= cableGadget p p
-            handleDraggingCable handleDefault i p p
-        In {} -> do
-            W.undoPoint
-            clickOnIn' p i
-        Knob { _knobStyle = KnobStyle } -> do
-            highlightJust i
-            W.undoPoint
-            handleDraggingKnob handleDefault handleDefault' i (_setting elt) p
-        Knob { _knobStyle = SliderStyle } -> do
-            highlightJust i
-            W.undoPoint
-            handleDraggingSlider i p
-        Label {} -> do
-            doSelection i
-            handleDefault
-        Image {} -> do
-            doSelection i
-            handleDefault
-        Selector { _setting = oldSetting,
-                   _options = opts } -> do
-            let newSetting = (floor oldSetting+1) `mod` length opts
-            W.undoPoint
-            void $ W.synthSet i (fromIntegral newSetting)
-            handleDefault
-        TextBox { } -> 
-            handleTextBox i
+defaultClick' :: Point -> UiId -> UIElement -> MoodlerM Zero
+defaultClick' p i Container {} = do -- XXX Need to select images/containers correctly.
+    doSelection i
+    handleDraggingSelection handleDefault p
+
+defaultClick' p i Out {} = do
+    highlightJust i
+    gadget .= cableGadget p p
+    handleDraggingCable handleDefault i p p
+
+defaultClick' p i In {} = do
+    W.undoPoint
+    clickOnIn' p i
+
+defaultClick' p i elt@Knob { _knobStyle = KnobStyle } = do
+    highlightJust i
+    W.undoPoint
+    handleDraggingKnob handleDefault handleDefault' i (_setting elt) p
+
+defaultClick' p i Knob { _knobStyle = SliderStyle } = do
+    highlightJust i
+    W.undoPoint
+    handleDraggingSlider i p
+
+defaultClick' _ i Label {} = do
+    doSelection i
+    handleDefault
+
+defaultClick' _ i Image {} = do
+    doSelection i
+    handleDefault
+
+defaultClick' _ i Selector { _setting = oldSetting
+                           , _options = opts } = do
+    let newSetting = (floor oldSetting+1) `mod` length opts
+    W.undoPoint
+    void $ W.synthSet i (fromIntegral newSetting)
+    handleDefault
+
+defaultClick' _ i TextBox { } = 
+    handleTextBox i
 
 elementDisplayName :: UIElement -> String
 elementDisplayName In { _displayName = n} = n
@@ -149,7 +153,6 @@ labelGadget p f xform = do
     pictureTransformer xform $
         uncurry translate p
             (scale 0.05 0.05 (color black (text (show f))))
-
 
 mMaybe :: Monad m => m (Maybe a) -> (a -> m ()) -> m ()
 mMaybe ma f = do
@@ -298,37 +301,37 @@ handleDefault' (EventKey (Char 'g') Down _ proxyLocation) = do
 -- Shift mouse down
 -- Starts MultiSelection
 handleDefault' (EventKey (MouseButton LeftButton) Down
-                    (Modifiers {alt = Up, shift = Down, ctrl = Up})
-                    p) = do
+                Modifiers {alt = Up, shift = Down, ctrl = Up}
+                p) = do
     selectionPlane <- use (planeInfo . planes)
-    mMaybe (selectedByPoint selectionPlane p) $ \i -> do
+    mMaybe (selectedByPoint selectionPlane p) $ \selected -> do
         sel <- use currentSelection
-        if i `elem` sel
+        if selected `elem` sel
             then do
-                unhighlightElement i
-                currentSelection %= delete i
+                unhighlightElement selected
+                currentSelection %= delete selected
             else do
-                highlightElement i
-                currentSelection %= (i :)
+                highlightElement selected
+                currentSelection %= (selected :)
     handleDefault
 
 -- The normal/ordinary mouse down event
 handleDefault' (EventKey (MouseButton LeftButton) Down
-    (Modifiers {alt = Up, shift = Up, ctrl = Up}) p) = do
+    Modifiers {alt = Up, shift = Up, ctrl = Up} p) = do
     selectionPlane <- use (planeInfo . planes)
     e <- selectedByPoint selectionPlane p
     case e of
-        Just i -> do
-            bringToFront i
+        Just selected -> do
+            bringToFront selected
             sel <- use currentSelection
-            if (length sel > 1) && (i `elem` sel)
+            if length sel > 1 && selected `elem` sel
                 then handleDraggingSelection handleDefault p
-                else defaultClick' p i
+                else defaultClick' p selected =<< getElementById "defaultClick'" selected
 
         Nothing -> handleDraggingRegion p p
 
 handleDefault' (EventKey (MouseButton RightButton) Down
-    (Modifiers {alt = Down, shift = Up, ctrl = Up}) p) = do
+    Modifiers {alt = Down, shift = Up, ctrl = Up} p) = do
 
     selectionPlane <- use (planeInfo . planes)
     mMaybe (selectedByPoint selectionPlane p) $ \i -> do
@@ -344,7 +347,7 @@ handleDefault' (EventKey (MouseButton WheelUp) Down _ p) = do
 
 -- Start ordinary selection alt-drag to move
 handleDefault' (EventKey (MouseButton LeftButton) Down
-    (Modifiers {alt = Down, shift = Up, ctrl = Up}) p) = do
+    Modifiers {alt = Down, shift = Up, ctrl = Up} p) = do
     selectionPlane <- use (planeInfo . planes)
     e <- selectedByPoint selectionPlane p
     sel <- use currentSelection
@@ -358,7 +361,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
 
 -- Cable drag with ctrl-mouse
 handleDefault' (EventKey (MouseButton LeftButton) Down
-        (Modifiers {alt = Up, ctrl = Down, shift = Up}) p) = do
+        Modifiers {alt = Up, ctrl = Down, shift = Up} p) = do
     selectionPlane <- use (planeInfo . planes)
     e <- selectedByPoint selectionPlane p
     case e of
@@ -368,7 +371,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
         Nothing -> handleDefault
 
 handleDefault' (EventKey key Down
-            (Modifiers {shift = Up}) _) | isDirection key = do
+            Modifiers {shift = Up} _) | isDirection key = do
     let (dx, dy) = getDirection key
     sel <- use currentSelection
     forM_ sel $ \e ->
