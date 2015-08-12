@@ -4,7 +4,7 @@ module HandleEvent where
 
 import Control.Lens hiding (setting)
 import Control.Monad.State
-import Control.Monad.Trans.Free
+--import Control.Monad.Trans.Free
 import Data.List
 import Data.Monoid
 import GHC.IO.Exception
@@ -33,7 +33,7 @@ import Utils
 import World
 import Save
 import KeyMatcher
-import Comms
+-- import Comms
 import HandleDraggingRoot
 import HandleDraggingSelection
 import HandleDraggingCable
@@ -74,7 +74,7 @@ ctrlDrag i p TextBox {} = do
     handleDraggingCable handleDefault i p p
 
 handleDefault :: MoodlerM Zero
-handleDefault = handleDefault' =<< {-MoodlerM-} liftF (GetEvent id)
+handleDefault = handleDefault' =<< getEvent
 
 -- Handle ordinary click on an In port.
 -- If there's a cable attached we start dragging it
@@ -150,63 +150,13 @@ labelGadget p f xform = do
         uncurry translate p
             (scale 0.05 0.05 (color black (text (show f))))
 
-handleListenToKnob :: Event -> MoodlerM ()
-handleListenToKnob (EventKey (SpecialKey KeySpace) Up _ _) = do
-    gadget .= const blank
-    liftIO $ print "Finished listening"
 
-handleListenToKnob _ = do
-    e <- getEvent
-    handleListenToKnob e
-
-handleListen :: [Cable] -> Event -> MoodlerM ()
-handleListen currentCables (EventKey (SpecialKey KeySpace) Up _ _) = do
-    liftIO $ print currentCables
-    case currentCables of
-        [] -> do
-            sendDisconnectMessage "out.value"
-            sendRecompileMessage "Finished listening"
-        Cable o : _ ->  do
-            oName <- use (inner . uiElements . ix o . ur . name)
-            sendConnectMessage oName "out.value"
-            sendRecompileMessage "Finished listening"
-    gadget .= const blank
-    liftIO $ print "Finished listening"
-
-handleListen currentCables _ = do
-    e <- getEvent
-    handleListen currentCables e
-
-listenTo :: UIElement -> FreeT MoodlerF (StateT GlossWorld IO) ()
-listenTo elt = do
-    let srcName = elt ^. ur . name
-    outId <- use outputId
-    currentCables <- use (inner . uiElements . ix outId . cablesIn)
-    liftIO $ print $ "cables = " ++ show currentCables
-    sendConnectMessage srcName "out.value"
-    sendRecompileMessage "listen"
-    e <- getEvent
-    handleListen currentCables e
-
-listenOn :: UIElement -> MoodlerM ()
-listenOn elt@Out {} = do
-    --liftIO $ print "An Out!"
-    gadget .= listenGadget (elt ^. ur . loc)
-    listenTo elt
-listenOn elt@In {} = do
-    -- We can only listen to this In if it has a
-    -- cable coming from an Out.
-    case elt ^. cablesIn of
-        Cable srcId : _ -> do
-            gadget .= listenGadget (elt ^. ur . loc)
-            elt' <- getElementById "listen" srcId
-            listenTo elt'
-        _ -> return ()
-listenOn elt@Knob {} = do
-    gadget .= knobGadget (elt ^. ur . loc) (unJust "listen" $ elt ^? setting)
-    e <- getEvent
-    handleListenToKnob e
-listenOn _ = return ()
+mMaybe :: Monad m => m (Maybe a) -> (a -> m ()) -> m ()
+mMaybe ma f = do
+    a <- ma
+    case a of
+        Just x -> f x
+        Nothing -> return ()
 
 handleDefault' :: Event -> MoodlerM Zero
 handleDefault' (EventMotion p) = do
@@ -225,11 +175,8 @@ handleDefault' (EventMotion p) = do
 
 handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
     selectionPlane <- use (planeInfo . planes)
-    maybeListeningOver <- selectedByPoint selectionPlane =<< use mouseLoc
-    case maybeListeningOver of
-        Just listeningOver ->
-            listenOn =<< getElementById "HandleEvent.hs" listeningOver
-        Nothing -> return ()
+    mMaybe (selectedByPoint selectionPlane =<< use mouseLoc) $ \listeningOver ->
+        listenOn =<< getElementById "HandleEvent.hs" listeningOver
     handleDefault
 
 handleDefault' (EventKey (Char 'z') Down Modifiers { alt = Down } _) = do
@@ -303,11 +250,8 @@ handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctr
 -- XXX quantise
 handleDefault' (EventKey (Char 'w') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
-    filename <- handleGetString allScripts "" "" "write: "
-    liftIO $ putStrLn $ "filename = " ++ show filename
-    case filename of
-        Just filename' -> evalUi (U.write filename')
-        Nothing -> return ()
+    mMaybe (handleGetString allScripts "" "" "write: ") $ \filename' ->
+        evalUi (U.write filename')
     handleDefault
 
 handleDefault' (EventKey (Char 'q') Down Modifiers { alt = Down } _) = do
@@ -357,18 +301,15 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
                     (Modifiers {alt = Up, shift = Down, ctrl = Up})
                     p) = do
     selectionPlane <- use (planeInfo . planes)
-    elementId <- selectedByPoint selectionPlane p
-    case elementId of
-        Just i -> do
-            sel <- use currentSelection
-            if i `elem` sel
-                then do
-                    unhighlightElement i
-                    currentSelection %= delete i
-                else do
-                    highlightElement i
-                    currentSelection %= (i :)
-        Nothing -> return ()
+    mMaybe (selectedByPoint selectionPlane p) $ \i -> do
+        sel <- use currentSelection
+        if i `elem` sel
+            then do
+                unhighlightElement i
+                currentSelection %= delete i
+            else do
+                highlightElement i
+                currentSelection %= (i :)
     handleDefault
 
 -- The normal/ordinary mouse down event
@@ -390,12 +331,9 @@ handleDefault' (EventKey (MouseButton RightButton) Down
     (Modifiers {alt = Down, shift = Up, ctrl = Up}) p) = do
 
     selectionPlane <- use (planeInfo . planes)
-    e <- selectedByPoint selectionPlane p
-    case e of
-        Just i -> do
-            f <- getElementById "handleDefault'" i
-            gadget .= labelGadget p f
-        Nothing -> return ()
+    mMaybe (selectedByPoint selectionPlane p) $ \i -> do
+        f <- getElementById "handleDefault'" i
+        gadget .= labelGadget p f
     handleDefault
 
 {-
@@ -442,9 +380,8 @@ handleDefault' (EventKey key Down mods _) = do
     W.undoPoint
     matcher <- use keyMatcher
     let (mBinds, matcher') = updateKeyMatcher (key, mods) matcher
-    liftIO $ print (key, mods)
-    F.forM_ mBinds $ \script ->
-            execScript "scripts" script
+    --liftIO $ print (key, mods)
+    F.forM_ mBinds $ execScript "scripts"
     keyMatcher .= matcher'
     handleDefault
 
@@ -453,12 +390,9 @@ handleDefault' _ = handleDefault
 handleTextBox :: UiId -> MoodlerM Zero
 handleTextBox selectedTextBox = do
     oldText <- use (inner . uiElements . ix selectedTextBox . boxText)
-    newText <- handleGetString [] oldText "" "textbox: "
-    case newText of
-        Nothing -> return ()
-        Just txt -> do
-            W.undoPoint
-            W.synthSetString selectedTextBox txt
+    mMaybe (handleGetString [] oldText "" "textbox: ") $ \txt -> do
+        W.undoPoint
+        W.synthSetString selectedTextBox txt
     handleDefault
 
 selectEverythingInRegion :: (MonadIO m, MonadState GlossWorld m) =>
@@ -472,9 +406,7 @@ selectEverythingInRegion p0 p1 = do
 
 handleDraggingRegion :: Point -> Point ->
                            MoodlerM Zero
-handleDraggingRegion p1 p2 = do
-    e <- getEvent
-    handleDraggingRegion' p1 p2 e
+handleDraggingRegion p1 p2 = handleDraggingRegion' p1 p2 =<< getEvent
 
 -- Mouse motion during region drag
 handleDraggingRegion' :: Point -> Point -> Event ->
@@ -504,8 +436,7 @@ handleDraggingSlider selectedSlider (_, y0) = do
     let sliderLoc = elt ^. ur . loc . _2 :: Float
     let v = unUiAngle (_knobMin elt) (_knobMax elt) ((y0-sliderLoc)/15.0) :: Float
     void $ W.synthSet selectedSlider v
-    e <- getEvent
-    handleDraggingSlider' selectedSlider e
+    handleDraggingSlider' selectedSlider =<< getEvent
 
 sliderGadget :: (Float, Float) -> Float -> B.Transform -> Picture
 sliderGadget sliderLoc v1 xform = 
