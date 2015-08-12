@@ -13,6 +13,7 @@ import System.Posix
 import qualified Wiring as W
 import qualified Box as B
 import qualified Data.Foldable as F
+--import Control.Applicative
 
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.Quantise
@@ -192,6 +193,26 @@ listenTo elt = do
     e <- getEvent
     handleListen currentCables e
 
+listenOn :: UIElement -> MoodlerM ()
+listenOn elt@Out {} = do
+    --liftIO $ print "An Out!"
+    gadget .= listenGadget (elt ^. ur . loc)
+    listenTo elt
+listenOn elt@In {} = do
+    -- We can only listen to this In if it has a
+    -- cable coming from an Out.
+    case elt ^. cablesIn of
+        Cable srcId : _ -> do
+            gadget .= listenGadget (elt ^. ur . loc)
+            elt' <- getElementById "listen" srcId
+            listenTo elt'
+        _ -> return ()
+listenOn elt@Knob {} = do
+    gadget .= knobGadget (elt ^. ur . loc) (unJust "listen" $ elt ^? setting)
+    e <- getEvent
+    handleListenToKnob e
+listenOn _ = return ()
+
 handleDefault' :: Event -> MoodlerM Zero
 handleDefault' (EventMotion p) = do
     selectionPlane <- use (planeInfo . planes)
@@ -208,35 +229,11 @@ handleDefault' (EventMotion p) = do
 --     handleDefault
 
 handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
-    liftIO $ print "Hello"
     selectionPlane <- use (planeInfo . planes)
-    (x, y) <- use mouseLoc
-    liftIO $ print (x, y)
-    maybeHoveringOver <- selectedByPoint selectionPlane (x, y)
-    case maybeHoveringOver of
-        Just hoveringOver -> do
-            elt <- getElementById "HandleEvent.hs" hoveringOver
-            liftIO $ print hoveringOver
-            liftIO $ print elt
-            case elt of
-                Out {} -> do
-                    liftIO $ print "An Out!"
-                    gadget .= listenGadget (elt ^. ur . loc)
-                    listenTo elt
-                In {} -> do
-                    -- We can only listen to this In if it has a single
-                    -- cable coming from an Out.
-                    case elt ^. cablesIn of
-                        Cable srcId : _ -> do
-                            gadget .= listenGadget (elt ^. ur . loc)
-                            elt' <- getElementById "listen" srcId
-                            listenTo elt'
-                        _ -> return ()
-                Knob {} -> do
-                    gadget .= knobGadget (elt ^. ur . loc) (unJust "listen" $ elt ^? setting)
-                    e <- getEvent
-                    handleListenToKnob e
-                _ -> return ()
+    maybeListeningOver <- selectedByPoint selectionPlane =<< use mouseLoc
+    case maybeListeningOver of
+        Just listeningOver ->
+            listenOn =<< getElementById "HandleEvent.hs" listeningOver
         Nothing -> return ()
     handleDefault
 
@@ -434,8 +431,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
     case e of
         Just i -> do
             bringToFront i
-            elt <- getElementById "HandleEvent.hs" i
-            ctrlDrag i p elt
+            ctrlDrag i p =<< getElementById "HandleEvent.hs" i 
         Nothing -> handleDefault
 
 handleDefault' (EventKey key Down
