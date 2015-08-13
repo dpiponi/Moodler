@@ -173,7 +173,7 @@ handleDefault' (EventMotion p) = do
 
 handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
     selectionPlane <- use (planeInfo . planes)
-    mMaybe (selectedByPoint selectionPlane =<< use mouseLoc) $ \listeningOver ->
+    withJustM (selectedByPoint selectionPlane =<< use mouseLoc) $ \listeningOver ->
         listenOn =<< getElementById "HandleEvent.hs" listeningOver
     handleDefault
 
@@ -188,7 +188,7 @@ handleDefault' (EventKey (Char 'Z') Down Modifiers { alt = Down } _) = do
 -- XXX Could this be script+keybinding?
 -- XXX Needs to deal gracefully with situation with /= 1 container.
 handleDefault' (EventKey (Char 'p') Down _ _) = do
-    mMaybe (findContainer =<< use currentSelection) $ \(container, contentss) ->
+    withJustM (findContainer =<< use currentSelection) $ \(container, contentss) ->
         --liftIO $ print (container, contentss)
         forM_ contentss $ reparent (Outside container)
     handleDefault
@@ -211,7 +211,7 @@ handleDefault' (EventKey (Char '-')
 handleDefault' (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
     filename <- handleGetString allScripts "" "" "read: "
-    withJustM filename $ \filename' -> do
+    withJust filename $ \filename' -> do
         W.undoPoint
         void $ execScript "scripts" filename'
     handleDefault
@@ -220,7 +220,7 @@ handleDefault' (EventKey (Char 'l') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "saves"
     filename <- handleGetString allScripts "" "" "load: "
     liftIO $ putStrLn $ "filename = " ++ show filename
-    withJustM filename $ \filename' -> do
+    withJust filename $ \filename' -> do
         W.undoPoint
         fileName <- execScript "saves" filename'
         projectFile .= fileName
@@ -246,7 +246,7 @@ handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctr
 -- XXX quantise
 handleDefault' (EventKey (Char 'w') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
-    mMaybe (handleGetString allScripts "" "" "write: ") $ \filename' ->
+    withJustM (handleGetString allScripts "" "" "write: ") $ \filename' ->
         evalUi (U.write filename')
     handleDefault
 
@@ -297,7 +297,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
                 Modifiers {alt = Up, shift = Down, ctrl = Up}
                 p) = do
     selectionPlane <- use (planeInfo . planes)
-    mMaybe (selectedByPoint selectionPlane p) $ \selected -> do
+    withJustM (selectedByPoint selectionPlane p) $ \selected -> do
         sel <- use currentSelection
         if selected `elem` sel
             then do
@@ -327,7 +327,7 @@ handleDefault' (EventKey (MouseButton RightButton) Down
     Modifiers {alt = Down, shift = Up, ctrl = Up} p) = do
 
     selectionPlane <- use (planeInfo . planes)
-    mMaybe (selectedByPoint selectionPlane p) $ \i -> do
+    withJustM (selectedByPoint selectionPlane p) $ \i -> do
         f <- getElementById "handleDefault'" i
         gadget .= labelGadget p f
     handleDefault
@@ -386,7 +386,7 @@ handleDefault' _ = handleDefault
 handleTextBox :: UiId -> MoodlerM Zero
 handleTextBox selectedTextBox = do
     oldText <- use (inner . uiElements . ix selectedTextBox . boxText)
-    mMaybe (handleGetString [] oldText "" "textbox: ") $ \txt -> do
+    withJustM (handleGetString [] oldText "" "textbox: ") $ \txt -> do
         W.undoPoint
         W.synthSetString selectedTextBox txt
     handleDefault

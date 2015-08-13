@@ -67,11 +67,11 @@ clampToRange lowLimit highLimit value =
             Nothing -> v0
             Just hi -> min v0 hi
 
-mMaybe :: Monad m => m (Maybe a) -> (a -> m ()) -> m ()
-mMaybe ma f = do
+withJustM :: Monad m => m (Maybe a) -> (a -> m ()) -> m ()
+withJustM ma f = do
     a <- ma
-    withJustM a f
+    withJust a f
 
-withJustM :: Monad m => Maybe a -> (a -> m ()) -> m ()
-withJustM Nothing _ = return ()
-withJustM (Just a) f = f a
+withJust :: Monad m => Maybe a -> (a -> m ()) -> m ()
+withJust Nothing _ = return ()
+withJust (Just a) f = f a
