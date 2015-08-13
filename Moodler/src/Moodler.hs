@@ -1,20 +1,14 @@
 --{-# LANGUAGE TemplateHaskell #-}
 
---import Control.Concurrent
 import Control.Monad
 import Sound.OSC
 import System.Posix.DynamicLinker
 import Data.IORef
 import qualified Data.Map as M
 import qualified Data.Set as S
---import Data.Maybe
 import Control.Monad.Trans.Error
 import Data.Array.IArray
 import Control.Monad.State
---import Control.Lens
---import Foreign.Ptr
---import Control.Monad.Morph
---import Foreign.C.String
 
 import Audio
 import Synth
@@ -25,11 +19,6 @@ import KeyTracker
 import MoodlerSymbols
 
 ipAddress :: String
---ipAddress = "192.168.10.31"
---ipAddress = "172.19.23.48"
---ipAddress = "192.168.1.64"
---ipAddress = "192.168.1.72"
---ipAddress = "100.110.63.245"
 ipAddress = "127.0.0.1"
 socket :: Int
 socket = 7777
@@ -40,6 +29,8 @@ modulesDirectory = "modules"
 numVoices :: Int
 numVoices = 1
 
+-- Write code using the State monad but use it with
+-- IORef instead.
 adapt :: MonadIO m => IORef a -> StateT a m b -> m b
 adapt ref code = do
       a <- liftIO $ readIORef ref
@@ -62,12 +53,6 @@ main = do
             audioStateList <- replicateM numVoices (createFn dso)
             let audioStates = 
                     listArray (0, numVoices-1) audioStateList
-                    {-
-            forM_ [0..numVoices-1] $ \i ->
-                forM_ (M.keys theStandard) $ \nodeToClear ->
-                    withCString nodeToClear $ \nodeString ->
-                        dsoInit2Fn dso (audioStates!i) nodeString
-                        -}
 
             audioPlayer <- liftIO loadAudioDSO
             setNumStates audioPlayer numVoices
@@ -82,8 +67,8 @@ main = do
             void $ withTransport transport $ forever $ do
                 msg <- recvMessage
                 lift $ adapt pMoodler (handleMessage theStandard numVoices audioStates
-                                       (setFillBuffer audioPlayer)
-                       synthTypes msg)
+                                                     (setFillBuffer audioPlayer)
+                                                     synthTypes msg)
 
             dlclose (dl dso)
             closeAudioPlayer audioPlayer

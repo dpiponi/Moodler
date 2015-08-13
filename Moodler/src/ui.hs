@@ -3,22 +3,15 @@
 import Graphics.Gloss.Interface.IO.Game
 import Control.Monad.State
 import System.Environment
---import Control.Applicative
---import Control.Monad.Trans.Either
 import Control.Lens
 import Control.Monad.Trans.Free
 import qualified Data.Map as M
 import qualified Data.Set as S
---import Data.Maybe
 
 import Sound.MoodlerLib.Symbols
 
---import Symbols
 import World
---import Options
 import Draw
---import UISupport
---import Data.Maybe
 import UIElement
 import HandleEvent
 import Command
@@ -39,11 +32,6 @@ handleMousePosition world m p = (`execStateT` world) $ do
 handleNoMousePosition :: GlossWorld -> MoodlerM Zero -> IO GlossWorld
 handleNoMousePosition world m = (`execStateT` world) $
     (cont .=) =<< runFreeT m
-
-{-
-applyTransformKey xform (EventKey a1 a2 a3 p) =
-    EventKey a1 a2 a3 (applyTransform xform p)
--}
 
 -- XXX Mouse position may be off by one event in time.
 eventHandler :: Event -> GlossWorld -> IO GlossWorld
