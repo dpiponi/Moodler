@@ -7,6 +7,8 @@ import Control.Lens
 import Control.Monad.Trans.Free
 import qualified Data.Map as M
 import qualified Data.Set as S
+import Sound.OSC
+import Control.Concurrent
 
 import Sound.MoodlerLib.Symbols
 
@@ -18,6 +20,11 @@ import Command
 import Box
 import KeyMatcher
 import ParseUIOpts
+
+ipAddress :: String
+ipAddress = "127.0.0.1"
+socket :: Int
+socket = 7777
 
 -- Zero elimination
 magic :: Zero -> a
@@ -115,11 +122,17 @@ emptyGlossWorld =
 
 launchGUI :: GlossWorld -> IO ()
 launchGUI world = do
-  print "Starting..."
-  playIO (InWindow "Moodler"
-                   (1200, 1000) (100, 100))
-                   white 1 world
-                   renderWorld eventHandler simulate
+    print "Starting OSC thread..."
+    let transport = udpServer ipAddress socket
+    void $ forkIO $ withTransport transport $ forever $ do
+        msg <- recvMessage
+        liftIO $ print msg
+        
+    print "Starting..."
+    playIO (InWindow "Moodler"
+                     (1200, 1000) (100, 100))
+                     white 1 world
+                     renderWorld eventHandler simulate
 
 main :: IO ()
 main = do
