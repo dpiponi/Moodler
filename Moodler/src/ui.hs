@@ -9,6 +9,8 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 import Sound.OSC
 import Control.Concurrent
+import Control.Monad.STM
+import Control.Concurrent.STM.TChan
 
 import Sound.MoodlerLib.Symbols
 
@@ -41,8 +43,8 @@ handleNoMousePosition world m = (`execStateT` world) $
     (cont .=) =<< runFreeT m
 
 -- XXX Mouse position may be off by one event in time.
-eventHandler :: Event -> GlossWorld -> IO GlossWorld
-eventHandler (EventKey a1 a2 a3 p) world@GlossWorld { _cont = m } = 
+eventHandler :: TChan Message -> Event -> GlossWorld -> IO GlossWorld
+eventHandler oscQueue (EventKey a1 a2 a3 p) world@GlossWorld { _cont = m } = 
     case m of
         Pure a -> magic a
 
@@ -52,7 +54,7 @@ eventHandler (EventKey a1 a2 a3 p) world@GlossWorld { _cont = m } =
             in handleMousePosition world
                          (handler (EventKey a1 a2 a3 p')) p'
 
-eventHandler (EventMotion p) world@GlossWorld { _cont = m } =
+eventHandler oscQueue (EventMotion p) world@GlossWorld { _cont = m } =
     case m of
         Pure a -> magic a
 
@@ -62,7 +64,7 @@ eventHandler (EventMotion p) world@GlossWorld { _cont = m } =
             in handleMousePosition world
                             (handler (EventMotion p')) p'
 
-eventHandler event@(EventResize _) world@GlossWorld { _cont = m } =
+eventHandler oscQueue event@(EventResize _) world@GlossWorld { _cont = m } =
     case m of
         Pure a -> magic a
 
@@ -124,15 +126,17 @@ launchGUI :: GlossWorld -> IO ()
 launchGUI world = do
     print "Starting OSC thread..."
     let transport = udpServer ipAddress socket
+    oscQueue <- newTChanIO
     void $ forkIO $ withTransport transport $ forever $ do
-        msg <- recvMessage
+        msg <- waitMessage
         liftIO $ print msg
+        liftIO $ atomically $ writeTChan oscQueue msg
         
     print "Starting..."
     playIO (InWindow "Moodler"
                      (1200, 1000) (100, 100))
                      white 1 world
-                     renderWorld eventHandler simulate
+                     renderWorld (eventHandler oscQueue) simulate
 
 main :: IO ()
 main = do
