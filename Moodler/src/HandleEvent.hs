@@ -42,10 +42,12 @@ import HandleListen
 
 -- Find a container somewhere in a list of ids.
 -- Assumes there is precisely one. XXX
-findContainer :: [UiId] -> MoodlerM (UiId, [UiId])
+findContainer :: [UiId] -> MoodlerM (Maybe (UiId, [UiId]))
 findContainer es = do
     (a, b) <- partitionM isContainer es
-    return (head a, b)
+    case a of
+        [a'] -> return $ Just (a', b)
+        _ -> return Nothing
 
 ctrlDrag :: UiId -> Point -> UIElement -> MoodlerM Zero
 ctrlDrag i _ Container {} = do
@@ -95,46 +97,46 @@ clickOnIn' p i = do
 
 -- Straightforward click on a UI element
 defaultClick' :: Point -> UiId -> UIElement -> MoodlerM Zero
-defaultClick' p i Container {} = do -- XXX Need to select images/containers correctly.
-    doSelection i
+defaultClick' p selected Container {} = do -- XXX Need to select images/containers correctly.
+    doSelection selected
     handleDraggingSelection handleDefault p
 
-defaultClick' p i Out {} = do
-    highlightJust i
+defaultClick' p selected Out {} = do
+    highlightJust selected
     gadget .= cableGadget p p
-    handleDraggingCable handleDefault i p p
+    handleDraggingCable handleDefault selected p p
 
-defaultClick' p i In {} = do
+defaultClick' p selected In {} = do
     W.undoPoint
-    clickOnIn' p i
+    clickOnIn' p selected
 
-defaultClick' p i elt@Knob { _knobStyle = KnobStyle } = do
-    highlightJust i
+defaultClick' p selected elt@Knob { _knobStyle = KnobStyle } = do
+    highlightJust selected
     W.undoPoint
-    handleDraggingKnob handleDefault handleDefault' i (_setting elt) p
+    handleDraggingKnob handleDefault handleDefault' selected (_setting elt) p
 
-defaultClick' p i Knob { _knobStyle = SliderStyle } = do
-    highlightJust i
+defaultClick' p selected Knob { _knobStyle = SliderStyle } = do
+    highlightJust selected
     W.undoPoint
-    handleDraggingSlider i p
+    handleDraggingSlider selected p
 
-defaultClick' _ i Label {} = do
-    doSelection i
+defaultClick' _ selected Label {} = do
+    doSelection selected
     handleDefault
 
-defaultClick' _ i Image {} = do
-    doSelection i
+defaultClick' _ selected Image {} = do
+    doSelection selected
     handleDefault
 
-defaultClick' _ i Selector { _setting = oldSetting
+defaultClick' _ selected Selector { _setting = oldSetting
                            , _options = opts } = do
     let newSetting = (floor oldSetting+1) `mod` length opts
     W.undoPoint
-    void $ W.synthSet i (fromIntegral newSetting)
+    void $ W.synthSet selected (fromIntegral newSetting)
     handleDefault
 
-defaultClick' _ i TextBox { } = 
-    handleTextBox i
+defaultClick' _ selected TextBox { } = 
+    handleTextBox selected
 
 elementDisplayName :: UIElement -> String
 elementDisplayName In { _displayName = n} = n
@@ -153,13 +155,6 @@ labelGadget p f xform = do
     pictureTransformer xform $
         uncurry translate p
             (scale 0.05 0.05 (color black (text (show f))))
-
-mMaybe :: Monad m => m (Maybe a) -> (a -> m ()) -> m ()
-mMaybe ma f = do
-    a <- ma
-    case a of
-        Just x -> f x
-        Nothing -> return ()
 
 handleDefault' :: Event -> MoodlerM Zero
 handleDefault' (EventMotion p) = do
@@ -193,10 +188,9 @@ handleDefault' (EventKey (Char 'Z') Down Modifiers { alt = Down } _) = do
 -- XXX Could this be script+keybinding?
 -- XXX Needs to deal gracefully with situation with /= 1 container.
 handleDefault' (EventKey (Char 'p') Down _ _) = do
-    es <- use currentSelection
-    (container, contentss) <- findContainer es
-    liftIO $ print (container, contentss)
-    forM_ contentss $ \content -> reparent (Outside container) content
+    mMaybe (findContainer =<< use currentSelection) $ \(container, contentss) ->
+        --liftIO $ print (container, contentss)
+        forM_ contentss $ reparent (Outside container)
     handleDefault
 
 -- XXX Make script+binding. Needs planeInfo . rootTransform command.
@@ -217,8 +211,7 @@ handleDefault' (EventKey (Char '-')
 handleDefault' (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
     filename <- handleGetString allScripts "" "" "read: "
-    liftIO $ putStrLn $ "filename = " ++ show filename
-    withJust filename $ \filename' -> do
+    withJustM filename $ \filename' -> do
         W.undoPoint
         void $ execScript "scripts" filename'
     handleDefault
@@ -227,7 +220,7 @@ handleDefault' (EventKey (Char 'l') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "saves"
     filename <- handleGetString allScripts "" "" "load: "
     liftIO $ putStrLn $ "filename = " ++ show filename
-    withJust filename $ \filename' -> do
+    withJustM filename $ \filename' -> do
         W.undoPoint
         fileName <- execScript "saves" filename'
         projectFile .= fileName

@@ -4,10 +4,6 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 import Data.List
 
-withJust :: Monad m => Maybe a -> (a -> m ()) -> m ()
-withJust Nothing _ = return ()
-withJust (Just a) f = f a
-
 dezip :: [Either a b] -> ([a], [b])
 dezip [] = ([], [])
 dezip (Left a : cs) = let (as, bs) = dezip cs in (a:as, bs)
@@ -70,3 +66,12 @@ clampToRange lowLimit highLimit value =
     in case highLimit of
             Nothing -> v0
             Just hi -> min v0 hi
+
+mMaybe :: Monad m => m (Maybe a) -> (a -> m ()) -> m ()
+mMaybe ma f = do
+    a <- ma
+    withJustM a f
+
+withJustM :: Monad m => Maybe a -> (a -> m ()) -> m ()
+withJustM Nothing _ = return ()
+withJustM (Just a) f = f a
