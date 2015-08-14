@@ -18,6 +18,7 @@ import Command
 import Box
 import KeyMatcher
 import ParseUIOpts
+import ServerState
 
 -- Zero elimination
 magic :: Zero -> a
@@ -66,14 +67,7 @@ eventHandler event@(EventResize _) world@GlossWorld { _cont = m } =
 simulate :: Float -> GlossWorld -> IO GlossWorld
 simulate _ = return
 
-emptyWorld :: UiId -> UIElement -> World
-emptyWorld rootID root =
-    World { _uiElements = M.fromList [(rootID, root)]
-          , _synthList = []
-          , _aliases = M.empty
-          }
-
-emptyUndo :: World -> UndoInfo
+emptyUndo :: ServerState -> UndoInfo
 emptyUndo world = UndoInfo { _innerHistory = [world]
                            , _undoHistory = [([], [])]
                            , _innerFuture = []
@@ -93,7 +87,7 @@ emptyGlossWorld :: GlossWorld
 emptyGlossWorld = 
     let root = Container { _ur = emptyUr, _pic = "panel_proxy.png", _imageWidth = 40, _imageHeight = 40, _inside = S.empty, _outside = S.empty }
         rootID = UiId "root"
-        innerWorld = emptyWorld rootID root
+        innerWorld = emptyServerState rootID root
     in GlossWorld { _inner = innerWorld
                   , _ipAddr = ""
                   , _projectFile = ""

@@ -2,7 +2,7 @@ module HandleDraggingKnob where
 
 import Control.Lens
 import Graphics.Gloss.Interface.IO.Game
-import Control.Monad.Trans.Free
+--import Control.Monad.Trans.Free
 import qualified Data.Map as M
 import Data.Monoid
 import Control.Monad

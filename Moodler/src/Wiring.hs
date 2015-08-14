@@ -30,6 +30,7 @@ import Control.Monad.Trans.Free
 
 import Sound.MoodlerLib.Symbols
 
+import ServerState
 import Comms
 import Box
 import Cable
@@ -37,27 +38,27 @@ import World
 import UIElement
 import KeyMatcher
 
-emptyWorld' :: UiId -> UIElement -> World
+emptyWorld' :: UiId -> UIElement -> ServerState
 emptyWorld' rootID root =
-    World { _uiElements = M.fromList [(rootID, root)]
-          , _synthList = []
-          , _aliases = M.empty
-          }
+    ServerState { _uiElements = M.fromList [(rootID, root)]
+                , _synthList = []
+                , _aliases = M.empty
+                }
 
 emptyGlossWorld' :: GlossWorld
 emptyGlossWorld' = 
     let root = Container { _ur = UrElement { _parent = error "Root parent shouldn't be visible"
-                     , _highlighted = False
-                     , _depth = 0
-                     , _hidden = False
-                     , _loc = (0, 0)
-                     , _name = "root" }
-                     , _inside = S.empty
-                     , _outside = S.empty
-                     , _pic = "panel_proxy.png"
-                     , _imageWidth = 40
-                     , _imageHeight = 40
-                     }
+                         , _highlighted = False
+                         , _depth = 0
+                         , _hidden = False
+                         , _loc = (0, 0)
+                         , _name = "root" }
+                         , _inside = S.empty
+                         , _outside = S.empty
+                         , _pic = "panel_proxy.png"
+                         , _imageWidth = 40
+                         , _imageHeight = 40
+                         }
         rootID = UiId "root"
         innerWorld = emptyWorld' rootID root
     in GlossWorld { _inner = innerWorld

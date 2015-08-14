@@ -2,7 +2,7 @@ module HandleDraggingCable where
 
 import Control.Lens
 import Graphics.Gloss.Interface.IO.Game
-import Control.Monad.Trans.Free
+--import Control.Monad.Trans.Free
 import Data.Monoid
 
 import Sound.MoodlerLib.Symbols
@@ -35,7 +35,7 @@ cableGadget p0 p1 xform =
 
 handleDraggingCable :: MoodlerM Zero -> UiId -> Point -> Point -> MoodlerM Zero
 handleDraggingCable handleDefault src start end =
-    handleDraggingCable' handleDefault src start end =<< liftF (GetEvent id)
+    handleDraggingCable' handleDefault src start end =<< getEvent
 
 elementDisplayName' :: UIElement -> String
 elementDisplayName' In { _displayName = n} = n

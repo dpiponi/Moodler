@@ -21,6 +21,7 @@ import Text
 import UIElement
 import qualified Box as B
 import KeyMatcher
+import ServerState
 
 data MoodlerF a = GetEvent (Event -> a) deriving Functor
 
@@ -28,14 +29,6 @@ data MoodlerF a = GetEvent (Event -> a) deriving Functor
 --    fmap f (GetEvent c) = GetEvent (f . c)
 
 data Zero
-
--- World is intended to reflect the state of the synth on the server
-data World = World { _uiElements :: M.Map UiId UIElement
-                   , _synthList :: [(String, String)]
-                   , _aliases :: M.Map String String
-                   -- XXX What are connections?
-                   -- , _connections :: [(String, String)]
-                   }
 
 -- Need to make args consistent XXX
 data SendCommand = SendConnect String String
@@ -49,7 +42,7 @@ data PlaneInfo = PlaneInfo { _planes :: UiId
                            , _rootTransform :: B.Transform
                            }
 
-data GlossWorld = GlossWorld { _inner :: World
+data GlossWorld = GlossWorld { _inner :: ServerState
                              , _mouseLoc :: (Float, Float)
                              , _planeInfo :: PlaneInfo
                              , _newName :: Int
@@ -67,10 +60,10 @@ data GlossWorld = GlossWorld { _inner :: World
                              , _outputId :: UiId
                              }
 
-data UndoInfo = UndoInfo { _innerHistory :: [World]
+data UndoInfo = UndoInfo { _innerHistory :: [ServerState]
                          , _undoHistory ::
                                     [([SendCommand], [SendCommand])]
-                         , _innerFuture :: [World]
+                         , _innerFuture :: [ServerState]
                          , _undoFuture ::
                                     [([SendCommand], [SendCommand])]
                          }
@@ -84,7 +77,7 @@ type MoodlerM = FreeT MoodlerF (StateT GlossWorld IO)
 class InputHandler m where
     getInput :: String -> [String] -> String -> m (Maybe String)
 
-$(makeLenses ''World)
+$(makeLenses ''ServerState)
 
 getEvent :: MoodlerM Event
 getEvent = liftF $ GetEvent id
