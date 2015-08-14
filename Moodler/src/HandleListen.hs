@@ -34,7 +34,7 @@ handleListen currentCables (EventKey (SpecialKey KeySpace) Up _ _) = do
             sendDisconnectMessage "out.value"
             sendRecompileMessage "Finished listening"
         Cable o : _ ->  do
-            oName <- use (inner . uiElements . ix o . ur . name)
+            oName <- use (serverState . uiElements . ix o . ur . name)
             sendConnectMessage oName "out.value"
             sendRecompileMessage "Finished listening"
     gadget .= const blank
@@ -42,11 +42,11 @@ handleListen currentCables (EventKey (SpecialKey KeySpace) Up _ _) = do
 
 handleListen currentCables _ = handleListen currentCables =<< getEvent
 
-listenTo :: UIElement -> FreeT MoodlerF (StateT GlossWorld IO) ()
+listenTo :: UIElement -> FreeT MoodlerF (StateT World IO) ()
 listenTo elt = do
     let srcName = elt ^. ur . name
     outId <- use outputId
-    currentCables <- use (inner . uiElements . ix outId . cablesIn)
+    currentCables <- use (serverState . uiElements . ix outId . cablesIn)
     liftIO $ print $ "cables = " ++ show currentCables
     sendConnectMessage srcName "out.value"
     sendRecompileMessage "listen"

@@ -14,7 +14,7 @@ import UIElement
 
 dragElement :: [UiId] -> Point -> [UiId] -> MoodlerM ()
 dragElement top d sel = forM_ sel $ \s -> do
-    inner . uiElements . ix s . ur . loc += d
+    serverState . uiElements . ix s . ur . loc += d
     elt <- getElementById "dragElement" s
     case elt of
         Container { _outside = cts } ->

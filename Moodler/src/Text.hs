@@ -31,7 +31,7 @@ deleteLastChar [_] = []
 deleteLastChar (a : as) = a : deleteLastChar as
 
 -- This is a crude estimate.
--- Can't do better without digging into gloss internals.
+-- Can't do much better without digging into gloss internals.
 estimateTextWidth :: String -> Float
 estimateTextWidth s = 0.7*24*fromIntegral (length s)
 

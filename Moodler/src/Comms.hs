@@ -32,7 +32,7 @@ socket = 7777
 -- XXX
 -- XXX The undo history needs to be at string, not UiId level
 -- XXX
-interpretSend :: (MonadIO m, MonadState GlossWorld m, Functor m) =>
+interpretSend :: (MonadIO m, MonadState World m, Functor m) =>
                  SendCommand -> m ()
 interpretSend (SendConnect a b) = sendConnectMessage a b
 interpretSend (SendDisconnect a) = sendDisconnectMessage a
@@ -49,7 +49,7 @@ reversePushSend :: SendCommand -> [SendCommand] -> [SendCommand]
 --reversePushSend a@(SendSet b _) (SendSet b' _ : cs) | b == b' = a : cs
 reversePushSend a as = a : as
 
-recordUndo :: (MonadIO m, MonadState GlossWorld m) =>
+recordUndo :: (MonadIO m, MonadState World m) =>
               SendCommand -> SendCommand -> m ()
 recordUndo undoCmd redoCmd = do
     undoInfo . undoHistory . _head . _1 %= pushSend undoCmd
@@ -57,13 +57,13 @@ recordUndo undoCmd redoCmd = do
     liftIO $ putStrLn $ "undo: " ++ show (undoCmd, redoCmd)
 -- END UNDO
 
-sendOSCMsg :: (MonadIO m, MonadState GlossWorld m) => Message -> m ()
+sendOSCMsg :: (MonadIO m, MonadState World m) => Message -> m ()
 sendOSCMsg m = do
     ipAddress <- use ipAddr
     liftIO $ withTransport (openUDP ipAddress socket) $ sendMessage m
     --liftIO $ print m
 
-sendConnectMessage' :: (MonadIO m, MonadState GlossWorld m) =>
+sendConnectMessage' :: (MonadIO m, MonadState World m) =>
                        String -> String -> m ()
 sendConnectMessage' outPoint inPoint = do
     let (a, b) = splitDot outPoint
@@ -71,69 +71,69 @@ sendConnectMessage' outPoint inPoint = do
     let msg = message "/connect" $ string <$> [a, b, c, d]
     sendOSCMsg msg
 
-sendDisconnectMessage :: (MonadIO m, MonadState GlossWorld m) =>
+sendDisconnectMessage :: (MonadIO m, MonadState World m) =>
                          String -> m ()
 sendDisconnectMessage inPoint = do
     let (c, d) = splitDot inPoint
     let msg = message "/disconnect" $ string <$> [c, d]
     sendOSCMsg msg
 
-sendSetMessage :: (MonadIO m, MonadState GlossWorld m) =>
+sendSetMessage :: (MonadIO m, MonadState World m) =>
                   String -> Float -> m ()
 sendSetMessage knobName value = do
     let (a, b) = splitDot knobName
     let msg = message "/set" [string a, string b, float value]
     sendOSCMsg msg
 
-sendSetStringMessage :: (MonadIO m, MonadState GlossWorld m) =>
+sendSetStringMessage :: (MonadIO m, MonadState World m) =>
                         String -> String -> m ()
 sendSetStringMessage textBoxName value = do
     let (a, b) = splitDot textBoxName
     let msg = message "/set" [string a, string b, string value]
     sendOSCMsg msg
 
-sendNewInputMessage :: (MonadIO m, MonadState GlossWorld m) =>
+sendNewInputMessage :: (MonadIO m, MonadState World m) =>
                        String -> m ()
 sendNewInputMessage knobName = do
     let (a, _) = splitDot knobName
     let msg = message "/input" [string a]
     sendOSCMsg msg
 
-sendConnectMessage :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+sendConnectMessage :: (Functor m, MonadIO m, MonadState World m) =>
                       String -> String -> m ()
 sendConnectMessage =
     -- srcElt <- _name <$> getElementById "sendConnectMessage1" src
     -- dstElt <- _name <$> getElementById "sendConnectMessage2" dst
     sendConnectMessage'
 
-sendNewSynthMessage :: (MonadIO m, MonadState GlossWorld m) =>
+sendNewSynthMessage :: (MonadIO m, MonadState World m) =>
                        String -> String -> m ()
 sendNewSynthMessage synthType synthName = do
     let msg = message "/synth" [string synthType, string synthName]
     sendOSCMsg msg
 
-sendRecompileMessage :: (MonadIO m, MonadState GlossWorld m) =>
+sendRecompileMessage :: (MonadIO m, MonadState World m) =>
                         String -> m ()
 sendRecompileMessage reason = do
     liftIO $ putStrLn $ "sendRecompileMessage: " ++ reason
     sendOSCMsg (message "/recompile" [])
 
-sendResetMessage :: (MonadIO m, MonadState GlossWorld m) =>
+sendResetMessage :: (MonadIO m, MonadState World m) =>
                         String -> m ()
 sendResetMessage reason = do
     liftIO $ putStrLn $ "sendResetMessage: " ++ reason
     sendOSCMsg (message "/reset" [])
 
-sendQuitMessage :: (MonadIO m, MonadState GlossWorld m) => m ()
+sendQuitMessage :: (MonadIO m, MonadState World m) => m ()
 sendQuitMessage =
     sendOSCMsg (message "/quit" [])
 
-sendAliasMessage :: (MonadIO m, MonadState GlossWorld m) =>
+sendAliasMessage :: (MonadIO m, MonadState World m) =>
                     String -> String -> m ()
 sendAliasMessage aliasName synthName =
     sendOSCMsg (message "/alias" [string aliasName, string synthName])
 
-sendUnAliasMessage :: (MonadIO m, MonadState GlossWorld m) =>
+sendUnAliasMessage :: (MonadIO m, MonadState World m) =>
                       String -> m ()
 sendUnAliasMessage aliasName =
     sendOSCMsg (message "/unalias" [string aliasName])

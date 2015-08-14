@@ -33,12 +33,12 @@ synthUsedInElement Selector { _ur = UrElement { _name = n } } = S.singleton (bas
 synthUsedInElement TextBox { _ur = UrElement { _name = n } } = S.singleton (base n)
 synthUsedInElement _ = S.empty
 
-synthUsedInItem :: (Functor m, MonadState GlossWorld m) =>
+synthUsedInItem :: (Functor m, MonadState World m) =>
                    UiId -> m (S.Set String)
 synthUsedInItem item = synthUsedInElement <$>
                         getElementById "synthUsedInItem" item
 
-synthsUsedInItems :: (Functor m, MonadState GlossWorld m) =>
+synthsUsedInItems :: (Functor m, MonadState World m) =>
                      [UiId] -> m [String]
 synthsUsedInItems items = do
     synthsUsed <- mapM synthUsedInItem items
@@ -67,7 +67,7 @@ showParent :: Location -> String
 showParent (Inside i) = paren ("Inside " ++ unUiId i)
 showParent (Outside i) = paren ("Outside " ++ unUiId i)
 
-elementLine :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+elementLine :: (Functor m, MonadIO m, MonadState World m) =>
                S.Set UiId ->
                Location ->
                Maybe Point -> UiId -> UIElement ->
@@ -160,7 +160,7 @@ elementLine _ parentId maybeMouseLocn eltName Container { _ur = UrElement { _loc
                               "<-", "container'", show picture,
                               relativeShow maybeMouseLocn p, showParent parentId]
 
-saveElement :: (Functor m, MonadIO m, MonadState GlossWorld m)
+saveElement :: (Functor m, MonadIO m, MonadState World m)
                   => Location -> S.Set UiId -> Maybe Point ->
                      UiId -> UIElement ->
                      StateT (S.Set UiId)
@@ -170,7 +170,7 @@ saveElement parentId everythingSaved maybeMouseLocn eltName elt = do
     when (elt ^. ur . hidden) $ multiTellLn "module" 4 $
                         unwords ["hide", unUiId eltName]
 
-saveItem :: (Functor m, MonadIO m, MonadState GlossWorld m)
+saveItem :: (Functor m, MonadIO m, MonadState World m)
                   => Location -> S.Set UiId -> Maybe Point -> UiId ->
                                         StateT (S.Set UiId) (
                                           WriterT (Multi String String) m) ()
@@ -186,7 +186,7 @@ saveItem parentId everythingSaved maybeMouseLocn item = do
         _ -> return ()
 
 -- Shouldn't need doneAlready test. XXX
-saveItems :: (Functor m, MonadIO m, MonadState GlossWorld m)
+saveItems :: (Functor m, MonadIO m, MonadState World m)
                   => Location -> S.Set UiId -> Maybe Point -> [UiId] ->
                                 StateT (S.Set UiId) (
                                       WriterT (Multi String String) m) ()
@@ -196,7 +196,7 @@ saveItems parentId everythingSaved mouseLocn curSel =
         when (item `S.notMember` doneAlready) $
             saveItem parentId everythingSaved mouseLocn item
 
-saveSelection' :: (Functor m, MonadIO m, MonadState GlossWorld m)
+saveSelection' :: (Functor m, MonadIO m, MonadState World m)
                   => S.Set UiId -> Maybe Point -> [UiId] ->
                       M.Map String String -> Maybe UiId ->
                       StateT (S.Set UiId) ( WriterT (Multi String String) m) ()
@@ -211,7 +211,7 @@ saveSelection' everythingSaved maybeMouseLocn curSel aliasesToSave mOutId = do
         Nothing -> return ()
         Just outId -> multiTellLn "output" 4 $ unwords ["setOutput", unUiId outId]
 
-selectionCode :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+selectionCode :: (Functor m, MonadIO m, MonadState World m) =>
                  Maybe Point -> [UiId] -> StateT (S.Set UiId) (
                                       WriterT (Multi String String) m) ()
 selectionCode maybeMouseLocn sel = do
@@ -222,9 +222,9 @@ selectionCode maybeMouseLocn sel = do
     everythingSaved <- lift $ getAllContainerProxyDescendants sel
     needsSaving <- lift $ getMinimalParents everythingSaved sel
     synths <- lift $ synthsUsedInItems everythingSaved
-    allAliases <- lift $ use (inner . aliases)
+    allAliases <- lift $ use (serverState . aliases)
     let aliasesToSave = M.filter (`elem` synths) allAliases
-    sList <- lift $ use (inner . synthList)
+    sList <- lift $ use (serverState . synthList)
 
     forM_ synths $ \synthName -> do
         let synthType = unJust ("saveSelection: " ++ synthName) $
@@ -234,7 +234,7 @@ selectionCode maybeMouseLocn sel = do
                 " <- ", "new'", show synthType]
     saveSelection' (S.fromList everythingSaved) maybeMouseLocn needsSaving aliasesToSave Nothing
 
-saveSelection :: (Functor m, MonadIO m, MonadState GlossWorld m)
+saveSelection :: (Functor m, MonadIO m, MonadState World m)
                  => Maybe Point -> m String
 saveSelection maybeMouseLocn = do
     curSel <- use currentSelection
@@ -244,7 +244,7 @@ saveSelection maybeMouseLocn = do
     return $ collate codeSections sections
 
 codeWorld' ::
-    (Functor m, MonadIO m, MonadState GlossWorld m) =>
+    (Functor m, MonadIO m, MonadState World m) =>
     S.Set UiId -> [String] -> [UiId] -> M.Map String String
     -> StateT (S.Set UiId) (WriterT (Multi String String) m) ()
 codeWorld' everythingSaved synths needsSaving aliasesToSave = do
@@ -256,7 +256,7 @@ codeWorld' everythingSaved synths needsSaving aliasesToSave = do
         multiTellLn "preamble" 4 "let keyboard = \"keyboard\""
         multiTellLn "preamble" 4 "let trigger = \"trigger\""
 
-        sList <- lift $ use (inner . synthList)
+        sList <- lift $ use (serverState . synthList)
 
         forM_ synths $ \synthName -> do
             let maybeSynthType = lookup synthName (map swap sList)
@@ -288,7 +288,7 @@ codeSections = ["preamble", "synth", "module",
                 "aliases", "output", "postamble"]
 
 -- Need more effort on saving aliases XXX
-codeWorld :: (Functor m, MonadIO m, MonadState GlossWorld m)
+codeWorld :: (Functor m, MonadIO m, MonadState World m)
                  => m String
 codeWorld = do
     root <- use (planeInfo . rootPlane)
@@ -303,7 +303,7 @@ codeWorld = do
     let everythingSavedSet = S.fromList everythingSaved
     let needsSaving = [item | (item, elt) <- zip everythingSaved selElts,
                               inOrOutParent (elt ^. ur . parent) `S.notMember` everythingSavedSet]
-    allAliases <- use (inner . aliases)
+    allAliases <- use (serverState . aliases)
     let aliasesToSave = M.filter (`S.member` S.fromList synths) allAliases
     sections <- execWriterT (evalStateT (
             codeWorld' everythingSavedSet synths needsSaving aliasesToSave
@@ -311,7 +311,7 @@ codeWorld = do
     return $ collate codeSections sections
 
 {-
-saveBindings :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+saveBindings :: (Functor m, MonadIO m, MonadState World m) =>
                 StateT (S.Set UiId) (WriterT (Multi String String) m) ()
 saveBindings = do
     bs <- lift $ use keyMatcher
@@ -325,7 +325,7 @@ rewriteConnection s1 =
     let (a, b) = splitDot s1
     in paren (unwords [a, "!", show b])
 
-saveWorld :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+saveWorld :: (Functor m, MonadIO m, MonadState World m) =>
              String -> m ()
 saveWorld t = do
     code <- codeWorld

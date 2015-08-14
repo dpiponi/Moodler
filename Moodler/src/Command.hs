@@ -36,7 +36,7 @@ alertGadget :: String -> B.Transform -> Picture
 alertGadget alt _ = 
     B.textInBox (makeColor 1.0 0.1 0.1 0.8) white alt
 
-doAlert :: (MonadIO m, MonadState GlossWorld m) =>
+doAlert :: (MonadIO m, MonadState World m) =>
            String -> m ()
 doAlert alt = do
     gadget .= alertGadget alt
@@ -58,7 +58,7 @@ imageDimensions (P.ImageYCbCr8 (P.Image { P.imageWidth = w, P.imageHeight = h })
 imageDimensions (P.ImageCMYK8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
 imageDimensions (P.ImageCMYK16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
 
-getPic :: (MonadIO m, MonadState GlossWorld m) => String -> m (Either String (Int, Int))
+getPic :: (MonadIO m, MonadState World m) => String -> m (Either String (Int, Int))
 getPic bmpName = do
     liftIO $ putStrLn $ "Loading: " ++ show bmpName
     let imageFileName = "assets/" ++ bmpName
@@ -84,7 +84,7 @@ commandImportList =
           "Sound.MoodlerLib.Quantise"]
 
 execCommand :: (InputHandler m, Functor m, MonadIO m,
-                MonadState GlossWorld m) =>
+                MonadState World m) =>
                String -> m ()
 execCommand cmd = do
     commandResult <- liftIO $ I.runInterpreter $ do
@@ -106,7 +106,7 @@ safeReadFile f =
         return $ Left err
 
 execScript :: (InputHandler m, Functor m, MonadIO m,
-               MonadState GlossWorld m) =>
+               MonadState World m) =>
                String -> String -> m String
 execScript dir f = do -- use proper dir API XXX
     let fileName = dir ++ "/" ++ f ++ ".hs"
@@ -118,7 +118,7 @@ execScript dir f = do -- use proper dir API XXX
         Right cmd -> execCommand cmd
     return fileName
 
-evalUi :: (Functor m, MonadIO m, MonadState GlossWorld m,
+evalUi :: (Functor m, MonadIO m, MonadState World m,
           InputHandler m) =>
           Ui () -> m ()
 evalUi (Return a) = return a
@@ -134,7 +134,7 @@ evalUi (Echo t cfn) =
     doAlert t >> evalUi cfn
 
 evalUi (Hide t h cfn) =
-    inner . uiElements . ix t . ur . hidden .= h >> evalUi cfn
+    serverState . uiElements . ix t . ur . hidden .= h >> evalUi cfn
 
 evalUi (ToggleHidden cfn) =
     showHidden %= not >> evalUi cfn
@@ -234,9 +234,9 @@ evalUi (U.SetPicture uiId pictureFileName cfn) = do
     maybePic <- getPic pictureFileName
     case maybePic of
         Right (width, height) -> do
-            inner . uiElements . ix uiId . pic .= pictureFileName
-            inner . uiElements . ix uiId . UIElement.imageWidth .= width
-            inner . uiElements . ix uiId . UIElement.imageHeight .= height
+            serverState . uiElements . ix uiId . pic .= pictureFileName
+            serverState . uiElements . ix uiId . UIElement.imageWidth .= width
+            serverState . uiElements . ix uiId . UIElement.imageHeight .= height
         Left e -> doAlert e
     evalUi cfn
 
@@ -275,16 +275,16 @@ evalUi (SetString t v cfn) =
     synthSetString t v >> evalUi cfn
 
 evalUi (SetLow t v cfn) =
-    inner . uiElements . ix t . UIElement.knobMin .= v >> evalUi cfn
+    serverState . uiElements . ix t . UIElement.knobMin .= v >> evalUi cfn
 
 evalUi (SetName t n cfn) =
-    inner . uiElements . ix t . ur . UIElement.name .= n >> evalUi cfn
+    serverState . uiElements . ix t . ur . UIElement.name .= n >> evalUi cfn
 
 evalUi (SetHigh t v cfn) =
-    inner . uiElements . ix t . UIElement.knobMax .= v >> evalUi cfn
+    serverState . uiElements . ix t . UIElement.knobMax .= v >> evalUi cfn
 
 evalUi (SetColour t v cfn) =
-    inner . uiElements . ix t . UIElement.dataColour .= v >> evalUi cfn
+    serverState . uiElements . ix t . UIElement.dataColour .= v >> evalUi cfn
 
 evalUi (Mouse cfn) = do
     p <- use mouseLoc
@@ -297,7 +297,7 @@ evalUi (Args cfn) = do
 -}
 
 evalUi (GetValue s1 cfn) = do
-    elts <- use (inner . uiElements)
+    elts <- use (serverState . uiElements)
     let a = case M.lookup s1 elts of
             Nothing -> error "No value"
             Just e  -> UIElement._setting (e::UIElement)
@@ -309,7 +309,7 @@ evalUi (GetType s1 cfn) = do
 
 -- Is this right? XXX
 evalUi (GetParent s1 cfn) = do
-    elts <- use (inner . uiElements)
+    elts <- use (serverState . uiElements)
     root <- use (planeInfo . rootPlane)
     if s1 == root
         then evalUi (cfn (Inside root))
@@ -339,7 +339,7 @@ evalUi (Parent s1 s2 cfn) =
     T.reparent s1 s2 >> evalUi cfn
 
 evalUi (Rename namedTo toBeNamed cfn) =
-    inner . uiElements . ix toBeNamed . displayName .= namedTo >> evalUi cfn
+    serverState . uiElements . ix toBeNamed . displayName .= namedTo >> evalUi cfn
 
 evalUi (Unparent s1 cfn) =
     T.unparent s1 >> evalUi cfn
@@ -359,7 +359,7 @@ evalUi (NewId s1 cfn) = do
     newN <- use newName
     newName %= (+ 1)
     let n = UiId (s1 ++ show newN)
-    elts <- use (inner . uiElements)
+    elts <- use (serverState . uiElements)
     evalUi $ if n `M.member` elts
         then NewId s1 cfn
         else cfn n
@@ -373,15 +373,15 @@ evalUi (Bind c t cfn) =
     keyMatcher %= addKey (interpretKeys c) t >> evalUi cfn
 
 evalUi (Move c p cfn) =
-    inner . uiElements . ix c . ur . loc .= p >> evalUi cfn
+    serverState . uiElements . ix c . ur . loc .= p >> evalUi cfn
 
 evalUi (GetName c cfn) = do
-    elts <- use (inner . uiElements)
+    elts <- use (serverState . uiElements)
     evalUi (cfn (_name . _ur <$> M.lookup c elts))
 
 -- Not everything has a colour XXX
 evalUi (GetColour c cfn) = do
-    elts <- use (inner . uiElements)
+    elts <- use (serverState . uiElements)
     evalUi (cfn (_dataColour <$> M.lookup c elts))
 
 evalUi (Location c cfn) = do

@@ -55,7 +55,7 @@ proxyColour, inertCableColour :: Color
 proxyColour = makeColor 0.4 0.6 1.0 1.0
 inertCableColour = makeColor 0.7 0.7 0.7 1
     
-drawCable :: GlossWorld -> Point -> Bool -> Cable -> Picture
+drawCable :: World -> Point -> Bool -> Cable -> Picture
 drawCable w (x1, y1) active (Cable o) =
     let (x0, y0) = locById w o
         cableColour = interpretColour (colourById w o)
@@ -73,7 +73,7 @@ proxyFeature = color proxyColour (
                    rect (-18, -18) (18, 18) <>
                    thickCircle 2 16)
 
-drawUIElement :: Bool -> GlossWorld -> UIElement -> (Picture, Picture)
+drawUIElement :: Bool -> World -> UIElement -> (Picture, Picture)
 -- Recurse into containers
 drawUIElement showingHidden world
               Container { _outside = c
@@ -88,7 +88,7 @@ drawUIElement showingHidden world
                 then color red (rectAt x y iw ih)
                 else mempty) <>
            mconcat (map (\i -> do
-                let elts = world ^. (inner . uiElements)
+                let elts = world ^. (serverState . uiElements)
                 case M.lookup i elts of
                     Just elt -> drawUIElement'' showingHidden world elt
                     Nothing -> error $ "In drawUIElement missing " ++
@@ -169,7 +169,7 @@ rect (x0, y0) (x1, y1) = Line [ (x0, y0), (x1, y0)
                               , (x0, y0)
                               ]
 
-drawUIElement'' :: Bool -> GlossWorld -> UIElement -> (Picture, Picture)
+drawUIElement'' :: Bool -> World -> UIElement -> (Picture, Picture)
 drawUIElement'' showingHidden w e =
     -- Don't draw parented elements as they'll get drawn
     -- with parent
@@ -182,9 +182,9 @@ renderPlaneName firstPlane =
     translate (-550) 300 $ B.textInBox (B.transparentBlack 0.8)
                                        white firstPlane
 
-renderWorld :: GlossWorld -> IO Picture
-renderWorld w@GlossWorld { _planeInfo  = PlaneInfo { _rootTransform = rootXform }
-                         , _showHidden = showingHidden } =
+renderWorld :: World -> IO Picture
+renderWorld w@World { _planeInfo  = PlaneInfo { _rootTransform = rootXform }
+                    , _showHidden = showingHidden } =
     flip evalStateT w $ do
         wplanes0 <- use (planeInfo . planes)
         -- XXX Don't know if it's wise to have

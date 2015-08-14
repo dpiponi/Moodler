@@ -42,37 +42,34 @@ data PlaneInfo = PlaneInfo { _planes :: UiId
                            , _rootTransform :: B.Transform
                            }
 
-data GlossWorld = GlossWorld { _inner :: ServerState
-                             , _mouseLoc :: (Float, Float)
-                             , _planeInfo :: PlaneInfo
-                             , _newName :: Int
-                             , _showHidden :: Bool
-                             , _pics :: M.Map String (Picture, Int, Int)
-                             , _currentSelection :: [UiId]
-                             , _gadget :: B.Transform -> Picture
-                             , _ipAddr :: String
-                             , _projectFile :: String
-                             , _keyMatcher :: KeyMatcher (Key, Modifiers) String
-                             , _cont :: FreeF MoodlerF Zero
-                                            (FreeT MoodlerF (StateT GlossWorld IO)
-                                                Zero)
-                             , _undoInfo :: UndoInfo
-                             , _outputId :: UiId
-                             }
+data World = World { _serverState :: ServerState
+                   , _mouseLoc :: (Float, Float)
+                   , _planeInfo :: PlaneInfo
+                   , _newName :: Int
+                   , _showHidden :: Bool
+                   , _pics :: M.Map String (Picture, Int, Int)
+                   , _currentSelection :: [UiId]
+                   , _gadget :: B.Transform -> Picture
+                   , _ipAddr :: String
+                   , _projectFile :: String
+                   , _keyMatcher :: KeyMatcher (Key, Modifiers) String
+                   , _cont :: FreeF MoodlerF Zero
+                                    (FreeT MoodlerF (StateT World IO) Zero)
+                   , _undoInfo :: UndoInfo
+                   , _outputId :: UiId
+                   }
 
-data UndoInfo = UndoInfo { _innerHistory :: [ServerState]
-                         , _undoHistory ::
-                                    [([SendCommand], [SendCommand])]
-                         , _innerFuture :: [ServerState]
-                         , _undoFuture ::
-                                    [([SendCommand], [SendCommand])]
+data UndoInfo = UndoInfo { _serverStateHistory :: [ServerState]
+                         , _undoHistory :: [([SendCommand], [SendCommand])]
+                         , _serverStateFuture :: [ServerState]
+                         , _undoFuture :: [([SendCommand], [SendCommand])]
                          }
 
 $(makeLenses ''UndoInfo)
-$(makeLenses ''GlossWorld)
+$(makeLenses ''World)
 $(makeLenses ''PlaneInfo)
 
-type MoodlerM = FreeT MoodlerF (StateT GlossWorld IO)
+type MoodlerM = FreeT MoodlerF (StateT World IO)
 
 class InputHandler m where
     getInput :: String -> [String] -> String -> m (Maybe String)
@@ -82,24 +79,24 @@ $(makeLenses ''ServerState)
 getEvent :: MoodlerM Event
 getEvent = liftF $ GetEvent id
 
-handleGetString :: [String] -> String -> String -> String ->
+handleGetString :: [String] -> (String, String) -> String ->
                    MoodlerM (Maybe String)
-handleGetString completions inputString afterCursor prompt = do
+handleGetString completions (inputString, afterCursor) prompt = do
     e <- getEvent
     let longestCompletion = if null afterCursor
         then longestMatchingPrefix completions inputString
         else inputString
     gadget .= stringGadget longestCompletion inputString afterCursor prompt
-    handleGetString' completions inputString afterCursor prompt e
+    handleGetString' completions (inputString, afterCursor) prompt e
 
-continueGetString :: String -> [String] -> String -> String ->
+continueGetString :: String -> [String] -> (String, String) ->
                      MoodlerM (Maybe String)
-continueGetString prompt completions inputString afterCursor = do
+continueGetString prompt completions (inputString, afterCursor) = do
     let longestCompletion = if null afterCursor
         then longestMatchingPrefix completions inputString
         else inputString
     gadget .= stringGadget longestCompletion inputString afterCursor prompt
-    handleGetString completions inputString afterCursor prompt
+    handleGetString completions (inputString, afterCursor) prompt
 
 handleGetString'' :: String -> [String] -> String -> String -> String ->
                      MoodlerM (Maybe String)
@@ -108,56 +105,55 @@ handleGetString'' afterCursor' completions inputString' prompt inputString = do
         then longestMatchingPrefix completions inputString'
         else inputString
     gadget .= stringGadget longestCompletion inputString' afterCursor' prompt
-    handleGetString completions inputString' afterCursor' prompt
+    handleGetString completions (inputString', afterCursor') prompt
 
-handleGetString' :: [String] -> String -> String -> String -> Event ->
+handleGetString' :: [String] -> (String, String) -> String -> Event ->
                     MoodlerM (Maybe String)
-handleGetString' _ inputString afterCursor _ (EventKey (SpecialKey KeyEnter)
+handleGetString' _ (inputString, afterCursor) _ (EventKey (SpecialKey KeyEnter)
                                               Down _ _) = do
     gadget .= const blank
     return (Just (inputString ++ afterCursor))
 
-handleGetString' _ _ _ _ (EventKey (SpecialKey KeyEsc)
+handleGetString' _ _ _ (EventKey (SpecialKey KeyEsc)
                                               Down _ _) = do
     gadget .= const blank
     return Nothing
 
 -- Delete key during command entry
-handleGetString' completions inputString afterCursor prompt
+handleGetString' completions (inputString, afterCursor) prompt
                     (EventKey (SpecialKey KeyDelete)
                               Down _ _) = do
     let inputString' = deleteLastChar inputString
-    continueGetString prompt completions inputString' afterCursor
+    continueGetString prompt completions (inputString', afterCursor)
 
 -- Space key during command entry
-handleGetString' completions inputString afterCursor prompt (EventKey
+handleGetString' completions (inputString, afterCursor) prompt (EventKey
                                      (SpecialKey KeySpace)
                                      Down _ _) = do
     let inputString' = inputString ++ " "
-    continueGetString prompt completions inputString' afterCursor
+    continueGetString prompt completions (inputString', afterCursor)
 
-handleGetString' completions inputString afterCursor prompt
+handleGetString' completions (inputString, afterCursor) prompt
                     (EventKey (SpecialKey KeyTab)
                     Down _ _) = do
     let longestCompletion = if null afterCursor
         then longestMatchingPrefix completions inputString
         else inputString
     gadget .= stringGadget longestCompletion inputString afterCursor prompt
-    handleGetString completions longestCompletion afterCursor prompt
+    handleGetString completions (longestCompletion, afterCursor) prompt
 
-handleGetString' completions inputString afterCursor prompt
+handleGetString' completions (inputString, afterCursor) prompt
                     (EventKey (SpecialKey KeyLeft)
                     Down _ _) =
     if not (null inputString)
         then do
             let afterCursor' = last inputString : afterCursor
             let inputString' = init inputString
-            let longestCompletion = inputString
-            gadget .= stringGadget longestCompletion inputString' afterCursor' prompt
-            handleGetString completions inputString' afterCursor' prompt
-        else handleGetString completions inputString afterCursor prompt
+            gadget .= stringGadget inputString inputString' afterCursor' prompt
+            handleGetString completions (inputString', afterCursor') prompt
+        else handleGetString completions (inputString, afterCursor) prompt
 
-handleGetString' completions inputString afterCursor prompt
+handleGetString' completions (inputString, afterCursor) prompt
                     (EventKey (SpecialKey KeyRight)
                     Down _ _) =
     if not (null afterCursor)
@@ -165,35 +161,35 @@ handleGetString' completions inputString afterCursor prompt
             let inputString' = inputString ++ [head afterCursor]
             let afterCursor' = tail afterCursor
             handleGetString'' afterCursor' completions inputString' prompt inputString
-        else handleGetString completions inputString afterCursor prompt
+        else handleGetString completions (inputString, afterCursor) prompt
 
-handleGetString' completions inputString afterCursor prompt
+handleGetString' completions (inputString, afterCursor) prompt
                     (EventKey (SpecialKey KeyHome)
                     Down _ _) = do
     let inputString' = ""
     let afterCursor' = inputString ++ afterCursor
     handleGetString'' afterCursor' completions inputString' prompt inputString
 
-handleGetString' completions inputString afterCursor prompt
+handleGetString' completions (inputString, afterCursor) prompt
                     (EventKey (SpecialKey KeyEnd)
                     Down _ _) = do
     let inputString' = inputString ++ afterCursor
     let afterCursor' = ""
     let longestCompletion = longestMatchingPrefix completions inputString'
     gadget .= stringGadget longestCompletion inputString' afterCursor' prompt
-    handleGetString completions inputString' afterCursor' prompt
+    handleGetString completions (inputString', afterCursor') prompt
 
 -- Command key entry
-handleGetString' completions inputString afterCursor prompt
+handleGetString' completions (inputString, afterCursor) prompt
                         (EventKey (Char c) Down _ _) = do
     let inputString' = inputString ++ [c]
-    continueGetString prompt completions inputString' afterCursor
+    continueGetString prompt completions (inputString', afterCursor)
 
 -- XXX Need to think about this
-handleGetString' c x y z _ = handleGetString c x y z
+handleGetString' c x z _ = handleGetString c x z
 
 instance InputHandler MoodlerM where
-    getInput inputString completions = handleGetString completions inputString ""
+    getInput inputString completions = handleGetString completions (inputString, "")
 
 grey50 :: Color
 grey50 = makeColor 0.5 0.5 0.5 1.0
@@ -209,20 +205,20 @@ stringGadget completion inputString afterCursor prompt _ =
         translate (-300) 0 (scale 0.3 0.3 (color grey50 $ text displayedCompletion)) <>
         translate (-300) 0 (scale 0.3 0.3 (color white $ text displayedString))
 
-locById :: GlossWorld -> UiId -> (Float, Float)
+locById :: World -> UiId -> (Float, Float)
 locById w e =
     let elt = M.findWithDefault (error "locById") e
-                                          (_uiElements (_inner w))
+                                          (_uiElements (_serverState w))
     in _loc (_ur elt)
 
-colourById :: GlossWorld -> UiId -> String
+colourById :: World -> UiId -> String
 colourById w e =
     let elt = M.findWithDefault (error "colourById") e
-                                          (_uiElements (_inner w))
+                                          (_uiElements (_serverState w))
     in _dataColour elt
 
-newtype WorldMonad a = WorldMonad { runWorldMonad :: StateT GlossWorld IO a }
-                        deriving (Monad, MonadState GlossWorld,
+newtype WorldMonad a = WorldMonad { runWorldMonad :: StateT World IO a }
+                        deriving (Monad, MonadState World,
                                   MonadIO, Functor)
 
 -- This prevents splitting out handleGetString
@@ -233,19 +229,19 @@ instance Applicative WorldMonad where
     pure = return
     (<*>) = ap
 
-getElementById :: MonadState GlossWorld m => String -> UiId -> m UIElement
+getElementById :: MonadState World m => String -> UiId -> m UIElement
 getElementById msg i = do
-    w <- use (inner . uiElements)
+    w <- use (serverState . uiElements)
     let l = M.lookup i w
     case l of
         Just elt -> return elt
         Nothing -> error $ msg ++ ": can't find:" ++ show i
 
-getElementTypeById :: MonadState GlossWorld m => UiId -> m ElementType
+getElementTypeById :: MonadState World m => UiId -> m ElementType
 getElementTypeById i = do
     elt <- getElementById "getElementTypeById" i
     return $ elementType elt
 
-getElementsById :: MonadState GlossWorld m =>
+getElementsById :: MonadState World m =>
                    String -> [UiId] -> m [UIElement]
 getElementsById msg = mapM (getElementById msg)

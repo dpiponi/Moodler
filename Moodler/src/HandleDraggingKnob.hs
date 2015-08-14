@@ -43,7 +43,7 @@ handleDraggingKnob' :: MoodlerM Zero -> (Event -> MoodlerM Zero) ->
 handleDraggingKnob' handleDefault handleDefault' selectedKnob v p0 (EventMotion p) = do
     let newV = knobMapping v (p-p0)
     -- Use zoom?
-    elts <- use (inner . uiElements)
+    elts <- use (serverState . uiElements)
     let elt = M.lookup selectedKnob elts
     case elt of
         Nothing -> handleDraggingKnob handleDefault handleDefault' selectedKnob v p0

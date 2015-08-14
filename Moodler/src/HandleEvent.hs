@@ -210,7 +210,7 @@ handleDefault' (EventKey (Char '-')
 -- But now that's fixed maybe this will work again.
 handleDefault' (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
-    filename <- handleGetString allScripts "" "" "read: "
+    filename <- handleGetString allScripts ("", "") "read: "
     withJust filename $ \filename' -> do
         W.undoPoint
         void $ execScript "scripts" filename'
@@ -218,7 +218,7 @@ handleDefault' (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctr
 
 handleDefault' (EventKey (Char 'l') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "saves"
-    filename <- handleGetString allScripts "" "" "load: "
+    filename <- handleGetString allScripts ("", "") "load: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     withJust filename $ \filename' -> do
         W.undoPoint
@@ -229,7 +229,7 @@ handleDefault' (EventKey (Char 'l') Down _ _) = do
 
 handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctrl = Up } _) = do
     allSaves <- liftIO $ getAllScripts "saves"
-    filename <- handleGetString allSaves "" "" "save: "
+    filename <- handleGetString allSaves ("", "") "save: "
     case filename of
         Just "" -> do
             fileName' <- use projectFile
@@ -246,7 +246,7 @@ handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctr
 -- XXX quantise
 handleDefault' (EventKey (Char 'w') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
-    withJustM (handleGetString allScripts "" "" "write: ") $ \filename' ->
+    withJustM (handleGetString allScripts ("", "") "write: ") $ \filename' ->
         evalUi (U.write filename')
     handleDefault
 
@@ -368,7 +368,7 @@ handleDefault' (EventKey key Down
     let (dx, dy) = getDirection key
     sel <- use currentSelection
     forM_ sel $ \e ->
-        inner . uiElements . ix e . ur . loc += (quantum*dx, quantum*dy)
+        serverState . uiElements . ix e . ur . loc += (quantum*dx, quantum*dy)
     handleDefault
 
 -- Use key binding.
@@ -385,13 +385,13 @@ handleDefault' _ = handleDefault
 
 handleTextBox :: UiId -> MoodlerM Zero
 handleTextBox selectedTextBox = do
-    oldText <- use (inner . uiElements . ix selectedTextBox . boxText)
-    withJustM (handleGetString [] oldText "" "textbox: ") $ \txt -> do
+    oldText <- use (serverState . uiElements . ix selectedTextBox . boxText)
+    withJustM (handleGetString [] (oldText, "") "textbox: ") $ \txt -> do
         W.undoPoint
         W.synthSetString selectedTextBox txt
     handleDefault
 
-selectEverythingInRegion :: (MonadIO m, MonadState GlossWorld m) =>
+selectEverythingInRegion :: (MonadIO m, MonadState World m) =>
                             Point -> Point -> m ()
 selectEverythingInRegion p0 p1 = do
     selectionPlane <- use (planeInfo . planes)

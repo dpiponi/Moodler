@@ -16,12 +16,12 @@ import ContainerTree
 import UIElement
 
 checkEverythingAccessibleFromRoot :: (Functor m, MonadIO m,
-                                     MonadState GlossWorld m) =>
+                                     MonadState World m) =>
                                      m Bool
 checkEverythingAccessibleFromRoot = do
     root <- use (planeInfo . rootPlane)
     everything <- S.fromList <$> getAllContainerProxyDescendants [root]
-    elts <- use (inner . uiElements)
+    elts <- use (serverState . uiElements)
     let k = M.keys elts
     accessible <- forM k $ \key ->
         if key `S.notMember` everything
@@ -32,7 +32,7 @@ checkEverythingAccessibleFromRoot = do
                 return True
     return $ and accessible
 
-checkChildrenHaveCorrectParent' :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+checkChildrenHaveCorrectParent' :: (Functor m, MonadIO m, MonadState World m) =>
                                    Location -> S.Set UiId -> m Bool
 checkChildrenHaveCorrectParent' parentId childrenIds = do
     result <- forM (S.toList childrenIds) $ \childId -> do
@@ -52,7 +52,7 @@ checkChildrenHaveCorrectParent' parentId childrenIds = do
     return $ and result
 
         
-checkChildrenHaveCorrectParent :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+checkChildrenHaveCorrectParent :: (Functor m, MonadIO m, MonadState World m) =>
                                   m Bool
 checkChildrenHaveCorrectParent = do
     root <- use (planeInfo . rootPlane)
