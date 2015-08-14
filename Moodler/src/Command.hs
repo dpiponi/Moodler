@@ -11,6 +11,7 @@ import Graphics.Gloss.Data.Color
 import qualified Language.Haskell.Interpreter as I
 import qualified Data.Map as M
 import qualified Data.Set as S
+import System.Directory
 
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.Quantise
@@ -76,6 +77,7 @@ commandImportList =
         [ "Prelude",
           "Control.Monad",
           "Text.Read",
+          "System.Directory",
           "Sound.MoodlerLib.Symbols",
           "Sound.MoodlerLib.UiLib",
           "Sound.MoodlerLib.UiLibElement",
@@ -387,7 +389,13 @@ evalUi (Location c cfn) = do
     evalUi (cfn (elt ^. ur . loc))
 
 evalUi (Input prompt cfn) = do
-    inp <- getInput "" prompt
+    inp <- getInput "" [] prompt
+    evalUi (cfn inp)
+
+-- Supply list of filenames
+evalUi (InputFile prompt directory cfn) = do
+    filenames <- liftIO $ getDirectoryContents directory
+    inp <- getInput "" filenames prompt
     evalUi (cfn inp)
 
 evalUi (Alias aliasName synthName cfn) = do

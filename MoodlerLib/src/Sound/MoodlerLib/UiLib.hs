@@ -60,6 +60,7 @@ data Ui a = Return a
           | Rename String UiId (Ui a)
           | Unparent UiId (Ui a)
           | Input String (Maybe String -> Ui a)
+          | InputFile String String (Maybe String -> Ui a)
           | GetType UiId (ElementType -> Ui a)
           | SendBack UiId (Ui a)
           | BringFront UiId (Ui a)
@@ -127,6 +128,7 @@ instance Monad Ui where
     Rename s0 s1 cont >>= f = Rename s0 s1 (cont >>= f)
     Unparent s0 cont >>= f = Unparent s0 (cont >>= f)
     Input s0 cont >>= f = Input s0 ((>>= f) . cont)
+    InputFile s0 s1 cont >>= f = InputFile s0 s1 ((>>= f) . cont)
     Alias s0 s1 cont >>= f = Alias s0 s1 (cont >>= f)
     UnAlias s0 cont >>= f = UnAlias s0 (cont >>= f)
     SetOutput s cont >>= f = SetOutput s (cont >>= f)
@@ -250,6 +252,9 @@ getValue s1 = GetValue s1 return
 
 input :: String -> Ui (Maybe String)
 input s1 = Input s1 return
+
+inputFile :: String -> String -> Ui (Maybe String)
+inputFile s0 s1 = InputFile s0 s1 return
 
 getParent :: UiId -> Ui Location
 getParent s1 = GetParent s1 return

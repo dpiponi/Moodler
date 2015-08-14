@@ -82,7 +82,7 @@ $(makeLenses ''PlaneInfo)
 type MoodlerM = FreeT MoodlerF (StateT GlossWorld IO)
 
 class InputHandler m where
-    getInput :: String -> String -> m (Maybe String)
+    getInput :: String -> [String] -> String -> m (Maybe String)
 
 $(makeLenses ''World)
 
@@ -200,7 +200,7 @@ handleGetString' completions inputString afterCursor prompt
 handleGetString' c x y z _ = handleGetString c x y z
 
 instance InputHandler MoodlerM where
-    getInput inputString = handleGetString [] inputString ""
+    getInput inputString completions = handleGetString completions inputString ""
 
 grey50 :: Color
 grey50 = makeColor 0.5 0.5 0.5 1.0
@@ -234,7 +234,7 @@ newtype WorldMonad a = WorldMonad { runWorldMonad :: StateT GlossWorld IO a }
 
 -- This prevents splitting out handleGetString
 instance InputHandler WorldMonad where
-    getInput _ _ = return Nothing
+    getInput _ _ _ = return Nothing
 
 instance Applicative WorldMonad where
     pure = return
