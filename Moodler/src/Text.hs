@@ -52,3 +52,56 @@ longestMatchingPrefix :: [String] -> String -> String
 longestMatchingPrefix completions input =
     let matches = filter (isPrefixOf input) completions
     in longestCommonPrefix matches
+
+newtype RString = R { unR :: String }
+
+-- A string with an insertion point.
+type FString = (RString, String)
+
+toRString :: String -> RString
+toRString = R . reverse
+
+fromRString :: RString -> String
+fromRString = reverse . unR
+
+rnull :: RString -> Bool
+rnull = null . fromRString
+
+rlength :: RString -> Int
+rlength = length . fromRString
+
+fnil :: FString
+fnil = (toRString "", "")
+
+cursorLeft :: FString -> FString
+cursorLeft (R (b : before), after) = (R before, b : after)
+cursorLeft (R [], _) = error "Can't cursor left"
+
+cursorRight :: FString -> FString
+cursorRight (R before, a : after) = (R (a : before), after)
+cursorRight (R _, []) = error "Can't cursor right"
+
+cursorEnd :: FString -> FString
+cursorEnd (R before, after) = (R (before ++ reverse after), "")
+
+cursorHome :: FString -> FString
+cursorHome (R before, after) = (R "", reverse before ++ after)
+
+deleteChar :: FString -> FString
+deleteChar (R "", after) = (R "", after)
+deleteChar (R (_ : before), after) = (R before, after)
+
+insertChar :: Char -> FString -> FString
+insertChar a (R b, c) = (R (a : b), c)
+
+unzipper :: FString -> String
+unzipper (a, b) = fromRString a ++ b
+
+precursor :: FString -> String
+precursor (a, _) = fromRString a
+
+postcursor :: FString -> String
+postcursor (_, b) = b
+
+toFString :: String -> FString
+toFString a = (toRString a, "")

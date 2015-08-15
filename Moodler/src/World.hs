@@ -79,75 +79,36 @@ $(makeLenses ''ServerState)
 getEvent :: MoodlerM Event
 getEvent = liftF $ GetEvent id
 
-newtype RString = R { unR :: String }
-
-toRString :: String -> RString
-toRString = R . reverse
-
-fromRString :: RString -> String
-fromRString = reverse . unR
-
-rnull :: RString -> Bool
-rnull = null . fromRString
-
-rlength :: RString -> Int
-rlength = length . fromRString
-
-cursorLeft :: (RString, String) -> (RString, String)
-cursorLeft (R (b : before), after) = (R before, b : after)
-cursorLeft (R [], _) = error "Can't cursor left"
-
-cursorRight :: (RString, String) -> (RString, String)
-cursorRight (R before, a : after) = (R (a : before), after)
-cursorRight (R _, []) = error "Can't cursor right"
-
-cursorEnd :: (RString, String) -> (RString, String)
-cursorEnd (R before, after) = (R (before ++ reverse after), "")
-
-cursorHome :: (RString, String) -> (RString, String)
-cursorHome (R before, after) = (R "", reverse before ++ after)
-
-deleteChar :: (RString, String) -> (RString, String)
-deleteChar (R "", after) = (R "", after)
-deleteChar (R (_ : before), after) = (R before, after)
-
-insertChar :: Char -> (RString, String) -> (RString, String)
-insertChar a (R b, c) = (R (a : b), c)
-
-unzipper :: (RString, String) -> String
-unzipper (R before, after) = reverse before ++ after
-
-handleGetString :: [String] -> (RString, String) -> String ->
+handleGetString :: [String] -> FString -> String ->
                    MoodlerM (Maybe String)
-handleGetString completions zipper@(inputString, afterCursor) prompt = do
+handleGetString completions zipper prompt = do
     e <- getEvent
-    let longestCompletion = if null afterCursor
-        then longestMatchingPrefix completions (fromRString inputString)
-        else fromRString inputString
+    let longestCompletion = if null (postcursor zipper)
+        then longestMatchingPrefix completions (precursor zipper)
+        else precursor zipper
     gadget .= stringGadget longestCompletion zipper prompt
     handleGetString' e completions zipper prompt
 
-continueGetString :: String -> [String] -> (RString, String) ->
+continueGetString :: String -> [String] -> FString ->
                      MoodlerM (Maybe String)
-continueGetString prompt completions zipper@(inputString, afterCursor) = do
-    let longestCompletion = if null afterCursor
-        then longestMatchingPrefix completions (fromRString inputString)
-        else fromRString inputString
+continueGetString prompt completions zipper = do
+    let longestCompletion = if null (postcursor zipper)
+        then longestMatchingPrefix completions (precursor zipper)
+        else precursor zipper
     gadget .= stringGadget longestCompletion zipper prompt
     handleGetString completions zipper prompt
 
--- XXX Wrong! It's inputString' that goes into pair
-handleGetString'' :: [String] -> String -> String -> (RString, String) ->
+handleGetString'' :: [String] -> String -> String -> FString ->
                      MoodlerM (Maybe String)
-handleGetString'' completions inputString prompt zipper'@(inputString', afterCursor') = do
-    let longestCompletion = if null afterCursor'
-        then longestMatchingPrefix completions (fromRString inputString')
+handleGetString'' completions inputString prompt zipper' = do
+    let longestCompletion = if null (postcursor zipper')
+        then longestMatchingPrefix completions (precursor zipper')
         else inputString
     gadget .= stringGadget longestCompletion zipper' prompt
     handleGetString completions zipper' prompt
 
 -- Put event at beginning XXX
-handleGetString' :: Event -> [String] -> (RString, String) -> String -> 
+handleGetString' :: Event -> [String] -> FString -> String -> 
                     MoodlerM (Maybe String)
 handleGetString' (EventKey (SpecialKey KeyEnter) Down _ _) _ zipper _ = do
     gadget .= const blank
@@ -161,33 +122,35 @@ handleGetString' (EventKey (SpecialKey KeyEsc) Down _ _) _ _ _ = do
 handleGetString' (EventKey (SpecialKey KeyDelete) Down _ _) completions zipper prompt =
     continueGetString prompt completions (deleteChar zipper)
 
--- XXX sort out reverse bug XXX
-handleGetString' (EventKey (SpecialKey KeyTab) Down _ _) completions zipper@(inputString, afterCursor) prompt = do
-    let longestCompletion = if null afterCursor
-        then longestMatchingPrefix completions (fromRString inputString)
-        else fromRString inputString
-    gadget .= stringGadget longestCompletion zipper prompt
-    handleGetString completions (toRString longestCompletion, afterCursor) prompt
+handleGetString' (EventKey (SpecialKey KeyTab) Down _ _) completions zipper prompt = do
+    if null (postcursor zipper)
+        then do
+            let longestCompletion = longestMatchingPrefix completions (precursor zipper)
+            gadget .= stringGadget longestCompletion zipper prompt
+            handleGetString completions (toFString longestCompletion) prompt
+        else do
+            gadget .= stringGadget (precursor zipper) zipper prompt
+            handleGetString completions zipper prompt
 
 handleGetString' (EventKey (SpecialKey KeyLeft) Down _ _) completions zipper@(R "", _) prompt = handleGetString completions zipper prompt
 
-handleGetString' (EventKey (SpecialKey KeyLeft) Down _ _) completions zipper@(inputString, _) prompt = do
+handleGetString' (EventKey (SpecialKey KeyLeft) Down _ _) completions zipper prompt = do
     let zipper' = cursorLeft zipper
-    gadget .= stringGadget (fromRString inputString) zipper' prompt
+    gadget .= stringGadget (precursor zipper) zipper' prompt
     handleGetString completions zipper' prompt
 
 handleGetString' (EventKey (SpecialKey KeyRight) Down _ _) completions zipper@(_, "") prompt =
     handleGetString completions zipper prompt
 
-handleGetString' (EventKey (SpecialKey KeyRight) Down _ _) completions zipper@(inputString, _) prompt =
-    handleGetString'' completions (fromRString inputString) prompt (cursorRight zipper)
+handleGetString' (EventKey (SpecialKey KeyRight) Down _ _) completions zipper prompt =
+    handleGetString'' completions (precursor zipper) prompt (cursorRight zipper)
 
-handleGetString' (EventKey (SpecialKey KeyHome) Down _ _) completions zipper@(inputString, _) prompt = 
-    handleGetString'' completions (fromRString inputString) prompt (cursorHome zipper)
+handleGetString' (EventKey (SpecialKey KeyHome) Down _ _) completions zipper prompt = 
+    handleGetString'' completions (precursor zipper) prompt (cursorHome zipper)
 
 handleGetString' (EventKey (SpecialKey KeyEnd) Down _ _) completions zipper prompt = do
-    let zipper'@(inputString', _) = cursorEnd zipper
-    let longestCompletion = longestMatchingPrefix completions (fromRString inputString')
+    let zipper' = cursorEnd zipper
+    let longestCompletion = longestMatchingPrefix completions (precursor zipper')
     gadget .= stringGadget longestCompletion zipper' prompt
     handleGetString completions zipper' prompt
 
@@ -203,16 +166,16 @@ handleGetString' (EventKey (Char c) Down _ _) completions zipper prompt =
 handleGetString' _ c x z = handleGetString c x z
 
 instance InputHandler MoodlerM where
-    getInput inputString completions = handleGetString completions (toRString inputString, "")
+    getInput inputString completions = handleGetString completions (toFString inputString)
 
 grey50 :: Color
 grey50 = makeColor 0.5 0.5 0.5 1.0
 
-stringGadget :: String -> (RString, String) -> String -> B.Transform -> Picture
-stringGadget completion (inputString, afterCursor) prompt _ =
-    let displayedString = prompt ++ fromRString inputString ++ "|" ++ afterCursor
-        displayedCompletion = if null afterCursor
-            then prompt ++ fromRString inputString ++ "|" ++ drop (rlength inputString) completion
+stringGadget :: String -> FString -> String -> B.Transform -> Picture
+stringGadget completion zipper prompt _ =
+    let displayedString = prompt ++ (unzipper (insertChar '|' zipper))
+        displayedCompletion = if null (postcursor zipper)
+            then prompt ++ precursor zipper ++ "|" ++ drop (length (precursor zipper)) completion
             else ""
     in
         translate 0 10 (color (B.transparentBlack 0.8) (rectangleSolid 600 50)) <>
@@ -221,14 +184,12 @@ stringGadget completion (inputString, afterCursor) prompt _ =
 
 locById :: World -> UiId -> (Float, Float)
 locById w e =
-    let elt = M.findWithDefault (error "locById") e
-                                          (_uiElements (_serverState w))
+    let elt = M.findWithDefault (error "locById") e (_uiElements (_serverState w))
     in _loc (_ur elt)
 
 colourById :: World -> UiId -> String
 colourById w e =
-    let elt = M.findWithDefault (error "colourById") e
-                                          (_uiElements (_serverState w))
+    let elt = M.findWithDefault (error "colourById") e (_uiElements (_serverState w))
     in _dataColour elt
 
 newtype WorldMonad a = WorldMonad { runWorldMonad :: StateT World IO a }

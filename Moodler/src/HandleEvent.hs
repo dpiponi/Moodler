@@ -30,6 +30,7 @@ import Numeric
 import UIElement
 import UISupport
 import Utils
+import Text
 import World
 import Save
 import KeyMatcher
@@ -217,7 +218,7 @@ handleDefault' (EventKey (Char '-')
 -- But now that's fixed maybe this will work again.
 handleDefault' (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
-    filename <- handleGetString allScripts (toRString "", "") "read: "
+    filename <- handleGetString allScripts fnil "read: "
     withJust filename $ \filename' -> do
         W.undoPoint
         void $ execScript "scripts" filename'
@@ -225,7 +226,7 @@ handleDefault' (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctr
 
 handleDefault' (EventKey (Char 'l') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "saves"
-    filename <- handleGetString allScripts (toRString "", "") "load: "
+    filename <- handleGetString allScripts fnil "load: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     withJust filename $ \filename' -> do
         W.undoPoint
@@ -236,7 +237,7 @@ handleDefault' (EventKey (Char 'l') Down _ _) = do
 
 handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctrl = Up } _) = do
     allSaves <- liftIO $ getAllScripts "saves"
-    filename <- handleGetString allSaves (toRString "", "") "save: "
+    filename <- handleGetString allSaves fnil "save: "
     case filename of
         Just "" -> do
             fileName' <- use projectFile
@@ -253,7 +254,7 @@ handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctr
 -- XXX quantise
 handleDefault' (EventKey (Char 'w') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
-    withJustM (handleGetString allScripts (toRString "", "") "write: ") $ \filename' ->
+    withJustM (handleGetString allScripts fnil "write: ") $ \filename' ->
         evalUi (U.write filename')
     handleDefault
 
@@ -386,7 +387,7 @@ handleDefault' _ = handleDefault
 handleTextBox :: UiId -> MoodlerM Zero
 handleTextBox selectedTextBox = do
     oldText <- use (serverState . uiElements . ix selectedTextBox . boxText)
-    withJustM (handleGetString [] (toRString oldText, "") "textbox: ") $ \txt -> do
+    withJustM (handleGetString [] (toFString oldText) "textbox: ") $ \txt -> do
         W.undoPoint
         W.synthSetString selectedTextBox txt
     handleDefault
@@ -400,13 +401,11 @@ selectEverythingInRegion p0 p1 = do
     unhighlightEverything
     forM_ s highlightElement
 
-handleDraggingRegion :: Point -> Point ->
-                           MoodlerM Zero
+handleDraggingRegion :: Point -> Point -> MoodlerM Zero
 handleDraggingRegion p1 p2 = handleDraggingRegion' p1 p2 =<< getEvent
 
 -- Mouse motion during region drag
-handleDraggingRegion' :: Point -> Point -> Event ->
-                         MoodlerM Zero
+handleDraggingRegion' :: Point -> Point -> Event -> MoodlerM Zero
 handleDraggingRegion' f z (EventMotion p) = do
     gadget .= \xform -> pictureTransformer xform $ color black (rect z p)
     selectEverythingInRegion f p
