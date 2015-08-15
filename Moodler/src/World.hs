@@ -25,17 +25,7 @@ import ServerState
 
 data MoodlerF a = GetEvent (Event -> a) deriving Functor
 
---instance Functor MoodlerF where
---    fmap f (GetEvent c) = GetEvent (f . c)
-
 data Zero
-
--- Need to make args consistent XXX
-data SendCommand = SendConnect String String
-                 | SendDisconnect String
-                 | SendSet String Float
-                 | SendSetString String String
-                 deriving Show
 
 data PlaneInfo = PlaneInfo { _planes :: UiId
                            , _rootPlane :: UiId
@@ -122,7 +112,7 @@ handleGetString' (EventKey (SpecialKey KeyEsc) Down _ _) _ _ _ = do
 handleGetString' (EventKey (SpecialKey KeyDelete) Down _ _) completions zipper prompt =
     continueGetString prompt completions (deleteChar zipper)
 
-handleGetString' (EventKey (SpecialKey KeyTab) Down _ _) completions zipper prompt = do
+handleGetString' (EventKey (SpecialKey KeyTab) Down _ _) completions zipper prompt =
     if null (postcursor zipper)
         then do
             let longestCompletion = longestMatchingPrefix completions (precursor zipper)
@@ -173,7 +163,7 @@ grey50 = makeColor 0.5 0.5 0.5 1.0
 
 stringGadget :: String -> FString -> String -> B.Transform -> Picture
 stringGadget completion zipper prompt _ =
-    let displayedString = prompt ++ (unzipper (insertChar '|' zipper))
+    let displayedString = prompt ++ unzipper (insertChar '|' zipper)
         displayedCompletion = if null (postcursor zipper)
             then prompt ++ precursor zipper ++ "|" ++ drop (length (precursor zipper)) completion
             else ""
@@ -196,7 +186,7 @@ newtype WorldMonad a = WorldMonad { runWorldMonad :: StateT World IO a }
                         deriving (Monad, MonadState World,
                                   MonadIO, Functor)
 
--- This prevents splitting out handleGetString
+-- XXX This prevents splitting out handleGetString
 instance InputHandler WorldMonad where
     getInput _ _ _ = return Nothing
 

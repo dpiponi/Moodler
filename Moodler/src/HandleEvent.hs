@@ -176,10 +176,6 @@ handleDefault' (EventMotion p) = do
         Nothing -> gadget .= const blank
     handleDefault
 
--- handleDefault' (EventKey (Char '"') Down _ _) = do
---     showHidden %= not
---     handleDefault
-
 handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
     withJustM (selectPointOnCurrent =<< use mouseLoc) $ 
         listenOn <=< getElementById "HandleEvent.hs"

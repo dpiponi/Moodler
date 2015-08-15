@@ -22,6 +22,9 @@ splitDot ""         = ("", "")
 splitDot (a : as)   = let (bs, cs) = splitDot as
                       in  (a : bs, cs)
 
+splitDot' :: String -> [String]
+splitDot' a = let (b, c) = splitDot a in [b, c]
+
 base :: String -> String
 base = fst . splitDot
 

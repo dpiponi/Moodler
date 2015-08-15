@@ -80,6 +80,6 @@ loadSynthTypes dir = do
 
 addSynth :: ModuleName -> (Int -> Module) -> State Synth ()
 addSynth name synthMaker = do
-    types <- get
-    let n = M.size types
+    --types <- get
+    n <- M.size <$> get
     put $ M.insert name (synthMaker n) types

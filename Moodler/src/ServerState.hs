@@ -20,3 +20,10 @@ emptyServerState rootID root =
                 , _synthList = []
                 , _aliases = M.empty
                 }
+
+-- Need to make args consistent XXX
+data SendCommand = SendConnect String String
+                 | SendDisconnect String
+                 | SendSet String Float
+                 | SendSetString String String
+                 deriving Show
