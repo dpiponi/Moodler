@@ -156,10 +156,18 @@ labelGadget p f xform = do
         uncurry translate p
             (scale 0.05 0.05 (color black (text (show f))))
 
+currentPlane :: (MonadIO m, MonadState World m) => m UiId
+currentPlane = use (planeInfo . planes)
+
+selectPointOnCurrent :: (MonadIO m, MonadState World m) =>
+                        Point -> m (Maybe UiId)
+selectPointOnCurrent p = do
+    selectionPlane <- currentPlane
+    selectedByPoint selectionPlane p
+
 handleDefault' :: Event -> MoodlerM Zero
 handleDefault' (EventMotion p) = do
-    selectionPlane <- use (planeInfo . planes)
-    maybeHoveringOver <- selectedByPoint selectionPlane p
+    maybeHoveringOver <- selectPointOnCurrent p
     case maybeHoveringOver of
         Just hoveringOver -> do
             elt <- getElementById "HandleEvent.hs" hoveringOver
@@ -172,8 +180,7 @@ handleDefault' (EventMotion p) = do
 --     handleDefault
 
 handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
-    selectionPlane <- use (planeInfo . planes)
-    withJustM (selectedByPoint selectionPlane =<< use mouseLoc) $ \listeningOver ->
+    withJustM (selectPointOnCurrent =<< use mouseLoc) $ \listeningOver ->
         listenOn =<< getElementById "HandleEvent.hs" listeningOver
     handleDefault
 
@@ -210,7 +217,7 @@ handleDefault' (EventKey (Char '-')
 -- But now that's fixed maybe this will work again.
 handleDefault' (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
-    filename <- handleGetString allScripts ("", "") "read: "
+    filename <- handleGetString allScripts (toRString "", "") "read: "
     withJust filename $ \filename' -> do
         W.undoPoint
         void $ execScript "scripts" filename'
@@ -218,7 +225,7 @@ handleDefault' (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctr
 
 handleDefault' (EventKey (Char 'l') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "saves"
-    filename <- handleGetString allScripts ("", "") "load: "
+    filename <- handleGetString allScripts (toRString "", "") "load: "
     liftIO $ putStrLn $ "filename = " ++ show filename
     withJust filename $ \filename' -> do
         W.undoPoint
@@ -229,7 +236,7 @@ handleDefault' (EventKey (Char 'l') Down _ _) = do
 
 handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctrl = Up } _) = do
     allSaves <- liftIO $ getAllScripts "saves"
-    filename <- handleGetString allSaves ("", "") "save: "
+    filename <- handleGetString allSaves (toRString "", "") "save: "
     case filename of
         Just "" -> do
             fileName' <- use projectFile
@@ -246,7 +253,7 @@ handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctr
 -- XXX quantise
 handleDefault' (EventKey (Char 'w') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
-    withJustM (handleGetString allScripts ("", "") "write: ") $ \filename' ->
+    withJustM (handleGetString allScripts (toRString "", "") "write: ") $ \filename' ->
         evalUi (U.write filename')
     handleDefault
 
@@ -257,8 +264,7 @@ handleDefault' (EventKey (Char 'q') Down Modifiers { alt = Down } _) = do
 -- Supposed to rotate cables.
 -- Probably doesn't work since introducing undo. XXX
 handleDefault' (EventKey (Char 'c') Down _ p) = do
-    selectionPlane <- use (planeInfo . planes)
-    e <- selectedByPoint selectionPlane p
+    e <- selectPointOnCurrent p
     case e of
         Just i -> do
             elt <- getElementById "handleDefault'" i
@@ -273,8 +279,7 @@ handleDefault' (EventKey (Char 'c') Down _ p) = do
 
 -- Output some info about the current selection.
 handleDefault' (EventKey (Char '?') Down _ p) = do
-    selectionPlane <- use (planeInfo . planes)
-    e <- selectedByPoint selectionPlane p
+    e <- selectPointOnCurrent p
     case e of
         Just i -> do
             elt <- getElementById "HandleEvent.hs" i
@@ -287,7 +292,7 @@ handleDefault' (EventKey (Char '?') Down _ p) = do
 -- Could it be script+keybinding?
 handleDefault' (EventKey (Char 'g') Down _ proxyLocation) = do
     sel <- use currentSelection
-    p <- use (planeInfo . planes)
+    p <- currentPlane
     makeGroup p sel proxyLocation
     handleDefault
 
@@ -296,8 +301,7 @@ handleDefault' (EventKey (Char 'g') Down _ proxyLocation) = do
 handleDefault' (EventKey (MouseButton LeftButton) Down
                 Modifiers {alt = Up, shift = Down, ctrl = Up}
                 p) = do
-    selectionPlane <- use (planeInfo . planes)
-    withJustM (selectedByPoint selectionPlane p) $ \selected -> do
+    withJustM (selectPointOnCurrent p) $ \selected -> do
         sel <- use currentSelection
         if selected `elem` sel
             then do
@@ -311,8 +315,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
 -- The normal/ordinary mouse down event
 handleDefault' (EventKey (MouseButton LeftButton) Down
     Modifiers {alt = Up, shift = Up, ctrl = Up} p) = do
-    selectionPlane <- use (planeInfo . planes)
-    e <- selectedByPoint selectionPlane p
+    e <- selectPointOnCurrent p
     case e of
         Just selected -> do
             bringToFront selected
@@ -326,8 +329,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
 handleDefault' (EventKey (MouseButton RightButton) Down
     Modifiers {alt = Down, shift = Up, ctrl = Up} p) = do
 
-    selectionPlane <- use (planeInfo . planes)
-    withJustM (selectedByPoint selectionPlane p) $ \i -> do
+    withJustM (selectPointOnCurrent p) $ \i -> do
         f <- getElementById "handleDefault'" i
         gadget .= labelGadget p f
     handleDefault
@@ -341,8 +343,7 @@ handleDefault' (EventKey (MouseButton WheelUp) Down _ p) = do
 -- Start ordinary selection alt-drag to move
 handleDefault' (EventKey (MouseButton LeftButton) Down
     Modifiers {alt = Down, shift = Up, ctrl = Up} p) = do
-    selectionPlane <- use (planeInfo . planes)
-    e <- selectedByPoint selectionPlane p
+    e <- selectPointOnCurrent p
     sel <- use currentSelection
     case e of
         Just i -> do
@@ -355,8 +356,7 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
 -- Cable drag with ctrl-mouse
 handleDefault' (EventKey (MouseButton LeftButton) Down
         Modifiers {alt = Up, ctrl = Down, shift = Up} p) = do
-    selectionPlane <- use (planeInfo . planes)
-    e <- selectedByPoint selectionPlane p
+    e <- selectPointOnCurrent p
     case e of
         Just i -> do
             bringToFront i
@@ -386,7 +386,7 @@ handleDefault' _ = handleDefault
 handleTextBox :: UiId -> MoodlerM Zero
 handleTextBox selectedTextBox = do
     oldText <- use (serverState . uiElements . ix selectedTextBox . boxText)
-    withJustM (handleGetString [] (oldText, "") "textbox: ") $ \txt -> do
+    withJustM (handleGetString [] (toRString oldText, "") "textbox: ") $ \txt -> do
         W.undoPoint
         W.synthSetString selectedTextBox txt
     handleDefault
@@ -394,7 +394,7 @@ handleTextBox selectedTextBox = do
 selectEverythingInRegion :: (MonadIO m, MonadState World m) =>
                             Point -> Point -> m ()
 selectEverythingInRegion p0 p1 = do
-    selectionPlane <- use (planeInfo . planes)
+    selectionPlane <- currentPlane
     s <- everythingInRegion selectionPlane p0 p1
     currentSelection .= s
     unhighlightEverything

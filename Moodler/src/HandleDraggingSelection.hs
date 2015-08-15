@@ -2,7 +2,7 @@ module HandleDraggingSelection where
 
 import Graphics.Gloss.Interface.IO.Game
 import Control.Monad
-import Control.Monad.Trans.Free
+--import Control.Monad.Trans.Free
 import Control.Lens hiding (setting)
 import qualified Data.Set as S
 

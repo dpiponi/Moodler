@@ -2,7 +2,7 @@ module HandleDraggingRoot where
 
 import Control.Lens hiding (setting)
 import Graphics.Gloss.Interface.IO.Game
-import Control.Monad.Trans.Free
+--import Control.Monad.Trans.Free
 import Data.Monoid
 
 import World

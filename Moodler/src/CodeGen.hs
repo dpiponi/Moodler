@@ -225,9 +225,8 @@ instantiateInitHelper nodeName nodeType =
     in rewriteInitVars (_getModuleTypeName nodeName) variables i
 
 genInitialisers :: NodeType -> CExtDecl
-genInitialisers node = --do
+genInitialisers node =
       let initSource = instantiateInitHelper (_nodeTypeName node) node
-          --name = _getNodeName node
           typeName = _getModuleTypeName (_nodeTypeName node)
 
       in CFDefExt $ CFunDef [CTypeSpec (CVoidType undefNode)]
