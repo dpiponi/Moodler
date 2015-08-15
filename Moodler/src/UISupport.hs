@@ -99,20 +99,6 @@ visitElements' e elt = do
         then []
         else [e]
     
-    {-
-visitElements :: MonadState World m => m [UiId]
-visitElements = do
-    es <- use (serverState . uiElements)
-    lists <- forM (M.toList es) $ \(e, elt) -> do
-        -- Don't visit something with a parent from the top level.
-        -- We'll probably get there via the parent.
-        root <- use (serverState . rootPlane)
-        if (elt ^. parent) /= root && not (elt ^. hidden)
-            then visitElements' e elt
-            else return []
-    return $ concat lists
-    -}
-
 visitElementsOnPlane :: MonadState World m => UiId -> m [UiId]
 visitElementsOnPlane planeId = do
     showHiddenElements <- use showHidden
