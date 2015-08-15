@@ -249,6 +249,9 @@ evalUi (U.Label n labelText p creationPlane cfn) = do
 evalUi (U.Cable s1 s2 cfn) =
     synthConnect s1 s2 >> evalUi cfn
 
+evalUi (U.UnCable dest cfn) =
+    deleteCable dest >> evalUi cfn
+
 evalUi (U.Recompile cfn) =
     synthRecompile "Recompile command" >> evalUi cfn
 
@@ -397,6 +400,10 @@ evalUi (InputFile prompt directory cfn) = do
     filenames <- liftIO $ getDirectoryContents directory
     inp <- getInput "" filenames prompt
     evalUi (cfn inp)
+
+evalUi (GetCableSource destId cfn) = do
+    src <- cableSrc destId
+    evalUi (cfn src)
 
 evalUi (Alias aliasName synthName cfn) = do
     synthAlias aliasName synthName

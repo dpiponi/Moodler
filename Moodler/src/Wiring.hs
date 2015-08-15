@@ -17,7 +17,8 @@ module Wiring(synthConnect,
               synthUnAlias,
               undoPoint,
               performUndo, 
-              performRedo
+              performRedo,
+              cableSrc
               ) where
 
 import Control.Lens
@@ -37,15 +38,6 @@ import Cable
 import World
 import UIElement
 import KeyMatcher
-
-{-
-emptyWorld' :: UiId -> UIElement -> ServerState
-emptyWorld' rootID root =
-    ServerState { _uiElements = M.fromList [(rootID, root)]
-                , _synthList = []
-                , _aliases = M.empty
-                }
-                -}
 
 emptyWorld' :: World
 emptyWorld' = 
@@ -305,3 +297,10 @@ performRedo = do
         -- XXX Note "reverse". This could be eliminated.
         mapM_ (\a -> interpretSend a >> liftIO (putStrLn $ "Redoing: " ++ show a)) (reverse redos)
         synthRecompile "redo"
+
+cableSrc :: (MonadIO m, MonadState World m) => UiId -> m (Maybe UiId)
+cableSrc srcId = do
+    elt <- getElementById "cableSrc" srcId
+    case elt of
+        In { _cablesIn = (Cable src : _) } -> return (Just src)
+        _ -> return Nothing

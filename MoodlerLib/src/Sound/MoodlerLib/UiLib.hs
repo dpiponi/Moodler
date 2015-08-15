@@ -26,6 +26,7 @@ data Ui a = Return a
                                 [String] Location (UiId -> Ui a)
           -- | Connect String String (Ui a)
           | Cable UiId UiId (Ui a)
+          | UnCable UiId (Ui a)
           | Mouse ((Float, Float) -> Ui a)
           -- | Args ([String] -> Ui a)
           | NewId String (UiId -> Ui a)
@@ -68,6 +69,7 @@ data Ui a = Return a
           | Alias String String (Ui a)
           | UnAlias String (Ui a)
           | SetOutput UiId (Ui a)
+          | GetCableSource UiId (Maybe UiId -> Ui a)
           deriving (Typeable, Functor)
 
 instance Monad Ui where
@@ -88,7 +90,8 @@ instance Monad Ui where
     Container s1 s2 p q cont >>= f = Container s1 s2 p q ((>>= f) . cont)
     Label s1 s2 p q cont >>= f = Label s1 s2 p q ((>>= f) . cont)
     -- Connect s1 s2 cont >>= f = Connect s1 s2 (cont >>= f)
-    Cable s1 s2 cont >>= f = Cable s1 s2 (cont >>= f)
+    Cable src dest cont >>= f = Cable src dest (cont >>= f)
+    UnCable dest cont >>= f = UnCable dest (cont >>= f)
     Mouse cont >>= f = Mouse ((>>= f) . cont)
     -- Args cont >>= f = Args ((>>= f) . cont)
     GetValue s1 cont >>= f = GetValue s1 ((>>= f) . cont)
@@ -129,6 +132,8 @@ instance Monad Ui where
     Unparent s0 cont >>= f = Unparent s0 (cont >>= f)
     Input s0 cont >>= f = Input s0 ((>>= f) . cont)
     InputFile s0 s1 cont >>= f = InputFile s0 s1 ((>>= f) . cont)
+    GetCableSource cableDest cont >>= f =
+                            GetCableSource cableDest ((>>= f) . cont)
     Alias s0 s1 cont >>= f = Alias s0 s1 (cont >>= f)
     UnAlias s0 cont >>= f = UnAlias s0 (cont >>= f)
     SetOutput s cont >>= f = SetOutput s (cont >>= f)
@@ -238,6 +243,9 @@ connect s1 s2 = Connect s1 s2 (return ())
 cable :: UiId -> UiId -> Ui ()
 cable s1 s2 = Cable s1 s2 (return ())
 
+unCable :: UiId -> Ui ()
+unCable dest = UnCable dest (return ())
+
 mouse :: Ui (Float, Float)
 mouse = Mouse return
 
@@ -255,6 +263,9 @@ input s1 = Input s1 return
 
 inputFile :: String -> String -> Ui (Maybe String)
 inputFile s0 s1 = InputFile s0 s1 return
+
+getCableSrc :: UiId -> Ui (Maybe UiId)
+getCableSrc cableSrc = GetCableSource cableSrc return
 
 getParent :: UiId -> Ui Location
 getParent s1 = GetParent s1 return

@@ -232,3 +232,46 @@ getAllFilesOfType ext dir = do
 
 getAllScripts :: String -> IO [String]
 getAllScripts = getAllFilesOfType ".hs"
+
+{-
+-- Split cable going into chosen In.
+-- Returns (new In, new Out)
+splitCable :: (MonadState World m, MonadIO m) => UiId -> m (Maybe (UiId, UiId))
+splitCable inId = do
+    inElt <- getElementById "splitCable" inId
+    case inElt of
+        In { _cablesIn = (cable : _) } -> do
+        {-
+new' s1 = do
+    s2 <- newId s1 -- kludge until we have SynthIds
+    New s1 (unUiId s2) (return ())
+    return (unUiId s2)
+plugin :: UiId -> String -> (Float, Float) -> Location -> Ui UiId
+plugin s1 s2 p creationParent = PlugIn s1 s2 p creationParent return
+
+plugin' :: String -> (Float, Float) -> Location -> Ui UiId
+plugin' s2 p creationParent = do
+    s1 <- newId "plugin"
+    PlugIn s1 s2 p creationParent return
+
+plugout :: UiId -> String -> (Float, Float) -> Location -> Ui UiId
+plugout s1 s2 p creationParent = PlugOut s1 s2 p creationParent return
+
+plugout' :: String -> (Float, Float) -> Location -> Ui UiId
+plugout' s2 p creationParent = do
+    s1 <- newId "plugout"
+    PlugOut s1 s2 p creationParent return
+do
+    (x0, y0) <- mouse
+    let (x, y) = quantise2 quantum (x0, y0)
+    root <- currentPlane
+    id5  <-  new' "id"
+    in6 <- plugin' (id5 ++ "." ++ "signal") (x+(-16.0), y+(-5.0)) (Inside root)
+    setColour in6 "#control"
+    out7 <- plugout' (id5 ++ "." ++ "result") (x+(25.0), y+(-5.0)) (Inside root)
+    setColour out7 "#control"
+    recompile
+    return ()
+         -}
+        _ -> return Nothing
+-}
