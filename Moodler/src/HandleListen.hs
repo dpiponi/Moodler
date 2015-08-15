@@ -47,7 +47,7 @@ listenTo elt = do
     let srcName = elt ^. ur . name
     outId <- use outputId
     currentCables <- use (serverState . uiElements . ix outId . cablesIn)
-    liftIO $ print $ "cables = " ++ show currentCables
+    --liftIO $ print $ "cables = " ++ show currentCables
     sendConnectMessage srcName "out.value"
     sendRecompileMessage "listen"
     handleListen currentCables =<< getEvent
@@ -58,7 +58,7 @@ listenOn elt@Out {} = do
     gadget .= listenGadget (elt ^. ur . loc)
     listenTo elt
 
-listenOn elt@In {} = do
+listenOn elt@In {} =
     -- We can only listen to this In if it has a
     -- cable coming from an Out.
     case elt ^. cablesIn of

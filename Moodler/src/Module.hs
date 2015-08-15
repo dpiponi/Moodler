@@ -84,24 +84,16 @@ genScriptPlugs name command xoffset outOffset outs =
              tellInd 4 $ unwords [ "setColour", name, show col]
 
 panelDetails :: Int -> (String, Int)
-panelDetails height =
-    if height >= 13
-        then ("panel_9x1.png", 9)
-        else if height >= 12
-                then ("panel_8x1.png", 8)
-                else if height >= 10
-                        then ("panel_7x1.png", 7)
-                        else if height >= 8
-                                then ("panel_6x1.png", 6)
-                                else if height >= 7
-                                        then ("panel_5x1.png", 5)
-                                        else if height >= 5
-                                            then ("panel_4x1.png", 4)
-                                            else if height >= 3
-                                                 then ("panel_3x1.png", 3)
-                                                 else if height >= 2
-                                                          then ("panel_2x1.png", 2)
-                                                          else ("panel_1x1.png", 1)
+panelDetails height
+    | height >= 13 = ("panel_9x1.png", 9)
+    | height >= 12 = ("panel_8x1.png", 8)
+    | height >= 10 = ("panel_7x1.png", 7)
+    | height >= 8 = ("panel_6x1.png", 6)
+    | height >= 7 = ("panel_5x1.png", 5)
+    | height >= 5 = ("panel_4x1.png", 4)
+    | height >= 3 = ("panel_3x1.png", 3)
+    | height >= 2 = ("panel_2x1.png", 2)
+    | otherwise = ("panel_1x1.png", 1)
 
 -- Auto-generate UI script for a .msl module
 synthScript :: String -> [(CDecl, InName)] -> [(CDecl, OutName)] -> String

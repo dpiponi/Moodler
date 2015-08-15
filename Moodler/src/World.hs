@@ -79,25 +79,6 @@ $(makeLenses ''ServerState)
 getEvent :: MoodlerM Event
 getEvent = liftF $ GetEvent id
 
-handleGetString :: [String] -> (RString, String) -> String ->
-                   MoodlerM (Maybe String)
-handleGetString completions zipper@(inputString, afterCursor) prompt = do
-    e <- getEvent
-    let longestCompletion = if null afterCursor
-        then longestMatchingPrefix completions (fromRString inputString)
-        else fromRString inputString
-    gadget .= stringGadget longestCompletion zipper prompt
-    handleGetString' completions zipper prompt e
-
-continueGetString :: String -> [String] -> (RString, String) ->
-                     MoodlerM (Maybe String)
-continueGetString prompt completions zipper@(inputString, afterCursor) = do
-    let longestCompletion = if null afterCursor
-        then longestMatchingPrefix completions (fromRString inputString)
-        else fromRString inputString
-    gadget .= stringGadget longestCompletion zipper prompt
-    handleGetString completions zipper prompt
-
 newtype RString = R { unR :: String }
 
 toRString :: String -> RString
@@ -136,6 +117,25 @@ insertChar a (R b, c) = (R (a : b), c)
 unzipper :: (RString, String) -> String
 unzipper (R before, after) = reverse before ++ after
 
+handleGetString :: [String] -> (RString, String) -> String ->
+                   MoodlerM (Maybe String)
+handleGetString completions zipper@(inputString, afterCursor) prompt = do
+    e <- getEvent
+    let longestCompletion = if null afterCursor
+        then longestMatchingPrefix completions (fromRString inputString)
+        else fromRString inputString
+    gadget .= stringGadget longestCompletion zipper prompt
+    handleGetString' e completions zipper prompt
+
+continueGetString :: String -> [String] -> (RString, String) ->
+                     MoodlerM (Maybe String)
+continueGetString prompt completions zipper@(inputString, afterCursor) = do
+    let longestCompletion = if null afterCursor
+        then longestMatchingPrefix completions (fromRString inputString)
+        else fromRString inputString
+    gadget .= stringGadget longestCompletion zipper prompt
+    handleGetString completions zipper prompt
+
 -- XXX Wrong! It's inputString' that goes into pair
 handleGetString'' :: [String] -> String -> String -> (RString, String) ->
                      MoodlerM (Maybe String)
@@ -147,81 +147,60 @@ handleGetString'' completions inputString prompt zipper'@(inputString', afterCur
     handleGetString completions zipper' prompt
 
 -- Put event at beginning XXX
-handleGetString' :: [String] -> (RString, String) -> String -> Event ->
+handleGetString' :: Event -> [String] -> (RString, String) -> String -> 
                     MoodlerM (Maybe String)
-handleGetString' _ zipper@(inputString, afterCursor) _ (EventKey (SpecialKey KeyEnter)
-                                              Down _ _) = do
+handleGetString' (EventKey (SpecialKey KeyEnter) Down _ _) _ zipper _ = do
     gadget .= const blank
     return (Just (unzipper zipper))
 
-handleGetString' _ _ _ (EventKey (SpecialKey KeyEsc)
-                                              Down _ _) = do
+handleGetString' (EventKey (SpecialKey KeyEsc) Down _ _) _ _ _ = do
     gadget .= const blank
     return Nothing
 
 -- Delete key during command entry
-handleGetString' completions zipper prompt
-                    (EventKey (SpecialKey KeyDelete)
-                              Down _ _) = do
+handleGetString' (EventKey (SpecialKey KeyDelete) Down _ _) completions zipper prompt =
     continueGetString prompt completions (deleteChar zipper)
 
--- Space key during command entry
-handleGetString' completions zipper prompt (EventKey
-                                     (SpecialKey KeySpace)
-                                     Down _ _) = do
-    continueGetString prompt completions (insertChar ' ' zipper)
-
 -- XXX sort out reverse bug XXX
-handleGetString' completions zipper@(inputString, afterCursor) prompt
-                    (EventKey (SpecialKey KeyTab)
-                    Down _ _) = do
+handleGetString' (EventKey (SpecialKey KeyTab) Down _ _) completions zipper@(inputString, afterCursor) prompt = do
     let longestCompletion = if null afterCursor
         then longestMatchingPrefix completions (fromRString inputString)
         else fromRString inputString
     gadget .= stringGadget longestCompletion zipper prompt
     handleGetString completions (toRString longestCompletion, afterCursor) prompt
 
-handleGetString' completions zipper@(R "", _) prompt
-                    (EventKey (SpecialKey KeyLeft)
-                    Down _ _) = handleGetString completions zipper prompt
+handleGetString' (EventKey (SpecialKey KeyLeft) Down _ _) completions zipper@(R "", _) prompt = handleGetString completions zipper prompt
 
-handleGetString' completions zipper@(inputString, _) prompt
-                    (EventKey (SpecialKey KeyLeft)
-                    Down _ _) = do
+handleGetString' (EventKey (SpecialKey KeyLeft) Down _ _) completions zipper@(inputString, _) prompt = do
     let zipper' = cursorLeft zipper
     gadget .= stringGadget (fromRString inputString) zipper' prompt
     handleGetString completions zipper' prompt
 
-handleGetString' completions zipper@(_, "") prompt
-                    (EventKey (SpecialKey KeyRight)
-                    Down _ _) =
+handleGetString' (EventKey (SpecialKey KeyRight) Down _ _) completions zipper@(_, "") prompt =
     handleGetString completions zipper prompt
 
-handleGetString' completions zipper@(inputString, _) prompt
-                    (EventKey (SpecialKey KeyRight)
-                    Down _ _) =
+handleGetString' (EventKey (SpecialKey KeyRight) Down _ _) completions zipper@(inputString, _) prompt =
     handleGetString'' completions (fromRString inputString) prompt (cursorRight zipper)
 
-handleGetString' completions zipper@(inputString, _) prompt
-                    (EventKey (SpecialKey KeyHome)
-                    Down _ _) = 
+handleGetString' (EventKey (SpecialKey KeyHome) Down _ _) completions zipper@(inputString, _) prompt = 
     handleGetString'' completions (fromRString inputString) prompt (cursorHome zipper)
 
-handleGetString' completions zipper prompt
-                    (EventKey (SpecialKey KeyEnd)
-                    Down _ _) = do
+handleGetString' (EventKey (SpecialKey KeyEnd) Down _ _) completions zipper prompt = do
     let zipper'@(inputString', _) = cursorEnd zipper
     let longestCompletion = longestMatchingPrefix completions (fromRString inputString')
     gadget .= stringGadget longestCompletion zipper' prompt
     handleGetString completions zipper' prompt
 
+-- Space key during command entry
+handleGetString' (EventKey (SpecialKey KeySpace) Down _ _) completions zipper prompt =
+    continueGetString prompt completions (insertChar ' ' zipper)
+
 -- Command key entry
-handleGetString' completions zipper prompt
-                        (EventKey (Char c) Down _ _) = do
+handleGetString' (EventKey (Char c) Down _ _) completions zipper prompt =
     continueGetString prompt completions (insertChar c zipper)
 
 -- XXX Need to think about this
-handleGetString' c x z _ = handleGetString c x z
+handleGetString' _ c x z = handleGetString c x z
 
 instance InputHandler MoodlerM where
     getInput inputString completions = handleGetString completions (toRString inputString, "")

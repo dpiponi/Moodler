@@ -151,7 +151,7 @@ hoverGadget (ex, ey) elt xform =
         B.textInBox (B.transparentBlack 0.7) white txt
 
 labelGadget :: Show a => (Float, Float) -> a -> B.Transform -> Picture
-labelGadget p f xform = do
+labelGadget p f xform =
     pictureTransformer xform $
         uncurry translate p
             (scale 0.05 0.05 (color black (text (show f))))
@@ -180,8 +180,8 @@ handleDefault' (EventMotion p) = do
 --     handleDefault
 
 handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
-    withJustM (selectPointOnCurrent =<< use mouseLoc) $ \listeningOver ->
-        listenOn =<< getElementById "HandleEvent.hs" listeningOver
+    withJustM (selectPointOnCurrent =<< use mouseLoc) $ 
+        listenOn <=< getElementById "HandleEvent.hs"
     handleDefault
 
 handleDefault' (EventKey (Char 'z') Down Modifiers { alt = Down } _) = do
