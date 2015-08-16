@@ -14,6 +14,8 @@ import Sound.MoodlerLib.Symbols
 import World
 import ContainerTree
 import UIElement
+import ServerState
+import WorldSupport
 
 checkEverythingAccessibleFromRoot :: (Functor m, MonadIO m,
                                      MonadState World m) =>

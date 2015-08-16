@@ -22,8 +22,8 @@ import Text
 import UIElement
 import Utils
 import World
---import KeyMatcher
---import KeyStrokes
+import WorldSupport
+import ServerState
 
 synthUsedInElement :: UIElement -> S.Set String
 synthUsedInElement In { _ur = UrElement { _name = n } } = S.singleton (base n)

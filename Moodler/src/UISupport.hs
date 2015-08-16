@@ -18,6 +18,8 @@ import Sound.MoodlerLib.Symbols
 import ContainerTree
 import UIElement
 import World
+import WorldSupport
+import ServerState
 
 uiAngle :: Floating a => Maybe a -> Maybe a -> a -> a
 uiAngle (Just lo) (Just hi) v = -1.0+2.0*(v-lo)/(hi-lo)

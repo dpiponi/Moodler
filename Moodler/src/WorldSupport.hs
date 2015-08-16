@@ -1,9 +1,9 @@
-{-# LANGUAGE Rank2Types, TemplateHaskell, FlexibleContexts #-}
+{-# LANGUAGE Rank2Types, FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses, GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE EmptyDataDecls, DeriveFunctor #-}
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 
-module World where
+module WorldSupport where
 
 import Control.Lens
 import Control.Monad.State
@@ -12,7 +12,6 @@ import Control.Applicative
 import Data.Monoid
 import Graphics.Gloss.Interface.IO.Game
 import qualified Data.Map as M
---import Debug.Trace
 
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.UiLibElement
@@ -20,51 +19,8 @@ import Sound.MoodlerLib.UiLibElement
 import Text
 import UIElement
 import qualified Box as B
-import KeyMatcher
 import ServerState
-
-data MoodlerF a = GetEvent (Event -> a) deriving Functor
-
-data Zero
-
-data PlaneInfo = PlaneInfo { _planes :: UiId
-                           , _rootPlane :: UiId
-                           , _rootTransform :: B.Transform
-                           }
-
-data World = World { _serverState :: ServerState
-                   , _mouseLoc :: (Float, Float)
-                   , _planeInfo :: PlaneInfo
-                   , _newName :: Int
-                   , _showHidden :: Bool
-                   , _pics :: M.Map String (Picture, Int, Int)
-                   , _currentSelection :: [UiId]
-                   , _gadget :: B.Transform -> Picture
-                   , _ipAddr :: String
-                   , _projectFile :: String
-                   , _keyMatcher :: KeyMatcher (Key, Modifiers) String
-                   , _cont :: FreeF MoodlerF Zero
-                                    (FreeT MoodlerF (StateT World IO) Zero)
-                   , _undoInfo :: UndoInfo
-                   , _outputId :: UiId
-                   }
-
-data UndoInfo = UndoInfo { _serverStateHistory :: [ServerState]
-                         , _undoHistory :: [([SendCommand], [SendCommand])]
-                         , _serverStateFuture :: [ServerState]
-                         , _undoFuture :: [([SendCommand], [SendCommand])]
-                         }
-
-$(makeLenses ''UndoInfo)
-$(makeLenses ''World)
-$(makeLenses ''PlaneInfo)
-
-type MoodlerM = FreeT MoodlerF (StateT World IO)
-
-class InputHandler m where
-    getInput :: String -> [String] -> String -> m (Maybe String)
-
-$(makeLenses ''ServerState)
+import World
 
 getEvent :: MoodlerM Event
 getEvent = liftF $ GetEvent id
@@ -159,6 +115,9 @@ handleGetString' (EventKey (Char c) Down _ _) completions zipper prompt =
 
 -- XXX Need to think about this
 handleGetString' _ c x z = handleGetString c x z
+
+class InputHandler m where
+    getInput :: String -> [String] -> String -> m (Maybe String)
 
 instance InputHandler MoodlerM where
     getInput inputString completions = handleGetString completions (toFString inputString)

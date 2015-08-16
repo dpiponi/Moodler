@@ -7,6 +7,8 @@ import Control.Monad.Trans.Free
 import qualified Box as B
 import Control.Lens hiding (setting)
 import World
+import WorldSupport
+import ServerState
 import Draw
 import Cable
 import Utils

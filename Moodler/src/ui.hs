@@ -19,6 +19,7 @@ import Box
 import KeyMatcher
 import ParseUIOpts
 import ServerState
+import WorldSupport
 
 -- Zero elimination
 magic :: Zero -> a

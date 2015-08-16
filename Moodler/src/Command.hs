@@ -31,6 +31,8 @@ import Codec.Picture
 import qualified Codec.Picture.Types as P
 import KeyMatcher
 import KeyStrokes
+import ServerState
+import WorldSupport
 
 alertGadget :: String -> B.Transform -> Picture
 alertGadget alt _ = 

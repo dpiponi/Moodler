@@ -1,8 +1,11 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module ServerState where
 
 import qualified Data.Map as M
 
 import Sound.MoodlerLib.Symbols
+import Control.Lens
 
 import UIElement
 
@@ -27,3 +30,5 @@ data SendCommand = SendConnect String String
                  | SendSet String Float
                  | SendSetString String String
                  deriving Show
+
+$(makeLenses ''ServerState)

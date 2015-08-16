@@ -12,9 +12,11 @@ import Control.Applicative
 import Sound.MoodlerLib.Symbols
 
 import World
+import WorldSupport
 import UIElement
 import Utils
 import Wiring
+import ServerState
 --import Control.Monad.Morph
 
 -- XXX Could be argued that it should be impossible to

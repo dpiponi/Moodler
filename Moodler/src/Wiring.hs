@@ -36,6 +36,7 @@ import Comms
 import Box
 import Cable
 import World
+import WorldSupport
 import UIElement
 import KeyMatcher
 

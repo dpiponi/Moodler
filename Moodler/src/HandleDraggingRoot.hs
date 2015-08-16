@@ -6,6 +6,7 @@ import Graphics.Gloss.Interface.IO.Game
 import Data.Monoid
 
 import World
+import WorldSupport
 import qualified Box as B
 
 handleDraggingRoot :: MoodlerM Zero -> Point -> MoodlerM Zero

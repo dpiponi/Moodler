@@ -10,6 +10,8 @@ import Sound.MoodlerLib.Quantise
 import Sound.MoodlerLib.Symbols
 
 import World
+import WorldSupport
+import ServerState
 import UIElement
 
 dragElement :: [UiId] -> Point -> [UiId] -> MoodlerM ()

@@ -8,6 +8,7 @@ import Data.Monoid
 import Sound.MoodlerLib.Symbols
 
 import World
+import WorldSupport
 import Draw
 import UIElement
 import UISupport
