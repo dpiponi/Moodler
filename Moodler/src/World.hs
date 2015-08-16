@@ -100,9 +100,14 @@ handleGetString'' completions inputString prompt zipper' = do
 -- Put event at beginning XXX
 handleGetString' :: Event -> [String] -> FString -> String -> 
                     MoodlerM (Maybe String)
-handleGetString' (EventKey (SpecialKey KeyEnter) Down _ _) _ zipper _ = do
+handleGetString' (EventKey (SpecialKey KeyEnter) Down _ _) completions zipper _ = do
     gadget .= const blank
-    return (Just (unzipper zipper))
+    if null (postcursor zipper)
+        then do
+            let longestCompletion = longestMatchingPrefix completions (precursor zipper)
+            return (Just longestCompletion)
+        else
+            return (Just (unzipper zipper))
 
 handleGetString' (EventKey (SpecialKey KeyEsc) Down _ _) _ _ _ = do
     gadget .= const blank

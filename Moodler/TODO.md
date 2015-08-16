@@ -1,4 +1,5 @@
 * ui
+    * drag a cable from its source, not just destination
     * convert as many key operations as possible to scripts with bindings
     * in KeyTracker.hs can I eliminate sort?
     * primary input and output. Deleting a node with primary input and output
