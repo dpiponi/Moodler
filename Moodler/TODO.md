@@ -1,4 +1,5 @@
 * ui
+    * clampToRange should take pair as argument. Use pars no hi/low separately.
     * drag a cable from its source, not just destination
     * convert as many key operations as possible to scripts with bindings
     * in KeyTracker.hs can I eliminate sort?
