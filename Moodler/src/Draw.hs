@@ -26,6 +26,7 @@ import Sound.MoodlerLib.UiLibElement
 import UISupport
 import ContainerTree
 import ServerState
+import Text
 
 below :: Monoid m => m -> (m, m)
 below a = (a, mempty)
@@ -129,19 +130,16 @@ drawUIElement _ world (In (UrElement _ wasSelected _ _ (x, y) _) col _ cableList
                      (True : repeat False)
                      cableList))
 
-drawUIElement _ _ (Label (UrElement _ wasSelected _ _ (x, y) dispName)) =
-        below $ translate x y (
+drawUIElement _ _ (Label (UrElement _ _wasSelected _ _ (x, y) dispName)) =
+        below ${- translate x y (
             color (selectColor wasSelected $ makeColor 0.7 0.7 0.5 1) $
-                scale 0.15 0.15 $ color black $ text dispName)
+                scale 0.15 0.15 $ color black $ text dispName)-}
+              write (x, y) 0.15 black dispName
 
-drawUIElement _ _ (Selector (UrElement _ wasSelected _ _ (x, y) _) col v opts) =
+drawUIElement _ _ (Selector (UrElement _ _wasSelected _ _ (x, y) _) col v opts) =
         below $ translate x y (
             color (interpretColour col) (circleSolid 6.5 <>
-            translate 10 (-5) (
-                color (selectColor wasSelected (
-                    makeColor 0.7 0.7 0.5 1)) (
-                        scale 0.15 0.15 (color black 
-                                        (text (opts!!floor v)))))))
+            write (10, -5) 0.15 black (opts!!floor v)))
 
 drawUIElement _ _ (Knob (UrElement _ wasSelected _ _ (x, y) _) col _ KnobStyle v lo hi) =
         below $ translate x y $
@@ -157,13 +155,16 @@ drawUIElement _ _ (Knob (UrElement _ wasSelected _ _ (x, y) _) col _ SliderStyle
             let angle = 3.0*uiAngle lo hi v
             in color (interpretColour col) $ polygon [(-6,-15), (6,-15), (6,5*angle), (-6,5*angle), (-6,-15)]
 
-drawUIElement _ _ (TextBox (UrElement _ wasSelected _ _ (x, y) _) col txt) =
+drawUIElement _ _ (TextBox (UrElement _ _wasSelected _ _ (x, y) _) col txt) =
         below $ translate x y (
             color (interpretColour col) (circleSolid 6.5 <>
+            write (10, -5) 0.15 black txt))
+        {-
             translate 10 (-5) (
                 color (selectColor wasSelected (
                     makeColor 0.6 0.8 0.4 1)) (
                         scale 0.15 0.15 (color black (text txt))))))
+                        -}
 
 rect :: Point -> Point -> Picture
 rect (x0, y0) (x1, y1) = Line [ (x0, y0), (x1, y0)

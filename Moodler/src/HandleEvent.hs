@@ -157,8 +157,7 @@ hoverGadget (ex, ey) elt xform =
 labelGadget :: Show a => (Float, Float) -> a -> B.Transform -> Picture
 labelGadget p f xform =
     pictureTransformer xform $
-        uncurry translate p
-            (scale 0.05 0.05 (color black (text (show f))))
+        uncurry translate p (write (0, 0) 0.05 black (show f))
 
 currentPlane :: (MonadIO m, MonadState World m) => m UiId
 currentPlane = use (planeInfo . planes)

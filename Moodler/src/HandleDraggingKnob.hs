@@ -20,16 +20,15 @@ import qualified Box as B
 import qualified Wiring as W
 import Music
 import Numeric
+import Text
 
 knobGadget :: (Float, Float) -> Float -> B.Transform -> Picture
 knobGadget (x0, y0) v1 xform = 
              pictureTransformer xform $
                 translate (x0+150) y0 (
                 color (B.transparentBlack 0.8) (rectangleSolid 250 100) <>
-                translate (-80) (-40) (scale 0.27 0.27 $
-                    color green $ text (showFFloat (Just 4) v1 "")) <>
-                translate (-80) 0 (scale 0.27 0.27 $
-                        color red $ text (showNote v1)))
+                write (-80, -40) 0.27 green (showFFloat (Just 4) v1 "") <>
+                write (-80, 0) 0.27 red (showNote v1))
 
 knobMapping :: Float -> Point -> Float
 knobMapping v (dx, dy) = v+0.01*dx*exp (0.01*dy)

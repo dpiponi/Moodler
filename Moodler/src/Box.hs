@@ -120,5 +120,8 @@ textInBox :: G.Color -> G.Color -> String -> G.Picture
 textInBox boxColor textColor targetText = 
     let w = estimateTextWidth targetText
     in G.color boxColor (G.rectangleSolid (w+10) 40) <>
+       write (-w/2, -9) 0.2 textColor targetText
+       {-
        G.translate (-w/2) (-9)
                  (G.scale 0.20 0.20 (G.color textColor (G.text targetText)))
+                 -}
