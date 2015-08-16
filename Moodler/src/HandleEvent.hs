@@ -88,9 +88,10 @@ clickOnIn' p i = do
     d <- W.deleteCable i
     W.synthRecompile "click on In"
     case d of
-        Nothing -> do
-            doSelection i
-            handleDraggingSelection handleDefault p
+        Nothing -> handleDefault
+--         Nothing -> do
+--             doSelection i
+--             handleDraggingSelection handleDefault p
         Just (Cable src) -> do
             srcElt <- getElementById "clickOnIn'" src
             gadget .= cableGadget (_loc (_ur srcElt)) p
