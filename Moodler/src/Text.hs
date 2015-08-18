@@ -4,7 +4,6 @@ module Text where
 
 import Control.Monad.Writer
 import Data.List
-import Graphics.Gloss.Interface.IO.Game
 
 removeFirst :: Eq a => a -> [a] -> [a]
 removeFirst _ [] = []
@@ -109,6 +108,3 @@ postcursor (_, b) = b
 
 toFString :: String -> FString
 toFString a = (toRString a, "")
-
-write :: (Float, Float) -> Float -> Color -> String -> Picture
-write (x, y) s c = translate x y . scale s s . color c . text

@@ -20,9 +20,10 @@ elementDisplayName' In { _displayName = n} = n
 elementDisplayName' Knob { _displayName = n} = n
 elementDisplayName' e = e ^. ur . name
 
-handleDraggingCable :: MoodlerM Zero -> UiId -> Point -> Point -> MoodlerM Zero
-handleDraggingCable handleDefault src start end =
-    handleDraggingCable' end =<< getEvent
+handleDraggingCable :: (Event -> MoodlerM Zero) -> UiId -> Point -> Point -> Event -> MoodlerM Zero
+handleDraggingCable handleDefaultDash src start =
+    handleDraggingCable'
+
     where
 
     -- XXX There are two of these. Move to common area.
@@ -50,7 +51,7 @@ handleDraggingCable handleDefault src start end =
                                   hoverGadget' (elt ^. ur . loc) elt 
                     _ -> unhighlightEverything
             Nothing -> unhighlightEverything
-        handleDraggingCable handleDefault src start p
+        getEvent >>= handleDraggingCable' p
 
     -- Deal with the end of cable dragging
     handleDraggingCable' _ (EventKey (MouseButton LeftButton) Up _ p) = do
@@ -64,19 +65,18 @@ handleDraggingCable handleDefault src start end =
                     Out {} -> justSelect i
                     _ -> do
                             gadget .= const blank
-                            handleDefault
+                            getEvent >>= handleDefaultDash
             Nothing -> do
                         gadget .= const blank
-                        handleDefault
+                        getEvent >>= handleDefaultDash
 
-    handleDraggingCable' end _ =
-        handleDraggingCable handleDefault src start end -- XXX ???
+    handleDraggingCable' end _ = getEvent >>= handleDraggingCable' end
 
     justSelect :: UiId -> MoodlerM Zero
     justSelect i = do
         doSelection i
         gadget .= const blank
-        handleDefault
+        getEvent >>= handleDefaultDash
 
     wireCable :: UiId -> UiId -> MoodlerM Zero
     wireCable i selectedOut = do

@@ -19,6 +19,7 @@ import KeyMatcher
 import ServerState
 
 data MoodlerF a = GetEvent (Event -> a) deriving Functor
+type MoodlerM = FreeT MoodlerF (StateT World IO)
 
 data Zero
 
@@ -53,5 +54,3 @@ data UndoInfo = UndoInfo { _serverStateHistory :: [ServerState]
 $(makeLenses ''UndoInfo)
 $(makeLenses ''World)
 $(makeLenses ''PlaneInfo)
-
-type MoodlerM = FreeT MoodlerF (StateT World IO)

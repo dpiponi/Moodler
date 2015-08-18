@@ -9,26 +9,28 @@ import World
 import WorldSupport
 import qualified Box as B
 
-handleDraggingRoot :: MoodlerM Zero -> Point -> MoodlerM Zero
-handleDraggingRoot handleDefault p0 = do
-    e <- getEvent
-    handleDraggingRoot' handleDefault p0 e
+handleDraggingRoot :: (Event -> MoodlerM Zero) -> Point -> MoodlerM Zero
+handleDraggingRoot handleDefaultDash p0 =
+    getEvent >>= handleDraggingRoot'
 
-handleDraggingRoot' :: MoodlerM Zero -> Point -> Event -> MoodlerM Zero
-handleDraggingRoot' handleDefault p0 (EventMotion p1) = do
-    planeInfo . rootTransform %= (B.Transform (p1-p0) 1 <>)
-    -- It's not obvious that the following line is correct.
-    -- It's tempting to use p1.
-    -- Remember that mouse coordinates have been transformed
-    -- by the very transform we're changing.
-    -- This means that the position of the mouse at the previous
-    -- event is always p0 in the current coordinate system
-    -- despite the fact that the mouse is moving.
-    handleDraggingRoot handleDefault p0
+    where
 
-handleDraggingRoot' handleDefault p0
-    (EventKey (MouseButton LeftButton) Up _ p1) = do
-    planeInfo . rootTransform %= (B.Transform (p1-p0) 1 <>)
-    handleDefault
+    handleDraggingRoot' :: Event -> MoodlerM Zero
+    handleDraggingRoot' (EventMotion p1) = do
+        planeInfo . rootTransform %= (B.Transform (p1-p0) 1 <>)
+        -- It's not obvious that the following line is correct.
+        -- It's tempting to use p1.
+        -- Remember that mouse coordinates have been transformed
+        -- by the very transform we're changing.
+        -- This means that the position of the mouse at the previous
+        -- event is always p0 in the current coordinate system
+        -- despite the fact that the mouse is moving.
+        -- But there is a bug when you zoom out >= 4x ... XXX
+        getEvent >>= handleDraggingRoot'
 
-handleDraggingRoot' handleDefault a _ = handleDraggingRoot handleDefault a
+    handleDraggingRoot'
+        (EventKey (MouseButton LeftButton) Up _ p1) = do
+        planeInfo . rootTransform %= (B.Transform (p1-p0) 1 <>)
+        getEvent >>= handleDefaultDash
+
+    handleDraggingRoot' _ = getEvent >>= handleDraggingRoot'

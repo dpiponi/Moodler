@@ -21,6 +21,7 @@ import UIElement
 import qualified Box as B
 import ServerState
 import World
+import Box hiding (translate)
 
 getEvent :: MoodlerM Event
 getEvent = liftF $ GetEvent id

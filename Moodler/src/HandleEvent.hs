@@ -42,6 +42,7 @@ import HandleDraggingSelection
 import HandleDraggingCable
 import HandleDraggingKnob
 import HandleListen
+import Box hiding (translate)
 
 -- Find a container somewhere in a list of ids.
 -- Assumes there is precisely one. XXX
@@ -55,31 +56,33 @@ findContainer es = do
 ctrlDrag :: UiId -> Point -> UIElement -> MoodlerM Zero
 ctrlDrag i _ Container {} = do
     planeInfo . planes .= i
-    handleDefault
+    getEvent >>= handleDefaultDash
 ctrlDrag i p Out {} = do
     highlightJust i
-    handleDraggingCable handleDefault i p p
+    getEvent >>= handleDraggingCable handleDefaultDash i p p
 ctrlDrag i _ In {} = do
     doSelection i
-    handleDefault
+    getEvent >>= handleDefaultDash
 ctrlDrag i p Knob {} = do
     highlightJust i
-    handleDraggingCable handleDefault i p p
+    getEvent >>= handleDraggingCable handleDefaultDash i p p
 ctrlDrag i p Selector {} = do
     highlightJust i
-    handleDraggingCable handleDefault i p p
+    getEvent >>= handleDraggingCable handleDefaultDash i p p
 ctrlDrag i _ Label {} = do
     doSelection i
-    handleDefault
+    getEvent >>= handleDefaultDash
 ctrlDrag i _ Image {} = do
     doSelection i
-    handleDefault
+    getEvent >>= handleDefaultDash
 ctrlDrag i p TextBox {} = do
     highlightJust i
-    handleDraggingCable handleDefault i p p
+    getEvent >>= handleDraggingCable handleDefaultDash i p p
 
+{-
 handleDefault :: MoodlerM Zero
-handleDefault = handleDefault' =<< getEvent
+handleDefault = getEvent >>= handleDefaultDash
+-}
 
 -- Handle ordinary click on an In port.
 -- If there's a cable attached we start dragging it
@@ -90,25 +93,25 @@ clickOnIn' p i = do
     d <- W.deleteCable i
     W.synthRecompile "click on In"
     case d of
-        Nothing -> handleDefault
+        Nothing -> getEvent >>= handleDefaultDash
 --         Nothing -> do
 --             doSelection i
---             handleDraggingSelection handleDefault p
+--             handleDraggingSelection getEvent >>= handleDefaultDash p
         Just (Cable src) -> do
             srcElt <- getElementById "clickOnIn'" src
             gadget .= cableGadget (_loc (_ur srcElt)) p
-            handleDraggingCable handleDefault src (_loc (_ur srcElt)) p
+            getEvent >>= handleDraggingCable handleDefaultDash src (_loc (_ur srcElt)) p
 
 -- Straightforward click on a UI element
 defaultClick' :: Point -> UiId -> UIElement -> MoodlerM Zero
 defaultClick' p selected Container {} = do -- XXX Need to select images/containers correctly.
     doSelection selected
-    handleDraggingSelection handleDefault p
+    handleDraggingSelection handleDefaultDash p
 
 defaultClick' p selected Out {} = do
     highlightJust selected
     gadget .= cableGadget p p
-    handleDraggingCable handleDefault selected p p
+    getEvent >>= handleDraggingCable handleDefaultDash selected p p
 
 defaultClick' p selected In {} = do
     W.undoPoint
@@ -117,7 +120,7 @@ defaultClick' p selected In {} = do
 defaultClick' p selected elt@Knob { _knobStyle = KnobStyle } = do
     highlightJust selected
     W.undoPoint
-    handleDraggingKnob handleDefault handleDefault' selected (_setting elt) p
+    getEvent >>= handleDraggingKnob handleDefaultDash selected (_setting elt) p
 
 defaultClick' p selected Knob { _knobStyle = SliderStyle } = do
     highlightJust selected
@@ -126,18 +129,18 @@ defaultClick' p selected Knob { _knobStyle = SliderStyle } = do
 
 defaultClick' _ selected Label {} = do
     doSelection selected
-    handleDefault
+    getEvent >>= handleDefaultDash
 
 defaultClick' _ selected Image {} = do
     doSelection selected
-    handleDefault
+    getEvent >>= handleDefaultDash
 
 defaultClick' _ selected Selector { _setting = oldSetting
                            , _options = opts } = do
     let newSetting = (floor oldSetting+1) `mod` length opts
     W.undoPoint
     void $ W.synthSet selected (fromIntegral newSetting)
-    handleDefault
+    getEvent >>= handleDefaultDash
 
 defaultClick' _ selected TextBox { } = 
     handleTextBox selected
@@ -168,61 +171,61 @@ selectPointOnCurrent p = do
     selectionPlane <- currentPlane
     selectedByPoint selectionPlane p
 
-handleDefault' :: Event -> MoodlerM Zero
-handleDefault' (EventMotion p) = do
+handleDefaultDash :: Event -> MoodlerM Zero
+handleDefaultDash (EventMotion p) = do
     maybeHoveringOver <- selectPointOnCurrent p
     case maybeHoveringOver of
         Just hoveringOver -> do
             elt <- getElementById "HandleEvent.hs" hoveringOver
             gadget .= hoverGadget (_loc (_ur elt)) elt
         Nothing -> gadget .= const blank
-    handleDefault
+    getEvent >>= handleDefaultDash
 
-handleDefault' (EventKey (SpecialKey KeySpace) Down _ _) = do
+handleDefaultDash (EventKey (SpecialKey KeySpace) Down _ _) = do
     withJustM (selectPointOnCurrent =<< use mouseLoc) $ 
         listenOn <=< getElementById "HandleEvent.hs"
-    handleDefault
+    getEvent >>= handleDefaultDash
 
-handleDefault' (EventKey (Char 'z') Down Modifiers { alt = Down } _) = do
+handleDefaultDash (EventKey (Char 'z') Down Modifiers { alt = Down } _) = do
     W.performUndo
-    handleDefault
+    getEvent >>= handleDefaultDash
 
-handleDefault' (EventKey (Char 'Z') Down Modifiers { alt = Down } _) = do
+handleDefaultDash (EventKey (Char 'Z') Down Modifiers { alt = Down } _) = do
     W.performRedo
-    handleDefault
+    getEvent >>= handleDefaultDash
 
 -- XXX Could this be script+keybinding?
 -- XXX Needs to deal gracefully with situation with /= 1 container.
-handleDefault' (EventKey (Char 'p') Down _ _) = do
+handleDefaultDash (EventKey (Char 'p') Down _ _) = do
     withJustM (findContainer =<< use currentSelection) $ \(container, contentss) ->
         --liftIO $ print (container, contentss)
         forM_ contentss $ reparent (Outside container)
-    handleDefault
+    getEvent >>= handleDefaultDash
 
 -- XXX Make script+binding. Needs planeInfo . rootTransform command.
-handleDefault' (EventKey (Char '+')
+handleDefaultDash (EventKey (Char '+')
                          Down Modifiers { shift = Down, alt = Down, ctrl = Up } _) = do
     planeInfo . rootTransform %= (B.Transform (0, 0) 1.5 <>)
-    handleDefault
+    getEvent >>= handleDefaultDash
 
 -- XXX Make script+binding. Needs planeInfo . rootTransform command.
-handleDefault' (EventKey (Char '-')
+handleDefaultDash (EventKey (Char '-')
                Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
     planeInfo . rootTransform %= (B.Transform (0, 0) (1/1.5) <>)
-    handleDefault
+    getEvent >>= handleDefaultDash
 
 -- XXX Can this become script+binding.
 -- Couldn't before because of hlint problem.
 -- But now that's fixed maybe this will work again.
-handleDefault' (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
+handleDefaultDash (EventKey (Char 'r') Down Modifiers { shift = Up, alt = Down, ctrl = Up } _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
     filename <- handleGetString allScripts fnil "read: "
     withJust filename $ \filename' -> do
         W.undoPoint
         void $ execScript "scripts" filename'
-    handleDefault
+    getEvent >>= handleDefaultDash
 
-handleDefault' (EventKey (Char 'l') Down _ _) = do
+handleDefaultDash (EventKey (Char 'l') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "saves"
     filename <- handleGetString allScripts fnil "load: "
     liftIO $ putStrLn $ "filename = " ++ show filename
@@ -231,9 +234,9 @@ handleDefault' (EventKey (Char 'l') Down _ _) = do
         fileName <- execScript "saves" filename'
         projectFile .= fileName
         liftIO $ putStrLn $ "Loaded \"" ++ filename' ++ "\""
-    handleDefault
+    getEvent >>= handleDefaultDash
 
-handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctrl = Up } _) = do
+handleDefaultDash (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctrl = Up } _) = do
     allSaves <- liftIO $ getAllScripts "saves"
     filename <- handleGetString allSaves fnil "save: "
     case filename of
@@ -247,57 +250,57 @@ handleDefault' (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctr
             saveWorld filename''
             liftIO $ putStrLn $ "Saved \"" ++ filename'' ++ "\""
         Nothing -> return ()
-    handleDefault
+    getEvent >>= handleDefaultDash
 
 -- XXX quantise
-handleDefault' (EventKey (Char 'w') Down _ _) = do
+handleDefaultDash (EventKey (Char 'w') Down _ _) = do
     allScripts <- liftIO $ getAllScripts "scripts"
     withJustM (handleGetString allScripts fnil "write: ") $ \filename' ->
         evalUi (U.write filename')
-    handleDefault
+    getEvent >>= handleDefaultDash
 
-handleDefault' (EventKey (Char 'q') Down Modifiers { alt = Down } _) = do
+handleDefaultDash (EventKey (Char 'q') Down Modifiers { alt = Down } _) = do
     liftIO $ exitImmediately ExitSuccess
-    handleDefault
+    getEvent >>= handleDefaultDash
 
 -- Supposed to rotate cables.
 -- Probably doesn't work since introducing undo. XXX
-handleDefault' (EventKey (Char 'c') Down _ p) = do
+handleDefaultDash (EventKey (Char 'c') Down _ p) = do
     e <- selectPointOnCurrent p
     case e of
         Just i -> do
-            elt <- getElementById "handleDefault'" i
+            elt <- getElementById "handleDefaultDash" i
             case elt of
                 In {} -> do
                     W.undoPoint
                     W.rotateCables i
                     W.synthRecompile "rotated cables"
-                    handleDefault
-                _ -> handleDefault
-        Nothing -> handleDefault
+                    getEvent >>= handleDefaultDash
+                _ -> getEvent >>= handleDefaultDash
+        Nothing -> getEvent >>= handleDefaultDash
 
 -- Output some info about the current selection.
-handleDefault' (EventKey (Char '?') Down _ p) = do
+handleDefaultDash (EventKey (Char '?') Down _ p) = do
     e <- selectPointOnCurrent p
     case e of
         Just i -> do
             elt <- getElementById "HandleEvent.hs" i
             liftIO $ putStrLn $ "UiId = " ++ show i
             liftIO $ putStrLn $ "Element = " ++ show elt
-            handleDefault
-        Nothing -> handleDefault
+            getEvent >>= handleDefaultDash
+        Nothing -> getEvent >>= handleDefaultDash
 
 -- Make group from current selection.
 -- Could it be script+keybinding?
-handleDefault' (EventKey (Char 'g') Down _ proxyLocation) = do
+handleDefaultDash (EventKey (Char 'g') Down _ proxyLocation) = do
     sel <- use currentSelection
     p <- currentPlane
     makeGroup p sel proxyLocation
-    handleDefault
+    getEvent >>= handleDefaultDash
 
 -- Shift mouse down
 -- Starts MultiSelection
-handleDefault' (EventKey (MouseButton LeftButton) Down
+handleDefaultDash (EventKey (MouseButton LeftButton) Down
                 Modifiers {alt = Up, shift = Down, ctrl = Up}
                 p) = do
     withJustM (selectPointOnCurrent p) $ \selected -> do
@@ -309,10 +312,10 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
             else do
                 highlightElement selected
                 currentSelection %= (selected :)
-    handleDefault
+    getEvent >>= handleDefaultDash
 
 -- The normal/ordinary mouse down event
-handleDefault' (EventKey (MouseButton LeftButton) Down
+handleDefaultDash (EventKey (MouseButton LeftButton) Down
     Modifiers {alt = Up, shift = Up, ctrl = Up} p) = do
     e <- selectPointOnCurrent p
     case e of
@@ -320,27 +323,27 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
             bringToFront selected
             sel <- use currentSelection
             if length sel > 1 && selected `elem` sel
-                then handleDraggingSelection handleDefault p
+                then handleDraggingSelection handleDefaultDash p
                 else defaultClick' p selected =<< getElementById "defaultClick'" selected
 
-        Nothing -> handleDraggingRegion p p
+        Nothing -> getEvent >>= handleDraggingRegion p p
 
-handleDefault' (EventKey (MouseButton RightButton) Down
+handleDefaultDash (EventKey (MouseButton RightButton) Down
     Modifiers {alt = Down, shift = Up, ctrl = Up} p) = do
 
     withJustM (selectPointOnCurrent p) $ \i -> do
-        f <- getElementById "handleDefault'" i
+        f <- getElementById "handleDefaultDash" i
         gadget .= labelGadget p f
-    handleDefault
+    getEvent >>= handleDefaultDash
 
 {-
-handleDefault' (EventKey (MouseButton WheelUp) Down _ p) = do
+handleDefaultDash (EventKey (MouseButton WheelUp) Down _ p) = do
     liftIO $ print "Wheel up!!!!"
-    handleDefault
+    getEvent >>= handleDefaultDash
     -}
 
 -- Start ordinary selection alt-drag to move
-handleDefault' (EventKey (MouseButton LeftButton) Down
+handleDefaultDash (EventKey (MouseButton LeftButton) Down
     Modifiers {alt = Down, shift = Up, ctrl = Up} p) = do
     e <- selectPointOnCurrent p
     sel <- use currentSelection
@@ -349,38 +352,38 @@ handleDefault' (EventKey (MouseButton LeftButton) Down
             bringToFront i
             W.undoPoint
             unless (i `elem` sel) $ doSelection i
-            handleDraggingSelection handleDefault p
-        Nothing -> handleDraggingRoot handleDefault p
+            handleDraggingSelection handleDefaultDash p
+        Nothing -> handleDraggingRoot handleDefaultDash p
 
 -- Cable drag with ctrl-mouse
-handleDefault' (EventKey (MouseButton LeftButton) Down
+handleDefaultDash (EventKey (MouseButton LeftButton) Down
         Modifiers {alt = Up, ctrl = Down, shift = Up} p) = do
     e <- selectPointOnCurrent p
     case e of
         Just i -> do
             bringToFront i
             ctrlDrag i p =<< getElementById "HandleEvent.hs" i 
-        Nothing -> handleDefault
+        Nothing -> getEvent >>= handleDefaultDash
 
-handleDefault' (EventKey key Down
+handleDefaultDash (EventKey key Down
             Modifiers {shift = Up} _) | isDirection key = do
     let (dx, dy) = getDirection key
     sel <- use currentSelection
     forM_ sel $ \e ->
         serverState . uiElements . ix e . ur . loc += (quantum*dx, quantum*dy)
-    handleDefault
+    getEvent >>= handleDefaultDash
 
 -- Use key binding.
-handleDefault' (EventKey key Down mods _) = do
+handleDefaultDash (EventKey key Down mods _) = do
     W.undoPoint
     matcher <- use keyMatcher
     let (mBinds, matcher') = updateKeyMatcher (key, mods) matcher
     --liftIO $ print (key, mods)
     F.forM_ mBinds $ execScript "scripts"
     keyMatcher .= matcher'
-    handleDefault
+    getEvent >>= handleDefaultDash
 
-handleDefault' _ = handleDefault
+handleDefaultDash _ = getEvent >>= handleDefaultDash
 
 handleTextBox :: UiId -> MoodlerM Zero
 handleTextBox selectedTextBox = do
@@ -388,39 +391,39 @@ handleTextBox selectedTextBox = do
     withJustM (handleGetString [] (toFString oldText) "textbox: ") $ \txt -> do
         W.undoPoint
         W.synthSetString selectedTextBox txt
-    handleDefault
+    getEvent >>= handleDefaultDash
 
-selectEverythingInRegion :: (MonadIO m, MonadState World m) =>
-                            Point -> Point -> m ()
-selectEverythingInRegion p0 p1 = do
-    selectionPlane <- currentPlane
-    s <- everythingInRegion selectionPlane p0 p1
-    currentSelection .= s
-    unhighlightEverything
-    forM_ s highlightElement
+handleDraggingRegion :: Point -> Point -> Event -> MoodlerM Zero
+handleDraggingRegion start = handleDraggingRegion'
+    where
+    -- Mouse motion during region drag
+    handleDraggingRegion' :: Point -> Event -> MoodlerM Zero
+    handleDraggingRegion' z (EventMotion p) = do
+        gadget .= \xform -> pictureTransformer xform $ color black (rect z p)
+        selectEverythingInRegion p
+        getEvent >>= handleDraggingRegion' z
 
-handleDraggingRegion :: Point -> Point -> MoodlerM Zero
-handleDraggingRegion p1 p2 = handleDraggingRegion' p1 p2 =<< getEvent
+    -- Finished dragging
+    handleDraggingRegion' _
+        (EventKey (MouseButton LeftButton) Up _ p) = do
+        if start == p
+            then do
+                unhighlightEverything
+                currentSelection .= []
+            else selectEverythingInRegion p
+        gadget .= const blank
+        getEvent >>= handleDefaultDash
 
--- Mouse motion during region drag
-handleDraggingRegion' :: Point -> Point -> Event -> MoodlerM Zero
-handleDraggingRegion' f z (EventMotion p) = do
-    gadget .= \xform -> pictureTransformer xform $ color black (rect z p)
-    selectEverythingInRegion f p
-    handleDraggingRegion f z
+    handleDraggingRegion' b _ = getEvent >>= handleDraggingRegion' b
 
--- Finished dragging
-handleDraggingRegion' f _
-    (EventKey (MouseButton LeftButton) Up _ p) = do
-    if f == p
-        then do
-            unhighlightEverything
-            currentSelection .= []
-        else selectEverythingInRegion f p
-    gadget .= const blank
-    handleDefault
-
-handleDraggingRegion' a b _ = handleDraggingRegion a b
+    selectEverythingInRegion :: (MonadIO m, MonadState World m) =>
+                                Point -> m ()
+    selectEverythingInRegion p2 = do
+        selectionPlane <- currentPlane
+        s <- everythingInRegion selectionPlane start p2
+        currentSelection .= s
+        unhighlightEverything
+        forM_ s highlightElement
 
 handleDraggingSlider :: UiId -> Point ->
                         MoodlerM Zero
@@ -449,7 +452,7 @@ handleDraggingSlider' selectedSlider (EventMotion p) = do
     let newV = unUiAngle (_knobMin elt) (_knobMax elt) ((snd p-snd sliderLoc)/15.0) :: Float
     let lowLimit = _knobMin elt
     let highLimit = _knobMax elt
-    let v1 = clampToRange lowLimit highLimit newV
+    let v1 = clampToRange (lowLimit, highLimit) newV
     gadget .= sliderGadget sliderLoc v1
     void $ W.synthSet selectedSlider v1
     handleDraggingSlider selectedSlider p
@@ -458,6 +461,6 @@ handleDraggingSlider' selectedSlider
     (EventKey (MouseButton LeftButton) Up _ _) = do
     gadget .= const blank
     doSelection selectedSlider
-    handleDefault
+    getEvent >>= handleDefaultDash
 
-handleDraggingSlider' _ e = handleDefault' e
+handleDraggingSlider' _ e = handleDefaultDash e

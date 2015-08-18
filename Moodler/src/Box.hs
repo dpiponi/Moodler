@@ -125,3 +125,6 @@ textInBox boxColor textColor targetText =
        G.translate (-w/2) (-9)
                  (G.scale 0.20 0.20 (G.color textColor (G.text targetText)))
                  -}
+
+write :: (Float, Float) -> Float -> G.Color -> String -> G.Picture
+write (x, y) s c = G.translate x y . G.scale s s . G.color c . G.text

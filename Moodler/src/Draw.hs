@@ -27,6 +27,7 @@ import UISupport
 import ContainerTree
 import ServerState
 import Text
+import Box hiding (translate)
 
 below :: Monoid m => m -> (m, m)
 below a = (a, mempty)
