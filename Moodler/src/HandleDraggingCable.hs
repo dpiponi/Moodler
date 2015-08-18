@@ -20,8 +20,8 @@ elementDisplayName' In { _displayName = n} = n
 elementDisplayName' Knob { _displayName = n} = n
 elementDisplayName' e = e ^. ur . name
 
-handleDraggingCable :: (Event -> MoodlerM Zero) -> UiId -> Point -> Point -> Event -> MoodlerM Event
-handleDraggingCable handleDefaultDash src start =
+handleDraggingCable :: UiId -> Point -> Point -> Event -> MoodlerM Event
+handleDraggingCable src start =
     handleDraggingCable'
 
     where
@@ -61,8 +61,8 @@ handleDraggingCable handleDefaultDash src start =
             Just i -> do
                 elt <- getElementById "HandleDraggingCable.hs" i
                 case elt of
-                    In {} -> wireCable i src >> getEvent
-                    Out {} -> justSelect i >> getEvent
+                    In {} -> wireCable i src
+                    Out {} -> justSelect i
                     _ -> do
                             gadget .= const blank
                             getEvent
@@ -70,15 +70,16 @@ handleDraggingCable handleDefaultDash src start =
                         gadget .= const blank
                         getEvent
 
+    -- Ignore other events.
     handleDraggingCable' end _ = getEvent >>= handleDraggingCable' end
 
-    justSelect :: UiId -> MoodlerM Zero
+    justSelect :: UiId -> MoodlerM Event
     justSelect i = do
         doSelection i
         gadget .= const blank
-        getEvent >>= handleDefaultDash
+        getEvent
 
-    wireCable :: UiId -> UiId -> MoodlerM Zero
+    wireCable :: UiId -> UiId -> MoodlerM Event
     wireCable i selectedOut = do
         unhighlightEverything
         W.undoPoint

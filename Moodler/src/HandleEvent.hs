@@ -50,16 +50,16 @@ ctrlDrag i _ Container {} = do
     getEvent >>= handleDefaultDash
 ctrlDrag i p Out {} = do
     highlightJust i
-    getEvent >>= handleDraggingCable handleDefaultDash i p p >>= handleDefaultDash
+    getEvent >>= handleDraggingCable i p p >>= handleDefaultDash
 ctrlDrag i _ In {} = do
     doSelection i
     getEvent >>= handleDefaultDash
 ctrlDrag i p Knob {} = do
     highlightJust i
-    getEvent >>= handleDraggingCable handleDefaultDash i p p >>= handleDefaultDash
+    getEvent >>= handleDraggingCable i p p >>= handleDefaultDash
 ctrlDrag i p Selector {} = do
     highlightJust i
-    getEvent >>= handleDraggingCable handleDefaultDash i p p >>= handleDefaultDash
+    getEvent >>= handleDraggingCable i p p >>= handleDefaultDash
 ctrlDrag i _ Label {} = do
     doSelection i
     getEvent >>= handleDefaultDash
@@ -68,7 +68,7 @@ ctrlDrag i _ Image {} = do
     getEvent >>= handleDefaultDash
 ctrlDrag i p TextBox {} = do
     highlightJust i
-    getEvent >>= handleDraggingCable handleDefaultDash i p p >>= handleDefaultDash
+    getEvent >>= handleDraggingCable i p p >>= handleDefaultDash
 
 clickOnIn' :: Point -> UiId -> MoodlerM Zero
 clickOnIn' p i = do
@@ -83,7 +83,7 @@ clickOnIn' p i = do
         Just (Cable src) -> do
             srcElt <- getElementById "clickOnIn'" src
             gadget .= cableGadget (_loc (_ur srcElt)) p
-            getEvent >>= handleDraggingCable handleDefaultDash src (_loc (_ur srcElt)) p >>= handleDefaultDash
+            getEvent >>= handleDraggingCable src (_loc (_ur srcElt)) p >>= handleDefaultDash
 
 -- Straightforward click on a UI element
 defaultClick' :: Point -> UiId -> UIElement -> MoodlerM Zero
@@ -94,7 +94,7 @@ defaultClick' p selected Container {} = do -- XXX Need to select images/containe
 defaultClick' p selected Out {} = do
     highlightJust selected
     gadget .= cableGadget p p
-    getEvent >>= handleDraggingCable handleDefaultDash selected p p >>= handleDefaultDash
+    getEvent >>= handleDraggingCable selected p p >>= handleDefaultDash
 
 defaultClick' p selected In {} = do
     W.undoPoint
