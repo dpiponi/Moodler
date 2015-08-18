@@ -50,8 +50,8 @@ handleDraggingKnob selectedKnob startValue p0 =
     handleDraggingKnob' _ = getEvent >>= handleDraggingKnob'
 
 knobGadget :: (Float, Float) -> Float -> B.Transform -> Picture
-knobGadget (x0, y0) v1 xform = 
-             pictureTransformer xform $
+knobGadget (x0, y0) v1 = 
+             flip pictureTransformer $
                 translate (x0+150) y0 (
                 color (B.transparentBlack 0.8) (rectangleSolid 250 100) <>
                 write (-80, -40) 0.27 green (showFFloat (Just 4) v1 "") <>

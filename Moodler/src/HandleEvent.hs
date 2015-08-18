@@ -135,16 +135,15 @@ elementDisplayName Knob { _displayName = n} = n
 elementDisplayName e = e ^. ur . name
 
 hoverGadget :: Point -> UIElement -> B.Transform -> Picture
-hoverGadget (ex, ey) elt xform = 
+hoverGadget (ex, ey) elt = 
      let txt = elementDisplayName elt
-     in pictureTransformer xform $
+     in flip pictureTransformer $
         translate ex (ey+25) $ scale 0.5 0.5 $
         B.textInBox (B.transparentBlack 0.7) white txt
 
 labelGadget :: Show a => (Float, Float) -> a -> B.Transform -> Picture
-labelGadget p f xform =
-    pictureTransformer xform $
-        uncurry translate p (write (0, 0) 0.05 black (show f))
+labelGadget p f =
+    flip pictureTransformer $ uncurry translate p (write (0, 0) 0.05 black (show f))
 
 selectPointOnCurrent :: (MonadIO m, MonadState World m) =>
                         Point -> m (Maybe UiId)
@@ -384,8 +383,8 @@ handleDraggingSlider selectedSlider (_, y0) = do
     handleDraggingSlider' selectedSlider =<< getEvent
 
 sliderGadget :: (Float, Float) -> Float -> B.Transform -> Picture
-sliderGadget sliderLoc v1 xform = 
-     pictureTransformer xform $
+sliderGadget sliderLoc v1 = 
+     flip pictureTransformer $
         translate (fst sliderLoc+150) (snd sliderLoc) (
         color (B.transparentBlack 0.8) (rectangleSolid 250 100) <>
         translate (-80) (-40) (scale 0.27 0.27 $
