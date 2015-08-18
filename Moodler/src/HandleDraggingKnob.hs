@@ -20,15 +20,15 @@ import Music
 import Numeric
 import Box hiding (translate)
 
-handleDraggingKnob :: (Event -> MoodlerM Zero) -> UiId -> Float -> Point -> Event ->
-                        MoodlerM Zero
-handleDraggingKnob handleDefaultDash selectedKnob startValue p0 =
+handleDraggingKnob :: UiId -> Float -> Point -> Event ->
+                      MoodlerM Event
+handleDraggingKnob selectedKnob startValue p0 =
     handleDraggingKnob'
 
     where
 
     -- Motion events mean we keep dragging.
-    handleDraggingKnob' :: Event -> MoodlerM Zero
+    handleDraggingKnob' :: Event -> MoodlerM Event
     handleDraggingKnob' (EventMotion p) = do
         let newV = knobMapping startValue (p-p0)
         -- Use zoom?
@@ -44,13 +44,10 @@ handleDraggingKnob handleDefaultDash selectedKnob startValue p0 =
     handleDraggingKnob' (EventKey (MouseButton LeftButton) Up _ _) = do
         gadget .= const blank
         doSelection selectedKnob
-        getEvent >>= handleDefaultDash
+        getEvent
 
-    -- Was handleDefault'. Why? XXX
-    -- Probably need to think about what happens if some other
-    -- event comes in. Probably end dragging as above and then
-    -- hand event on to handleDefault.
-    handleDraggingKnob' e = handleDefaultDash e
+    -- Other events are ignored.
+    handleDraggingKnob' _ = getEvent >>= handleDraggingKnob'
 
 knobGadget :: (Float, Float) -> Float -> B.Transform -> Picture
 knobGadget (x0, y0) v1 xform = 

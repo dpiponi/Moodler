@@ -103,7 +103,7 @@ defaultClick' p selected In {} = do
 defaultClick' p selected elt@Knob { _knobStyle = KnobStyle } = do
     highlightJust selected
     W.undoPoint
-    getEvent >>= handleDraggingKnob handleDefaultDash selected (_setting elt) p
+    getEvent >>= handleDraggingKnob selected (_setting elt) p >>= handleDefaultDash
 
 defaultClick' p selected Knob { _knobStyle = SliderStyle } = do
     highlightJust selected
