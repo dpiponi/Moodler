@@ -45,32 +45,6 @@ import HandleDraggingRegion
 import HandleListen
 import Box hiding (translate)
 
-ctrlDrag :: UiId -> Point -> UIElement -> MoodlerM Zero
-ctrlDrag i _ Container {} = do
-    planeInfo . planes .= i
-    getEvent >>= handleDefault
-ctrlDrag i p Out {} = do
-    highlightJust i
-    getEvent >>= handleDraggingCable i p p >>= handleDefault
-ctrlDrag i _ In {} = do
-    doSelection i
-    getEvent >>= handleDefault
-ctrlDrag i p Knob {} = do
-    highlightJust i
-    getEvent >>= handleDraggingCable i p p >>= handleDefault
-ctrlDrag i p Selector {} = do
-    highlightJust i
-    getEvent >>= handleDraggingCable i p p >>= handleDefault
-ctrlDrag i _ Label {} = do
-    doSelection i
-    getEvent >>= handleDefault
-ctrlDrag i _ Image {} = do
-    doSelection i
-    getEvent >>= handleDefault
-ctrlDrag i p TextBox {} = do
-    highlightJust i
-    getEvent >>= handleDraggingCable i p p >>= handleDefault
-
 clickOnIn' :: Point -> UiId -> MoodlerM Zero
 clickOnIn' p i = do
     W.undoPoint
@@ -85,49 +59,6 @@ clickOnIn' p i = do
             srcElt <- getElementById "clickOnIn'" src
             gadget .= cableGadget (_loc (_ur srcElt)) p
             getEvent >>= handleDraggingCable src (_loc (_ur srcElt)) p >>= handleDefault
-
--- Straightforward click on a UI element
-defaultClick' :: Point -> UiId -> UIElement -> MoodlerM Zero
-defaultClick' p selected Container {} = do -- XXX Need to select images/containers correctly.
-    doSelection selected
-    handleDraggingSelection handleDefault p
-
-defaultClick' p selected Out {} = do
-    highlightJust selected
-    gadget .= cableGadget p p
-    getEvent >>= handleDraggingCable selected p p >>= handleDefault
-
-defaultClick' p selected In {} = do
-    W.undoPoint
-    clickOnIn' p selected
-
-defaultClick' p selected elt@Knob { _knobStyle = KnobStyle } = do
-    highlightJust selected
-    W.undoPoint
-    getEvent >>= handleDraggingKnob selected (_setting elt) p >>= handleDefault
-
-defaultClick' p selected Knob { _knobStyle = SliderStyle } = do
-    highlightJust selected
-    W.undoPoint
-    handleDraggingSlider selected p
-
-defaultClick' _ selected Label {} = do
-    doSelection selected
-    getEvent >>= handleDefault
-
-defaultClick' _ selected Image {} = do
-    doSelection selected
-    getEvent >>= handleDefault
-
-defaultClick' _ selected Selector { _setting = oldSetting
-                           , _options = opts } = do
-    let newSetting = (floor oldSetting+1) `mod` length opts
-    W.undoPoint
-    void $ W.synthSet selected (fromIntegral newSetting)
-    getEvent >>= handleDefault
-
-defaultClick' _ selected TextBox { } = 
-    handleTextBox selected
 
 elementDisplayName :: UIElement -> String
 elementDisplayName In { _displayName = n} = n
@@ -302,9 +233,51 @@ handleDefault (EventKey (MouseButton LeftButton) Down
         Just selected -> do
             bringToFront selected
             sel <- use currentSelection
-            if length sel > 1 && selected `elem` sel
+            if length sel > 1 && selected `elem` sel -- front?
                 then handleDraggingSelection handleDefault p
-                else getElementById "defaultClick'" selected >>= defaultClick' p selected
+                else do
+                    elt <- getElementById "defaultClick'" selected
+                    case elt of
+                        Container {} -> do -- XXX Need to select images/containers correctly.
+                            doSelection selected
+                            handleDraggingSelection handleDefault p
+
+                        Out {} -> do
+                            highlightJust selected
+                            gadget .= cableGadget p p
+                            getEvent >>= handleDraggingCable selected p p >>= handleDefault
+
+                        In {} -> do
+                            W.undoPoint
+                            clickOnIn' p selected
+
+                        Knob { _knobStyle = KnobStyle } -> do
+                            highlightJust selected
+                            W.undoPoint
+                            getEvent >>= handleDraggingKnob selected (_setting elt) p >>= handleDefault
+
+                        Knob { _knobStyle = SliderStyle } -> do
+                            highlightJust selected
+                            W.undoPoint
+                            handleDraggingSlider selected p
+
+                        Label {} -> do
+                            doSelection selected
+                            getEvent >>= handleDefault
+
+                        Image {} -> do
+                            doSelection selected
+                            getEvent >>= handleDefault
+
+                        Selector { _setting = oldSetting
+                                 , _options = opts } -> do
+                            let newSetting = (floor oldSetting+1) `mod` length opts
+                            W.undoPoint
+                            void $ W.synthSet selected (fromIntegral newSetting)
+                            getEvent >>= handleDefault
+
+                        TextBox { } -> 
+                            handleTextBox selected
 
         Nothing -> getEvent >>= handleDraggingRegion p >>= handleDefault
 
@@ -342,7 +315,33 @@ handleDefault (EventKey (MouseButton LeftButton) Down
     case e of
         Just i -> do
             bringToFront i
-            ctrlDrag i p =<< getElementById "HandleEvent.hs" i 
+            elt <- getElementById "HandleEvent.hs" i
+            case elt of
+                Container {} -> do
+                    planeInfo . planes .= i
+                    getEvent >>= handleDefault
+                Out {} -> do
+                    highlightJust i
+                    getEvent >>= handleDraggingCable i p p >>= handleDefault
+                In {} -> do
+                    doSelection i
+                    getEvent >>= handleDefault
+                Knob {} -> do
+                    highlightJust i
+                    getEvent >>= handleDraggingCable i p p >>= handleDefault
+                Selector {} -> do
+                    highlightJust i
+                    getEvent >>= handleDraggingCable i p p >>= handleDefault
+                Label {} -> do
+                    doSelection i
+                    getEvent >>= handleDefault
+                Image {} -> do
+                    doSelection i
+                    getEvent >>= handleDefault
+                TextBox {} -> do
+                    highlightJust i
+                    getEvent >>= handleDraggingCable i p p >>= handleDefault
+
         Nothing -> getEvent >>= handleDefault
 
 handleDefault (EventKey key Down
@@ -380,7 +379,7 @@ handleDraggingSlider selectedSlider (_, y0) = do
     let sliderLoc = elt ^. ur . loc . _2 :: Float
     let v = unUiAngle (_knobMin elt) (_knobMax elt) ((y0-sliderLoc)/15.0) :: Float
     void $ W.synthSet selectedSlider v
-    handleDraggingSlider' selectedSlider =<< getEvent
+    getEvent >>= handleDraggingSlider' selectedSlider
 
 sliderGadget :: (Float, Float) -> Float -> B.Transform -> Picture
 sliderGadget sliderLoc v1 = 
