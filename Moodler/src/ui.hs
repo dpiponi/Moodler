@@ -108,7 +108,7 @@ emptyWorld =
              , _pics = M.empty
              , _gadget = const blank
              , _currentSelection = []
-             , _cont = Free (GetEvent handleDefaultDash)
+             , _cont = Free (GetEvent handleDefault)
              , _undoInfo = emptyUndo serverStateWorld
              , _outputId = undefined
              }

@@ -9,28 +9,31 @@ import World
 import WorldSupport
 import qualified Box as B
 
-handleDraggingRoot :: (Event -> MoodlerM Zero) -> Point -> MoodlerM Zero
-handleDraggingRoot handleDefaultDash p0 =
-    getEvent >>= handleDraggingRoot'
+handleDraggingRoot :: Point -> Event -> MoodlerM Event
+handleDraggingRoot startPoint =
+    handleDraggingRoot'
 
     where
 
-    handleDraggingRoot' :: Event -> MoodlerM Zero
+    -- Keep dragging.
+    handleDraggingRoot' :: Event -> MoodlerM Event
     handleDraggingRoot' (EventMotion p1) = do
-        planeInfo . rootTransform %= (B.Transform (p1-p0) 1 <>)
+        planeInfo . rootTransform %= (B.Transform (p1-startPoint) 1 <>)
         -- It's not obvious that the following line is correct.
         -- It's tempting to use p1.
         -- Remember that mouse coordinates have been transformed
         -- by the very transform we're changing.
         -- This means that the position of the mouse at the previous
-        -- event is always p0 in the current coordinate system
+        -- event is always startPoint in the current coordinate system
         -- despite the fact that the mouse is moving.
         -- But there is a bug when you zoom out >= 4x ... XXX
         getEvent >>= handleDraggingRoot'
 
+    -- Finish dragging and return.
     handleDraggingRoot'
         (EventKey (MouseButton LeftButton) Up _ p1) = do
-        planeInfo . rootTransform %= (B.Transform (p1-p0) 1 <>)
-        getEvent >>= handleDefaultDash
+        planeInfo . rootTransform %= (B.Transform (p1-startPoint) 1 <>)
+        getEvent
 
+    -- Ignore other events.
     handleDraggingRoot' _ = getEvent >>= handleDraggingRoot'

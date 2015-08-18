@@ -176,3 +176,6 @@ getElementTypeById i = do
 getElementsById :: MonadState World m =>
                    String -> [UiId] -> m [UIElement]
 getElementsById msg = mapM (getElementById msg)
+
+currentPlane :: (MonadIO m, MonadState World m) => m UiId
+currentPlane = use (planeInfo . planes)
