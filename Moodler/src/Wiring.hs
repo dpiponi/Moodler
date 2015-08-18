@@ -140,6 +140,7 @@ synthUnAlias aliasName = do
     serverState . aliases %= M.delete aliasName
     sendUnAliasMessage aliasName 
 
+-- Connect src to dst replacing oldSrc as input
 connect :: (MonadState World m, MonadIO m, Functor m) =>
            UiId -> UiId -> UiId -> m ()
 connect src dst oldSrc = do

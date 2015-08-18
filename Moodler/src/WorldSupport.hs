@@ -26,18 +26,18 @@ import Box hiding (translate)
 getEvent :: MoodlerM Event
 getEvent = liftF $ GetEvent id
 
+-- Work on this logic XXX
 handleGetString :: [String] -> FString -> String ->
                    MoodlerM (Maybe String)
-handleGetString completions zipper prompt = handleGetString''' zipper
+handleGetString completions zipper prompt = getEvent >>= handleGetString''' zipper
     where
-    handleGetString''' :: FString -> MoodlerM (Maybe String)
-    handleGetString''' zipper = do
-        e <- getEvent
+    handleGetString''' :: FString -> Event -> MoodlerM (Maybe String)
+    handleGetString''' zipper e = do
         let longestCompletion = if null (postcursor zipper)
             then longestMatchingPrefix completions (precursor zipper)
             else precursor zipper
         gadget .= stringGadget longestCompletion zipper
-        handleGetString' e zipper
+        handleGetString' zipper e
 
     continueGetString :: FString -> MoodlerM (Maybe String)
     continueGetString zipper = do
@@ -45,7 +45,7 @@ handleGetString completions zipper prompt = handleGetString''' zipper
             then longestMatchingPrefix completions (precursor zipper)
             else precursor zipper
         gadget .= stringGadget longestCompletion zipper
-        handleGetString''' zipper
+        getEvent >>= handleGetString''' zipper
 
     handleGetString'' :: String -> FString -> MoodlerM (Maybe String)
     handleGetString'' inputString zipper' = do
@@ -53,70 +53,75 @@ handleGetString completions zipper prompt = handleGetString''' zipper
             then longestMatchingPrefix completions (precursor zipper')
             else inputString
         gadget .= stringGadget longestCompletion zipper'
-        handleGetString''' zipper'
+        getEvent >>= handleGetString''' zipper'
 
-    -- Put event at beginning XXX
-    handleGetString' :: Event -> FString ->
+    handleGetString' :: FString -> Event ->
                         MoodlerM (Maybe String)
-    handleGetString' (EventKey (SpecialKey KeyEnter) Down _ _) zipper = do
+    handleGetString' zipper (EventKey (SpecialKey KeyEnter) Down _ _) = do
         gadget .= const blank
         if null (postcursor zipper)
             then do
                 let longestCompletion = longestMatchingPrefix completions (precursor zipper)
-                return (Just longestCompletion)
-            else
+                let returnedString = if length longestCompletion > length (unzipper zipper)
+                    then longestCompletion
+                    else unzipper zipper
+                liftIO $ print $ "Returning completion " ++ returnedString
+                return (Just returnedString)
+            else do
+                liftIO $ print $ "Returning " ++ unzipper zipper
                 return (Just (unzipper zipper))
 
-    handleGetString' (EventKey (SpecialKey KeyEsc) Down _ _) _ = do
+    handleGetString' _ (EventKey (SpecialKey KeyEsc) Down _ _) = do
         gadget .= const blank
         return Nothing
 
     -- Delete key during command entry
-    handleGetString' (EventKey (SpecialKey KeyDelete) Down _ _) zipper =
+    handleGetString' zipper (EventKey (SpecialKey KeyDelete) Down _ _) =
         continueGetString (deleteChar zipper)
 
-    handleGetString' (EventKey (SpecialKey KeyTab) Down _ _) zipper =
+    handleGetString' zipper (EventKey (SpecialKey KeyTab) Down _ _) =
         if null (postcursor zipper)
             then do
                 let longestCompletion = longestMatchingPrefix completions (precursor zipper)
                 gadget .= stringGadget longestCompletion zipper
-                handleGetString''' (toFString longestCompletion)
+                getEvent >>= handleGetString''' (toFString longestCompletion)
             else do
                 gadget .= stringGadget (precursor zipper) zipper
-                handleGetString''' zipper
+                getEvent >>= handleGetString''' zipper
 
-    handleGetString' (EventKey (SpecialKey KeyLeft) Down _ _) zipper@(R "", _) = handleGetString''' zipper
+    handleGetString' zipper @(R "", _) (EventKey (SpecialKey KeyLeft) Down _ _) =
+        getEvent >>= handleGetString''' zipper
 
-    handleGetString' (EventKey (SpecialKey KeyLeft) Down _ _) zipper = do
+    handleGetString' zipper (EventKey (SpecialKey KeyLeft) Down _ _) = do
         let zipper' = cursorLeft zipper
         gadget .= stringGadget (precursor zipper) zipper'
-        handleGetString''' zipper'
+        getEvent >>= handleGetString''' zipper'
 
-    handleGetString' (EventKey (SpecialKey KeyRight) Down _ _) zipper@(_, "") =
-        handleGetString''' zipper
+    handleGetString' zipper @(_, "") (EventKey (SpecialKey KeyRight) Down _ _) =
+        getEvent >>= handleGetString''' zipper
 
-    handleGetString' (EventKey (SpecialKey KeyRight) Down _ _) zipper =
+    handleGetString' zipper (EventKey (SpecialKey KeyRight) Down _ _) =
         handleGetString'' (precursor zipper) (cursorRight zipper)
 
-    handleGetString' (EventKey (SpecialKey KeyHome) Down _ _) zipper = 
+    handleGetString' zipper (EventKey (SpecialKey KeyHome) Down _ _) = 
         handleGetString'' (precursor zipper) (cursorHome zipper)
 
-    handleGetString' (EventKey (SpecialKey KeyEnd) Down _ _) zipper = do
+    handleGetString' zipper (EventKey (SpecialKey KeyEnd) Down _ _) = do
         let zipper' = cursorEnd zipper
         let longestCompletion = longestMatchingPrefix completions (precursor zipper')
         gadget .= stringGadget longestCompletion zipper'
-        handleGetString''' zipper'
+        getEvent >>= handleGetString''' zipper'
 
     -- Space key during command entry
-    handleGetString' (EventKey (SpecialKey KeySpace) Down _ _) zipper =
+    handleGetString' zipper (EventKey (SpecialKey KeySpace) Down _ _) =
         continueGetString (insertChar ' ' zipper)
 
     -- Command key entry
-    handleGetString' (EventKey (Char c) Down _ _) zipper =
+    handleGetString' zipper (EventKey (Char c) Down _ _) =
         continueGetString (insertChar c zipper)
 
     -- XXX Need to think about this
-    handleGetString' _ zipper = handleGetString''' zipper
+    handleGetString' zipper _ = getEvent >>= handleGetString''' zipper
 
     stringGadget :: String -> FString -> B.Transform -> Picture
     stringGadget completion zipper _ =
