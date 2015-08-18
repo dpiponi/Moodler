@@ -147,3 +147,12 @@ getMinimalParents everything sel = do
     selElts <- getElementsById "getMinimalParents" sel
     return [item | (item, elt) <- zip sel selElts,
                    inOrOutParent (elt ^. ur . parent) `notElem` everything]
+
+-- Find a container somewhere in a list of ids.
+-- Assumes there is precisely one. XXX
+findContainer :: [UiId] -> MoodlerM (Maybe (UiId, [UiId]))
+findContainer es = do
+    (a, b) <- partitionM isContainer es
+    case a of
+        [a'] -> return $ Just (a', b)
+        _ -> return Nothing

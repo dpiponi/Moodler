@@ -20,7 +20,7 @@ elementDisplayName' In { _displayName = n} = n
 elementDisplayName' Knob { _displayName = n} = n
 elementDisplayName' e = e ^. ur . name
 
-handleDraggingCable :: (Event -> MoodlerM Zero) -> UiId -> Point -> Point -> Event -> MoodlerM Zero
+handleDraggingCable :: (Event -> MoodlerM Zero) -> UiId -> Point -> Point -> Event -> MoodlerM Event
 handleDraggingCable handleDefaultDash src start =
     handleDraggingCable'
 
@@ -36,7 +36,7 @@ handleDraggingCable handleDefaultDash src start =
             B.textInBox (B.transparentBlack 0.7) white txt
 
     -- Motion during cable dragging
-    handleDraggingCable' :: Point -> Event -> MoodlerM Zero
+    handleDraggingCable' :: Point -> Event -> MoodlerM Event
     handleDraggingCable' _ (EventMotion p) = do
         gadget .= cableGadget start p
         selectionPlane <- use (planeInfo . planes)
@@ -61,14 +61,14 @@ handleDraggingCable handleDefaultDash src start =
             Just i -> do
                 elt <- getElementById "HandleDraggingCable.hs" i
                 case elt of
-                    In {} -> wireCable i src
-                    Out {} -> justSelect i
+                    In {} -> wireCable i src >> getEvent
+                    Out {} -> justSelect i >> getEvent
                     _ -> do
                             gadget .= const blank
-                            getEvent >>= handleDefaultDash
+                            getEvent
             Nothing -> do
                         gadget .= const blank
-                        getEvent >>= handleDefaultDash
+                        getEvent
 
     handleDraggingCable' end _ = getEvent >>= handleDraggingCable' end
 

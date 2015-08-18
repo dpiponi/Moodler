@@ -1,32 +1,25 @@
 module Draw where
 
 import Graphics.Gloss.Interface.IO.Game
-
-import Cable
-import Control.Lens hiding (below)
-import Control.Monad.State
-import Data.Monoid
---import Control.Monad.Writer
---import Symbols
-import UIElement
---import Utils
-import World
-import WorldSupport
---import Text
 import qualified Box as B
 import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Data.List as L
 import Text.Read
 import Data.Function
---import Debug.Trace
+import Control.Lens hiding (below)
+import Data.Monoid
+import Control.Monad.State
 
 import Sound.MoodlerLib.UiLibElement
 
+import Cable
+import UIElement
+import World
+import WorldSupport
 import UISupport
 import ContainerTree
 import ServerState
-import Text
 import Box hiding (translate)
 
 below :: Monoid m => m -> (m, m)

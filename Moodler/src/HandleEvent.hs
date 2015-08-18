@@ -44,31 +44,22 @@ import HandleDraggingKnob
 import HandleListen
 import Box hiding (translate)
 
--- Find a container somewhere in a list of ids.
--- Assumes there is precisely one. XXX
-findContainer :: [UiId] -> MoodlerM (Maybe (UiId, [UiId]))
-findContainer es = do
-    (a, b) <- partitionM isContainer es
-    case a of
-        [a'] -> return $ Just (a', b)
-        _ -> return Nothing
-
 ctrlDrag :: UiId -> Point -> UIElement -> MoodlerM Zero
 ctrlDrag i _ Container {} = do
     planeInfo . planes .= i
     getEvent >>= handleDefaultDash
 ctrlDrag i p Out {} = do
     highlightJust i
-    getEvent >>= handleDraggingCable handleDefaultDash i p p
+    getEvent >>= handleDraggingCable handleDefaultDash i p p >>= handleDefaultDash
 ctrlDrag i _ In {} = do
     doSelection i
     getEvent >>= handleDefaultDash
 ctrlDrag i p Knob {} = do
     highlightJust i
-    getEvent >>= handleDraggingCable handleDefaultDash i p p
+    getEvent >>= handleDraggingCable handleDefaultDash i p p >>= handleDefaultDash
 ctrlDrag i p Selector {} = do
     highlightJust i
-    getEvent >>= handleDraggingCable handleDefaultDash i p p
+    getEvent >>= handleDraggingCable handleDefaultDash i p p >>= handleDefaultDash
 ctrlDrag i _ Label {} = do
     doSelection i
     getEvent >>= handleDefaultDash
@@ -77,16 +68,8 @@ ctrlDrag i _ Image {} = do
     getEvent >>= handleDefaultDash
 ctrlDrag i p TextBox {} = do
     highlightJust i
-    getEvent >>= handleDraggingCable handleDefaultDash i p p
+    getEvent >>= handleDraggingCable handleDefaultDash i p p >>= handleDefaultDash
 
-{-
-handleDefault :: MoodlerM Zero
-handleDefault = getEvent >>= handleDefaultDash
--}
-
--- Handle ordinary click on an In port.
--- If there's a cable attached we start dragging it
--- Otherwise we select and possibly drag the port itself.
 clickOnIn' :: Point -> UiId -> MoodlerM Zero
 clickOnIn' p i = do
     W.undoPoint
@@ -100,7 +83,7 @@ clickOnIn' p i = do
         Just (Cable src) -> do
             srcElt <- getElementById "clickOnIn'" src
             gadget .= cableGadget (_loc (_ur srcElt)) p
-            getEvent >>= handleDraggingCable handleDefaultDash src (_loc (_ur srcElt)) p
+            getEvent >>= handleDraggingCable handleDefaultDash src (_loc (_ur srcElt)) p >>= handleDefaultDash
 
 -- Straightforward click on a UI element
 defaultClick' :: Point -> UiId -> UIElement -> MoodlerM Zero
@@ -111,7 +94,7 @@ defaultClick' p selected Container {} = do -- XXX Need to select images/containe
 defaultClick' p selected Out {} = do
     highlightJust selected
     gadget .= cableGadget p p
-    getEvent >>= handleDraggingCable handleDefaultDash selected p p
+    getEvent >>= handleDraggingCable handleDefaultDash selected p p >>= handleDefaultDash
 
 defaultClick' p selected In {} = do
     W.undoPoint
