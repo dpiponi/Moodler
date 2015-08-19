@@ -2131,6 +2131,7 @@ do
     setColour in1118 "#control"
     hide in1118
     in1119 <- plugin' (out ++ "." ++ "value") (662.0,128.0) (Inside root)
+    setOutput in1119
     setColour in1119 "#sample"
     in1120 <- plugin' (id78 ++ "." ++ "signal") (-168.0,192.0) (Inside root)
     setColour in1120 "#control"

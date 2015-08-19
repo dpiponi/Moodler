@@ -26,10 +26,11 @@ data Ui a = Return a
                                 [String] Location (UiId -> Ui a)
           -- | Connect String String (Ui a)
           | Cable UiId UiId (Ui a)
+          | UnCable UiId (Ui a)
           | Mouse ((Float, Float) -> Ui a)
           -- | Args ([String] -> Ui a)
           | NewId String (UiId -> Ui a)
-          | Set UiId Float (Ui a)
+          | Set UiId Float (Bool -> Ui a)
           | SetString UiId String (Ui a)
           | SetColour UiId String (Ui a)
           | GetColour UiId (Maybe String -> Ui a)
@@ -41,6 +42,7 @@ data Ui a = Return a
           | Write String (Ui a)
           | Selection ([UiId] -> Ui a)
           | Hide UiId Bool (Ui a)
+          | ToggleHidden (Ui a)
           | Delete UiId (Ui a)
           | Bind String String (Ui a)
           | Location UiId ((Float, Float) -> Ui a)
@@ -59,10 +61,15 @@ data Ui a = Return a
           | Rename String UiId (Ui a)
           | Unparent UiId (Ui a)
           | Input String (Maybe String -> Ui a)
+          | InputFile String String (Maybe String -> Ui a)
           | GetType UiId (ElementType -> Ui a)
           | SendBack UiId (Ui a)
           | BringFront UiId (Ui a)
           | SetPicture UiId String (Ui a)
+          | Alias String String (Ui a)
+          | UnAlias String (Ui a)
+          | SetOutput UiId (Ui a)
+          | GetCableSource UiId (Maybe UiId -> Ui a)
           deriving (Typeable, Functor)
 
 instance Monad Ui where
@@ -83,7 +90,8 @@ instance Monad Ui where
     Container s1 s2 p q cont >>= f = Container s1 s2 p q ((>>= f) . cont)
     Label s1 s2 p q cont >>= f = Label s1 s2 p q ((>>= f) . cont)
     -- Connect s1 s2 cont >>= f = Connect s1 s2 (cont >>= f)
-    Cable s1 s2 cont >>= f = Cable s1 s2 (cont >>= f)
+    Cable src dest cont >>= f = Cable src dest (cont >>= f)
+    UnCable dest cont >>= f = UnCable dest (cont >>= f)
     Mouse cont >>= f = Mouse ((>>= f) . cont)
     -- Args cont >>= f = Args ((>>= f) . cont)
     GetValue s1 cont >>= f = GetValue s1 ((>>= f) . cont)
@@ -91,7 +99,7 @@ instance Monad Ui where
     GetParent s1 cont >>= f = GetParent s1 ((>>= f) . cont)
     GetRoot cont >>= f = GetRoot ((>>= f) . cont)
     NewId s1 cont >>= f = NewId s1 ((>>= f) . cont)
-    Set t v cont >>= f = Set t v (cont >>= f)
+    Set t v cont >>= f = Set t v ((>>= f) . cont)
     SetString t v cont >>= f = SetString t v (cont >>= f)
     SetColour t v cont >>= f = SetColour t v (cont >>= f)
     SetLow t v cont >>= f = SetLow t v (cont >>= f)
@@ -103,6 +111,7 @@ instance Monad Ui where
     Write t cont >>= f = Write t (cont >>= f)
     Selection cont >>= f = Selection ((>>= f) . cont)
     Hide t h cont >>= f = Hide t h (cont >>= f)
+    ToggleHidden cont >>= f = ToggleHidden (cont >>= f)
     SendBack t cont >>= f = SendBack t (cont >>= f)
     BringFront t cont >>= f = BringFront t (cont >>= f)
     Delete t cont >>= f = Delete t (cont >>= f)
@@ -122,6 +131,12 @@ instance Monad Ui where
     Rename s0 s1 cont >>= f = Rename s0 s1 (cont >>= f)
     Unparent s0 cont >>= f = Unparent s0 (cont >>= f)
     Input s0 cont >>= f = Input s0 ((>>= f) . cont)
+    InputFile s0 s1 cont >>= f = InputFile s0 s1 ((>>= f) . cont)
+    GetCableSource cableDest cont >>= f =
+                            GetCableSource cableDest ((>>= f) . cont)
+    Alias s0 s1 cont >>= f = Alias s0 s1 (cont >>= f)
+    UnAlias s0 cont >>= f = UnAlias s0 (cont >>= f)
+    SetOutput s cont >>= f = SetOutput s (cont >>= f)
 
 instance Applicative Ui where
     pure = return
@@ -130,6 +145,10 @@ instance Applicative Ui where
 new :: String -> String -> Ui ()
 new s1 s2 = New s1 s2 (return ())
 
+-- XXX This will be wrong.
+-- Not supposed to use newIds from same pool
+-- as element ids.
+-- Especially without checking uniqueness.
 new' :: String -> Ui String
 new' s1 = do
     s2 <- newId s1 -- kludge until we have SynthIds
@@ -150,7 +169,7 @@ plugin s1 s2 p creationParent = PlugIn s1 s2 p creationParent return
 
 plugin' :: String -> (Float, Float) -> Location -> Ui UiId
 plugin' s2 p creationParent = do
-    s1 <- newId "in"
+    s1 <- newId "plugin"
     PlugIn s1 s2 p creationParent return
 
 plugout :: UiId -> String -> (Float, Float) -> Location -> Ui UiId
@@ -158,7 +177,7 @@ plugout s1 s2 p creationParent = PlugOut s1 s2 p creationParent return
 
 plugout' :: String -> (Float, Float) -> Location -> Ui UiId
 plugout' s2 p creationParent = do
-    s1 <- newId "out"
+    s1 <- newId "plugout"
     PlugOut s1 s2 p creationParent return
 
 knob :: UiId -> String -> (Float, Float) -> KnobStyle -> Location -> Ui UiId
@@ -224,6 +243,9 @@ connect s1 s2 = Connect s1 s2 (return ())
 cable :: UiId -> UiId -> Ui ()
 cable s1 s2 = Cable s1 s2 (return ())
 
+unCable :: UiId -> Ui ()
+unCable dest = UnCable dest (return ())
+
 mouse :: Ui (Float, Float)
 mouse = Mouse return
 
@@ -239,6 +261,12 @@ getValue s1 = GetValue s1 return
 input :: String -> Ui (Maybe String)
 input s1 = Input s1 return
 
+inputFile :: String -> String -> Ui (Maybe String)
+inputFile s0 s1 = InputFile s0 s1 return
+
+getCableSrc :: UiId -> Ui (Maybe UiId)
+getCableSrc cableSrc = GetCableSource cableSrc return
+
 getParent :: UiId -> Ui Location
 getParent s1 = GetParent s1 return
 
@@ -248,8 +276,8 @@ getRoot = GetRoot return
 newId :: String -> Ui UiId
 newId s1 = NewId s1 return
 
-set :: UiId -> Float -> Ui ()
-set t v = Set t v (return ())
+set :: UiId -> Float -> Ui Bool
+set t v = Set t v return
 
 setString :: UiId -> String -> Ui ()
 setString t v = SetString t v (return ())
@@ -283,6 +311,9 @@ selection = Selection return
 
 hide :: UiId -> Ui ()
 hide t = Hide t True (return ())
+
+toggleHidden :: Ui ()
+toggleHidden = ToggleHidden (return ())
 
 sendBack :: UiId -> Ui ()
 sendBack t = SendBack t (return ())
@@ -335,3 +366,12 @@ currentPlane = CurrentPlane return
 
 switch :: UiId -> Ui ()
 switch p = Switch p (return ())
+
+alias :: String -> String -> Ui ()
+alias s0 s1 = Alias s0 s1 (return ())
+
+unalias :: String -> Ui ()
+unalias s0 = UnAlias s0 (return ())
+
+setOutput :: UiId -> Ui ()
+setOutput s0 = SetOutput s0 (return ())

@@ -386,6 +386,7 @@ do
     setColour out101 "#sample"
     hide out101
     in226 <- plugin' (out ++ "." ++ "value") (276.0,132.0) (Inside root)
+    setOutput in226
     setColour in226 "#sample"
     out227 <- plugout' (keyboard ++ "." ++ "result") (-492.0,132.0) (Inside root)
     setColour out227 "#control"

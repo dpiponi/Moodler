@@ -1784,6 +1784,7 @@ do
     out1103 <- plugout' (id99 ++ "." ++ "result") (-228.0,48.0) (Inside proxy1083)
     setColour out1103 "#control"
     in1104 <- plugin' (out ++ "." ++ "value") (626.0,56.0) (Inside root)
+    setOutput in1104
     setColour in1104 "#sample"
     out1105 <- plugout' (keyboard ++ "." ++ "result") (-496.0,130.0) (Inside root)
     setColour out1105 "#control"

@@ -1,29 +1,26 @@
 module Draw where
 
 import Graphics.Gloss.Interface.IO.Game
-
-import Cable
-import Control.Lens hiding (below)
-import Control.Monad.State
-import Data.Monoid
---import Control.Monad.Writer
---import Symbols
-import UIElement
---import Utils
-import World
---import Text
 import qualified Box as B
 import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Data.List as L
 import Text.Read
 import Data.Function
---import Debug.Trace
+import Control.Lens hiding (below)
+import Data.Monoid
+import Control.Monad.State
 
 import Sound.MoodlerLib.UiLibElement
 
+import Cable
+import UIElement
+import World
+import WorldSupport
 import UISupport
 import ContainerTree
+import ServerState
+import Box hiding (translate)
 
 below :: Monoid m => m -> (m, m)
 below a = (a, mempty)
@@ -55,7 +52,7 @@ proxyColour, inertCableColour :: Color
 proxyColour = makeColor 0.4 0.6 1.0 1.0
 inertCableColour = makeColor 0.7 0.7 0.7 1
     
-drawCable :: GlossWorld -> Point -> Bool -> Cable -> Picture
+drawCable :: World -> Point -> Bool -> Cable -> Picture
 drawCable w (x1, y1) active (Cable o) =
     let (x0, y0) = locById w o
         cableColour = interpretColour (colourById w o)
@@ -73,7 +70,7 @@ proxyFeature = color proxyColour (
                    rect (-18, -18) (18, 18) <>
                    thickCircle 2 16)
 
-drawUIElement :: Bool -> GlossWorld -> UIElement -> (Picture, Picture)
+drawUIElement :: Bool -> World -> UIElement -> (Picture, Picture)
 -- Recurse into containers
 drawUIElement showingHidden world
               Container { _outside = c
@@ -88,7 +85,7 @@ drawUIElement showingHidden world
                 then color red (rectAt x y iw ih)
                 else mempty) <>
            mconcat (map (\i -> do
-                let elts = world ^. (inner . uiElements)
+                let elts = world ^. (serverState . uiElements)
                 case M.lookup i elts of
                     Just elt -> drawUIElement'' showingHidden world elt
                     Nothing -> error $ "In drawUIElement missing " ++
@@ -127,19 +124,16 @@ drawUIElement _ world (In (UrElement _ wasSelected _ _ (x, y) _) col _ cableList
                      (True : repeat False)
                      cableList))
 
-drawUIElement _ _ (Label (UrElement _ wasSelected _ _ (x, y) dispName)) =
-        below $ translate x y (
+drawUIElement _ _ (Label (UrElement _ _wasSelected _ _ (x, y) dispName)) =
+        below ${- translate x y (
             color (selectColor wasSelected $ makeColor 0.7 0.7 0.5 1) $
-                scale 0.15 0.15 $ color black $ text dispName)
+                scale 0.15 0.15 $ color black $ text dispName)-}
+              write (x, y) 0.15 black dispName
 
-drawUIElement _ _ (Selector (UrElement _ wasSelected _ _ (x, y) _) col v opts) =
+drawUIElement _ _ (Selector (UrElement _ _wasSelected _ _ (x, y) _) col v opts) =
         below $ translate x y (
             color (interpretColour col) (circleSolid 6.5 <>
-            translate 10 (-5) (
-                color (selectColor wasSelected (
-                    makeColor 0.7 0.7 0.5 1)) (
-                        scale 0.15 0.15 (color black 
-                                        (text (opts!!floor v)))))))
+            write (10, -5) 0.15 black (opts!!floor v)))
 
 drawUIElement _ _ (Knob (UrElement _ wasSelected _ _ (x, y) _) col _ KnobStyle v lo hi) =
         below $ translate x y $
@@ -155,13 +149,16 @@ drawUIElement _ _ (Knob (UrElement _ wasSelected _ _ (x, y) _) col _ SliderStyle
             let angle = 3.0*uiAngle lo hi v
             in color (interpretColour col) $ polygon [(-6,-15), (6,-15), (6,5*angle), (-6,5*angle), (-6,-15)]
 
-drawUIElement _ _ (TextBox (UrElement _ wasSelected _ _ (x, y) _) col txt) =
+drawUIElement _ _ (TextBox (UrElement _ _wasSelected _ _ (x, y) _) col txt) =
         below $ translate x y (
             color (interpretColour col) (circleSolid 6.5 <>
+            write (10, -5) 0.15 black txt))
+        {-
             translate 10 (-5) (
                 color (selectColor wasSelected (
                     makeColor 0.6 0.8 0.4 1)) (
                         scale 0.15 0.15 (color black (text txt))))))
+                        -}
 
 rect :: Point -> Point -> Picture
 rect (x0, y0) (x1, y1) = Line [ (x0, y0), (x1, y0)
@@ -169,7 +166,7 @@ rect (x0, y0) (x1, y1) = Line [ (x0, y0), (x1, y0)
                               , (x0, y0)
                               ]
 
-drawUIElement'' :: Bool -> GlossWorld -> UIElement -> (Picture, Picture)
+drawUIElement'' :: Bool -> World -> UIElement -> (Picture, Picture)
 drawUIElement'' showingHidden w e =
     -- Don't draw parented elements as they'll get drawn
     -- with parent
@@ -182,19 +179,19 @@ renderPlaneName firstPlane =
     translate (-550) 300 $ B.textInBox (B.transparentBlack 0.8)
                                        white firstPlane
 
-renderWorld :: GlossWorld -> IO Picture
-renderWorld w@GlossWorld { _rootTransform = rootXform
-                         , _showHidden = showingHidden } =
+renderWorld :: World -> IO Picture
+renderWorld w@World { _planeInfo  = PlaneInfo { _rootTransform = rootXform }
+                    , _showHidden = showingHidden } =
     flip evalStateT w $ do
-        wplanes0 <- use planes
+        wplanes0 <- use (planeInfo . planes)
         -- XXX Don't know if it's wise to have
-        -- uiids pointing no non-existent planes.
+        -- uiids pointing no non-existent planeInfo . planes.
         planeExists <- checkExists wplanes0
         wplanes <- if planeExists
             then return wplanes0
             else do
                 liftIO $ putStrLn "Plane don't exist!"
-                use rootPlane
+                use (planeInfo . rootPlane)
         thingsToDraw <- rootElementsOnPlane wplanes
         elementsToDraw <- getElementsById "renderWorld" thingsToDraw
         let elementsToDraw' = L.sortBy (compare `on` _depth . _ur) elementsToDraw

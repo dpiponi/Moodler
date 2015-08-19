@@ -622,6 +622,7 @@ do
     out946 <- plugout' (vca943 ! "result") (188.0,-204.0) (Outside container941)
     setColour out946 "#sample"
     in933 <- plugin' (out ! "value") (612.0,48.0) (Inside root)
+    setOutput in933
     setColour in933 "#sample"
     out936 <- plugout' (trigger ! "result") (-492.0,24.0) (Inside root)
     setColour out936 "#sample"

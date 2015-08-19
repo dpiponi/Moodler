@@ -28,20 +28,6 @@ instance Show Out where
     show Out { _outModuleName = a, _outModuleOut = c} =
             _getModuleName a ++ "." ++ _getOutName c
 
-{-
-instance Eq Out where
-    Disconnected == Disconnected = True
-    Out a _ b == Out a' _ b' = (a, b) == (a', b')
-    Disconnected == Out {} = False
-    Out {} == Disconnected = False
-
-instance Ord Out where
-    compare Disconnected Disconnected = EQ
-    compare Disconnected Out {} = LT
-    compare Out {} Disconnected = GT
-    compare (Out a _ b) (Out a' _ b') = compare (a, b) (a', b')
-    -}
-
 -- _moduleNumber used to maintain consistent ordering
 -- as modules are added
 data Module = Module { _getNodeName :: ModuleName
@@ -68,18 +54,13 @@ connect outNodeName outField inNode inField synth =
 
 -- We want to pass synthTypes into here and use that to
 -- set up normalled value. Maybe.
--- -- XXX
+-- XXX
 disconnect :: ModuleName -> InName -> Synth -> Synth
 disconnect inNode inField synth =
     ix inNode . inputNodes . ix inField .~ Disconnected $ synth 
 
-{-
-out :: String -> Out
-out os = let (moduleName, outName) = splitDot os
-         in Out (ModuleName moduleName) outName
-         -}
-
-getSynth :: M.Map String NodeType -> String -> ErrorT String Identity NodeType
+getSynth :: M.Map String NodeType -> String ->
+            ErrorT String Identity NodeType
 getSynth synths t = maybe (error $ "no synth " ++ t) return $
                             M.lookup t synths
 

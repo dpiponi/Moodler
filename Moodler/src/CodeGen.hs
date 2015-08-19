@@ -74,7 +74,7 @@ genHeaders libDirectory includeList = do
 -- Generate elements of struct corresponding to one primitive module.
 genNodeStruct :: NodeType -> CExtDecl
 genNodeStruct NodeType { _nodeTypeName = name
-                                   , _stateDecls = decls } =
+                       , _stateDecls = decls } =
     let stateStruct1 = structType (cIdent (_getModuleTypeName name))
                                   (Just decls)
     in CDeclExt $ CDecl [CTypeSpec stateStruct1] [(Nothing, Nothing, Nothing)] undefNode
@@ -98,15 +98,17 @@ genShaderFunctions nodeType@NodeType { _execCode = execFunDef
                                      , _nodeTypeName = typeName } =
     let codeBody = execBody nodeType undefined
         typeString = _getModuleTypeName typeName
-    in CFDefExt $ execFunDef & funDefDeclr %~ rewriteShaderDeclr (typeString ++ "_exec") typeString typeString
-                                    & funDefStat .~ codeBody
+    in CFDefExt $ execFunDef & funDefDeclr %~ rewriteShaderDeclr (typeString ++ "_exec")
+                                                                 typeString typeString
+                             & funDefStat .~ codeBody
 
 cExprForOut :: M.Map InName CDecl -> InName -> Out -> CExpr
 cExprForOut inDecls inName Disconnected =
     fromMaybe (intConst 0) $ inDecls ^? ix inName . to getNormalFromCDecl . each
 
 cExprForOut _ _ (Out name' name'') =
-        cVar (cIdent "state") `cArrow` cIdent (_getModuleName name') `cDot` cIdent (_getOutName name'')
+        cVar (cIdent "state") `cArrow` cIdent (_getModuleName name')
+                              `cDot` cIdent (_getOutName name'')
 
 -- The type of the "execute" C function.
 executeType :: CDerivedDeclr
@@ -154,7 +156,7 @@ genExec sortedPrimitives =
                 in if _getModuleName name == "out" || _isInlined nodeType
                     then execInlined name nodeType connections'
                     else [execCall name nodeType typeName
-                                                 inputNames connections]
+                                   inputNames connections]
         compoundStatement = CCompound []
                                       (map CBlockStmt (concat compoundParts))
                                       undefNode
@@ -223,9 +225,8 @@ instantiateInitHelper nodeName nodeType =
     in rewriteInitVars (_getModuleTypeName nodeName) variables i
 
 genInitialisers :: NodeType -> CExtDecl
-genInitialisers node = --do
+genInitialisers node =
       let initSource = instantiateInitHelper (_nodeTypeName node) node
-          --name = _getNodeName node
           typeName = _getModuleTypeName (_nodeTypeName node)
 
       in CFDefExt $ CFunDef [CTypeSpec (CVoidType undefNode)]
@@ -259,6 +260,8 @@ genSetString = do
     tell "    printf(\"set %s.%s(%d)=%s\\n\",node,field,offset,value);\n"
     tell "}\n"
 
+--- XXX Allocating 1MB for state.
+-- This needs to be managed at some point.
 genCreate :: Writer String ()
 genCreate = do
     tell "struct State *create() {\n"

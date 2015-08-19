@@ -1138,6 +1138,7 @@ do
     out694 <- plugout' (sum4161 ++ "." ++ "result") (468.0,-631.0) (Outside container688)
     setColour out694 "#sample"
     in695 <- plugin' (out ++ "." ++ "value") (518.0,8.0) (Inside root)
+    setOutput in695
     setColour in695 "#sample"
     out696 <- plugout' (keyboard ++ "." ++ "result") (-496.0,130.0) (Inside root)
     setColour out696 "#control"

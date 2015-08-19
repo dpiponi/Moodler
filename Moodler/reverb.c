@@ -3,6 +3,7 @@
 
 #include "reverb.h"
 #include "moodler_lib.h"
+#include "reverb.h"
 
 void reverb_fini(Reverb *reverb) {
     /* ... */
@@ -26,6 +27,10 @@ void init_reverb(Reverb *reverb) {
     int n = 12;
     reverb->n = n;
 
+    /*
+     * 0 is fed into 8
+     * 1 is fed into 6 etc.
+     */
     reverb->perm = (int *)malloc(n*sizeof(int));
     reverb->perm[0] = 8;
     reverb->perm[1] = 6;
@@ -60,15 +65,27 @@ void init_reverb(Reverb *reverb) {
     memset(reverb->filtered_output, 0, n*sizeof(double));
     reverb->transformed_output = (double *)malloc(n*sizeof(double));
 
+    /*
+     * b defines the gain of each copy of the input
+     * fed into delay lines.
+     * Currently just sharing equally so 1/12.
+     */
     reverb->b = (double *)malloc(n*sizeof(double));
     double in = 1.0/n;
     for (int i = 0; i < n; ++i) {
         reverb->b[i] = in;
     }
 
+    /*
+     * h controls one pole filter
+     */
     reverb->h = (double *)malloc(n*sizeof(double));
     set_absorption(reverb, 1/48000.0, 0.5);
 
+    /* c is how transformed outputs are mixed into
+     * final output.
+     * So no contribution from c to feedback.
+     */
     reverb->c = (double *)malloc(n*sizeof(double));
     double sign = 1.0;
     for (int i = 0; i < n; ++i) {
@@ -76,6 +93,10 @@ void init_reverb(Reverb *reverb) {
         sign = -sign;
     }
 
+    /*
+     * g is the gain of the transformed output
+     * when fed back into delay lines.
+     */
     reverb->g = (double *)malloc(n*sizeof(double));
     set_gain(reverb, 1/48000.0, 0.9);
 

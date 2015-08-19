@@ -31,7 +31,7 @@ executable ui
   hs-source-dirs:   src
   main-is:          ui.hs
   ghc-options:      -threaded -Wall
-  build-depends:    base >= 4 && < 5, gloss, containers, lens, mtl,
+  build-depends:    base >= 4 && < 5, gloss == 1.9.2.1, containers, lens, mtl,
                     bmp, hint, hosc >= 0.14, unix, free, either, filepath,
                     mmorph, gloss-juicy, JuicyPixels, MoodlerLib, directory
 

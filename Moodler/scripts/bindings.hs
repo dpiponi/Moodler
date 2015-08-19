@@ -8,6 +8,7 @@ do
     bind "\\" "nolimits"
     bind "k" "addknob"
     bind "s" "addslider"
+    bind "⇧\"" "showhidden"
     --bind 'K' "breakknob"
     bind "m" "relocate"
     bind "n" "rename"

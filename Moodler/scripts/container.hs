@@ -1,7 +1,10 @@
 do
+    echo "AAAAAAAAAAAAAAAAAAAAAA!!"
     plane <- currentPlane
     (x, y) <- mouse
-    mName <- input "image file: "
+    assets <- getDirectoryContents("assets")
+    echo assets
+    mName <- input "image file:= "
     case mName of
         Nothing -> return ()
         Just filename -> do

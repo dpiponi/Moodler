@@ -559,6 +559,7 @@ do
     setColour out372 "#control"
     container373 <- container' "panel_out.png" (624.0,132.0) (Inside root)
     in374 <- plugin' (out ! "value") (600.0,132.0) (Outside container373)
+    setOutput in374
     setColour in374 "#sample"
     container375 <- container' "panel_snare_drum.png" (60.0,180.0) (Inside root)
     container376 <- container' "panel_proxy.png" (60.0,180.0) (Outside container375)

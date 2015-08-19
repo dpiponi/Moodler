@@ -4,10 +4,6 @@ import qualified Data.Map as M
 import qualified Data.Set as S
 import Data.List
 
-withJust :: Monad m => Maybe a -> (a -> m ()) -> m ()
-withJust Nothing _ = return ()
-withJust (Just a) f = f a
-
 dezip :: [Either a b] -> ([a], [b])
 dezip [] = ([], [])
 dezip (Left a : cs) = let (as, bs) = dezip cs in (a:as, bs)
@@ -61,3 +57,21 @@ uniqueValues = map snd . S.toList . S.fromList . M.toList
 
 unique :: (Ord b) => [b] -> [b]
 unique = S.toList . S.fromList
+
+clampToRange :: Ord a => (Maybe a, Maybe a) -> a -> a
+clampToRange (lowLimit, highLimit) value =
+    let v0 = case lowLimit of
+            Nothing -> value
+            Just lo -> max value lo
+    in case highLimit of
+            Nothing -> v0
+            Just hi -> min v0 hi
+
+withJustM :: Monad m => m (Maybe a) -> (a -> m ()) -> m ()
+withJustM ma f = do
+    a <- ma
+    withJust a f
+
+withJust :: Monad m => Maybe a -> (a -> m ()) -> m ()
+withJust Nothing _ = return ()
+withJust (Just a) f = f a

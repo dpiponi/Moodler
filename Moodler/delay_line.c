@@ -59,7 +59,7 @@ void lagrange_coefficients(int n, double f, double *c) {
     c[n] = n_left*d[n][n];
 }
 
-int smallest_power_of_two_ge(int n) {
+static int smallest_power_of_two_ge(int n) {
     return 1 << (31-__builtin_clz(2*n-1));
 }
 

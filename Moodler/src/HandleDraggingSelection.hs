@@ -2,7 +2,7 @@ module HandleDraggingSelection where
 
 import Graphics.Gloss.Interface.IO.Game
 import Control.Monad
-import Control.Monad.Trans.Free
+--import Control.Monad.Trans.Free
 import Control.Lens hiding (setting)
 import qualified Data.Set as S
 
@@ -10,13 +10,13 @@ import Sound.MoodlerLib.Quantise
 import Sound.MoodlerLib.Symbols
 
 import World
+import WorldSupport
+import ServerState
 import UIElement
 
 dragElement :: [UiId] -> Point -> [UiId] -> MoodlerM ()
 dragElement top d sel = forM_ sel $ \s -> do
-    inner . uiElements . ix s . ur . loc += d
-    --elts <- use (inner . uiElements)
-    --let Just elt = M.lookup s elts
+    serverState . uiElements . ix s . ur . loc += d
     elt <- getElementById "dragElement" s
     case elt of
         Container { _outside = cts } ->
@@ -27,29 +27,27 @@ dragElement top d sel = forM_ sel $ \s -> do
                                                         S.toList cts)
         _ -> return ()
 
-handleDraggingSelection :: MoodlerM Zero -> Point ->
+handleDraggingSelection :: (Event -> MoodlerM Zero) -> Point ->
                            MoodlerM Zero
-handleDraggingSelection handleDefault p0' = do
-    let p0 = quantise2 quantum p0'
-    e <- liftF $ GetEvent id
-    handleDraggingSelection' handleDefault p0 e
+handleDraggingSelection handleDefault p0' =
+    getEvent >>= handleDraggingSelection' (quantise2 quantum p0')
+    where
 
-doDrag :: Point -> Point -> MoodlerM ()
-doDrag p0 p1 = do
-    sel <- use currentSelection
-    dragElement sel (p1-p0) sel
+    doDrag :: Point -> Point -> MoodlerM ()
+    doDrag p0 p1 = do
+        sel <- use currentSelection
+        dragElement sel (p1-p0) sel
 
-handleDraggingSelection' :: MoodlerM Zero -> Point -> Event -> MoodlerM Zero
-handleDraggingSelection' handleDefault p0 (EventMotion p1') = do
-    let p1 = quantise2 quantum p1'
-    doDrag p0 p1
-    handleDraggingSelection handleDefault p1
+    handleDraggingSelection' :: Point -> Event -> MoodlerM Zero
+    handleDraggingSelection' p0 (EventMotion p1') = do
+        let p1 = quantise2 quantum p1'
+        doDrag p0 p1
+        handleDraggingSelection handleDefault p1
 
-handleDraggingSelection' handleDefault p0
-    (EventKey (MouseButton LeftButton) Up _ p1') = do
-    let p1 = quantise2 quantum p1'
-    doDrag p0 p1
-    handleDefault
+    handleDraggingSelection' p0
+        (EventKey (MouseButton LeftButton) Up _ p1') = do
+        let p1 = quantise2 quantum p1'
+        doDrag p0 p1
+        getEvent >>= handleDefault
 
-handleDraggingSelection' handleDefault a _ = handleDraggingSelection handleDefault a
-
+    handleDraggingSelection' a _ = handleDraggingSelection handleDefault a

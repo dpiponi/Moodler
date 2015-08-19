@@ -1282,6 +1282,7 @@ do
     setColour out780 "#control"
     container781 <- container' "panel_out.png" (1020.0,-24.0) (Inside root)
     in782 <- plugin' (out ! "value") (996.0,-24.0) (Outside container781)
+    setOutput in782
     setColour in782 "#sample"
     container783 <- container' "panel_lfo.png" (-720.0,-348.0) (Inside root)
     in784 <- plugin' (lfo166 ! "sync") (-708.0,-324.0) (Outside container783)

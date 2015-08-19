@@ -253,6 +253,7 @@ do
     setColour in147 "#sample"
     hide in147
     in148 <- plugin' (out ! "value") (474.0,90.0) (Inside root)
+    setOutput in148
     setColour in148 "#sample"
     out149 <- plugout' (keyboard ! "result") (-496.0,130.0) (Inside root)
     setColour out149 "#sample"

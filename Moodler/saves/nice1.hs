@@ -382,6 +382,7 @@ do
     in4 <- plugin' (out ! "left") (420.0,72.0) (Outside container3)
     setColour in4 "#sample"
     in5 <- plugin' (out ! "value") (420.0,24.0) (Outside container3)
+    setOutput in5
     setColour in5 "#sample"
     in6 <- plugin' (out ! "right") (420.0,-24.0) (Outside container3)
     setColour in6 "#sample"

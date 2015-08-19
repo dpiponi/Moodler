@@ -50,6 +50,7 @@ do
     setColour out28 "(0, 1, 0)"
     container29 <- container' "panel_out.png" (444.0,24.0) (Inside root)
     in30 <- plugin' (out ! "value") (420.0,24.0) (Outside container29)
+    setOutput in30
     setColour in30 "#sample"
     container31 <- container' "panel_bit_or.png" (36.0,180.0) (Inside root)
     in32 <- plugin' (bit_or1 ! "x") (-24.0,204.0) (Outside container31)

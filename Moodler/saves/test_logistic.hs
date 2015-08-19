@@ -515,6 +515,7 @@ do
     selector149 <- selector' (input40 ++ "." ++ "result") (-156.0,408.0) ["1","2","3","4","5","6","7","8"] (Outside container93)
     selector150 <- selector' (input49 ++ "." ++ "result") (-120.0,408.0) ["repeat","slide","rest","hold"] (Outside container93)
     in318 <- plugin' (out ++ "." ++ "value") (612.0,-84.0) (Inside root)
+    setOutput in318
     setColour in318 "#sample"
     out319 <- plugout' (keyboard ++ "." ++ "result") (-492.0,132.0) (Inside root)
     setColour out319 "#sample"

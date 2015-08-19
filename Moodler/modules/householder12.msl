@@ -1,0 +1,68 @@
+double result1;
+double result2;
+double result3;
+double result4;
+double result5;
+double result6;
+double result7;
+double result8;
+double result9;
+double result10;
+double result11;
+double result12;
+
+void init() {
+    result1 = 0.0;
+    result2 = 0.0;
+    result3 = 0.0;
+    result4 = 0.0;
+    result5 = 0.0;
+    result6 = 0.0;
+    result7 = 0.0;
+    result8 = 0.0;
+    result9 = 0.0;
+    result10 = 0.0;
+    result11 = 0.0;
+    result12 = 0.0;
+}
+
+inline void exec(in sample signal1,
+                 in sample signal2,
+                 in sample signal3,
+                 in sample signal4,
+                 in sample signal5,
+                 in sample signal6,
+                 in sample signal7,
+                 in sample signal8,
+                 in sample signal9,
+                 in sample signal10,
+                 in sample signal11,
+                 in sample signal12,
+                 out sample result1,
+                 out sample result2,
+                 out sample result3,
+                 out sample result4,
+                 out sample result5,
+                 out sample result6,
+                 out sample result7,
+                 out sample result8,
+                 out sample result9,
+                 out sample result10,
+                 out sample result11,
+                 out sample result12) {
+    sample t = (signal1+signal2+signal3+signal4+
+                signal5+signal6+signal7+signal8+
+                signal9+signal10+signal11+signal12)/6.0;
+    result1 = signal1-t;
+    result2 = signal2-t;
+    result3 = signal3-t;
+    result4 = signal4-t;
+    result5 = signal5-t;
+    result6 = signal6-t;
+    result7 = signal7-t;
+    result8 = signal8-t;
+    result9 = signal9-t;
+    result10 = signal10-t;
+    result11 = signal11-t;
+    result12 = signal12-t;
+}

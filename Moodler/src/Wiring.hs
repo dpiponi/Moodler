@@ -13,9 +13,12 @@ module Wiring(synthConnect,
               synthQuit,
               synthRecompile,
               synthReset,
+              synthAlias,
+              synthUnAlias,
               undoPoint,
               performUndo, 
-              performRedo
+              performRedo,
+              cableSrc
               ) where
 
 import Control.Lens
@@ -28,123 +31,133 @@ import Control.Monad.Trans.Free
 
 import Sound.MoodlerLib.Symbols
 
+import ServerState
 import Comms
 import Box
 import Cable
 import World
+import WorldSupport
 import UIElement
 import KeyMatcher
 
-emptyWorld' :: UiId -> UIElement -> World
-emptyWorld' rootID root =
-    World { _uiElements = M.fromList [(rootID, root)]
-          , _synthList = []
-          }
-
-emptyGlossWorld' :: GlossWorld
-emptyGlossWorld' = 
+emptyWorld' :: World
+emptyWorld' = 
     let root = Container { _ur = UrElement { _parent = error "Root parent shouldn't be visible"
-                     , _highlighted = False
-                     , _depth = 0
-                     , _hidden = False
-                     , _loc = (0, 0)
-                     , _name = "root" }
-                     , _inside = S.empty
-                     , _outside = S.empty
-                     , _pic = "panel_proxy.png"
-                     , _imageWidth = 40
-                     , _imageHeight = 40
-                     }
+                         , _highlighted = False
+                         , _depth = 0
+                         , _hidden = False
+                         , _loc = (0, 0)
+                         , _name = "root" }
+                         , _inside = S.empty
+                         , _outside = S.empty
+                         , _pic = "panel_proxy.png"
+                         , _imageWidth = 40
+                         , _imageHeight = 40
+                         }
         rootID = UiId "root"
-        innerWorld = emptyWorld' rootID root
-    in GlossWorld { _inner = innerWorld
+        serverStateWorld = emptyServerState rootID root
+    in World { _serverState = serverStateWorld
                   , _ipAddr = ""
                   , _projectFile = ""
                   , _showHidden = False
                   , _newName = 0
                   , _mouseLoc = (0, 0)
-                  , _planes = rootID
-                  --, _cmdArgs = []
-                  , _rootPlane = rootID
+                  , _planeInfo = PlaneInfo { _planes = rootID
+                                           , _rootPlane = rootID
+                                           , _rootTransform = Transform (0, 0) 1
+                                           }
                   , _keyMatcher = initKeyMatcher
                   , _pics = M.empty
                   , _gadget = const blank
                   , _currentSelection = []
-                  -- , _previousSelection = Nothing
-                  , _rootTransform = Transform (0, 0) 1
                   , _cont = Pure undefined
                   , _undoInfo = UndoInfo
-                      { _innerHistory = [innerWorld]
+                      { _serverStateHistory = [serverStateWorld]
                       , _undoHistory = [([], [])]
-                      , _innerFuture = []
+                      , _serverStateFuture = []
                       , _undoFuture = [([], [])]
                   }
+                  , _outputId = undefined
                   }
 
-synthConnect :: (Functor m, MonadIO m, MonadState GlossWorld m,
+synthConnect :: (Functor m, MonadIO m, MonadState World m,
                 InputHandler m) =>
                 UiId -> UiId -> m ()
 synthConnect s1 s2 = do
-    s1Name <- use (inner . uiElements . ix s1 . ur . name)
-    s2Name <- use (inner . uiElements . ix s2 . ur . name)
+    s1Name <- use (serverState . uiElements . ix s1 . ur . name)
+    s2Name <- use (serverState . uiElements . ix s2 . ur . name)
     sendConnectMessage s1Name s2Name
-    previousCables <- use (inner . uiElements . ix s2 . cablesIn)
-    if null previousCables -- XXX case
-        then recordUndo (SendDisconnect s2Name)
-                        (SendConnect s1Name s2Name)
-        else do
-            let (Cable o : _) = previousCables
-            oName <- use (inner . uiElements . ix o . ur . name)
-            recordUndo (SendConnect oName s2Name)
-                       (SendConnect s1Name s2Name)
-    inner . uiElements . ix s2 . cablesIn %= (Cable.Cable s1 :)
+    previousCables <- use (serverState . uiElements . ix s2 . cablesIn)
+    undoCommand <- case previousCables of
+        [] -> return (SendDisconnect s2Name)
+        Cable o : _ -> do
+            oName <- use (serverState . uiElements . ix o . ur . name)
+            return (SendConnect oName s2Name)
+    let redoCommand = SendConnect s1Name s2Name
+    recordUndo undoCommand redoCommand
+    serverState . uiElements . ix s2 . cablesIn %= (Cable.Cable s1 :)
 
-synthNew :: (Functor m, MonadIO m, MonadState GlossWorld m,
+synthNew :: (Functor m, MonadIO m, MonadState World m,
             InputHandler m) =>
             String -> String -> m ()
 synthNew synthType synthName = do
-    inner . synthList %= (++ [(synthType, synthName)])
+    serverState . synthList %= (++ [(synthType, synthName)])
     sendNewSynthMessage synthType synthName
 
-deleteCable :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+deleteCable :: (Functor m, MonadIO m, MonadState World m) =>
                UiId -> m (Maybe Cable)
 deleteCable selectedIn = do
     outPoint <- getElementById "UISupport.hs" selectedIn
     case outPoint ^. cablesIn of
         [] -> return Nothing
         [c@(Cable c')] -> do
-            inner . uiElements . ix selectedIn . cablesIn .= []
-            selectedInName <- use (inner . uiElements . ix selectedIn . ur . name)
+            serverState . uiElements . ix selectedIn . cablesIn .= []
+            selectedInName <- use (serverState . uiElements . ix selectedIn . ur . name)
             sendDisconnectMessage selectedInName
-            --deleteCable' c selectedIn
-            c'Name <- use (inner . uiElements . ix c' . ur . name)
+            c'Name <- use (serverState . uiElements . ix c' . ur . name)
             recordUndo (SendConnect c'Name selectedInName)
                        (SendDisconnect selectedInName)
-            --sendRecompileMessage
             return (Just c)
+        -- Not sure why this lacks `recordUndo`. Seems to work.
         (c@(Cable c') : rc@(Cable src : _)) -> do
-            inner . uiElements . ix selectedIn . cablesIn .= rc
+            serverState . uiElements . ix selectedIn . cablesIn .= rc
             connect src selectedIn c'
-            --sendRecompileMessage
             return (Just c)
 
-connect :: (MonadState GlossWorld m, MonadIO m, Functor m) =>
+-- XXX Do undo
+synthAlias :: (Functor m, MonadIO m, MonadState World m,
+              InputHandler m) =>
+              String -> String -> m ()
+synthAlias aliasName synthName = do
+    serverState . aliases %= M.insert aliasName synthName
+    sendAliasMessage aliasName synthName
+
+-- XXX Do undo
+synthUnAlias :: (Functor m, MonadIO m, MonadState World m,
+                InputHandler m) =>
+                String -> m ()
+synthUnAlias aliasName = do
+    serverState . aliases %= M.delete aliasName
+    sendUnAliasMessage aliasName 
+
+connect :: (MonadState World m, MonadIO m, Functor m) =>
            UiId -> UiId -> UiId -> m ()
 connect src dst oldSrc = do
-            srcName <- use (inner . uiElements . ix src . ur . name)
-            dstName <- use (inner . uiElements . ix dst . ur . name)
+            srcName <- use (serverState . uiElements . ix src . ur . name)
+            dstName <- use (serverState . uiElements . ix dst . ur . name)
             sendConnectMessage srcName dstName
-            oldSrcName <- use (inner . uiElements . ix oldSrc . ur . name)
+            oldSrcName <- use (serverState . uiElements . ix oldSrc . ur . name)
             recordUndo (SendConnect oldSrcName dstName)
                        (SendConnect srcName dstName)
 
-rotateCables :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+-- XXX Resurrect this
+rotateCables :: (Functor m, MonadIO m, MonadState World m) =>
                 UiId -> m ()
 rotateCables selectedIn = do
     outPoint <- getElementById "rotateCables" selectedIn
     case outPoint ^. cablesIn of
         (c@(Cable c') : rc@(Cable src : _)) -> do
-            inner . uiElements . ix selectedIn . cablesIn .= rc ++ [c]
+            serverState . uiElements . ix selectedIn . cablesIn .= rc ++ [c]
             connect src selectedIn c'
             --sendRecompileMessage
             return ()
@@ -160,127 +173,135 @@ removeCablesFrom _ elt = elt
 
 -- Remove all cables from src to dst in list cs
 removeAllCablesFromTo :: (Functor m, MonadIO m,
-                         MonadState GlossWorld m) =>
+                         MonadState World m) =>
                          UiId -> UiId -> [Cable] -> m ()
 removeAllCablesFromTo src dst cs = do
     unless (null cs) $ do
         let Cable s : _ = cs
-        dstName <- use (inner . uiElements . ix dst . ur . name)
+        dstName <- use (serverState . uiElements . ix dst . ur . name)
         when (s == src) $ do
             let newCs = filter (not . cableIsFrom src) cs
-            srcName <- use (inner . uiElements . ix src . ur . name)
-            if null newCs
-                then do 
+            srcName <- use (serverState . uiElements . ix src . ur . name)
+            let undoCommand = SendConnect srcName dstName
+            redoCommand <- case newCs of
+                [] -> do
                     sendDisconnectMessage dstName
-                    recordUndo (SendConnect srcName dstName)
-                               (SendDisconnect dstName)
-                else do
-                    let Cable newSrc : _ = newCs
-                    newSrcName <- use (inner . uiElements . ix newSrc . ur . name)
+                    return (SendDisconnect dstName)
+                Cable newSrc : _ -> do
+                    newSrcName <- use (serverState . uiElements . ix newSrc . ur . name)
                     sendConnectMessage newSrcName dstName
-                    recordUndo (SendConnect srcName dstName)
-                               (SendConnect newSrcName dstName)
-            inner . uiElements . ix dst . cablesIn .= newCs
-    inner . uiElements . ix dst %= removeCablesFrom src
+                    return (SendConnect newSrcName dstName)
+            recordUndo undoCommand redoCommand
+            serverState . uiElements . ix dst . cablesIn .= newCs
+    serverState . uiElements . ix dst %= removeCablesFrom src
 
 removeAllCablesFrom :: (Functor m, MonadIO m,
-                       MonadState GlossWorld m) =>
+                       MonadState World m) =>
                        UiId -> m ()
 removeAllCablesFrom i = do
-    eltIds <- use (inner . uiElements)
+    eltIds <- use (serverState . uiElements)
     forM_ (M.toList eltIds) $ \(eltId, elt) ->
         case elt of
             In { _cablesIn = cs } -> removeAllCablesFromTo i eltId cs
             _ -> return ()
-    -- sendRecompileMessage
 
 synthSet :: (Functor m, MonadIO m,
-            MonadState GlossWorld m) =>
-            UiId -> Float -> m ()
+            MonadState World m) =>
+            UiId -> Float -> m Bool
 synthSet t v = do
     -- Note this is using fact that string is monoid
     -- Not good! XXX
     elt <- getElementById "synthSet" t
-    let knobName = UIElement._name (_ur elt)
-    inner . uiElements . ix t . UIElement.setting .= v
-    sendSetMessage knobName v
-    let oldValue = UIElement._setting elt
-    recordUndo (SendSet knobName oldValue)
-               (SendSet knobName v)
+    case elt ^? UIElement.setting of
+        Nothing -> return False
+        Just oldValue -> do
+            let knobName = UIElement._name (_ur elt)
+            serverState . uiElements . ix t . UIElement.setting .= v
+            sendSetMessage knobName v
+            recordUndo (SendSet knobName oldValue)
+                       (SendSet knobName v)
+            return True
 
 synthSetString :: (Functor m, MonadIO m,
-                  MonadState GlossWorld m) =>
+                  MonadState World m) =>
                   UiId -> String -> m ()
 synthSetString t v = do
     -- Note this is using fact that string is monoid
     -- Not good! XXX
     elt <- getElementById "synthSetString" t
     let textBoxName = UIElement._name (_ur elt)
-    inner . uiElements . ix t . UIElement.boxText .= v
+    serverState . uiElements . ix t . UIElement.boxText .= v
     sendSetStringMessage textBoxName v
     let oldValue = UIElement._boxText elt
     recordUndo (SendSetString textBoxName oldValue)
                (SendSetString textBoxName v)
 
-synthQuit :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+synthQuit :: (Functor m, MonadIO m, MonadState World m) =>
              m ()
 synthQuit = sendQuitMessage
 
-synthRecompile :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+synthRecompile :: (Functor m, MonadIO m, MonadState World m) =>
                   String -> m ()
 synthRecompile = sendRecompileMessage
 
-synthReset :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+synthReset :: (Functor m, MonadIO m, MonadState World m) =>
                   String -> m ()
 synthReset msg = do
     sendResetMessage msg
     ipAddress <- use ipAddr
     oldCont <- use cont
     oldBindings <- use keyMatcher
-    put emptyGlossWorld'
+    put emptyWorld'
     ipAddr .= ipAddress
     cont .= oldCont
     keyMatcher .= oldBindings
 
-undoPoint :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+undoPoint :: (Functor m, MonadIO m, MonadState World m) =>
              m ()
 undoPoint = do
     liftIO $ print "Setting undo point"
-    innerState <- use inner
-    undoInfo . innerHistory %= (innerState :)
+    serverStateState <- use serverState
+    undoInfo . serverStateHistory %= (serverStateState :)
     undoInfo . undoHistory %= (([], []) :)
-    undoInfo . innerFuture .= []
+    undoInfo . serverStateFuture .= []
     undoInfo . undoFuture .= []
 
-performUndo :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+performUndo :: (Functor m, MonadIO m, MonadState World m) =>
                m ()
 performUndo = do
-    history <- use (undoInfo . innerHistory)
+    history <- use (undoInfo . serverStateHistory)
     unless (null history) $ do
-        currentInner <- use inner
-        let innerState = head history
+        currentInner <- use serverState
+        let serverStateState = head history
         cmds@(undos, _) : _ <- use (undoInfo . undoHistory)
-        undoInfo . innerHistory %= tail
+        undoInfo . serverStateHistory %= tail
         undoInfo . undoHistory %= tail
-        inner .= innerState
-        undoInfo . innerFuture %= (currentInner :)
+        serverState .= serverStateState
+        undoInfo . serverStateFuture %= (currentInner :)
         undoInfo . undoFuture %= (cmds :)
         mapM_ (\a -> interpretSend a >> liftIO (putStrLn $ "Undoing: " ++ show a)) undos
         synthRecompile "undo"
 
-performRedo :: (Functor m, MonadIO m, MonadState GlossWorld m) =>
+performRedo :: (Functor m, MonadIO m, MonadState World m) =>
                m ()
 performRedo = do
-    future <- use (undoInfo . innerFuture)
+    future <- use (undoInfo . serverStateFuture)
     unless (null future) $ do
-        currentInner <- use inner
-        let innerState = head future
+        currentInner <- use serverState
+        let serverStateState = head future
         cmds@(_, redos) : _ <- use (undoInfo . undoFuture)
-        undoInfo . innerFuture %= tail
+        undoInfo . serverStateFuture %= tail
         undoInfo . undoFuture %= tail
-        inner .= innerState
-        undoInfo . innerHistory %= (currentInner :)
+        serverState .= serverStateState
+        undoInfo . serverStateHistory %= (currentInner :)
         undoInfo . undoHistory %= (cmds :)
         -- XXX Note "reverse". This could be eliminated.
         mapM_ (\a -> interpretSend a >> liftIO (putStrLn $ "Redoing: " ++ show a)) (reverse redos)
         synthRecompile "redo"
+
+cableSrc :: (MonadIO m, MonadState World m) => UiId -> m (Maybe UiId)
+cableSrc srcId = do
+    elt <- getElementById "cableSrc" srcId
+    case elt of
+        In { _cablesIn = (Cable src : _) } -> return (Just src)
+        _ -> return Nothing

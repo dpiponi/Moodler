@@ -18,6 +18,8 @@ import Sound.MoodlerLib.Symbols
 import ContainerTree
 import UIElement
 import World
+import WorldSupport
+import ServerState
 
 uiAngle :: Floating a => Maybe a -> Maybe a -> a -> a
 uiAngle (Just lo) (Just hi) v = -1.0+2.0*(v-lo)/(hi-lo)
@@ -31,58 +33,58 @@ unUiAngle (Just lo) Nothing   v = (lo+atanh ((v+1.0)/2.0)) `max` lo
 unUiAngle Nothing   (Just hi) v = (hi-atanh ((1.0-v)/2.0)) `min` hi
 unUiAngle Nothing   Nothing   v = atanh v
 
-highlightElement :: MonadState GlossWorld m => UiId -> m ()
-highlightElement i = inner . uiElements . ix i . ur . highlighted .= True
+highlightElement :: MonadState World m => UiId -> m ()
+highlightElement i = serverState . uiElements . ix i . ur . highlighted .= True
 
-unhighlightElement :: MonadState GlossWorld m => UiId -> m ()
-unhighlightElement i = inner . uiElements . ix i . ur . highlighted .= False
+unhighlightElement :: MonadState World m => UiId -> m ()
+unhighlightElement i = serverState . uiElements . ix i . ur . highlighted .= False
 
-unhighlightEverything :: MonadState GlossWorld m => m ()
-unhighlightEverything = inner . uiElements . traverse . ur . highlighted .=
+unhighlightEverything :: MonadState World m => m ()
+unhighlightEverything = serverState . uiElements . traverse . ur . highlighted .=
                             False
 
-highlightJust :: MonadState GlossWorld m => UiId -> m ()
+highlightJust :: MonadState World m => UiId -> m ()
 highlightJust i =
-    unhighlightEverything >> inner . uiElements . ix i . ur . highlighted .=
+    unhighlightEverything >> serverState . uiElements . ix i . ur . highlighted .=
         True
 
-depthExtent :: MonadState GlossWorld m =>
+depthExtent :: MonadState World m =>
                m (Int, Int)
 depthExtent = do
-    elts <- use (inner . uiElements)
+    elts <- use (serverState . uiElements)
     depths <- forM (M.toList elts) $ \(_, elt) ->
         return (elt ^. ur . depth)
     let sorted = L.sort depths
     return (head sorted, last sorted)
 
-doSelection :: MonadState GlossWorld m => UiId -> m ()
+doSelection :: MonadState World m => UiId -> m ()
 doSelection i = do
     unhighlightEverything
     highlightJust i
     currentSelection .= [i]
 
-bringToFront :: MonadState GlossWorld m => UiId -> m ()
+bringToFront :: MonadState World m => UiId -> m ()
 bringToFront t = do
     (_, hi) <- depthExtent
-    inner . uiElements . ix t . ur . depth .= (hi+1)
+    serverState . uiElements . ix t . ur . depth .= (hi+1)
 
-sendToBack :: MonadState GlossWorld m => UiId -> m ()
+sendToBack :: MonadState World m => UiId -> m ()
 sendToBack t = do
     (lo, _) <- depthExtent
-    inner . uiElements . ix t . ur . depth .= (lo-1)
+    serverState . uiElements . ix t . ur . depth .= (lo-1)
 
-newUIElement :: MonadState GlossWorld m => (UiId -> UIElement) -> m UiId
+newUIElement :: MonadState World m => (UiId -> UIElement) -> m UiId
 newUIElement elt = do
     newN <- use newName
     newName %= (+ 1)
     let n = UiId $ "elt" ++ show newN
     let e = elt n
-    (inner . uiElements) %= M.insert n e
+    (serverState . uiElements) %= M.insert n e
     doSelection n
     --liftIO $ print $ "newUIElement " ++ unUiId n
     return n
 
-visitElements' :: MonadState GlossWorld m =>
+visitElements' :: MonadState World m =>
                   UiId -> UIElement -> m [UiId]
 visitElements' e elt@Container { _outside = cts } = do
     showHiddenElements <- use showHidden
@@ -99,21 +101,7 @@ visitElements' e elt = do
         then []
         else [e]
     
-    {-
-visitElements :: MonadState GlossWorld m => m [UiId]
-visitElements = do
-    es <- use (inner . uiElements)
-    lists <- forM (M.toList es) $ \(e, elt) -> do
-        -- Don't visit something with a parent from the top level.
-        -- We'll probably get there via the parent.
-        root <- use (inner . rootPlane)
-        if (elt ^. parent) /= root && not (elt ^. hidden)
-            then visitElements' e elt
-            else return []
-    return $ concat lists
-    -}
-
-visitElementsOnPlane :: MonadState GlossWorld m => UiId -> m [UiId]
+visitElementsOnPlane :: MonadState World m => UiId -> m [UiId]
 visitElementsOnPlane planeId = do
     showHiddenElements <- use showHidden
     --p <- getElementById "visitElementsOnPlane" planeId
@@ -132,13 +120,13 @@ visitElementsOnPlane planeId = do
     return $ concat lists
 
 -- XXX Visible?
-rootElementsOnPlane :: MonadState GlossWorld m => UiId -> m [UiId]
+rootElementsOnPlane :: MonadState World m => UiId -> m [UiId]
 rootElementsOnPlane planeId = do
     p <- getElementById "rootElementsOnPlane" planeId
     return $ S.toList (p ^. inside)
 
 -- What UI element lies directly under point?
-selectedByPoint :: MonadState GlossWorld m => UiId -> (Float, Float) ->
+selectedByPoint :: MonadState World m => UiId -> (Float, Float) ->
                                          m (Maybe UiId)
 selectedByPoint selectionPlane (x, y) = do
     parentsFirst <- visitElementsOnPlane selectionPlane
@@ -155,21 +143,21 @@ newNameLike s m = if s `M.member` m
     else s
 
 {-
-anOut :: UiId -> GlossWorld -> Bool
+anOut :: UiId -> World -> Bool
 anOut n = evalState $ do
     possibleOut <- getElementById "anOut" n
     return $ case possibleOut of
         Out {} -> True
         _ -> False
 
-anIn :: UiId -> GlossWorld -> Bool
+anIn :: UiId -> World -> Bool
 anIn n = evalState $ do
     possibleIn <- getElementById "anIn" n
     return $ case possibleIn of
         In {} -> True
         _ -> False
 
-oneToMany :: S.Set UiId -> StateT GlossWorld IO (Maybe (UiId, [UiId]))
+oneToMany :: S.Set UiId -> StateT World IO (Maybe (UiId, [UiId]))
 oneToMany elts = do
     world <- get
     let (outs, rest) = S.partition (`anOut` world) elts
@@ -192,7 +180,7 @@ getDirection (SpecialKey KeyLeft) = (-1, 0)
 getDirection (SpecialKey KeyRight) = (1, 0)
 getDirection _ = (0, 0)
 
-everythingInRegion :: MonadState GlossWorld m =>
+everythingInRegion :: MonadState World m =>
                       UiId -> Point -> Point -> m [UiId]
 everythingInRegion selectionPlane p0 p1 = do
     parentsFirst <- visitElementsOnPlane selectionPlane
@@ -200,13 +188,13 @@ everythingInRegion selectionPlane p0 p1 = do
         elt <- getElementById "everythingInRegion" e
         return $ uiElementWithinBox (p0, p1) elt
 
-addPlane :: MonadState GlossWorld m => UiId -> m ()
-addPlane plane = planes .= plane
+addPlane :: MonadState World m => UiId -> m ()
+addPlane plane = planeInfo . planes .= plane
 
 -- When we make a group we may have to remove elements from their parents
 -- We only remove them if the parents aren't also in the newly formed
 -- group.
-makeGroup :: (Functor m, MonadState GlossWorld m, MonadIO m) =>
+makeGroup :: (Functor m, MonadState World m, MonadIO m) =>
              UiId -> [UiId] -> Point -> m ()
 makeGroup p sel proxyLocation = do
     liftIO $ putStrLn $ "Making group on " ++ show p
@@ -246,3 +234,46 @@ getAllFilesOfType ext dir = do
 
 getAllScripts :: String -> IO [String]
 getAllScripts = getAllFilesOfType ".hs"
+
+{-
+-- Split cable going into chosen In.
+-- Returns (new In, new Out)
+splitCable :: (MonadState World m, MonadIO m) => UiId -> m (Maybe (UiId, UiId))
+splitCable inId = do
+    inElt <- getElementById "splitCable" inId
+    case inElt of
+        In { _cablesIn = (cable : _) } -> do
+        {-
+new' s1 = do
+    s2 <- newId s1 -- kludge until we have SynthIds
+    New s1 (unUiId s2) (return ())
+    return (unUiId s2)
+plugin :: UiId -> String -> (Float, Float) -> Location -> Ui UiId
+plugin s1 s2 p creationParent = PlugIn s1 s2 p creationParent return
+
+plugin' :: String -> (Float, Float) -> Location -> Ui UiId
+plugin' s2 p creationParent = do
+    s1 <- newId "plugin"
+    PlugIn s1 s2 p creationParent return
+
+plugout :: UiId -> String -> (Float, Float) -> Location -> Ui UiId
+plugout s1 s2 p creationParent = PlugOut s1 s2 p creationParent return
+
+plugout' :: String -> (Float, Float) -> Location -> Ui UiId
+plugout' s2 p creationParent = do
+    s1 <- newId "plugout"
+    PlugOut s1 s2 p creationParent return
+do
+    (x0, y0) <- mouse
+    let (x, y) = quantise2 quantum (x0, y0)
+    root <- currentPlane
+    id5  <-  new' "id"
+    in6 <- plugin' (id5 ++ "." ++ "signal") (x+(-16.0), y+(-5.0)) (Inside root)
+    setColour in6 "#control"
+    out7 <- plugout' (id5 ++ "." ++ "result") (x+(25.0), y+(-5.0)) (Inside root)
+    setColour out7 "#control"
+    recompile
+    return ()
+         -}
+        _ -> return Nothing
+-}

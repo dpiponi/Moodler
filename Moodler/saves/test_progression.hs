@@ -1849,6 +1849,7 @@ do
     setColour out983 "#control"
     container984 <- container' "panel_out.png" (516.0,48.0) (Inside root)
     in985 <- plugin' (out ! "value") (492.0,48.0) (Outside container984)
+    setOutput in985
     setColour in985 "#sample"
     container986 <- container' "panel_organ.png" (10.0,335.0) (Inside root)
     container1002 <- container' "panel_3x1.png" (-288.0,-528.0) (Inside container986)

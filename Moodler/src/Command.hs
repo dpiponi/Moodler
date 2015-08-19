@@ -2,7 +2,6 @@
 
 module Command where
 
---import Codec.BMP
 import Control.Applicative
 import Control.Exception
 import Control.Lens
@@ -12,12 +11,11 @@ import Graphics.Gloss.Data.Color
 import qualified Language.Haskell.Interpreter as I
 import qualified Data.Map as M
 import qualified Data.Set as S
---import Data.Monoid
+import System.Directory
 
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.Quantise
 import Sound.MoodlerLib.UiLib as U
---import Sound.MoodlerLib.UiLibElement
 
 import Check
 import Wiring
@@ -33,13 +31,14 @@ import Codec.Picture
 import qualified Codec.Picture.Types as P
 import KeyMatcher
 import KeyStrokes
---import UiLibElement
+import ServerState
+import WorldSupport
 
 alertGadget :: String -> B.Transform -> Picture
 alertGadget alt _ = 
     B.textInBox (makeColor 1.0 0.1 0.1 0.8) white alt
 
-doAlert :: (MonadIO m, MonadState GlossWorld m) =>
+doAlert :: (MonadIO m, MonadState World m) =>
            String -> m ()
 doAlert alt = do
     gadget .= alertGadget alt
@@ -61,7 +60,7 @@ imageDimensions (P.ImageYCbCr8 (P.Image { P.imageWidth = w, P.imageHeight = h })
 imageDimensions (P.ImageCMYK8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
 imageDimensions (P.ImageCMYK16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
 
-getPic :: (MonadIO m, MonadState GlossWorld m) => String -> m (Either String (Int, Int))
+getPic :: (MonadIO m, MonadState World m) => String -> m (Either String (Int, Int))
 getPic bmpName = do
     liftIO $ putStrLn $ "Loading: " ++ show bmpName
     let imageFileName = "assets/" ++ bmpName
@@ -75,67 +74,72 @@ getPic bmpName = do
                 return $ Right (width, height)
         Left e -> return $ Left ("\"" ++ imageFileName ++ "\" didn't load: " ++ e)
 
+commandImportList :: [String]
+commandImportList = 
+        [ "Prelude",
+          "Control.Monad",
+          "Text.Read",
+          "System.Directory",
+          "Sound.MoodlerLib.Symbols",
+          "Sound.MoodlerLib.UiLib",
+          "Sound.MoodlerLib.UiLibElement",
+          "Sound.MoodlerLib.Quantise"]
+
 execCommand :: (InputHandler m, Functor m, MonadIO m,
-                MonadState GlossWorld m) =>
+                MonadState World m) =>
                String -> m ()
 execCommand cmd = do
-    x <- liftIO $ I.runInterpreter $ do
+    commandResult <- liftIO $ I.runInterpreter $ do
         I.set [I.searchPath I.:= ["src"]]
-        I.setImports [ "Prelude",
-                       "Control.Monad",
-                       "Text.Read",
-                       "Sound.MoodlerLib.Symbols",
-                       "Sound.MoodlerLib.UiLib",
-                       "Sound.MoodlerLib.UiLibElement",
-                       "Sound.MoodlerLib.Quantise"]
+        I.setImports commandImportList
         I.interpret cmd (I.as :: Ui ())
-    case x of
-        Left err -> case err of
-            I.UnknownError e -> doAlert $ "Unknown error: " ++ e
-            I.WontCompile es -> doAlert $ show (map I.errMsg es)
-            I.NotAllowed e   -> doAlert $ "Not allowed: " ++ e
-            I.GhcException e -> doAlert $ "GHC exception: " ++ e
-        Right y -> evalUi y
+    case commandResult of
+        Left err -> doAlert $ case err of
+            I.UnknownError e -> "Unknown error: " ++ e
+            I.WontCompile es -> show (map I.errMsg es)
+            I.NotAllowed e   -> "Not allowed: " ++ e
+            I.GhcException e -> "GHC exception: " ++ e
+        Right commandTree -> evalUi commandTree
 
 safeReadFile :: String -> IO (Either String String)
 safeReadFile f = 
-   catch (Right <$> readFile f) $ \e -> do
-        let err = show (e :: IOException)
+   catch (Right <$> readFile f) $ \exception -> do
+        let err = show (exception :: IOException)
         return $ Left err
 
 execScript :: (InputHandler m, Functor m, MonadIO m,
-               MonadState GlossWorld m) =>
+               MonadState World m) =>
                String -> String -> m String
 execScript dir f = do -- use proper dir API XXX
-    --liftIO $ putStrLn $ "Exec: " ++ dir ++ "/" ++ f ++ ".hs"
     let fileName = dir ++ "/" ++ f ++ ".hs"
     cmds <- liftIO $ safeReadFile fileName
     case cmds of
         Left err  -> do
             liftIO $ putStrLn err
             gadget .= alertGadget err
-        Right cmd ->
-            --cmdArgs .= arguments
-            execCommand cmd
+        Right cmd -> execCommand cmd
     return fileName
 
-evalUi :: (Functor m, MonadIO m, MonadState GlossWorld m,
+evalUi :: (Functor m, MonadIO m, MonadState World m,
           InputHandler m) =>
           Ui () -> m ()
 evalUi (Return a) = return a
 
 evalUi (CurrentPlane cfn) = do
-    p <- use planes
+    p <- use (planeInfo . planes)
     evalUi (cfn p)
 
 evalUi (Switch p cfn) =
-    planes .= p >> evalUi cfn
+    planeInfo . planes .= p >> evalUi cfn
 
 evalUi (Echo t cfn) =
     doAlert t >> evalUi cfn
 
 evalUi (Hide t h cfn) =
-    inner . uiElements . ix t . ur . hidden .= h >> evalUi cfn
+    serverState . uiElements . ix t . ur . hidden .= h >> evalUi cfn
+
+evalUi (ToggleHidden cfn) =
+    showHidden %= not >> evalUi cfn
 
 evalUi (Delete t cfn) =
     T.deleteElement t >> evalUi cfn
@@ -232,9 +236,9 @@ evalUi (U.SetPicture uiId pictureFileName cfn) = do
     maybePic <- getPic pictureFileName
     case maybePic of
         Right (width, height) -> do
-            inner . uiElements . ix uiId . pic .= pictureFileName
-            inner . uiElements . ix uiId . UIElement.imageWidth .= width
-            inner . uiElements . ix uiId . UIElement.imageHeight .= height
+            serverState . uiElements . ix uiId . pic .= pictureFileName
+            serverState . uiElements . ix uiId . UIElement.imageWidth .= width
+            serverState . uiElements . ix uiId . UIElement.imageHeight .= height
         Left e -> doAlert e
     evalUi cfn
 
@@ -246,6 +250,9 @@ evalUi (U.Label n labelText p creationPlane cfn) = do
 
 evalUi (U.Cable s1 s2 cfn) =
     synthConnect s1 s2 >> evalUi cfn
+
+evalUi (U.UnCable dest cfn) =
+    deleteCable dest >> evalUi cfn
 
 evalUi (U.Recompile cfn) =
     synthRecompile "Recompile command" >> evalUi cfn
@@ -264,23 +271,25 @@ evalUi (U.Check cfn) = do
         else "Consistency problem"
     evalUi cfn
 
-evalUi (Set t v cfn) =
-    synthSet t v >> evalUi cfn
+-- Set command doesn't check
+evalUi (Set t v cfn) = do
+    succeeded <- synthSet t v
+    evalUi (cfn succeeded)
 
 evalUi (SetString t v cfn) =
     synthSetString t v >> evalUi cfn
 
 evalUi (SetLow t v cfn) =
-    inner . uiElements . ix t . UIElement.knobMin .= v >> evalUi cfn
+    serverState . uiElements . ix t . UIElement.knobMin .= v >> evalUi cfn
 
 evalUi (SetName t n cfn) =
-    inner . uiElements . ix t . ur . UIElement.name .= n >> evalUi cfn
+    serverState . uiElements . ix t . ur . UIElement.name .= n >> evalUi cfn
 
 evalUi (SetHigh t v cfn) =
-    inner . uiElements . ix t . UIElement.knobMax .= v >> evalUi cfn
+    serverState . uiElements . ix t . UIElement.knobMax .= v >> evalUi cfn
 
 evalUi (SetColour t v cfn) =
-    inner . uiElements . ix t . UIElement.dataColour .= v >> evalUi cfn
+    serverState . uiElements . ix t . UIElement.dataColour .= v >> evalUi cfn
 
 evalUi (Mouse cfn) = do
     p <- use mouseLoc
@@ -293,7 +302,7 @@ evalUi (Args cfn) = do
 -}
 
 evalUi (GetValue s1 cfn) = do
-    elts <- use (inner . uiElements)
+    elts <- use (serverState . uiElements)
     let a = case M.lookup s1 elts of
             Nothing -> error "No value"
             Just e  -> UIElement._setting (e::UIElement)
@@ -305,8 +314,8 @@ evalUi (GetType s1 cfn) = do
 
 -- Is this right? XXX
 evalUi (GetParent s1 cfn) = do
-    elts <- use (inner . uiElements)
-    root <- use rootPlane
+    elts <- use (serverState . uiElements)
+    root <- use (planeInfo . rootPlane)
     if s1 == root
         then evalUi (cfn (Inside root))
         else let a = case M.lookup s1 elts of
@@ -315,7 +324,7 @@ evalUi (GetParent s1 cfn) = do
              in evalUi (cfn a)
 
 evalUi (GetRoot cfn) = do
-    root <- use rootPlane
+    root <- use (planeInfo . rootPlane)
     evalUi (cfn (root::UiId))
 
 {-
@@ -335,7 +344,7 @@ evalUi (Parent s1 s2 cfn) =
     T.reparent s1 s2 >> evalUi cfn
 
 evalUi (Rename namedTo toBeNamed cfn) =
-    inner . uiElements . ix toBeNamed . displayName .= namedTo >> evalUi cfn
+    serverState . uiElements . ix toBeNamed . displayName .= namedTo >> evalUi cfn
 
 evalUi (Unparent s1 cfn) =
     T.unparent s1 >> evalUi cfn
@@ -355,7 +364,7 @@ evalUi (NewId s1 cfn) = do
     newN <- use newName
     newName %= (+ 1)
     let n = UiId (s1 ++ show newN)
-    elts <- use (inner . uiElements)
+    elts <- use (serverState . uiElements)
     evalUi $ if n `M.member` elts
         then NewId s1 cfn
         else cfn n
@@ -369,15 +378,15 @@ evalUi (Bind c t cfn) =
     keyMatcher %= addKey (interpretKeys c) t >> evalUi cfn
 
 evalUi (Move c p cfn) =
-    inner . uiElements . ix c . ur . loc .= p >> evalUi cfn
+    serverState . uiElements . ix c . ur . loc .= p >> evalUi cfn
 
 evalUi (GetName c cfn) = do
-    elts <- use (inner . uiElements)
+    elts <- use (serverState . uiElements)
     evalUi (cfn (_name . _ur <$> M.lookup c elts))
 
 -- Not everything has a colour XXX
 evalUi (GetColour c cfn) = do
-    elts <- use (inner . uiElements)
+    elts <- use (serverState . uiElements)
     evalUi (cfn (_dataColour <$> M.lookup c elts))
 
 evalUi (Location c cfn) = do
@@ -385,5 +394,27 @@ evalUi (Location c cfn) = do
     evalUi (cfn (elt ^. ur . loc))
 
 evalUi (Input prompt cfn) = do
-    inp <- getInput "" prompt
+    inp <- getInput "" [] prompt
     evalUi (cfn inp)
+
+-- Supply list of filenames
+evalUi (InputFile prompt directory cfn) = do
+    filenames <- liftIO $ getDirectoryContents directory
+    inp <- getInput "" filenames prompt
+    evalUi (cfn inp)
+
+evalUi (GetCableSource destId cfn) = do
+    src <- cableSrc destId
+    evalUi (cfn src)
+
+evalUi (Alias aliasName synthName cfn) = do
+    synthAlias aliasName synthName
+    evalUi cfn
+
+evalUi (UnAlias aliasName cfn) = do
+    synthUnAlias aliasName
+    evalUi cfn
+
+evalUi (SetOutput i cfn) = do
+    outputId .= i
+    evalUi cfn

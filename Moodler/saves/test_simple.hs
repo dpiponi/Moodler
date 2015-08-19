@@ -13,6 +13,7 @@ do
     let trigger = "trigger"
     container14 <- container' "panel_out.png" (444.0,24.0) (Inside root)
     in15 <- plugin' (out ! "value") (420.0,24.0) (Outside container14)
+    setOutput in15
     setColour in15 "#sample"
     container16 <- container' "panel_3x1.png" (132.0,-60.0) (Inside root)
     in17 <- plugin' (audio_sin0 ! "freq") (111.0,-35.0) (Outside container16)

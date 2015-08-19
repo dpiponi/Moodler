@@ -1,6 +1,5 @@
 -- Set selected knobs to given value
 do
-    plane <- currentPlane
     knobs <- selection
     value <- input "value: "
     case value of
@@ -13,5 +12,5 @@ do
                     forM_ knobs $ \k -> do
                         t <- getType k
                         case t of
-                            KnobType -> set k v
+                            KnobType -> void $ set k v
                             _ -> return ()

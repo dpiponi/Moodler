@@ -721,6 +721,7 @@ do
     setColour out98 "#control"
     container99 <- container' "panel_out.png" (444.0,24.0) (Inside root)
     in100 <- plugin' (out ! "value") (420.0,24.0) (Outside container99)
+    setOutput in100
     setColour in100 "#sample"
     cable out119 in103
     cable out118 in104

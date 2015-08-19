@@ -72,7 +72,7 @@ synthPreamble panelName synthName topOffset = do
 
 genScriptPlugs :: String -> String -> Int -> Int -> [(CDecl, String)] -> Writer String ()
 genScriptPlugs name command xoffset outOffset outs =
-    forM_ (zip [outOffset, outOffset+50 ..] outs) $
+    forM_ (zip [outOffset, outOffset+48 ..] outs) $
                                 \(offset, (outputType, eachOutput)) -> do
          tellInd 4 $ unwords
                 [ name, "<-", command, "(name ++ ",
@@ -83,23 +83,33 @@ genScriptPlugs name command xoffset outOffset outs =
          F.forM_ outCol $ \col ->
              tellInd 4 $ unwords [ "setColour", name, show col]
 
+panelDetails :: Int -> (String, Int)
+panelDetails height
+    | height >= 13 = ("panel_9x1.png", 9)
+    | height >= 12 = ("panel_8x1.png", 8)
+    | height >= 10 = ("panel_7x1.png", 7)
+    | height >= 8 = ("panel_6x1.png", 6)
+    | height >= 7 = ("panel_5x1.png", 5)
+    | height >= 5 = ("panel_4x1.png", 4)
+    | height >= 3 = ("panel_3x1.png", 3)
+    | height >= 2 = ("panel_2x1.png", 2)
+    | otherwise = ("panel_1x1.png", 1)
+
 -- Auto-generate UI script for a .msl module
 synthScript :: String -> [(CDecl, InName)] -> [(CDecl, OutName)] -> String
 synthScript synthName ins outs = do
     let numIns = length ins
     let numOuts = length outs
     let height = max numIns numOuts
-    let inOffset = -25*numIns+25
-    let outOffset = -25*numOuts+25
-    let topOffset = (-25, 75 :: Float)
+    let (panelName, panelHeight) = panelDetails height
+    let inOffset = -24*numIns+24
+    let outOffset = -24*numOuts+24
+    let topOffset = (-36, fromIntegral (36*panelHeight+12) :: Float)
     -- XXX More sizes
-    let panelName = if height >= 4
-            then "panel_4x1.png"
-            else "panel_3x1.png"
     execWriter $ do
         synthPreamble panelName synthName topOffset
-        genScriptPlugs "inp" "plugin'" (-21) inOffset (map (_2 %~ _getInName) ins)
-        genScriptPlugs "out" "plugout'" 20 outOffset (map (_2 %~ _getOutName) outs)
+        genScriptPlugs "inp" "plugin'" (-24) inOffset (map (_2 %~ _getInName) ins)
+        genScriptPlugs "out" "plugout'" 24 outOffset (map (_2 %~ _getOutName) outs)
         tellInd 4 "recompile"
         tellInd 4 "return ()"
 

@@ -36,5 +36,6 @@ do
     bind "⇧G" "noteG"
     bind "b" "flatten"
     bind "⇧#" "sharpen"
+    bind "⌥/" "splitcable"
     return ()
 
