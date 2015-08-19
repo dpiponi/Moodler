@@ -1,4 +1,5 @@
-module HandleDraggingKnob where
+module HandleDraggingKnob(handleDraggingKnob,
+                          knobGadget) where
 
 import Control.Lens
 import Graphics.Gloss.Interface.IO.Game

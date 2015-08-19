@@ -26,6 +26,7 @@ do
     bind "⇧~" "setpicture"
     bind "⇧⌥F" "bringFront"
     bind "⇧⌥B" "sendBack"
+    bind "⇧\"" "showhidden"
 
     bind "⇧A" "noteA"
     bind "⇧B" "noteB"

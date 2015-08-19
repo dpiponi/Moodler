@@ -1,3 +1,12 @@
+{-|
+Module      : CLens
+Description : A partial Lens interface to the language-c AST type
+Maintainer  : dpiponi@gmail.com
+
+The language-c package doesn't come with lenses to access the fields of ASTs.
+This module provides lenses as needed.
+-}
+
 module CLens where
 
 import Language.C.Syntax.AST

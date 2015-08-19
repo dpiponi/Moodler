@@ -1,6 +1,16 @@
+{-|
+Module      : Command
+Description : Interpreter for plugin DSL
+Maintainer  : dpiponi@gmail.com
+
+The plugin DSL uses an AST build with a free monad. This module provides
+the interpreter.
+-}
+
 {-# LANGUAGE FlexibleContexts #-}
 
-module Command where
+module Command(execScript,
+               evalUi) where
 
 import Control.Applicative
 import Control.Exception
@@ -107,9 +117,12 @@ safeReadFile f =
         let err = show (exception :: IOException)
         return $ Left err
 
+-- | Execute plugin script from a .hs file
 execScript :: (InputHandler m, Functor m, MonadIO m,
                MonadState World m) =>
-               String -> String -> m String
+               String      -- ^ Execute script from this directory...
+               -> String   -- ^ ...called by this name (leaving out the .hs)...
+               -> m String -- ^ ...returning full filename of script
 execScript dir f = do -- use proper dir API XXX
     let fileName = dir ++ "/" ++ f ++ ".hs"
     cmds <- liftIO $ safeReadFile fileName

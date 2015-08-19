@@ -1,6 +1,7 @@
 {-# LANGUAGE Rank2Types, FlexibleContexts #-}
 
-module Save where
+module Save(saveSelection,
+            saveWorld) where
 
 import Control.Applicative
 import Control.Lens
@@ -44,8 +45,10 @@ synthsUsedInItems items = do
     synthsUsed <- mapM synthUsedInItem items
     return $ S.toList $ foldr S.union S.empty synthsUsed
 
+{-
 functionApp :: String -> [String] -> String
 functionApp f xs = unwords (f : xs)
+-}
 
 paren :: String -> String
 paren s = "(" ++ s ++ ")"

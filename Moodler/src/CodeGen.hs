@@ -1,3 +1,15 @@
+{-|
+Module      : CodeGen
+Description : C code generation
+Maintainer  : dpiponi@gmail.com
+
+Generate C code from a Moodler graph.
+This code is painfully verbose.
+It really needs quasiquoting but I believe the existing C quasiquoter
+uses a different AST representation and doesn't support operators like
+sizeof and __attribute__.
+-}
+
 {-# LANGUAGE FlexibleContexts #-}
 
 module CodeGen(gen) where
@@ -23,6 +35,11 @@ import Synth
 import TopologicalSort
 import Utils
 
+-- | There are three types of variable associated with an exec() function
+-- that Moodler cares about:
+-- inputs, outputs and internal state variables
+-- The function 'varsFromNodeType' builds a structure with their names.
+-- XXX This isnt full story. InName... XXX
 varsFromNodeType :: NodeType -> M.Map InName CExpr -> Vars
 varsFromNodeType NodeType { _stateNames = states
                           , _inNames = ins
@@ -44,10 +61,15 @@ execInlined nodeName nodeType connections =
              in fromMaybe [e'] (justStmts e')
     else []
 
--- Call to node_exec()
--- Why are inputNames separated from their connections?
-execCall :: ModuleName -> NodeType -> ModuleTypeName -> [InName] ->
-            M.Map InName Out -> CStat
+-- | Generate call to exec() member of MSL module.
+-- These calls are only made if the exec() function is not labelled
+-- as inline.
+execCall :: ModuleName          -- ^ The name of this module
+            -> NodeType         -- ^ The modules type as specified by the MSL code
+            -> ModuleTypeName   -- ^ The name of the module, ie. the name of the MSL file
+            -> [InName]         -- ^ TODO
+            -> M.Map InName Out -- ^ TODO
+            -> CStat            -- ^ The C statement calling the exec() function
 execCall nodeName nodeType typeName inputNames connections =
     cExpr $ cCall (cVar (cIdent (_getModuleTypeName typeName ++ "_exec")))
                   (map (\inputName ->
@@ -110,7 +132,7 @@ cExprForOut _ _ (Out name' name'') =
         cVar (cIdent "state") `cArrow` cIdent (_getModuleName name')
                               `cDot` cIdent (_getOutName name'')
 
--- The type of the "execute" C function.
+-- | The type of the "exec" C function.
 executeType :: CDerivedDeclr
 executeType =
     CFunDeclr (Right (
@@ -128,7 +150,14 @@ executeFunction stmt =
                     Nothing [] undefNode)
             [] (CCompound [] [CBlockStmt stmt] undefNode) undefNode
 
-mainLoop :: CStat -> CStat
+-- | Builds main audio generating loop.
+mainLoop :: CStat    -- ^ The body of the loop.
+            -> CStat -- ^ The full loop of the form
+                     -- ^ @
+                     -- ^ for (i = 0; i < 256; ++i) {
+                     -- ^     <body>
+                     -- ^ }
+                     -- ^ @
 mainLoop stat = 
     let iIdent = cIdent "i"
         iVar = cVar iIdent
@@ -301,9 +330,12 @@ makeStateTable typeName name entries =
                         Just (CInitList cEntries undefNode), Nothing)]
                        undefNode)
 
--- Create entire C source code unit.
-gen :: String -> Synth -> Module ->
-       Writer String [String]
+-- | Generate entire C module from internal Moodler graph.
+gen :: String                    -- ^ The directory container C header files.
+       -> Synth                  -- ^ The entire synth to generate C code for.
+       -> Module                 -- ^ The module representing the final output.
+       -> Writer String [String] -- ^ Returns list of libraries for linking, writing C code.
+                                 -- as side effect using 'Writer' monad.
 gen currentDirectory synth out' = do
 
     let moduleList = sortBy (compare `on` _moduleNumber) $ M.elems synth

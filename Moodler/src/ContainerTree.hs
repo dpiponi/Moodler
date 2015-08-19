@@ -1,6 +1,27 @@
+{-|
+Module      : ContainerTree
+Description : Deals with tree structure of a synth in UI.
+Maintainer  : dpiponi@gmail.com
+
+Maintains tree structure of a synth in UI. Ensures that when UI
+elements are added, moved or deleted the appropriate links
+are maintained. Also provides method for examining tree.
+-}
+
 {-# LANGUAGE FlexibleContexts #-}
 
-module ContainerTree where
+module ContainerTree(inOrOutParent,
+                     getAllContainerProxyDescendants,
+                     getAllContainerDescendants,
+                     getMinimalParents,
+                     moveElementToPlane,
+                     createdInsideParent,
+                     createdInParent,
+                     checkExists,
+                     findContainer,
+                     unparent,
+                     deleteElement,
+                     reparent) where
 
 import Control.Monad.State
 import Control.Lens hiding (inside, outside)
@@ -19,20 +40,28 @@ import Wiring
 import ServerState
 --import Control.Monad.Morph
 
--- XXX Could be argued that it should be impossible to
--- call checkExists and get False back.
+-- | Check whether a 'UiId' does map to a real UI element.
 checkExists :: (Functor m, MonadState World m) =>
-               UiId -> m Bool
+               UiId      -- ^ The 'UiId' to check
+               -> m Bool -- returns whether or not it exists
 checkExists i = M.member i <$> use (serverState . uiElements)
 
+-- | Ensures a UI element newly created inside a container is inserted into UI tree structure.
 createdInsideParent :: MonadState World m =>
-                   UiId -> UIElement -> UiId -> m ()
+                   UiId         -- ^ The proposed new 'UiId' for the element
+                   -> UIElement -- ^ The UI element itself
+                   -> UiId      -- ^ The parent inside which it is created
+                   -> m ()
 createdInsideParent n e q = do
     serverState . uiElements %= M.insert n e
     assignElementToInside n q
 
+-- | Ensures a UI element newly created outside a container is inserted into UI tree structure.
 createdOutsideParent :: MonadState World m =>
-                   UiId -> UIElement -> UiId -> m ()
+                   UiId         -- ^ The proposed new 'UiId' for the element  
+                   -> UIElement -- ^ The UI element itself                   
+                   -> UiId      -- ^ The parent outside which it is created   
+                   -> m ()
 createdOutsideParent n e q = do
     serverState . uiElements %= M.insert n e
     assignElementToOutside n q
@@ -78,8 +107,8 @@ isContainer i = do
 
 unparent :: MonadState World m => UiId -> m ()
 unparent childId = do
-    currentPlane <- use (planeInfo . planes)
-    reparent (Inside currentPlane) childId
+    thisPlane <- use (planeInfo . planes)
+    reparent (Inside thisPlane) childId
 
 reparent :: MonadState World m => Location -> UiId -> m ()
 reparent (Outside newParentId) childId = do

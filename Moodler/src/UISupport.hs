@@ -1,6 +1,22 @@
 {-# LANGUAGE Rank2Types, FlexibleContexts #-}
 
-module UISupport where
+module UISupport(depthExtent,
+                 bringToFront,
+                 sendToBack,
+                 rootElementsOnPlane,
+                 unhighlightEverything,
+                 doSelection,
+                 selectedByPoint,
+                 getAllScripts,
+                 unhighlightElement,
+                 highlightElement,
+                 everythingInRegion,
+                 getDirection,
+                 isDirection,
+                 unUiAngle,
+                 highlightJust,
+                 makeGroup,
+                 uiAngle) where
 
 import Control.Lens hiding (inside, outside)
 import Control.Monad.State
@@ -73,6 +89,7 @@ sendToBack t = do
     (lo, _) <- depthExtent
     serverState . uiElements . ix t . ur . depth .= (lo-1)
 
+{-
 newUIElement :: MonadState World m => (UiId -> UIElement) -> m UiId
 newUIElement elt = do
     newN <- use newName
@@ -83,6 +100,7 @@ newUIElement elt = do
     doSelection n
     --liftIO $ print $ "newUIElement " ++ unUiId n
     return n
+-}
 
 visitElements' :: MonadState World m =>
                   UiId -> UIElement -> m [UiId]
@@ -137,10 +155,12 @@ selectedByPoint selectionPlane (x, y) = do
         then Nothing
         else Just (head poss)
 
+{-
 newNameLike :: String -> M.Map String a -> String
 newNameLike s m = if s `M.member` m
     then newNameLike (s ++ "'") m
     else s
+-}
 
 {-
 anOut :: UiId -> World -> Bool

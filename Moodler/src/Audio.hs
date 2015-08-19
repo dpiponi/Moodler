@@ -1,6 +1,12 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Audio where
+module Audio(closeAudioPlayer,
+             startAudioPlayer,
+             setFillBuffer,
+             setStateAddress,
+             setNumStates,
+             loadAudioDSO
+             ) where
 
 import Control.Concurrent
 import Control.Monad
@@ -23,13 +29,14 @@ foreign import ccall "dynamic"
   mkSetFillBuffer :: FunPtr (FunPtr() -> IO ()) ->
                              FunPtr() -> IO ()
 
-data AudioPlayer = AudioPlayer {
-                    audioDSO :: DL,
-                    play :: IO (),
-                    setNumStates :: Int -> IO (),
-                    setStateAddress :: Int -> Ptr () -> IO (),
-                    setFillBuffer :: FunPtr () -> IO ()
-                   }
+-- | The 'AudioPlayer' type represents a complete Moodler
+-- graph compiled and loaded as a shared library.
+data AudioPlayer = AudioPlayer { audioDSO :: DL                            -- ^ library as returned by dlopen
+                               , play :: IO ()                             -- ^ function to launch main loop
+                               , setNumStates :: Int -> IO ()              -- ^ set number of voices (one state per voice)
+                               , setStateAddress :: Int -> Ptr () -> IO () -- ^ set address of internal state
+                               , setFillBuffer :: FunPtr () -> IO ()       -- ^ set address of function to fill buffer
+                               }
 
 loadAudioDSO :: IO AudioPlayer
 loadAudioDSO = do

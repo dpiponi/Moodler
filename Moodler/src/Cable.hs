@@ -1,12 +1,16 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Cable where
+module Cable(Cable(..),
+             from) where
 
-import Control.Lens
---import Graphics.Gloss.Data.Color
+import Control.Lens hiding (from)
 
 import Sound.MoodlerLib.Symbols
 
-newtype Cable = Cable { _from :: UiId } deriving (Eq, Ord, Show, Read)
+-- | The 'Cable' type represents a cable into an In.
+-- There is no need to store the In as the cable is stored in
+-- a list field within it.
+newtype Cable = Cable { _from :: UiId -- ^ the Out the cable starts at
+                      } deriving (Eq, Ord, Show, Read)
 
 $(makeLenses ''Cable)

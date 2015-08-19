@@ -1,6 +1,10 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module HandleEvent where
+module HandleEvent(elementDisplayName,
+                   hoverGadget,
+                   labelGadget,
+                   selectPointOnCurrent,
+                   handleDefault) where
 
 import Control.Lens hiding (setting)
 import Control.Monad.State

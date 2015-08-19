@@ -113,3 +113,22 @@ isPlane _ = False
 isProxy :: UIElement -> Bool
 --isProxy Proxy {} = True
 isProxy _ = False
+
+rootUr :: UrElement
+rootUr = UrElement { _parent = error "Root parent shouldn't be visible"
+                    , _highlighted = False
+                    , _depth = 0
+                    , _hidden = False
+                    , _loc = (0, 0)
+                    , _name = "root"
+                    }
+
+rootContainer :: UIElement
+rootContainer = 
+    Container { _ur = rootUr
+              , _inside = S.empty
+              , _outside = S.empty
+              , _pic = "panel_proxy.png"
+              , _imageWidth = 40
+              , _imageHeight = 40
+              }
