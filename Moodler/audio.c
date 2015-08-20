@@ -6,7 +6,7 @@
  * I consider a single stereo sample to have two values in it.
  */
 
-#define NUM_CHANNELS 2
+#define NUM_CHANNELS 2       /* stereo output */
 #define BUFFER_SIZE 2048*NUM_CHANNELS /* bytes */
 #define SAMPLE_TYPE short
 #define SAMPLE_RATE 48000
@@ -96,7 +96,7 @@ void play() {
       fprintf(stderr,"Error: No default output device.\n");
       goto error;
     }
-    outputParameters.channelCount = 2;       /* stereo output */
+    outputParameters.channelCount = NUM_CHANNELS;
     outputParameters.sampleFormat = paInt16; /* 16 bit int output */
     outputParameters.suggestedLatency = Pa_GetDeviceInfo(
          outputParameters.device)->defaultLowOutputLatency;
