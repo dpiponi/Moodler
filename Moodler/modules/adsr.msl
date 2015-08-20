@@ -41,7 +41,8 @@ void exec(in control attack, in control decay, in control sustain, in control re
         if (decay <= 0.0) {
             result = sustain;
         } else {
-            result -= decay_rate;
+            /* result -= decay_rate; */
+            result = sustain+exp(-decay_rate)*(result-sustain);
         }
         if (result < sustain) {
             result = sustain;

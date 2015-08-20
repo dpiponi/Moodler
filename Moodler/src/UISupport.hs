@@ -106,7 +106,7 @@ visitElements' :: MonadState World m =>
                   UiId -> UIElement -> m [UiId]
 visitElements' e elt@Container { _outside = cts } = do
     showHiddenElements <- use showHidden
-    if not showHiddenElements && (elt ^. ur . hidden)
+    if not (elt ^.ur ^. highlighted) && not showHiddenElements && (elt ^. ur . hidden)
         then return []
         else do
             childElements <- forM (S.toList cts) $ \c -> do
@@ -115,7 +115,7 @@ visitElements' e elt@Container { _outside = cts } = do
             return $ concat childElements ++ [e]
 visitElements' e elt = do
     showHiddenElements <- use showHidden
-    return $ if not showHiddenElements && (elt ^. ur . hidden)
+    return $ if not (elt ^. ur ^. highlighted) && not showHiddenElements && (elt ^. ur . hidden)
         then []
         else [e]
     
@@ -132,7 +132,7 @@ visitElementsOnPlane planeId = do
     --elementsToVisit' = map snd thingsAndelementsToVisit
 
     lists <- forM thingsAndelementsToVisit $ \(eltId, elt) ->
-        if showHiddenElements || not (elt ^. ur . hidden)
+        if (elt ^. ur . highlighted) || showHiddenElements || not (elt ^. ur . hidden)
             then visitElements' eltId elt
             else return []
     return $ concat lists

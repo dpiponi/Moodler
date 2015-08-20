@@ -170,9 +170,9 @@ drawUIElement'' :: Bool -> World -> UIElement -> (Picture, Picture)
 drawUIElement'' showingHidden w e =
     -- Don't draw parented elements as they'll get drawn
     -- with parent
-    if _hidden (_ur e) && not showingHidden
-        then mempty
-        else drawUIElement showingHidden w e
+    if not (_hidden (_ur e)) || showingHidden || _highlighted (_ur e)
+        then drawUIElement showingHidden w e
+        else mempty
 
 renderPlaneName :: String -> Picture
 renderPlaneName firstPlane =

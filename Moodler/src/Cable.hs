@@ -1,3 +1,11 @@
+{-|
+Module      : Cable
+Description : The 'Cable' type
+Maintainer  : dpiponi@gmail.com
+
+Defines 'Cable' type.
+-}
+
 {-# LANGUAGE TemplateHaskell #-}
 
 module Cable(Cable(..),
