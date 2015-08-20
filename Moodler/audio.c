@@ -56,9 +56,8 @@ int callback(const void *input,
     /*
      * Clear the audio buffer for filling.
      */
-    for (int k = 0; k < samplesPerBuffer; ++k) {
-        sample_buffer[2*k] = 0;
-        sample_buffer[2*k+1] = 0;
+    for (int k = 0; k < samplesPerBuffer * NUM_CHANNELS; ++k) {
+        sample_buffer[k] = 0;
     }
 
     int j = 0;
@@ -76,9 +75,8 @@ int callback(const void *input,
      * Sum the buffers we computed into the destination buffer
      */
     for (int i = 0; i < numStates; ++i) {
-        for (int k = 0; k < samplesPerBuffer; ++k) {
-            sample_buffer[2*k] += moodler_buffer[i][2*k];
-            sample_buffer[2*k+1] += moodler_buffer[i][2*k+1];
+        for (int k = 0; k < samplesPerBuffer * NUM_CHANNELS; ++k) {
+            sample_buffer[k] += moodler_buffer[i][k];
         }
     }
     return paContinue;
