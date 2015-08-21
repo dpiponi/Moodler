@@ -18,6 +18,8 @@ const int blocksPerBuffer = samplesPerBuffer/samplesPerBlock;
 
 /*
  * These are exported to Haskell
+ * TODO make samplesPerBlock and SAMPLE_RATE accessible to src/CodeGen.hs
+ * (currently they are hard coded in that file)
  */
 void (*fill_buffer)(void *state, SAMPLE_TYPE *);
 int numStates;
@@ -60,12 +62,13 @@ int callback(const void *input,
         sample_buffer[k] = 0;
     }
 
-    int j = 0;
     for (int k = 0; k < blocksPerBuffer; ++k) {
         for (int i = 0; i < numStates; ++i) {
             /*
              * Use ith state structure to fill the kth part
-             * of the ith voice's buffer.
+             * of the ith voice's buffer. The auto-generated c code
+             * only fills samplesPerBlock number of samples for each
+             * state (voice).
              */
             fill_buffer(states[i], moodler_buffer[i]+k*NUM_CHANNELS*samplesPerBlock);
         }
