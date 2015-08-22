@@ -74,8 +74,10 @@ drawUIElement :: Bool -> World -> UIElement -> (Picture, Picture)
 -- Recurse into containers
 drawUIElement showingHidden world
               Container { _outside = c
-                        , _pic = pic'            , _ur = UrElement { _loc = (x, y)
-                        , _highlighted = highlit } , _imageWidth = iw
+                        , _pic = pic'
+                        , _ur = UrElement { _loc = (x, y)
+                                          , _highlighted = highlit }
+                        , _imageWidth = iw
                         , _imageHeight = ih } =
         let x' = case M.lookup pic' (world ^. pics) of
                     Just (aPic, _, _) -> aPic

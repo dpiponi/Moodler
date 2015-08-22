@@ -10,7 +10,8 @@ the interpreter.
 {-# LANGUAGE FlexibleContexts #-}
 
 module Command(execScript,
-               evalUi) where
+               evalUi,
+               getPic) where
 
 import Control.Applicative
 import Control.Exception
