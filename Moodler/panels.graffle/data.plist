@@ -2103,7 +2103,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2015-08-22 19:04:06 +0000</string>
+	<string>2015-08-22 20:26:32 +0000</string>
 	<key>Modifier</key>
 	<string>Dan Piponi</string>
 	<key>NotesVisible</key>
@@ -3497,6 +3497,8 @@
 					<string>YES</string>
 					<key>Offset</key>
 					<string>{0.26315789473684209, 0}</string>
+					<key>StretchImage</key>
+					<true/>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -3786,8 +3788,6 @@
 					<real>0.99999999999999933</real>
 					<key>ScaleY</key>
 					<real>1</real>
-					<key>StretchImage</key>
-					<true/>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -4669,8 +4669,6 @@ In}</string>
 					<string>YES</string>
 					<key>Offset</key>
 					<string>{0.26315789473684209, 0}</string>
-					<key>StretchImage</key>
-					<true/>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -5060,6 +5058,8 @@ In}</string>
 					<real>0.99999999999999933</real>
 					<key>ScaleY</key>
 					<real>1</real>
+					<key>StretchImage</key>
+					<true/>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -5941,8 +5941,6 @@ In}</string>
 					<string>YES</string>
 					<key>Offset</key>
 					<string>{0.26315789473684209, 0}</string>
-					<key>StretchImage</key>
-					<true/>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -6132,6 +6130,8 @@ In}</string>
 					<real>0.99999999999999944</real>
 					<key>ScaleY</key>
 					<real>1</real>
+					<key>StretchImage</key>
+					<true/>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -7017,6 +7017,8 @@ In}</string>
 					<real>0.99999999999999922</real>
 					<key>ScaleY</key>
 					<real>1</real>
+					<key>StretchImage</key>
+					<true/>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -7406,8 +7408,6 @@ In}</string>
 					<real>0.99999999999999933</real>
 					<key>ScaleY</key>
 					<real>1</real>
-					<key>StretchImage</key>
-					<true/>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -8240,8 +8240,6 @@ Out}</string>
 					<real>0.99999999999999922</real>
 					<key>ScaleY</key>
 					<real>1</real>
-					<key>StretchImage</key>
-					<true/>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -8531,6 +8529,8 @@ Out}</string>
 					<real>0.99999999999999933</real>
 					<key>ScaleY</key>
 					<real>1</real>
+					<key>StretchImage</key>
+					<true/>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -9363,6 +9363,8 @@ Out}</string>
 					<real>0.99999999999999922</real>
 					<key>ScaleY</key>
 					<real>1</real>
+					<key>StretchImage</key>
+					<true/>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -9552,8 +9554,6 @@ Out}</string>
 					<real>0.99999999999999933</real>
 					<key>ScaleY</key>
 					<real>1</real>
-					<key>StretchImage</key>
-					<true/>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -50319,6 +50319,8 @@ Modular}</string>
 					<real>0.66836596588442387</real>
 					<key>Scale</key>
 					<real>0.19999999552965164</real>
+					<key>StretchImage</key>
+					<true/>
 					<key>Style</key>
 					<dict>
 						<key>shadow</key>
@@ -65909,6 +65911,172 @@ Modular}</string>
 			<array>
 				<dict>
 					<key>Bounds</key>
+					<string>{{72, 72}, {360, 42}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FontInfo</key>
+					<dict>
+						<key>Font</key>
+						<string>CourierNewPSMT</string>
+						<key>Size</key>
+						<real>36</real>
+					</dict>
+					<key>ID</key>
+					<integer>693</integer>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Color</key>
+							<dict>
+								<key>a</key>
+								<string>0.75</string>
+								<key>b</key>
+								<string>0.136405</string>
+								<key>g</key>
+								<string>0.136405</string>
+								<key>r</key>
+								<string>0.136405</string>
+							</dict>
+							<key>FillType</key>
+							<integer>2</integer>
+							<key>GradientAngle</key>
+							<real>90</real>
+							<key>GradientColor</key>
+							<dict>
+								<key>a</key>
+								<string>0.75</string>
+								<key>b</key>
+								<string>0</string>
+								<key>g</key>
+								<string>0</string>
+								<key>r</key>
+								<string>0</string>
+							</dict>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>CornerRadius</key>
+							<real>8</real>
+							<key>Width</key>
+							<real>2</real>
+						</dict>
+					</dict>
+				</dict>
+			</array>
+			<key>GridInfo</key>
+			<dict>
+				<key>GridSpacing</key>
+				<real>6</real>
+				<key>MajorGridSpacing</key>
+				<integer>12</integer>
+				<key>ShowsGrid</key>
+				<string>YES</string>
+				<key>SnapsToGrid</key>
+				<string>YES</string>
+			</dict>
+			<key>HPages</key>
+			<integer>1</integer>
+			<key>KeepToScale</key>
+			<false/>
+			<key>Layers</key>
+			<array>
+				<dict>
+					<key>Lock</key>
+					<string>NO</string>
+					<key>Name</key>
+					<string>Layer 1</string>
+					<key>Print</key>
+					<string>YES</string>
+					<key>View</key>
+					<string>YES</string>
+				</dict>
+			</array>
+			<key>LayoutInfo</key>
+			<dict>
+				<key>Animate</key>
+				<string>NO</string>
+				<key>circoMinDist</key>
+				<real>18</real>
+				<key>circoSeparation</key>
+				<real>0.0</real>
+				<key>layoutEngine</key>
+				<string>dot</string>
+				<key>neatoLineLength</key>
+				<real>0.20000000298023224</real>
+				<key>neatoSeparation</key>
+				<real>0.0</real>
+				<key>twopiSeparation</key>
+				<real>0.0</real>
+			</dict>
+			<key>Orientation</key>
+			<integer>2</integer>
+			<key>PrintOnePage</key>
+			<false/>
+			<key>RowAlign</key>
+			<integer>1</integer>
+			<key>RowSpacing</key>
+			<real>36</real>
+			<key>SheetTitle</key>
+			<string>panel_plane_xxx</string>
+			<key>UniqueID</key>
+			<integer>104</integer>
+			<key>VPages</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>ActiveLayerIndex</key>
+			<integer>0</integer>
+			<key>AutoAdjust</key>
+			<true/>
+			<key>BackgroundGraphic</key>
+			<dict>
+				<key>Bounds</key>
+				<string>{{0, 0}, {575.99997234344482, 733}}</string>
+				<key>Class</key>
+				<string>SolidGraphic</string>
+				<key>ID</key>
+				<integer>2</integer>
+				<key>Style</key>
+				<dict>
+					<key>fill</key>
+					<dict>
+						<key>Color</key>
+						<dict>
+							<key>b</key>
+							<string>1</string>
+							<key>g</key>
+							<string>0.943455</string>
+							<key>r</key>
+							<string>0.967527</string>
+						</dict>
+					</dict>
+					<key>stroke</key>
+					<dict>
+						<key>Draws</key>
+						<string>NO</string>
+					</dict>
+				</dict>
+			</dict>
+			<key>BaseZoom</key>
+			<integer>0</integer>
+			<key>CanvasOrigin</key>
+			<string>{0, 0}</string>
+			<key>ColumnAlign</key>
+			<integer>1</integer>
+			<key>ColumnSpacing</key>
+			<real>36</real>
+			<key>DisplayScale</key>
+			<string>1 in = 1"</string>
+			<key>GraphicsList</key>
+			<array>
+				<dict>
+					<key>Bounds</key>
 					<string>{{88.5, 192}, {38, 23}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
@@ -66579,6 +66747,8 @@ Modular}</string>
 					<real>0.99999999999999978</real>
 					<key>ScaleY</key>
 					<real>1</real>
+					<key>StretchImage</key>
+					<true/>
 					<key>Style</key>
 					<dict>
 						<key>fill</key>
@@ -80519,7 +80689,7 @@ Modular}</string>
 	<key>WindowInfo</key>
 	<dict>
 		<key>CurrentSheet</key>
-		<integer>59</integer>
+		<integer>79</integer>
 		<key>Expanded_Canvases</key>
 		<array/>
 		<key>Frame</key>
@@ -81047,6 +81217,11 @@ Modular}</string>
 			</array>
 			<array>
 				<string>panel_dragging_knob_xxx</string>
+				<real>2</real>
+				<real>1</real>
+			</array>
+			<array>
+				<string>panel_plane_xxx</string>
 				<real>2</real>
 				<real>1</real>
 			</array>

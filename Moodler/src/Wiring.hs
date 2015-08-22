@@ -236,6 +236,8 @@ synthReset msg = do
     oldCont <- use cont
     oldBindings <- use keyMatcher
     put emptyWorld'
+    void $ getPic "panel_plane.png"
+    void $ getPic "panel_dragging_knob.png"
     ipAddr .= ipAddress
     cont .= oldCont
     keyMatcher .= oldBindings

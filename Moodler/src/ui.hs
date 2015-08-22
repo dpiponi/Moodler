@@ -107,4 +107,6 @@ main = do
                                     (execScript "." "moodlerrc" >> execScript "saves" scr)
         projectFile .= filename
         world'' <- get
+        void $ getPic "panel_plane.png"
+        void $ getPic "panel_dragging_knob.png"
         lift $ when (opts ^. optGUI) $ launchGUI world''

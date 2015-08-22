@@ -10,8 +10,7 @@ the interpreter.
 {-# LANGUAGE FlexibleContexts #-}
 
 module Command(execScript,
-               evalUi,
-               getPic) where
+               evalUi) where
 
 import Control.Applicative
 import Control.Exception
@@ -37,9 +36,6 @@ import World
 import UISupport
 import qualified ContainerTree as T
 import qualified Box as B
-import Graphics.Gloss.Juicy
-import Codec.Picture
-import qualified Codec.Picture.Types as P
 import KeyMatcher
 import KeyStrokes
 import ServerState
@@ -54,36 +50,6 @@ doAlert :: (MonadIO m, MonadState World m) =>
 doAlert alt = do
     gadget .= alertGadget alt
     liftIO $ putStrLn alt
-
--- XXX Must be doing this wrong
-imageDimensions :: P.DynamicImage -> (Int, Int)
-imageDimensions (P.ImageY8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageY16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageYF (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageYA8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageYA16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageRGB8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageRGB16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageRGBF (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageRGBA8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageRGBA16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageYCbCr8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageCMYK8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageCMYK16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-
-getPic :: (MonadIO m, MonadState World m) => String -> m (Either String (Int, Int))
-getPic bmpName = do
-    liftIO $ putStrLn $ "Loading: " ++ show bmpName
-    let imageFileName = "assets/" ++ bmpName
-    mImage <- liftIO $ readImage imageFileName
-    case mImage of
-        Right image'' -> do
-                let bmp = image''
-                let Just b = fromDynamicImage bmp
-                let (width, height) = imageDimensions bmp
-                pics %= M.insert bmpName (b, width, height)
-                return $ Right (width, height)
-        Left e -> return $ Left ("\"" ++ imageFileName ++ "\" didn't load: " ++ e)
 
 commandImportList :: [String]
 commandImportList = 

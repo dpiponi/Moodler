@@ -176,10 +176,9 @@ drawUIElement'' showingHidden w e =
         then drawUIElement showingHidden w e
         else mempty
 
-renderPlaneName :: String -> Picture
-renderPlaneName firstPlane =
-    translate (-550) 300 $ B.textInBox (B.transparentBlack 0.8)
-                                       white firstPlane
+renderPlaneName :: Picture -> String -> Picture
+renderPlaneName panel firstPlane =
+    translate (-400) 370 $ panel <> write (-170, -10) 0.25 white firstPlane
 
 renderWorld :: World -> IO Picture
 renderWorld w@World { _planeInfo  = PlaneInfo { _rootTransform = rootXform }
@@ -202,7 +201,12 @@ renderWorld w@World { _planeInfo  = PlaneInfo { _rootTransform = rootXform }
         firstPlane <- getElementById "Draw.hs" wplanes
         gadgetPicture <- use gadget
 
+        let updatedPics = w ^. pics
+        let knobPanel = case M.lookup "panel_plane.png" updatedPics of
+                            Just (panel, _, _) -> panel
+                            Nothing -> error "No pic!"
+
         return $ pictureTransformer rootXform (
                      mconcat elems' <>
-                     renderPlaneName (_name (_ur firstPlane))) <>
+                     renderPlaneName knobPanel (_name (_ur firstPlane))) <>
                  gadgetPicture rootXform

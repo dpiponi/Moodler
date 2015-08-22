@@ -21,7 +21,6 @@ import qualified Wiring as W
 import Music
 import Numeric
 import Box hiding (translate)
-import Command
 
 handleDraggingKnob :: UiId -> Float -> Point -> Event ->
                       MoodlerM Event
@@ -58,9 +57,11 @@ handleDraggingKnob selectedKnob startValue p0 =
 makeKnobGadget :: (Float, Float) -> Float
                   -> MoodlerM (B.Transform -> Picture)
 makeKnobGadget a b = do
+{-
         currentPics <- use pics
         unless ("panel_dragging_knob.png" `M.member` currentPics) $
                                 void $ getPic "panel_dragging_knob.png"
+                                -}
         updatedPics <- use pics
         let knobPanel = case M.lookup "panel_dragging_knob.png" updatedPics of
                             Just (panel, _, _) -> panel
