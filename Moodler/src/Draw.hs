@@ -202,11 +202,11 @@ renderWorld w@World { _planeInfo  = PlaneInfo { _rootTransform = rootXform }
         gadgetPicture <- use gadget
 
         let updatedPics = w ^. pics
-        let knobPanel = case M.lookup "panel_plane.png" updatedPics of
+        let planePanel = case M.lookup "panel_plane.png" updatedPics of
                             Just (panel, _, _) -> panel
                             Nothing -> error "No pic!"
 
         return $ pictureTransformer rootXform (
                      mconcat elems' <>
-                     renderPlaneName knobPanel (_name (_ur firstPlane))) <>
+                     renderPlaneName planePanel (_name (_ur firstPlane))) <>
                  gadgetPicture rootXform

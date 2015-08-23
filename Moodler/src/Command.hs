@@ -202,7 +202,7 @@ evalUi (U.Container n bmpName p creationPlane cfn) = do
     maybePic <- getPic bmpName
     case maybePic of
         Right (width, height) -> do
-            let e = UIElement.Container { _ur = UrElement creationPlane False (hi+1) False p bmpName
+            let e = UIElement.Container { _ur = UrElement creationPlane False (hi+1) False p (unUiId n)
                                         , _pic = bmpName
                                         , _imageWidth = width
                                         , _imageHeight = height
@@ -357,6 +357,7 @@ evalUi (Selection cfn) = do
 evalUi (Bind c t cfn) =
     keyMatcher %= addKey (interpretKeys c) t >> evalUi cfn
 
+-- Deprecate? XXX
 evalUi (Move c p cfn) =
     serverState . uiElements . ix c . ur . loc .= p >> evalUi cfn
 
