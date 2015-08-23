@@ -89,6 +89,12 @@ int callback(const void *input,
      */
     for (int i = 0; i < numStates; ++i) {
         for (int k = 0; k < samplesPerBuffer * NUM_CHANNELS; ++k) {
+            // XXX I think this could be a mistake, we are summing
+            // values which have already been normalized, so it is
+            // likely that we will overflow right ? Also I read that
+            // there is no + operator for short in c ! It might be
+            // better to have the voice audio come back as double
+            // and for us to convert at the last minute to short.
             sample_buffer[k] += moodler_buffer[i][k];
         }
     }
