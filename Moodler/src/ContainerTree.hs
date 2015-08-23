@@ -13,6 +13,7 @@ are maintained. Also provides method for examining tree.
 module ContainerTree(inOrOutParent,
                      getAllContainerProxyDescendants,
                      getAllContainerDescendants,
+                     getAllContainers,
                      getMinimalParents,
                      moveElementToPlane,
                      createdInsideParent,
@@ -92,18 +93,25 @@ deleteElement :: (Functor m, MonadIO m,
                  MonadState World m) => UiId -> m ()
 deleteElement t = do
     removeAllCablesFrom t
-    elt <- getElementById "UISupport.hs" t
+    elt <- getElementById "deleteElement" t
     withContaining elt $ \ids -> mapM_ deleteElement (S.toList ids)
     removeFromParent t
     serverState . uiElements %= M.delete t
     currentSelection %= L.delete t
 
-isContainer :: UiId -> MoodlerM Bool
-isContainer i = do
-    elt <- getElementById "UISupport.hs" i
-    return $ case elt of
+isContainer :: UIElement -> Bool
+isContainer elt =
+    case elt of
         Container {} -> True
         _ -> False
+
+isContainerM :: UiId -> MoodlerM Bool
+isContainerM i =
+    isContainer <$> getElementById "isContainerM" i
+
+getAllContainers :: MoodlerM [UiId]
+getAllContainers =
+    (M.keys . M.filter isContainer) <$> use (serverState . uiElements)
 
 unparent :: MonadState World m => UiId -> m ()
 unparent childId = do
@@ -181,7 +189,7 @@ getMinimalParents everything sel = do
 -- Assumes there is precisely one. XXX
 findContainer :: [UiId] -> MoodlerM (Maybe (UiId, [UiId]))
 findContainer es = do
-    (a, b) <- partitionM isContainer es
+    (a, b) <- partitionM isContainerM es
     case a of
         [a'] -> return $ Just (a', b)
         _ -> return Nothing

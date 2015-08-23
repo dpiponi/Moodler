@@ -14,6 +14,7 @@
     * Write script/binding to change outputId
     * Maybe make outputId list to deal with deletes
     * Use getMinimalParents when moving between planes
+    * relocate should use completion. getAllContainers does exist now.
 
 * moodler
     * local enums?
