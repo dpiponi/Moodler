@@ -118,6 +118,17 @@ upKey key _ setSynth = do
                         [] -> lift $ setSynth 0 (fromJust $ _keySynth currentKey) key
                         dormant : _ -> reinstate setSynth currentKey dormant
 
+allUp :: (Ord a, Show a) => (Float -> Int -> a -> IO ()) ->
+                            StateT (KeyTracker a) IO ()
+allUp setSynth = do
+    actives <- use active
+    trackerClock %= (1 +)
+    forM_ (S.toList actives) $ \currentKey -> do
+        kdelete currentKey
+        case _keySynth currentKey of
+            Nothing -> return ()
+            Just synth -> lift $ setSynth 0 synth (_keyName currentKey)
+
 {-
 test :: IO ()
 test = do

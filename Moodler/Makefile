@@ -1,8 +1,11 @@
 PORTAUDIO_CFLAGS=-I$(PORTAUDIO_DIR)/include -L$(PORTAUDIO_DIR)/lib
 
-all: audio.so moodler_lib.o delay_line.o delay_int_line.o reverb.o hilbert.o progression.o audio_square.o band_limited.o audio_sin.o ladder.o
+all: audio.so moodler_lib.o delay_line.o delay_int_line.o reverb.o hilbert.o progression.o audio_square.o band_limited.o audio_sin.o ladder.o cbridge
 
 #Bridge
+
+cbridge: cbridge.c
+	clang -o cbridge cbridge.c -framework CoreMIDI -framework CoreServices -I/Users/dan/local/include -L/Users/dan/local/lib -llo
 
 audio.so: audio.c
 	cc $(PORTAUDIO_CFLAGS) -O3 -shared -o audio.so audio.c -lportaudio

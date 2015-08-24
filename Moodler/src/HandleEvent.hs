@@ -1,6 +1,10 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module HandleEvent where
+module HandleEvent(elementDisplayName,
+                   hoverGadget,
+                   labelGadget,
+                   selectPointOnCurrent,
+                   handleDefault) where
 
 import Control.Lens hiding (setting)
 import Control.Monad.State
@@ -44,21 +48,6 @@ import HandleDraggingKnob
 import HandleDraggingRegion
 import HandleListen
 import Box hiding (translate)
-
-clickOnIn' :: Point -> UiId -> MoodlerM Zero
-clickOnIn' p i = do
-    W.undoPoint
-    d <- W.deleteCable i
-    W.synthRecompile "click on In"
-    case d of
-        Nothing -> getEvent >>= handleDefault
---         Nothing -> do
---             doSelection i
---             handleDraggingSelection getEvent >>= handleDefault p
-        Just (Cable src) -> do
-            srcElt <- getElementById "clickOnIn'" src
-            gadget .= cableGadget (_loc (_ur srcElt)) p
-            getEvent >>= handleDraggingCable src (_loc (_ur srcElt)) p >>= handleDefault
 
 elementDisplayName :: UIElement -> String
 elementDisplayName In { _displayName = n} = n
@@ -150,6 +139,7 @@ handleDefault (EventKey (Char 'l') Down _ _) = do
 handleDefault (EventKey (Char 's') Down Modifiers { alt = Down, shift = Up, ctrl = Up } _) = do
     allSaves <- liftIO $ getAllScripts "saves"
     filename <- handleGetString allSaves fnil "save: "
+    liftIO $ print $ "Saving as " ++ show filename
     case filename of
         Just "" -> do
             fileName' <- use projectFile
@@ -249,7 +239,7 @@ handleDefault (EventKey (MouseButton LeftButton) Down
 
                         In {} -> do
                             W.undoPoint
-                            clickOnIn' p selected
+                            clickOnIn' selected
 
                         Knob { _knobStyle = KnobStyle } -> do
                             highlightJust selected
@@ -280,6 +270,20 @@ handleDefault (EventKey (MouseButton LeftButton) Down
                             handleTextBox selected
 
         Nothing -> getEvent >>= handleDraggingRegion p >>= handleDefault
+    where
+    clickOnIn' :: UiId -> MoodlerM Zero
+    clickOnIn' i = do
+        W.undoPoint
+        d <- W.deleteCable i
+        W.synthRecompile "click on In"
+        case d of
+            Nothing -> do
+                doSelection i
+                getEvent >>= handleDefault
+            Just (Cable src) -> do
+                srcElt <- getElementById "clickOnIn'" src
+                gadget .= cableGadget (_loc (_ur srcElt)) p
+                getEvent >>= handleDraggingCable src (_loc (_ur srcElt)) p >>= handleDefault
 
 handleDefault (EventKey (MouseButton RightButton) Down
     Modifiers {alt = Down, shift = Up, ctrl = Up} p) = do

@@ -1,6 +1,28 @@
+{-|
+Module      : ContainerTree
+Description : Deals with tree structure of a synth in UI.
+Maintainer  : dpiponi@gmail.com
+
+Maintains tree structure of a synth in UI. Ensures that when UI
+elements are added, moved or deleted the appropriate links
+are maintained. Also provides method for examining tree.
+-}
+
 {-# LANGUAGE FlexibleContexts #-}
 
-module ContainerTree where
+module ContainerTree(inOrOutParent,
+                     getAllContainerProxyDescendants,
+                     getAllContainerDescendants,
+                     getAllContainers,
+                     getMinimalParents,
+                     moveElementToPlane,
+                     createdInsideParent,
+                     createdInParent,
+                     checkExists,
+                     findContainer,
+                     unparent,
+                     deleteElement,
+                     reparent) where
 
 import Control.Monad.State
 import Control.Lens hiding (inside, outside)
@@ -19,20 +41,28 @@ import Wiring
 import ServerState
 --import Control.Monad.Morph
 
--- XXX Could be argued that it should be impossible to
--- call checkExists and get False back.
+-- | Check whether a 'UiId' does map to a real UI element.
 checkExists :: (Functor m, MonadState World m) =>
-               UiId -> m Bool
+               UiId      -- ^ The 'UiId' to check
+               -> m Bool -- returns whether or not it exists
 checkExists i = M.member i <$> use (serverState . uiElements)
 
+-- | Ensures a UI element newly created inside a container is inserted into UI tree structure.
 createdInsideParent :: MonadState World m =>
-                   UiId -> UIElement -> UiId -> m ()
+                   UiId         -- ^ The proposed new 'UiId' for the element
+                   -> UIElement -- ^ The UI element itself
+                   -> UiId      -- ^ The parent inside which it is created
+                   -> m ()
 createdInsideParent n e q = do
     serverState . uiElements %= M.insert n e
     assignElementToInside n q
 
+-- | Ensures a UI element newly created outside a container is inserted into UI tree structure.
 createdOutsideParent :: MonadState World m =>
-                   UiId -> UIElement -> UiId -> m ()
+                   UiId         -- ^ The proposed new 'UiId' for the element  
+                   -> UIElement -- ^ The UI element itself                   
+                   -> UiId      -- ^ The parent outside which it is created   
+                   -> m ()
 createdOutsideParent n e q = do
     serverState . uiElements %= M.insert n e
     assignElementToOutside n q
@@ -63,23 +93,30 @@ deleteElement :: (Functor m, MonadIO m,
                  MonadState World m) => UiId -> m ()
 deleteElement t = do
     removeAllCablesFrom t
-    elt <- getElementById "UISupport.hs" t
+    elt <- getElementById "deleteElement" t
     withContaining elt $ \ids -> mapM_ deleteElement (S.toList ids)
     removeFromParent t
     serverState . uiElements %= M.delete t
     currentSelection %= L.delete t
 
-isContainer :: UiId -> MoodlerM Bool
-isContainer i = do
-    elt <- getElementById "UISupport.hs" i
-    return $ case elt of
+isContainer :: UIElement -> Bool
+isContainer elt =
+    case elt of
         Container {} -> True
         _ -> False
 
+isContainerM :: UiId -> MoodlerM Bool
+isContainerM i =
+    isContainer <$> getElementById "isContainerM" i
+
+getAllContainers :: MoodlerM [UiId]
+getAllContainers =
+    (M.keys . M.filter isContainer) <$> use (serverState . uiElements)
+
 unparent :: MonadState World m => UiId -> m ()
 unparent childId = do
-    currentPlane <- use (planeInfo . planes)
-    reparent (Inside currentPlane) childId
+    thisPlane <- use (planeInfo . planes)
+    reparent (Inside thisPlane) childId
 
 reparent :: MonadState World m => Location -> UiId -> m ()
 reparent (Outside newParentId) childId = do
@@ -152,7 +189,7 @@ getMinimalParents everything sel = do
 -- Assumes there is precisely one. XXX
 findContainer :: [UiId] -> MoodlerM (Maybe (UiId, [UiId]))
 findContainer es = do
-    (a, b) <- partitionM isContainer es
+    (a, b) <- partitionM isContainerM es
     case a of
         [a'] -> return $ Just (a', b)
         _ -> return Nothing

@@ -1,6 +1,7 @@
 {-# LANGUAGE Rank2Types, FlexibleContexts #-}
 
-module Save where
+module Save(saveSelection,
+            saveWorld) where
 
 import Control.Applicative
 import Control.Lens
@@ -44,8 +45,10 @@ synthsUsedInItems items = do
     synthsUsed <- mapM synthUsedInItem items
     return $ S.toList $ foldr S.union S.empty synthsUsed
 
+{-
 functionApp :: String -> [String] -> String
 functionApp f xs = unwords (f : xs)
+-}
 
 paren :: String -> String
 paren s = "(" ++ s ++ ")"
@@ -253,8 +256,8 @@ codeWorld' everythingSaved synths needsSaving aliasesToSave = do
         --multiTellLn "preamble" 4 "let (x, y) = (0, 0)"
         multiTellLn "preamble" 4 "root <- getRoot"
         multiTellLn "preamble" 4 "let out = \"out\""
-        multiTellLn "preamble" 4 "let keyboard = \"keyboard\""
-        multiTellLn "preamble" 4 "let trigger = \"trigger\""
+        --multiTellLn "preamble" 4 "let keyboard = \"keyboard\""
+        --multiTellLn "preamble" 4 "let trigger = \"trigger\""
 
         sList <- lift $ use (serverState . synthList)
 
@@ -263,17 +266,21 @@ codeWorld' everythingSaved synths needsSaving aliasesToSave = do
             let synthType = unJust ("Don't know synth " ++ show synthName)
                                         maybeSynthType
 
-            if synthName `elem` ["keyboard", "trigger"]
-                then do
-                    multiTellLn "synth" 4 $
-                        unwords ["new", show synthType,
-                                 show synthName]
-                    multiTellLn "synth" 4 $
-                        unwords ["let", synthName, "=", show synthName]
-                else unless (synthName == "out") $
-                     multiTellLn "synth" 4 $
-                        unwords [synthName, "<-", "new'",
-                                 show synthType]
+--             if synthName `elem` ["keyboard", "trigger"]
+--                 then do
+--                     multiTellLn "synth" 4 $
+--                         unwords ["new", show synthType,
+--                                  show synthName]
+--                     multiTellLn "synth" 4 $
+--                         unwords ["let", synthName, "=", show synthName]
+--                 else unless (synthName == "out") $
+--                      multiTellLn "synth" 4 $
+--                         unwords [synthName, "<-", "new'",
+--                                  show synthType]
+
+            unless (synthName == "out") $
+                multiTellLn "synth" 4 $
+                    unwords [synthName, "<-", "new'", show synthType]
 
         outId <- lift $ use outputId
         saveSelection' everythingSaved Nothing needsSaving aliasesToSave (Just outId)

@@ -7,12 +7,13 @@
       will replace it with a cable going right through.
     * Properly integrate oscilloscope
     * Sliders could be better. Do I want sliders?
-    * Ensure panel_proxy.png is loaded when needed
     * Needs to save aliases on 'alt-w' as well as on 'alt-s'
     * Why does background drag fail when zoomed out?
     * Save outputId
     * Write script/binding to change outputId
     * Maybe make outputId list to deal with deletes
+    * Use getMinimalParents when moving between planes
+    * relocate should use completion. getAllContainers does exist now.
 
 * moodler
     * local enums?

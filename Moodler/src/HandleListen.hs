@@ -71,7 +71,9 @@ listenOn elt@In {} =
         _ -> return ()
 
 listenOn elt@Knob {} = do
-    gadget .= knobGadget (elt ^. ur . loc) (unJust "listen" $ elt ^? setting)
+    knobGadget <- makeKnobGadget
+                        (elt ^. ur . loc) (unJust "listen" $ elt ^? setting)
+    gadget .= knobGadget
     handleListenToKnob =<< getEvent
 
 listenOn _ = return ()

@@ -1,3 +1,11 @@
+{-|
+Module      : CGen
+Description : Helpers to generate small fragments of C code.
+Maintainer  : dpiponi@gmail.com
+
+Generate small fragments of C code such as constants and expressions.
+-}
+
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 module CGen where
 
@@ -17,9 +25,13 @@ cCall e f = CCall e f undefNode
 cLNeg :: CExpr -> CExpr
 cLNeg e = CUnary CNegOp e undefNode
 
+-- | Return address of expression.
+-- For example it makes '&a' from 'a'.
 cAddr :: CExpr -> CExpr
 cAddr e = CUnary CAdrOp e undefNode
 
+-- | Return logical and of two expressions.
+-- For example it makes 'a && b' from 'a'.
 cLAnd :: CExpr -> CExpr -> CExpr
 cLAnd e f = CBinary CLndOp e f undefNode
 
@@ -32,18 +44,25 @@ cPlus e f = CBinary CAddOp e f undefNode
 cExpr :: CExpr -> CStat
 cExpr e = CExpr (Just e) undefNode
 
+-- | Return C fragment representing a integer constant.
 intConst :: Integer -> CExpr
 intConst n = CConst (CIntConst (CInteger n DecRepr noFlags) undefNode)
 
+-- | Return C fragment representing a string constant.
 stringConst :: String -> CExpr
 stringConst n = CConst (CStrConst (cString n) undefNode)
 
+-- | Return C fragment representing an identifier.
 cIdent :: String -> Ident
 cIdent n = mkIdent nopos n (Name 0)
 
+-- | Return C fragment for the . (struct member) operator.
+-- Constructs C expressions like a.b
 cDot :: CExpr -> Ident -> CExpr
 cDot e n = CMember e n False undefNode
 
+-- | Return C fragment for the -> (struct member) operator.
+-- Constructs C expressions like a->b
 cArrow :: CExpr -> Ident -> CExpr
 cArrow e n = CMember e n True undefNode
 
@@ -103,6 +122,9 @@ cReturn0 = CReturn Nothing undefNode
 cReturn1 :: CExpr -> CStat
 cReturn1 s = CReturn (Just s) undefNode
 
+-- | Returns C fragment for C offsetof macro.
+-- For gcc and clang it's actually a builtin.
+-- Returns C expressions like offsetof(a,b)
 cOffsetOf :: CDecl -> Ident -> CExpr
 cOffsetOf d i = CBuiltinExpr (CBuiltinOffsetOf d
                                   [CMemberDesig i undefNode]

@@ -12,27 +12,32 @@ import UISupport
 import World
 
 handleDraggingRegion :: Point -> Event -> MoodlerM Event
-handleDraggingRegion start = handleDraggingRegion'
+handleDraggingRegion start e = do
+    restoreHidden <- use showHidden
+    showHidden .= True
+    handleDraggingRegion' restoreHidden e
     where
     -- Mouse motion during region drag
-    handleDraggingRegion' :: Event -> MoodlerM Event
-    handleDraggingRegion' (EventMotion p) = do
+    handleDraggingRegion' :: Bool -> Event -> MoodlerM Event
+    handleDraggingRegion' restoreHidden (EventMotion p) = do
         gadget .= flip pictureTransformer (color black (rect start p))
         selectEverythingInRegion p
-        getEvent >>= handleDraggingRegion'
+        getEvent >>= handleDraggingRegion' restoreHidden
 
     -- Finished dragging
-    handleDraggingRegion' (EventKey (MouseButton LeftButton) Up _ p) = do
+    handleDraggingRegion' restoreHidden (EventKey (MouseButton LeftButton) Up _ p) = do
         if start == p
             then do
                 unhighlightEverything
                 currentSelection .= []
             else selectEverythingInRegion p
         gadget .= const blank
+        showHidden .= restoreHidden
         getEvent
 
     -- Ignore other events
-    handleDraggingRegion' _ = getEvent >>= handleDraggingRegion'
+    handleDraggingRegion' restoreHidden _ =
+        getEvent >>= handleDraggingRegion' restoreHidden
 
     selectEverythingInRegion :: (MonadIO m, MonadState World m) =>
                                 Point -> m ()
@@ -40,6 +45,6 @@ handleDraggingRegion start = handleDraggingRegion'
         selectionPlane <- currentPlane
         s <- everythingInRegion selectionPlane start p2
         currentSelection .= s
-        unhighlightEverything
+--        unhighlightEverything
         forM_ s highlightElement
 

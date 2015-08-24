@@ -74,8 +74,10 @@ drawUIElement :: Bool -> World -> UIElement -> (Picture, Picture)
 -- Recurse into containers
 drawUIElement showingHidden world
               Container { _outside = c
-                        , _pic = pic'            , _ur = UrElement { _loc = (x, y)
-                        , _highlighted = highlit } , _imageWidth = iw
+                        , _pic = pic'
+                        , _ur = UrElement { _loc = (x, y)
+                                          , _highlighted = highlit }
+                        , _imageWidth = iw
                         , _imageHeight = ih } =
         let x' = case M.lookup pic' (world ^. pics) of
                     Just (aPic, _, _) -> aPic
@@ -170,14 +172,13 @@ drawUIElement'' :: Bool -> World -> UIElement -> (Picture, Picture)
 drawUIElement'' showingHidden w e =
     -- Don't draw parented elements as they'll get drawn
     -- with parent
-    if _hidden (_ur e) && not showingHidden
-        then mempty
-        else drawUIElement showingHidden w e
+    if not (_hidden (_ur e)) || showingHidden || _highlighted (_ur e)
+        then drawUIElement showingHidden w e
+        else mempty
 
-renderPlaneName :: String -> Picture
-renderPlaneName firstPlane =
-    translate (-550) 300 $ B.textInBox (B.transparentBlack 0.8)
-                                       white firstPlane
+renderPlaneName :: Picture -> String -> Picture
+renderPlaneName panel firstPlane =
+    translate (-400) 370 $ panel <> write (-170, -10) 0.25 white firstPlane
 
 renderWorld :: World -> IO Picture
 renderWorld w@World { _planeInfo  = PlaneInfo { _rootTransform = rootXform }
@@ -200,7 +201,12 @@ renderWorld w@World { _planeInfo  = PlaneInfo { _rootTransform = rootXform }
         firstPlane <- getElementById "Draw.hs" wplanes
         gadgetPicture <- use gadget
 
+        let updatedPics = w ^. pics
+        let planePanel = case M.lookup "panel_plane.png" updatedPics of
+                            Just (panel, _, _) -> panel
+                            Nothing -> error "No pic!"
+
         return $ pictureTransformer rootXform (
                      mconcat elems' <>
-                     renderPlaneName (_name (_ur firstPlane))) <>
+                     renderPlaneName planePanel (_name (_ur firstPlane))) <>
                  gadgetPicture rootXform

@@ -1,3 +1,12 @@
+{-|
+Module      : Box
+Description : Low level geometry routines.
+Maintainer  : dpiponi@gmail.com
+
+Basic geometry routines such as text rendering and
+point in box tests.
+-}
+
 module Box where
 
 import Data.Monoid
@@ -6,27 +15,48 @@ import Graphics.Gloss.Data.Vector
 
 import Text
 
-type Box = (G.Point, G.Point)
+-- | Basic box type. A box is usually specified as
+-- (lower left corner, upper right corner)
+type Box = ( G.Point, G.Point)
 
-pointWithin :: G.Point -> Box -> Bool
+-- | Test whether a point is in box.
+pointWithin :: G.Point -- ^ Test whether this point...
+               -> Box  -- ^ ...is in this box...
+               -> Bool -- ^ ...returning 'True' if it is.
 pointWithin (x0, y0) ((x1, y1), (x2, y2)) =
     x0 >= x1 && x0 <= x2 && y0 >= y1 && y0 <= y2
 
+-- | Ensure that first element of 'Box' type is lower left corner
+-- and that second element is upper right corner.
 normaliseBox :: Box -> Box
 normaliseBox ((x0, y0), (x1, y1)) =
     ((min x0 x1, min y0 y1), (max x0 x1, max y0 y1))
 
-within :: Box -> Box -> Bool
+-- | Test whether one box is completely contained within another.
+within :: Box     -- ^ Test whether this box...
+          -> Box  -- ^ ...is completely contained in this box...
+          -> Bool -- ^ ...returning 'True' if it is.
 within (p, q) box = pointWithin p box && pointWithin q box
 
+-- | Square a number.
 square :: Num a => a -> a
 square x = x^(2::Int)
 
-pointNear :: Float -> G.Point -> G.Point -> Bool
+-- | Test whether one point is near another.
+pointNear :: Float      -- ^ If within this radius...
+             -> G.Point -- ^ ...of this point...
+             -> G.Point -- ^ ...lies this point...
+             -> Bool    -- ^ ...then return 'True'.
 pointNear r (x0, y0) (x1, y1) =
     square (x0-x1)+square (y0-y1) <= square r
 
-rectToBox :: G.Point -> Int -> Int -> Box
+-- | Gloss sometimes specifies rectanges using a centre point,
+-- a width and a height. The 'rectToBox' function converts
+-- from that format to our 'Box' format.
+rectToBox :: G.Point -- ^ Convert a box with this centre...
+             -> Int  -- ^ ...this width...
+             -> Int  -- ^ ...and this height...
+             -> Box  -- ^ ... to the 'Box' type.
 rectToBox (x, y) w h =
     ((x-0.5*fromIntegral w, y-0.5*fromIntegral h),
      (x+0.5*fromIntegral w, y+0.5*fromIntegral h))
@@ -96,6 +126,8 @@ clamp a b x | x < a = a
             | x > b = b
             | otherwise = x
 
+-- | The 'Transform' type represents a 2D transform that is a
+-- composition of translations and scalings.
 data Transform = Transform { translate :: G.Point
                            , scaling :: Float } deriving Show
 

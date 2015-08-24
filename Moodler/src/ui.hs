@@ -5,21 +5,15 @@ import Control.Monad.State
 import System.Environment
 import Control.Lens
 import Control.Monad.Trans.Free
-import qualified Data.Map as M
-import qualified Data.Set as S
-
-import Sound.MoodlerLib.Symbols
 
 import World
 import Draw
-import UIElement
-import HandleEvent
 import Command
 import Box
-import KeyMatcher
 import ParseUIOpts
-import ServerState
 import WorldSupport
+import Wiring
+import HandleEvent
 
 -- Zero elimination
 magic :: Zero -> a
@@ -68,32 +62,11 @@ eventHandler event@(EventResize _) world@World { _cont = m } =
 simulate :: Float -> World -> IO World
 simulate _ = return
 
-emptyUndo :: ServerState -> UndoInfo
-emptyUndo world = UndoInfo { _serverStateHistory = [world]
-                           , _undoHistory = [([], [])]
-                           , _serverStateFuture = []
-                           , _undoFuture = [([], [])]
-                           }
-
-emptyUr :: UrElement
-emptyUr = UrElement { _parent = error "Root parent shouldn't be visible"
-                    , _highlighted = False
-                    , _depth = 0
-                    , _hidden = False
-                    , _loc = (0, 0)
-                    , _name = "root"
-                    }
-
+{-
 emptyWorld :: World
 emptyWorld = 
-    let root = Container { _ur = emptyUr
-                         , _pic = "panel_proxy.png"
-                         , _imageWidth = 40
-                         , _imageHeight = 40
-                         , _inside = S.empty
-                         , _outside = S.empty }
-        rootID = UiId "root"
-        serverStateWorld = emptyServerState rootID root
+    let rootID = UiId "root"
+        serverStateWorld = emptyServerState rootID rootContainer
     in World { _serverState = serverStateWorld
              , _ipAddr = ""
              , _projectFile = ""
@@ -112,6 +85,7 @@ emptyWorld =
              , _undoInfo = emptyUndo serverStateWorld
              , _outputId = undefined
              }
+-}
 
 launchGUI :: World -> IO ()
 launchGUI world = do
@@ -124,7 +98,7 @@ launchGUI world = do
 main :: IO ()
 main = do
     opts <- parseUIOpts =<< getArgs
-    void $ flip runStateT emptyWorld $ do
+    void $ flip runStateT (emptyWorld' {_cont = Free (GetEvent handleDefault)}) $ do
         ipAddr .= opts ^. optIpAddress
         filename <- case opts ^. optFilename of
                       Nothing -> runWorldMonad
@@ -132,5 +106,9 @@ main = do
                       Just scr -> runWorldMonad
                                     (execScript "." "moodlerrc" >> execScript "saves" scr)
         projectFile .= filename
+        void $ getPic "panel_plane.png"
+        void $ getPic "panel_dragging_knob.png"
+        void $ getPic "panel_proxy.png"
+        liftIO $ print "Starting..."
         world'' <- get
         lift $ when (opts ^. optGUI) $ launchGUI world''

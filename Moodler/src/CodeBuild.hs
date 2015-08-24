@@ -78,7 +78,7 @@ makeDso code linkList =
     --createDirectoryIfMissing False tmpDir
     withSystemTempDirectory
         ("gensrc" ++ show (hash code) ++ ".") $ \tmpDir -> do
-        -- putStrLn code
+        --putStrLn code
         let tmpSrcFile = tmpDir ++ "/gen.c"
         let tmpSoFile = tmpDir ++ "/gen.so"
         writeFile tmpSrcFile code

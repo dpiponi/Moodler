@@ -1,7 +1,16 @@
+{-|
+Module      : OSCRecv
+Description : This module is used by moodler to receive OSC messages
+Maintainer  : dpiponi@gmail.com
+
+Handles individual OSC messages sent to moodler.
+-}
+
 {-# LANGUAGE TemplateHaskell #-}
 -- Receive OSC commands and apply them to current synth.
 
-module OSCRecv where
+module OSCRecv(handleMessage,
+               Moodler(..)) where
 
 import Control.Applicative
 import Control.Lens
@@ -72,26 +81,23 @@ recompile' numVoices dataPtrs set_fill_buffer = do
     liftIO $ set_fill_buffer (dsoExecuteFn newDso)
     modulesPendingInit .= []
 
+-- | Dump generated C source for current synth.
 dumpC :: MonadIO m => ErrorT String (StateT Moodler m) ()
 dumpC = do
     synth <- use moodlerSynth
-    -- XXX ??? Store "out" globally in Moodler
-    let output' = unJust "dumpC" $ M.lookup (ModuleName "out") synth
     currentDirectory <- liftIO getCurrentDirectory
-    let code' = execWriter (gen currentDirectory synth output')
-    liftIO $ putStrLn code'
+    liftIO $ putStrLn $ execWriter $ gen currentDirectory synth $
+                        unJust "dumpC" $ M.lookup (ModuleName "out") synth
 
 reset :: MonadIO m =>
          Synth -> Int -> ErrorT String (StateT Moodler m) ()
 reset theStandard numVoices = do
-    -- Get "out" from Moodler?
-    output <- maybe (throwError "No output") return $ M.lookup (ModuleName "out") theStandard
+    output <- maybe (throwError "reset") return $ M.lookup (ModuleName "out") theStandard
     dso <- hoist liftIO $ makeDSOFromSynth theStandard output
     moodlerDSO .= dso
     moodlerSynth .= theStandard
     modulesPendingInit .= []
     keyTracker .= KeyTracker 0 numVoices S.empty
-    
 
 setKeyboardState :: DSO -> Array Int (Ptr ()) ->
                     Float -> Int -> Int -> IO ()
@@ -140,11 +146,48 @@ addNewModule synthType synthName synthTypes = do
     moodlerSynth .= aNewSynth
     modulesPendingInit %= (synthName :)
 
-handleMessage :: MonadIO m => Synth -> Int -> Array Int (Ptr ()) ->
-                              (FunPtr () -> IO ()) ->
-                              M.Map String NodeType ->
-                              Maybe Message ->
-                              StateT Moodler m ()
+-- | Main OSC message handler for moodler.
+--
+--   Messages include:
+--
+--   [@/input \<name\>@]                  create a new input with given name (eg. for knobs)
+--
+--   [@/reset@]                         reset to default synth
+--
+--   [@/dump@]                          dump currently generated C source
+--
+--   [@/synth \<type\> \<name\>@]           create new synth with given type and name
+--
+--   [@/set \<synth\> \<output\> \<float\>@]  set \<synth\>.\<output\> to given float value
+--
+--   [@/set \<synth\> \<output\> \<string\>@] set \<synth\>.\<output\> to given string value
+--
+--   [@/recompile@]
+--
+--   [@/quit@]
+--
+--   [@/connect@]
+--
+--   [@/disconnect@]
+--
+--   [@/alias@]
+--
+--   [@/unalias@]
+--
+--   [@\/8\/push\<n\>@]
+--
+--   [@\/8\/rotary\<n\>@]
+handleMessage :: MonadIO m => Synth                    -- ^ The synth to use if reset received
+                              -> Int                   -- ^ Current number of voices
+                              -> Array Int (Ptr ())    -- ^ Array of pointers to states
+                              -> (FunPtr () -> IO ())  -- ^ Function to use to set pointer
+                                                       -- to new exec() function if
+                                                       -- recompilation required.
+                              -> M.Map String NodeType -- ^ Mapping from names of synth types
+                                                       -- to internal synth representation.
+                              -> Maybe Message         -- ^ OSC message received
+                              -> StateT Moodler m ()      -- ^ No return value but update Moodler
+                                                       -- state as side effect.
 handleMessage theStandard numVoices dataPtrs set_fill_buffer
               synthTypes msg = do
     --liftIO $ putStrLn $ "received: " ++ show msg
@@ -224,6 +267,14 @@ handleMessage theStandard numVoices dataPtrs set_fill_buffer
                             setKeyboardState dso' dataPtrs
                         else upKey (read ds::Int) v $
                             setKeyboardState dso' dataPtrs
+                keyTracker .= newTracker
+
+            Just (Message "/off" []) -> do
+                --liftIO $ putStrLn $ "Key " ++ ds ++ ": " ++ show v
+                dso' <- use moodlerDSO
+                oldTracker <- use keyTracker
+                newTracker <- liftIO $ flip execStateT oldTracker $
+                        allUp $ setKeyboardState dso' dataPtrs
                 keyTracker .= newTracker
 
             Just (Message ('/':'8':'/':'r':'o':'t':'a':'r':'y':ds)

@@ -1,4 +1,12 @@
-module HandleDraggingCable where
+{-|
+Module      : HandleDraggingCable
+Description : Deals with dragging end of cable.
+Maintainer  : dpiponi@gmail.com
+
+Handles events when user drags end of cable to connect an 'Out' to an 'In'.
+-}
+module HandleDraggingCable(handleDraggingCable,
+                           cableGadget) where
 
 import Control.Lens
 import Graphics.Gloss.Interface.IO.Game

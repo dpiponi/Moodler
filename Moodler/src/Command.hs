@@ -1,6 +1,16 @@
+{-|
+Module      : Command
+Description : Interpreter for plugin DSL
+Maintainer  : dpiponi@gmail.com
+
+The plugin DSL uses an AST build with a free monad. This module provides
+the interpreter.
+-}
+
 {-# LANGUAGE FlexibleContexts #-}
 
-module Command where
+module Command(execScript,
+               evalUi) where
 
 import Control.Applicative
 import Control.Exception
@@ -26,9 +36,6 @@ import World
 import UISupport
 import qualified ContainerTree as T
 import qualified Box as B
-import Graphics.Gloss.Juicy
-import Codec.Picture
-import qualified Codec.Picture.Types as P
 import KeyMatcher
 import KeyStrokes
 import ServerState
@@ -43,36 +50,6 @@ doAlert :: (MonadIO m, MonadState World m) =>
 doAlert alt = do
     gadget .= alertGadget alt
     liftIO $ putStrLn alt
-
--- XXX Must be doing this wrong
-imageDimensions :: P.DynamicImage -> (Int, Int)
-imageDimensions (P.ImageY8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageY16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageYF (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageYA8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageYA16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageRGB8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageRGB16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageRGBF (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageRGBA8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageRGBA16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageYCbCr8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageCMYK8 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-imageDimensions (P.ImageCMYK16 (P.Image { P.imageWidth = w, P.imageHeight = h })) = (w, h)
-
-getPic :: (MonadIO m, MonadState World m) => String -> m (Either String (Int, Int))
-getPic bmpName = do
-    liftIO $ putStrLn $ "Loading: " ++ show bmpName
-    let imageFileName = "assets/" ++ bmpName
-    mImage <- liftIO $ readImage imageFileName
-    case mImage of
-        Right image'' -> do
-                let bmp = image''
-                let Just b = fromDynamicImage bmp
-                let (width, height) = imageDimensions bmp
-                pics %= M.insert bmpName (b, width, height)
-                return $ Right (width, height)
-        Left e -> return $ Left ("\"" ++ imageFileName ++ "\" didn't load: " ++ e)
 
 commandImportList :: [String]
 commandImportList = 
@@ -107,9 +84,12 @@ safeReadFile f =
         let err = show (exception :: IOException)
         return $ Left err
 
+-- | Execute plugin script from a .hs file
 execScript :: (InputHandler m, Functor m, MonadIO m,
                MonadState World m) =>
-               String -> String -> m String
+               String      -- ^ Execute script from this directory...
+               -> String   -- ^ ...called by this name (leaving out the .hs)...
+               -> m String -- ^ ...returning full filename of script
 execScript dir f = do -- use proper dir API XXX
     let fileName = dir ++ "/" ++ f ++ ".hs"
     cmds <- liftIO $ safeReadFile fileName
@@ -222,7 +202,7 @@ evalUi (U.Container n bmpName p creationPlane cfn) = do
     maybePic <- getPic bmpName
     case maybePic of
         Right (width, height) -> do
-            let e = UIElement.Container { _ur = UrElement creationPlane False (hi+1) False p bmpName
+            let e = UIElement.Container { _ur = UrElement creationPlane False (hi+1) False p (unUiId n)
                                         , _pic = bmpName
                                         , _imageWidth = width
                                         , _imageHeight = height
@@ -377,6 +357,7 @@ evalUi (Selection cfn) = do
 evalUi (Bind c t cfn) =
     keyMatcher %= addKey (interpretKeys c) t >> evalUi cfn
 
+-- Deprecate? XXX
 evalUi (Move c p cfn) =
     serverState . uiElements . ix c . ur . loc .= p >> evalUi cfn
 

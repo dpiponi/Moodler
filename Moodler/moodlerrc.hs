@@ -1,7 +1,7 @@
 do
     bind "⌫" "delete"
-    bind "⌥h" "hide"
-    bind "⇧⌥H" "unhide"
+    bind "h" "hide"
+    bind "⇧H" "unhide"
     bind "⇧P" "unparent"
     bind "⇧<" "setmin"
     bind "⇧>" "setmax"
@@ -26,6 +26,7 @@ do
     bind "⇧~" "setpicture"
     bind "⇧⌥F" "bringFront"
     bind "⇧⌥B" "sendBack"
+    bind "⇧\"" "showhidden"
 
     bind "⇧A" "noteA"
     bind "⇧B" "noteB"

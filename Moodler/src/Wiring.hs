@@ -18,7 +18,8 @@ module Wiring(synthConnect,
               undoPoint,
               performUndo, 
               performRedo,
-              cableSrc
+              cableSrc,
+              emptyWorld'
               ) where
 
 import Control.Lens
@@ -26,7 +27,6 @@ import Control.Monad.Trans
 import Control.Monad.State
 import Graphics.Gloss.Interface.IO.Game
 import qualified Data.Map as M
-import qualified Data.Set as S
 import Control.Monad.Trans.Free
 
 import Sound.MoodlerLib.Symbols
@@ -42,20 +42,8 @@ import KeyMatcher
 
 emptyWorld' :: World
 emptyWorld' = 
-    let root = Container { _ur = UrElement { _parent = error "Root parent shouldn't be visible"
-                         , _highlighted = False
-                         , _depth = 0
-                         , _hidden = False
-                         , _loc = (0, 0)
-                         , _name = "root" }
-                         , _inside = S.empty
-                         , _outside = S.empty
-                         , _pic = "panel_proxy.png"
-                         , _imageWidth = 40
-                         , _imageHeight = 40
-                         }
-        rootID = UiId "root"
-        serverStateWorld = emptyServerState rootID root
+    let rootID = UiId "root"
+        serverStateWorld = emptyServerState rootID rootContainer
     in World { _serverState = serverStateWorld
                   , _ipAddr = ""
                   , _projectFile = ""
@@ -71,12 +59,7 @@ emptyWorld' =
                   , _gadget = const blank
                   , _currentSelection = []
                   , _cont = Pure undefined
-                  , _undoInfo = UndoInfo
-                      { _serverStateHistory = [serverStateWorld]
-                      , _undoHistory = [([], [])]
-                      , _serverStateFuture = []
-                      , _undoFuture = [([], [])]
-                  }
+                  , _undoInfo = emptyUndo serverStateWorld
                   , _outputId = undefined
                   }
 
@@ -140,6 +123,7 @@ synthUnAlias aliasName = do
     serverState . aliases %= M.delete aliasName
     sendUnAliasMessage aliasName 
 
+-- Connect src to dst replacing oldSrc as input
 connect :: (MonadState World m, MonadIO m, Functor m) =>
            UiId -> UiId -> UiId -> m ()
 connect src dst oldSrc = do
@@ -252,6 +236,9 @@ synthReset msg = do
     oldCont <- use cont
     oldBindings <- use keyMatcher
     put emptyWorld'
+    void $ getPic "panel_plane.png"
+    void $ getPic "panel_dragging_knob.png"
+    void $ getPic "panel_proxy.png"
     ipAddr .= ipAddress
     cont .= oldCont
     keyMatcher .= oldBindings
@@ -299,7 +286,10 @@ performRedo = do
         mapM_ (\a -> interpretSend a >> liftIO (putStrLn $ "Redoing: " ++ show a)) (reverse redos)
         synthRecompile "redo"
 
-cableSrc :: (MonadIO m, MonadState World m) => UiId -> m (Maybe UiId)
+-- | The 'cableSrc' function gets the source end of a cable from its destination.
+cableSrc :: (MonadIO m, MonadState World m) =>
+            UiId              -- ^ The 'UiId' of the In at the end of the cable.
+            -> m (Maybe UiId) -- ^ Source end of cable, if it exists.
 cableSrc srcId = do
     elt <- getElementById "cableSrc" srcId
     case elt of
