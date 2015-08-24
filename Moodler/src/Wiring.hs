@@ -238,6 +238,7 @@ synthReset msg = do
     put emptyWorld'
     void $ getPic "panel_plane.png"
     void $ getPic "panel_dragging_knob.png"
+    void $ getPic "panel_proxy.png"
     ipAddr .= ipAddress
     cont .= oldCont
     keyMatcher .= oldBindings

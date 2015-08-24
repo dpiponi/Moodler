@@ -108,5 +108,7 @@ main = do
         projectFile .= filename
         void $ getPic "panel_plane.png"
         void $ getPic "panel_dragging_knob.png"
+        void $ getPic "panel_proxy.png"
+        liftIO $ print "Starting..."
         world'' <- get
         lift $ when (opts ^. optGUI) $ launchGUI world''
