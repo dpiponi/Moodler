@@ -14,7 +14,7 @@
 
 void oscilloscope_init(ssize_t);
 
-void setup_gl_stuff();
+void oscilloscope_gl_init();
 
 void set_sample_data(const short *);
 

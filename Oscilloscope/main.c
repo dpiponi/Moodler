@@ -43,7 +43,7 @@ int main(void)
     short buf[NUM_SAMPLES];
 
     oscilloscope_init(NUM_SAMPLES);
-    setup_gl_stuff();
+    oscilloscope_gl_init();
 
     while (!glfwWindowShouldClose(window))
     {

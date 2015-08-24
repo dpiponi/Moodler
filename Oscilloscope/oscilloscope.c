@@ -16,10 +16,7 @@ typedef struct{
 } PlotPoint;
 
 PlotPoint *points;
-ssize_t pointCount;
-//GLuint vbo;
-//GLuint vab;
-GLuint shaderProgram;
+GLsizei pointCount;
 
 // Shader sources
 const GLchar* vertexSource =
@@ -35,20 +32,11 @@ const GLchar* fragmentSource =
 
 
 void oscilloscope_init(ssize_t count){
-    pointCount = count;
+    pointCount = (GLsizei)count;
     points = (PlotPoint *)calloc(sizeof(PlotPoint), pointCount);
 }
 
-void setup_gl_stuff(){
-//    glGenVertexArrays(1, &vab);
-//    glBindVertexArray(vab);
-//    
-//    glGenBuffers(1, &vbo);
-//    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-//    glBufferData(GL_ARRAY_BUFFER,
-//                 pointCount * sizeof(PlotPoint),
-//                 points,
-//                 GL_STREAM_DRAW);
+void oscilloscope_gl_init(){
     
     // Create and compile the vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -61,14 +49,23 @@ void setup_gl_stuff(){
     glCompileShader(fragmentShader);
     
     // Link the vertex and fragment shader into a shader program
-    shaderProgram = glCreateProgram();
+    GLuint shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
-    //glBindFragDataLocation(shaderProgram, 0, "outColor");
     glLinkProgram(shaderProgram);
     glUseProgram(shaderProgram);
 
     glClearColor(0, 0.1, 0, 1.0);
+    
+    // Specify the layout of the point data
+    GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
+    glEnableVertexAttribArray(posAttrib);
+    glVertexAttribPointer(posAttrib,
+                          2,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(PlotPoint),
+                          points);
 }
 
 
@@ -76,35 +73,13 @@ void set_sample_data(const short *data){
 
     int middle = (int)pointCount / 2;
     
-    for (ssize_t i = 0; i < pointCount; i++) {
+    for (GLsizei i = 0; i < pointCount; i++) {
         points[i].x = (i - middle) * 2.0f / (float)pointCount;
-        points[i].y = data[i] / 32768.0;
+        points[i].y = data[i] / 32768.0;  // XXX assumption
     }
-
-//    glBindVertexArray(vab);
-//    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-//    glBufferSubData(GL_ARRAY_BUFFER,
-//                    0,
-//                    pointCount * sizeof(PlotPoint),
-//                    points);
 }
 
 void redraw(){
     glClear(GL_COLOR_BUFFER_BIT);
-    
-    // Specify the layout of the point data
-    GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-    glEnableVertexAttribArray(posAttrib);
-    glVertexAttribPointer(0,
-                          2,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(PlotPoint),
-                          points);
-    
-
-    GLenum mode = GL_LINE_STRIP;
-//    glBindVertexArray(vab);
-//    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glDrawArrays(mode, 0, (GLsizei)pointCount);
+    glDrawArrays(GL_LINE_STRIP, 0, pointCount);
 }
