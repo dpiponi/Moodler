@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "reverb.h"
 #include "moodler_lib.h"
 #include "reverb.h"
 
