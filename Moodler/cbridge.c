@@ -33,13 +33,13 @@ int main(void) {
    MIDIClientRef midiclient;
    MIDIPortRef   midiin;
    OSStatus status;
-   if (status = MIDIClientCreate(CFSTR("TeStInG"), NULL, NULL, &midiclient)) {
+   if ((status = MIDIClientCreate(CFSTR("TeStInG"), NULL, NULL, &midiclient))) {
       printf("Error trying to create MIDI Client structure: %d\n", status);
       printf("%s\n", GetMacOSStatusErrorString(status));
       exit(status);
    }
-   if (status = MIDIInputPortCreate(midiclient, CFSTR("InPuT"), myReadProc, 
-         NULL, &midiin)) {
+   if ((status = MIDIInputPortCreate(midiclient, CFSTR("InPuT"), myReadProc, 
+         NULL, &midiin))) {
       printf("Error trying to create MIDI output port: %d\n", status);
       printf("%s\n", GetMacOSStatusErrorString(status));
       exit(status);
