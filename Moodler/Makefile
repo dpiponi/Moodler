@@ -1,14 +1,24 @@
-PORTAUDIO_CFLAGS=-I$(PORTAUDIO_DIR)/include -L$(PORTAUDIO_DIR)/lib
+# If portaudio and liblo are in a location not typically found by the compiler
+# you can set PORTAUDIO_DIR and LIBLO_DIR in the environment and this makefile
+# will add the correct cflags for you.
 
-all: audio.so moodler_lib.o delay_line.o delay_int_line.o reverb.o hilbert.o progression.o audio_square.o band_limited.o audio_sin.o ladder.o cbridge
+ifdef PORTAUDIO_DIR
+PORTAUDIO_CFLAGS = -I$(PORTAUDIO_DIR)/include -L$(PORTAUDIO_DIR)/lib
+endif
 
-#Bridge
+ifdef LIBLO_DIR
+LIBLO_CFLAGS = -I$(LIBLO_DIR)/include -L$(LIBLO_DIR)/lib
+endif
 
-cbridge: cbridge.c
-	clang -o cbridge cbridge.c -framework CoreMIDI -framework CoreServices -I/Users/dan/local/include -L/Users/dan/local/lib -llo
+TARGETS = audio.so moodler_lib.o delay_line.o delay_int_line.o reverb.o hilbert.o progression.o audio_square.o band_limited.o audio_sin.o ladder.o cbridge
+
+all: $(TARGETS)
 
 audio.so: audio.c
 	cc $(PORTAUDIO_CFLAGS) -O3 -shared -o audio.so audio.c -lportaudio
+
+cbridge: cbridge.c
+	clang $(LIBLO_CFLAGS) -o cbridge cbridge.c -framework CoreMIDI -framework CoreServices -llo
 
 moodler_lib.o: moodler_lib.h moodler_lib.c
 	clang -ffast-math -O3 -c moodler_lib.c
@@ -41,4 +51,4 @@ ladder.o: ladder.h ladder.c
 	clang -ffast-math -O3 -c ladder.c
 
 clean:
-	rm *.o *.so
+	rm -f $(TARGETS)
