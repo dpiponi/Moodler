@@ -1,0 +1,31 @@
+double phase;
+double sin_result;
+double square_result;
+double saw;
+double triangle;
+double last_sync;
+
+void init() {
+    phase = 0.0;
+    last_sync = 0.0;
+}
+
+void exec(in control sync, in control rate,
+          in __attribute((normal(0.5))) control pwm,
+          out control sin_result,
+          out control square_result, out control saw, out control triangle) {
+    sin_result = sin(phase);
+    square_result = square_wave(pwm, phase);
+    saw = saw_wave(phase);
+    triangle = asymmetric_triangle_wave(pwm, phase);
+    phase += 2*M_PI*rate*dt;
+    if (phase >= 2*M_PI) {
+        phase -= 2*M_PI;
+    } else if (phase < 0) {
+        phase += 2*M_PI;
+    }
+    if (last_sync <= 0 && sync > 0) {
+        phase = 0.0;
+    }
+    last_sync = sync;
+}
