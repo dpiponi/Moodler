@@ -38,16 +38,16 @@ int main(void)
     glfwSwapInterval(1);
     glfwSetKeyCallback(window, key_callback);
 
-    ssize_t BUFSIZE = 2048*2; // from Moodler/audio.c
-    ssize_t NUM_SAMPLES = BUFSIZE / sizeof(short);
-    short buf[NUM_SAMPLES];
+    ssize_t MOODLER_BUFFER_SIZE = 8192 * 2; // from Moodler/audio.c
+    ssize_t samplesPerBuffer = MOODLER_BUFFER_SIZE/sizeof(double);
+    short buf[samplesPerBuffer];
 
-    oscilloscope_init(NUM_SAMPLES);
+    oscilloscope_init(samplesPerBuffer);
     oscilloscope_gl_init();
 
     while (!glfwWindowShouldClose(window))
     {
-        receive_audio(buf, BUFSIZE);
+        receive_audio(buf, samplesPerBuffer * sizeof(short));
         set_sample_data(buf);
         redraw();
         
