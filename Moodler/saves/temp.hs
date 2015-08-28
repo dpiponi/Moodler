@@ -2,1034 +2,1240 @@ do
     restart
     root <- getRoot
     let out = "out"
-    audio_saw142 <- new' "audio_saw"
-    audio_saw17 <- new' "audio_saw"
-    audio_saw209 <- new' "audio_saw"
-    audio_saw279 <- new' "audio_saw"
-    audio_saw280 <- new' "audio_saw"
-    audio_saw281 <- new' "audio_saw"
-    audio_saw282 <- new' "audio_saw"
-    audio_saw82 <- new' "audio_saw"
-    audio_sin143 <- new' "audio_sin"
-    audio_sin18 <- new' "audio_sin"
-    audio_sin210 <- new' "audio_sin"
-    audio_sin283 <- new' "audio_sin"
-    audio_sin284 <- new' "audio_sin"
-    audio_sin285 <- new' "audio_sin"
-    audio_sin286 <- new' "audio_sin"
-    audio_sin83 <- new' "audio_sin"
-    audio_square144 <- new' "audio_square"
-    audio_square19 <- new' "audio_square"
-    audio_square211 <- new' "audio_square"
-    audio_square287 <- new' "audio_square"
-    audio_square288 <- new' "audio_square"
-    audio_square289 <- new' "audio_square"
-    audio_square290 <- new' "audio_square"
-    audio_square84 <- new' "audio_square"
-    audio_triangle145 <- new' "audio_triangle"
-    audio_triangle20 <- new' "audio_triangle"
-    audio_triangle212 <- new' "audio_triangle"
-    audio_triangle291 <- new' "audio_triangle"
-    audio_triangle292 <- new' "audio_triangle"
-    audio_triangle293 <- new' "audio_triangle"
-    audio_triangle294 <- new' "audio_triangle"
-    audio_triangle85 <- new' "audio_triangle"
-    id146 <- new' "id"
-    id147 <- new' "id"
-    id148 <- new' "id"
-    id149 <- new' "id"
-    id150 <- new' "id"
-    id151 <- new' "id"
-    id152 <- new' "id"
-    id153 <- new' "id"
-    id21 <- new' "id"
-    id213 <- new' "id"
-    id214 <- new' "id"
-    id215 <- new' "id"
-    id216 <- new' "id"
-    id217 <- new' "id"
-    id218 <- new' "id"
-    id219 <- new' "id"
-    id22 <- new' "id"
-    id220 <- new' "id"
-    id23 <- new' "id"
-    id24 <- new' "id"
-    id25 <- new' "id"
-    id26 <- new' "id"
-    id27 <- new' "id"
-    id28 <- new' "id"
-    id295 <- new' "id"
-    id296 <- new' "id"
-    id297 <- new' "id"
-    id298 <- new' "id"
-    id299 <- new' "id"
-    id300 <- new' "id"
-    id301 <- new' "id"
-    id302 <- new' "id"
-    id303 <- new' "id"
-    id304 <- new' "id"
-    id305 <- new' "id"
-    id306 <- new' "id"
-    id307 <- new' "id"
-    id308 <- new' "id"
-    id309 <- new' "id"
-    id310 <- new' "id"
-    id311 <- new' "id"
-    id312 <- new' "id"
-    id313 <- new' "id"
-    id314 <- new' "id"
-    id315 <- new' "id"
-    id316 <- new' "id"
-    id317 <- new' "id"
-    id318 <- new' "id"
-    id319 <- new' "id"
-    id320 <- new' "id"
-    id321 <- new' "id"
-    id322 <- new' "id"
-    id323 <- new' "id"
-    id324 <- new' "id"
-    id325 <- new' "id"
-    id326 <- new' "id"
-    id86 <- new' "id"
-    id87 <- new' "id"
-    id88 <- new' "id"
-    id89 <- new' "id"
-    id90 <- new' "id"
-    id91 <- new' "id"
-    id92 <- new' "id"
-    id93 <- new' "id"
-    input154 <- new' "input"
-    input155 <- new' "input"
-    input221 <- new' "input"
-    input222 <- new' "input"
-    input29 <- new' "input"
-    input30 <- new' "input"
-    input327 <- new' "input"
-    input328 <- new' "input"
-    input329 <- new' "input"
-    input330 <- new' "input"
-    input331 <- new' "input"
-    input332 <- new' "input"
-    input333 <- new' "input"
-    input334 <- new' "input"
+    let keyboard = "keyboard"
+    let trigger = "trigger"
+    adsr0 <- new' "adsr"
+    audio_id1 <- new' "audio_id"
+    audio_id10 <- new' "audio_id"
+    audio_id11 <- new' "audio_id"
+    audio_id12 <- new' "audio_id"
+    audio_id13 <- new' "audio_id"
+    audio_id14 <- new' "audio_id"
+    audio_id15 <- new' "audio_id"
+    audio_id16 <- new' "audio_id"
+    audio_id17 <- new' "audio_id"
+    audio_id18 <- new' "audio_id"
+    audio_id19 <- new' "audio_id"
+    audio_id2 <- new' "audio_id"
+    audio_id20 <- new' "audio_id"
+    audio_id21 <- new' "audio_id"
+    audio_id22 <- new' "audio_id"
+    audio_id23 <- new' "audio_id"
+    audio_id24 <- new' "audio_id"
+    audio_id25 <- new' "audio_id"
+    audio_id26 <- new' "audio_id"
+    audio_id27 <- new' "audio_id"
+    audio_id3 <- new' "audio_id"
+    audio_id4 <- new' "audio_id"
+    audio_id5 <- new' "audio_id"
+    audio_id6 <- new' "audio_id"
+    audio_id7 <- new' "audio_id"
+    audio_id8 <- new' "audio_id"
+    audio_id9 <- new' "audio_id"
+    audio_saw28 <- new' "audio_saw"
+    audio_sin29 <- new' "audio_sin"
+    audio_square30 <- new' "audio_square"
+    audio_triangle31 <- new' "audio_triangle"
+    butterlp32 <- new' "butterlp"
+    delay_int33 <- new' "delay_int"
+    delay_int34 <- new' "delay_int"
+    delay_int35 <- new' "delay_int"
+    delay_int36 <- new' "delay_int"
+    delay_int37 <- new' "delay_int"
+    delay_int38 <- new' "delay_int"
+    delay_int39 <- new' "delay_int"
+    delay_int40 <- new' "delay_int"
+    delay_int41 <- new' "delay_int"
+    delay_int42 <- new' "delay_int"
+    delay_int43 <- new' "delay_int"
+    delay_int44 <- new' "delay_int"
+    echo45 <- new' "echo"
+    echo46 <- new' "echo"
+    exp_decay47 <- new' "exp_decay"
+    fdn_reverb48 <- new' "fdn_reverb"
+    householder1249 <- new' "householder12"
+    id50 <- new' "id"
+    id51 <- new' "id"
+    id52 <- new' "id"
+    id53 <- new' "id"
+    id54 <- new' "id"
+    id55 <- new' "id"
+    id56 <- new' "id"
+    id57 <- new' "id"
+    id58 <- new' "id"
+    id59 <- new' "id"
+    id60 <- new' "id"
+    id61 <- new' "id"
+    id62 <- new' "id"
+    id63 <- new' "id"
+    id64 <- new' "id"
+    id65 <- new' "id"
+    id66 <- new' "id"
+    id67 <- new' "id"
+    id68 <- new' "id"
+    id69 <- new' "id"
+    id70 <- new' "id"
+    id71 <- new' "id"
+    id72 <- new' "id"
+    id73 <- new' "id"
+    id74 <- new' "id"
+    id75 <- new' "id"
+    id76 <- new' "id"
+    id77 <- new' "id"
+    id78 <- new' "id"
+    id79 <- new' "id"
+    id80 <- new' "id"
+    id81 <- new' "id"
+    id82 <- new' "id"
+    id83 <- new' "id"
+    input100 <- new' "input"
+    input101 <- new' "input"
+    input102 <- new' "input"
+    input103 <- new' "input"
+    input104 <- new' "input"
+    input105 <- new' "input"
+    input106 <- new' "input"
+    input107 <- new' "input"
+    input108 <- new' "input"
+    input109 <- new' "input"
+    input110 <- new' "input"
+    input111 <- new' "input"
+    input112 <- new' "input"
+    input113 <- new' "input"
+    input114 <- new' "input"
+    input115 <- new' "input"
+    input116 <- new' "input"
+    input117 <- new' "input"
+    input118 <- new' "input"
+    input119 <- new' "input"
+    input120 <- new' "input"
+    input84 <- new' "input"
+    input85 <- new' "input"
+    input86 <- new' "input"
+    input87 <- new' "input"
+    input88 <- new' "input"
+    input89 <- new' "input"
+    input90 <- new' "input"
+    input91 <- new' "input"
+    input92 <- new' "input"
+    input93 <- new' "input"
     input94 <- new' "input"
     input95 <- new' "input"
-    sum156 <- new' "sum"
-    sum223 <- new' "sum"
-    sum269 <- new' "sum"
-    sum274 <- new' "sum"
-    sum31 <- new' "sum"
-    sum335 <- new' "sum"
-    sum336 <- new' "sum"
-    sum337 <- new' "sum"
-    sum338 <- new' "sum"
-    sum339 <- new' "sum"
-    sum340 <- new' "sum"
-    sum341 <- new' "sum"
-    sum534 <- new' "sum"
-    sum77 <- new' "sum"
-    sum96 <- new' "sum"
-    switch6 <- new' "switch"
-    container0 <- container' "panel_out.png" (780.0,24.0) (Inside root)
-    plugin1 <- plugin' (out ! "left") (756.0,72.0) (Outside container0)
-    setColour plugin1 "#sample"
-    plugin2 <- plugin' (out ! "value") (756.0,24.0) (Outside container0)
-    setColour plugin2 "#sample"
-    plugin3 <- plugin' (out ! "right") (756.0,-24.0) (Outside container0)
-    setColour plugin3 "#sample"
-    container157 <- container' "panel_vco2.png" (-624.0,-420.0) (Inside root)
-    container158 <- container' "panel_3x1.png" (-443.0,115.0) (Inside container157)
-    container159 <- container' "panel_3x1.png" (-62.0,96.0) (Inside container157)
-    container160 <- container' "panel_3x1.png" (54.0,-33.0) (Inside container157)
-    container161 <- container' "panel_3x1.png" (-319.0,129.0) (Inside container157)
-    container162 <- container' "panel_3x1.png" (-454.0,-125.0) (Inside container157)
-    label163 <- label' "sum" (-468.0,190.0) (Inside container157)
-    label164 <- label' "audio_triangle" (-87.0,171.0) (Inside container157)
-    label165 <- label' "audio_saw" (29.0,42.0) (Inside container157)
-    label166 <- label' "audio_sin" (-344.0,204.0) (Inside container157)
-    label167 <- label' "audio_square" (-479.0,-50.0) (Inside container157)
-    plugin168 <- plugin' (sum156 ! "signal2") (-464.0,90.0) (Inside container157)
-    setColour plugin168 "#sample"
-    plugin169 <- plugin' (sum156 ! "signal1") (-464.0,140.0) (Inside container157)
-    setColour plugin169 "#sample"
-    plugin170 <- plugin' (audio_triangle145 ! "freq") (-83.0,121.0) (Inside container157)
-    setColour plugin170 "#sample"
-    plugin171 <- plugin' (audio_triangle145 ! "sync") (-83.0,71.0) (Inside container157)
+    input96 <- new' "input"
+    input97 <- new' "input"
+    input98 <- new' "input"
+    input99 <- new' "input"
+    new "input" "keyboard"
+    let keyboard = "keyboard"
+    ladder121 <- new' "ladder"
+    lfo122 <- new' "lfo"
+    lfo123 <- new' "lfo"
+    linear_mix124 <- new' "linear_mix"
+    linear_mix125 <- new' "linear_mix"
+    linear_mix126 <- new' "linear_mix"
+    linear_mix127 <- new' "linear_mix"
+    linear_mix128 <- new' "linear_mix"
+    linear_mix129 <- new' "linear_mix"
+    linear_mix130 <- new' "linear_mix"
+    linear_mix131 <- new' "linear_mix"
+    linear_mix132 <- new' "linear_mix"
+    linear_mix133 <- new' "linear_mix"
+    linear_mix134 <- new' "linear_mix"
+    linear_mix135 <- new' "linear_mix"
+    linear_mix136 <- new' "linear_mix"
+    linear_mix137 <- new' "linear_mix"
+    negate138 <- new' "negate"
+    negate139 <- new' "negate"
+    negate140 <- new' "negate"
+    negate141 <- new' "negate"
+    negate142 <- new' "negate"
+    negate143 <- new' "negate"
+    sum12144 <- new' "sum12"
+    sum145 <- new' "sum"
+    sum146 <- new' "sum"
+    new "input" "trigger"
+    let trigger = "trigger"
+    vca147 <- new' "vca"
+    vca148 <- new' "vca"
+    vca149 <- new' "vca"
+    container150 <- container' "panel_keyboard.png" (-1008.0,480.0) (Inside root)
+    plugout151 <- plugout' (keyboard ! "result") (-948.0,504.0) (Outside container150)
+    setColour plugout151 "#control"
+    plugout152 <- plugout' (trigger ! "result") (-948.0,456.0) (Outside container150)
+    setColour plugout152 "#control"
+    container153 <- container' "panel_out.png" (1356.0,-1284.0) (Inside root)
+    plugin154 <- plugin' (out ! "right") (1332.0,-1332.0) (Outside container153)
+    setColour plugin154 "#sample"
+    plugin155 <- plugin' (out ! "left") (1332.0,-1236.0) (Outside container153)
+    setColour plugin155 "#sample"
+    plugin156 <- plugin' (out ! "value") (1332.0,-1284.0) (Outside container153)
+    setOutput plugin156
+    setColour plugin156 "#sample"
+    container157 <- container' "panel_knob.png" (996.0,-1344.0) (Inside root)
+    knob158 <- knob' (input93 ! "result") (984.0,-1344.0) (Outside container157)
+    plugin159 <- plugin' (id61 ! "signal") (984.0,-1344.0) (Outside container157)
+    setColour plugin159 "#control"
+    hide plugin159
+    plugout160 <- plugout' (id61 ! "result") (1020.0,-1344.0) (Outside container157)
+    setColour plugout160 "#control"
+    container161 <- container' "panel_lfo.png" (-2028.0,-1476.0) (Inside root)
+    knob162 <- knob' (input96 ! "result") (-2016.0,-1404.0) (Outside container161)
+    plugin163 <- plugin' (lfo123 ! "sync") (-2016.0,-1452.0) (Outside container161)
+    setColour plugin163 "#control"
+    plugin164 <- plugin' (lfo123 ! "rate") (-2031.0,-1421.0) (Outside container161)
+    setColour plugin164 "#control"
+    hide plugin164
+    plugout165 <- plugout' (lfo123 ! "triangle") (-2040.0,-1596.0) (Outside container161)
+    setColour plugout165 "#control"
+    plugout166 <- plugout' (lfo123 ! "saw") (-1980.0,-1596.0) (Outside container161)
+    setColour plugout166 "#control"
+    plugout167 <- plugout' (lfo123 ! "sin_result") (-2040.0,-1560.0) (Outside container161)
+    setColour plugout167 "#control"
+    plugout168 <- plugout' (lfo123 ! "square_result") (-1980.0,-1560.0) (Outside container161)
+    setColour plugout168 "#control"
+    container169 <- container' "panel_2x1.png" (-312.0,-1956.0) (Inside root)
+    label170 <- label' "delay_int" (-337.0,-1881.0) (Outside container169)
+    plugin171 <- plugin' (delay_int40 ! "signal") (-333.0,-1981.0) (Outside container169)
     setColour plugin171 "#sample"
-    plugin172 <- plugin' (audio_saw142 ! "freq") (33.0,-8.0) (Inside container157)
-    setColour plugin172 "#sample"
-    plugin173 <- plugin' (audio_saw142 ! "sync") (33.0,-58.0) (Inside container157)
-    setColour plugin173 "#sample"
-    plugin174 <- plugin' (audio_sin143 ! "freq") (-340.0,154.0) (Inside container157)
-    setColour plugin174 "#sample"
-    plugin175 <- plugin' (audio_sin143 ! "sync") (-340.0,104.0) (Inside container157)
-    setColour plugin175 "#sample"
-    plugin176 <- plugin' (audio_square144 ! "pwm") (-475.0,-125.0) (Inside container157)
-    setColour plugin176 "#sample"
-    plugin177 <- plugin' (audio_square144 ! "sync") (-475.0,-175.0) (Inside container157)
+    plugin172 <- plugin' (delay_int40 ! "delay") (-333.0,-1931.0) (Outside container169)
+    setColour plugin172 "#control"
+    plugout173 <- plugout' (delay_int40 ! "result") (-292.0,-1956.0) (Outside container169)
+    setColour plugout173 "#sample"
+    container174 <- container' "panel_2x1.png" (-312.0,-1704.0) (Inside root)
+    label175 <- label' "delay_int" (-337.0,-1629.0) (Outside container174)
+    plugin176 <- plugin' (delay_int39 ! "delay") (-333.0,-1679.0) (Outside container174)
+    setColour plugin176 "#control"
+    plugin177 <- plugin' (delay_int39 ! "signal") (-333.0,-1729.0) (Outside container174)
     setColour plugin177 "#sample"
-    plugin178 <- plugin' (audio_square144 ! "freq") (-475.0,-75.0) (Inside container157)
-    setColour plugin178 "#sample"
-    plugin179 <- plugin' (id152 ! "signal") (-381.0,-126.0) (Inside container157)
-    setColour plugin179 "#sample"
-    plugin180 <- plugin' (id153 ! "signal") (12.0,98.0) (Inside container157)
-    setColour plugin180 "#sample"
-    plugin181 <- plugin' (id146 ! "signal") (125.0,-32.0) (Inside container157)
-    setColour plugin181 "#sample"
-    plugin182 <- plugin' (id147 ! "signal") (-184.0,125.0) (Inside container157)
+    plugout178 <- plugout' (delay_int39 ! "result") (-292.0,-1704.0) (Outside container174)
+    setColour plugout178 "#sample"
+    container179 <- container' "panel_2x1.png" (-312.0,-1464.0) (Inside root)
+    label180 <- label' "delay_int" (-337.0,-1389.0) (Outside container179)
+    plugin181 <- plugin' (delay_int38 ! "delay") (-333.0,-1439.0) (Outside container179)
+    setColour plugin181 "#control"
+    plugin182 <- plugin' (delay_int38 ! "signal") (-333.0,-1489.0) (Outside container179)
     setColour plugin182 "#sample"
-    plugout183 <- plugout' (sum156 ! "result") (-423.0,115.0) (Inside container157)
+    plugout183 <- plugout' (delay_int38 ! "result") (-292.0,-1464.0) (Outside container179)
     setColour plugout183 "#sample"
-    plugout184 <- plugout' (audio_triangle145 ! "result") (-42.0,96.0) (Inside container157)
-    setColour plugout184 "#sample"
-    plugout185 <- plugout' (audio_saw142 ! "result") (74.0,-33.0) (Inside container157)
-    setColour plugout185 "#sample"
-    plugout186 <- plugout' (audio_sin143 ! "result") (-299.0,129.0) (Inside container157)
-    setColour plugout186 "#sample"
-    plugout187 <- plugout' (audio_square144 ! "result") (-434.0,-125.0) (Inside container157)
-    setColour plugout187 "#sample"
-    plugout188 <- plugout' (id148 ! "result") (-519.0,89.0) (Inside container157)
+    container184 <- container' "panel_3x1.png" (-1896.0,-1776.0) (Inside root)
+    label185 <- label' "butterlp" (-1921.0,-1701.0) (Outside container184)
+    plugin186 <- plugin' (butterlp32 ! "freq") (-1917.0,-1751.0) (Outside container184)
+    setColour plugin186 "#control"
+    plugin187 <- plugin' (butterlp32 ! "signal") (-1917.0,-1801.0) (Outside container184)
+    setColour plugin187 "#sample"
+    plugout188 <- plugout' (butterlp32 ! "result") (-1876.0,-1776.0) (Outside container184)
     setColour plugout188 "#sample"
-    plugout189 <- plugout' (id149 ! "result") (-520.0,145.0) (Inside container157)
-    setColour plugout189 "#sample"
-    plugout190 <- plugout' (id150 ! "result") (-522.0,-125.0) (Inside container157)
-    setColour plugout190 "#sample"
-    plugout191 <- plugout' (id151 ! "result") (-521.0,-178.0) (Inside container157)
-    setColour plugout191 "#sample"
-    knob192 <- knob' (input155 ! "result") (-588.0,-420.0) (Outside container157)
-    setLow knob192 (Just (0.0))
-    setHigh  knob192 (Just (1.0))
-    knob193 <- knob' (input154 ! "result") (-588.0,-348.0) (Outside container157)
-    plugin194 <- plugin' (id148 ! "signal") (-588.0,-384.0) (Outside container157)
-    setColour plugin194 "#control"
-    plugin195 <- plugin' (id149 ! "signal") (-588.0,-348.0) (Outside container157)
-    setColour plugin195 "#sample"
-    hide plugin195
-    plugin196 <- plugin' (id150 ! "signal") (-588.0,-420.0) (Outside container157)
+    container189 <- container' "panel_knob.png" (-2088.0,-1716.0) (Inside root)
+    knob190 <- knob' (input85 ! "result") (-2100.0,-1716.0) (Outside container189)
+    plugin191 <- plugin' (id62 ! "signal") (-2100.0,-1716.0) (Outside container189)
+    setColour plugin191 "#control"
+    hide plugin191
+    plugout192 <- plugout' (id62 ! "result") (-2064.0,-1716.0) (Outside container189)
+    setColour plugout192 "#control"
+    container193 <- container' "panel_ladder.png" (-2040.0,-1956.0) (Inside root)
+    knob194 <- knob' (input86 ! "result") (-1992.0,-1944.0) (Outside container193)
+    setLow knob194 (Just (0.0))
+    setHigh  knob194 (Just (3.999))
+    knob195 <- knob' (input88 ! "result") (-1992.0,-1884.0) (Outside container193)
+    setLow knob195 (Just (-1.0))
+    setHigh  knob195 (Just (0.7))
+    plugin196 <- plugin' (ladder121 ! "signal") (-2088.0,-2076.0) (Outside container193)
     setColour plugin196 "#sample"
-    hide plugin196
-    plugin197 <- plugin' (id151 ! "signal") (-588.0,-456.0) (Outside container157)
-    setColour plugin197 "#control"
-    plugout198 <- plugout' (id147 ! "result") (-648.0,-504.0) (Outside container157)
-    setColour plugout198 "#sample"
-    plugout199 <- plugout' (id152 ! "result") (-576.0,-504.0) (Outside container157)
-    setColour plugout199 "#sample"
-    plugout200 <- plugout' (id153 ! "result") (-648.0,-540.0) (Outside container157)
-    setColour plugout200 "#sample"
-    plugout201 <- plugout' (id146 ! "result") (-576.0,-540.0) (Outside container157)
+    plugin197 <- plugin' (sum146 ! "signal1") (-2003.0,-1885.0) (Outside container193)
+    setColour plugin197 "#sample"
+    hide plugin197
+    plugin198 <- plugin' (sum146 ! "signal2") (-2040.0,-1884.0) (Outside container193)
+    setColour plugin198 "#control"
+    plugin199 <- plugin' (ladder121 ! "freq") (-2029.0,-1931.0) (Outside container193)
+    setColour plugin199 "#sample"
+    hide plugin199
+    plugin200 <- plugin' (ladder121 ! "res") (-2006.0,-1968.0) (Outside container193)
+    setColour plugin200 "#sample"
+    hide plugin200
+    plugout201 <- plugout' (ladder121 ! "result") (-1992.0,-2076.0) (Outside container193)
     setColour plugout201 "#sample"
-    container224 <- container' "panel_vco2.png" (-624.0,-720.0) (Inside root)
-    container225 <- container' "panel_3x1.png" (-443.0,115.0) (Inside container224)
-    container226 <- container' "panel_3x1.png" (-62.0,96.0) (Inside container224)
-    container227 <- container' "panel_3x1.png" (54.0,-33.0) (Inside container224)
-    container228 <- container' "panel_3x1.png" (-319.0,129.0) (Inside container224)
-    container229 <- container' "panel_3x1.png" (-454.0,-125.0) (Inside container224)
-    label230 <- label' "sum" (-468.0,190.0) (Inside container224)
-    label231 <- label' "audio_triangle" (-87.0,171.0) (Inside container224)
-    label232 <- label' "audio_saw" (29.0,42.0) (Inside container224)
-    label233 <- label' "audio_sin" (-344.0,204.0) (Inside container224)
-    label234 <- label' "audio_square" (-479.0,-50.0) (Inside container224)
-    plugin235 <- plugin' (sum223 ! "signal2") (-464.0,90.0) (Inside container224)
-    setColour plugin235 "#sample"
-    plugin236 <- plugin' (sum223 ! "signal1") (-464.0,140.0) (Inside container224)
-    setColour plugin236 "#sample"
-    plugin237 <- plugin' (audio_triangle212 ! "freq") (-83.0,121.0) (Inside container224)
-    setColour plugin237 "#sample"
-    plugin238 <- plugin' (audio_triangle212 ! "sync") (-83.0,71.0) (Inside container224)
+    plugout202 <- plugout' (sum146 ! "result") (-2087.0,-1928.0) (Outside container193)
+    setColour plugout202 "#sample"
+    hide plugout202
+    container203 <- container' "panel_2x1.png" (-312.0,-1224.0) (Inside root)
+    label204 <- label' "delay_int" (-337.0,-1149.0) (Outside container203)
+    plugin205 <- plugin' (delay_int37 ! "delay") (-333.0,-1199.0) (Outside container203)
+    setColour plugin205 "#control"
+    plugin206 <- plugin' (delay_int37 ! "signal") (-333.0,-1249.0) (Outside container203)
+    setColour plugin206 "#sample"
+    plugout207 <- plugout' (delay_int37 ! "result") (-292.0,-1224.0) (Outside container203)
+    setColour plugout207 "#sample"
+    container208 <- container' "panel_gain.png" (1164.0,-1440.0) (Inside root)
+    knob209 <- knob' (input94 ! "result") (1140.0,-1440.0) (Outside container208)
+    plugin210 <- plugin' (vca148 ! "cv") (1140.0,-1440.0) (Outside container208)
+    setColour plugin210 "#control"
+    hide plugin210
+    plugin211 <- plugin' (vca148 ! "signal") (1104.0,-1440.0) (Outside container208)
+    setColour plugin211 "#sample"
+    plugout212 <- plugout' (vca148 ! "result") (1224.0,-1440.0) (Outside container208)
+    setColour plugout212 "#sample"
+    container213 <- container' "panel_2x1.png" (-312.0,-288.0) (Inside root)
+    label214 <- label' "delay_int" (-337.0,-213.0) (Outside container213)
+    plugin215 <- plugin' (delay_int36 ! "signal") (-333.0,-313.0) (Outside container213)
+    setColour plugin215 "#sample"
+    plugin216 <- plugin' (delay_int36 ! "delay") (-333.0,-263.0) (Outside container213)
+    setColour plugin216 "#control"
+    plugout217 <- plugout' (delay_int36 ! "result") (-292.0,-288.0) (Outside container213)
+    setColour plugout217 "#sample"
+    container218 <- container' "panel_3x1.png" (348.0,-108.0) (Inside root)
+    label219 <- label' "echo" (323.0,-33.0) (Outside container218)
+    plugin220 <- plugin' (echo45 ! "signal") (327.0,-108.0) (Outside container218)
+    setColour plugin220 "#sample"
+    plugout221 <- plugout' (echo45 ! "result") (368.0,-108.0) (Outside container218)
+    setColour plugout221 "#sample"
+    container222 <- container' "panel_2x1.png" (-1332.0,-1776.0) (Inside root)
+    label223 <- label' "id" (-1357.0,-1701.0) (Outside container222)
+    plugin224 <- plugin' (id63 ! "signal") (-1353.0,-1776.0) (Outside container222)
+    setColour plugin224 "#control"
+    plugout225 <- plugout' (id63 ! "result") (-1312.0,-1776.0) (Outside container222)
+    setColour plugout225 "#control"
+    container226 <- container' "panel_2x1.png" (-312.0,-516.0) (Inside root)
+    label227 <- label' "delay_int" (-337.0,-405.0) (Outside container226)
+    plugin228 <- plugin' (delay_int41 ! "delay") (-333.0,-491.0) (Outside container226)
+    setColour plugin228 "#control"
+    plugin229 <- plugin' (delay_int41 ! "signal") (-333.0,-541.0) (Outside container226)
+    setColour plugin229 "#sample"
+    plugout230 <- plugout' (delay_int41 ! "result") (-292.0,-516.0) (Outside container226)
+    setColour plugout230 "#sample"
+    container231 <- container' "panel_2x1.png" (-312.0,-744.0) (Inside root)
+    label232 <- label' "delay_int" (-337.0,-669.0) (Outside container231)
+    plugin233 <- plugin' (delay_int42 ! "delay") (-333.0,-719.0) (Outside container231)
+    setColour plugin233 "#control"
+    plugin234 <- plugin' (delay_int42 ! "signal") (-333.0,-769.0) (Outside container231)
+    setColour plugin234 "#sample"
+    plugout235 <- plugout' (delay_int42 ! "result") (-292.0,-744.0) (Outside container231)
+    setColour plugout235 "#sample"
+    container236 <- container' "panel_2x1.png" (-312.0,-972.0) (Inside root)
+    label237 <- label' "delay_int" (-337.0,-897.0) (Outside container236)
+    plugin238 <- plugin' (delay_int43 ! "signal") (-333.0,-997.0) (Outside container236)
     setColour plugin238 "#sample"
-    plugin239 <- plugin' (audio_saw209 ! "freq") (33.0,-8.0) (Inside container224)
-    setColour plugin239 "#sample"
-    plugin240 <- plugin' (audio_saw209 ! "sync") (33.0,-58.0) (Inside container224)
-    setColour plugin240 "#sample"
-    plugin241 <- plugin' (audio_sin210 ! "freq") (-340.0,154.0) (Inside container224)
-    setColour plugin241 "#sample"
-    plugin242 <- plugin' (audio_sin210 ! "sync") (-340.0,104.0) (Inside container224)
-    setColour plugin242 "#sample"
-    plugin243 <- plugin' (audio_square211 ! "pwm") (-475.0,-125.0) (Inside container224)
+    plugin239 <- plugin' (delay_int43 ! "delay") (-333.0,-947.0) (Outside container236)
+    setColour plugin239 "#control"
+    plugout240 <- plugout' (delay_int43 ! "result") (-292.0,-972.0) (Outside container236)
+    setColour plugout240 "#sample"
+    container241 <- container' "panel_3x1.png" (1392.0,-1512.0) (Inside root)
+    label242 <- label' "echo" (1367.0,-1437.0) (Outside container241)
+    plugin243 <- plugin' (echo46 ! "signal") (1371.0,-1512.0) (Outside container241)
     setColour plugin243 "#sample"
-    plugin244 <- plugin' (audio_square211 ! "sync") (-475.0,-175.0) (Inside container224)
-    setColour plugin244 "#sample"
-    plugin245 <- plugin' (audio_square211 ! "freq") (-475.0,-75.0) (Inside container224)
-    setColour plugin245 "#sample"
-    plugin246 <- plugin' (id219 ! "signal") (-381.0,-126.0) (Inside container224)
-    setColour plugin246 "#sample"
-    plugin247 <- plugin' (id220 ! "signal") (12.0,98.0) (Inside container224)
-    setColour plugin247 "#sample"
-    plugin248 <- plugin' (id213 ! "signal") (125.0,-32.0) (Inside container224)
-    setColour plugin248 "#sample"
-    plugin249 <- plugin' (id214 ! "signal") (-184.0,125.0) (Inside container224)
-    setColour plugin249 "#sample"
-    plugout250 <- plugout' (sum223 ! "result") (-423.0,115.0) (Inside container224)
-    setColour plugout250 "#sample"
-    plugout251 <- plugout' (audio_triangle212 ! "result") (-42.0,96.0) (Inside container224)
-    setColour plugout251 "#sample"
-    plugout252 <- plugout' (audio_saw209 ! "result") (74.0,-33.0) (Inside container224)
-    setColour plugout252 "#sample"
-    plugout253 <- plugout' (audio_sin210 ! "result") (-299.0,129.0) (Inside container224)
-    setColour plugout253 "#sample"
-    plugout254 <- plugout' (audio_square211 ! "result") (-434.0,-125.0) (Inside container224)
-    setColour plugout254 "#sample"
-    plugout255 <- plugout' (id215 ! "result") (-519.0,89.0) (Inside container224)
-    setColour plugout255 "#sample"
-    plugout256 <- plugout' (id216 ! "result") (-520.0,145.0) (Inside container224)
-    setColour plugout256 "#sample"
-    plugout257 <- plugout' (id217 ! "result") (-522.0,-125.0) (Inside container224)
-    setColour plugout257 "#sample"
-    plugout258 <- plugout' (id218 ! "result") (-521.0,-178.0) (Inside container224)
-    setColour plugout258 "#sample"
-    knob259 <- knob' (input222 ! "result") (-588.0,-720.0) (Outside container224)
-    setLow knob259 (Just (0.0))
-    setHigh  knob259 (Just (1.0))
-    knob260 <- knob' (input221 ! "result") (-588.0,-648.0) (Outside container224)
-    plugin261 <- plugin' (id215 ! "signal") (-588.0,-684.0) (Outside container224)
-    setColour plugin261 "#control"
-    plugin262 <- plugin' (id216 ! "signal") (-588.0,-648.0) (Outside container224)
-    setColour plugin262 "#sample"
-    hide plugin262
-    plugin263 <- plugin' (id217 ! "signal") (-588.0,-720.0) (Outside container224)
-    setColour plugin263 "#sample"
-    hide plugin263
-    plugin264 <- plugin' (id218 ! "signal") (-588.0,-756.0) (Outside container224)
-    setColour plugin264 "#control"
-    plugout265 <- plugout' (id214 ! "result") (-648.0,-804.0) (Outside container224)
-    setColour plugout265 "#sample"
-    plugout266 <- plugout' (id219 ! "result") (-576.0,-804.0) (Outside container224)
-    setColour plugout266 "#sample"
-    plugout267 <- plugout' (id220 ! "result") (-648.0,-840.0) (Outside container224)
-    setColour plugout267 "#sample"
-    plugout268 <- plugout' (id213 ! "result") (-576.0,-840.0) (Outside container224)
-    setColour plugout268 "#sample"
-    container270 <- container' "panel_int_add.png" (-480.0,-528.0) (Inside root)
-    plugin271 <- plugin' (sum269 ! "signal1") (-540.0,-504.0) (Outside container270)
-    setColour plugin271 "#sample"
-    plugin272 <- plugin' (sum269 ! "signal2") (-540.0,-552.0) (Outside container270)
-    setColour plugin272 "#sample"
-    plugout273 <- plugout' (sum269 ! "result") (-420.0,-528.0) (Outside container270)
-    setColour plugout273 "#sample"
-    container275 <- container' "panel_int_add.png" (-480.0,-828.0) (Inside root)
-    plugin276 <- plugin' (sum274 ! "signal1") (-540.0,-804.0) (Outside container275)
+    plugout244 <- plugout' (echo46 ! "result") (1412.0,-1512.0) (Outside container241)
+    setColour plugout244 "#sample"
+    container245 <- container' "panel_knobs.png" (-900.0,-1608.0) (Inside root)
+    knob246 <- knob' (input104 ! "result") (-972.0,-1608.0) (Outside container245)
+    knob247 <- knob' (input103 ! "result") (-924.0,-1608.0) (Outside container245)
+    knob248 <- knob' (input105 ! "result") (-876.0,-1608.0) (Outside container245)
+    knob249 <- knob' (input106 ! "result") (-828.0,-1608.0) (Outside container245)
+    knob250 <- knob' (input107 ! "result") (-780.0,-1608.0) (Outside container245)
+    knob251 <- knob' (input108 ! "result") (-1020.0,-1608.0) (Outside container245)
+    plugin252 <- plugin' (id53 ! "signal") (-780.0,-1644.0) (Outside container245)
+    setColour plugin252 "#control"
+    hide plugin252
+    plugin253 <- plugin' (id54 ! "signal") (-1020.0,-1644.0) (Outside container245)
+    setColour plugin253 "#control"
+    hide plugin253
+    plugin254 <- plugin' (id50 ! "signal") (-972.0,-1644.0) (Outside container245)
+    setColour plugin254 "#control"
+    hide plugin254
+    plugin255 <- plugin' (id78 ! "signal") (-924.0,-1644.0) (Outside container245)
+    setColour plugin255 "#control"
+    hide plugin255
+    plugin256 <- plugin' (id51 ! "signal") (-876.0,-1644.0) (Outside container245)
+    setColour plugin256 "#control"
+    hide plugin256
+    plugin257 <- plugin' (id52 ! "signal") (-828.0,-1644.0) (Outside container245)
+    setColour plugin257 "#control"
+    hide plugin257
+    plugout258 <- plugout' (id50 ! "result") (-972.0,-1644.0) (Outside container245)
+    setColour plugout258 "#control"
+    plugout259 <- plugout' (id78 ! "result") (-924.0,-1644.0) (Outside container245)
+    setColour plugout259 "#control"
+    plugout260 <- plugout' (id51 ! "result") (-876.0,-1644.0) (Outside container245)
+    setColour plugout260 "#control"
+    plugout261 <- plugout' (id52 ! "result") (-828.0,-1644.0) (Outside container245)
+    setColour plugout261 "#control"
+    plugout262 <- plugout' (id53 ! "result") (-780.0,-1644.0) (Outside container245)
+    setColour plugout262 "#control"
+    plugout263 <- plugout' (id54 ! "result") (-1020.0,-1644.0) (Outside container245)
+    setColour plugout263 "#control"
+    container264 <- container' "panel_vco2.png" (-1860.0,-444.0) (Inside root)
+    container265 <- container' "panel_3x1.png" (-443.0,115.0) (Inside container264)
+    container266 <- container' "panel_3x1.png" (-62.0,96.0) (Inside container264)
+    container267 <- container' "panel_3x1.png" (54.0,-33.0) (Inside container264)
+    container268 <- container' "panel_3x1.png" (-319.0,129.0) (Inside container264)
+    container269 <- container' "panel_3x1.png" (-454.0,-125.0) (Inside container264)
+    label270 <- label' "sum" (-468.0,190.0) (Inside container264)
+    label271 <- label' "audio_triangle" (-87.0,171.0) (Inside container264)
+    label272 <- label' "audio_saw" (29.0,42.0) (Inside container264)
+    label273 <- label' "audio_sin" (-344.0,204.0) (Inside container264)
+    label274 <- label' "audio_square" (-479.0,-50.0) (Inside container264)
+    plugin275 <- plugin' (sum145 ! "signal2") (-464.0,90.0) (Inside container264)
+    setColour plugin275 "#sample"
+    plugin276 <- plugin' (sum145 ! "signal1") (-464.0,140.0) (Inside container264)
     setColour plugin276 "#sample"
-    plugin277 <- plugin' (sum274 ! "signal2") (-540.0,-852.0) (Outside container275)
+    plugin277 <- plugin' (audio_triangle31 ! "freq") (-83.0,121.0) (Inside container264)
     setColour plugin277 "#sample"
-    plugout278 <- plugout' (sum274 ! "result") (-420.0,-828.0) (Outside container275)
-    setColour plugout278 "#sample"
-    container32 <- container' "panel_vco2.png" (-624.0,180.0) (Inside root)
-    container33 <- container' "panel_3x1.png" (-443.0,115.0) (Inside container32)
-    container34 <- container' "panel_3x1.png" (-62.0,96.0) (Inside container32)
-    container35 <- container' "panel_3x1.png" (54.0,-33.0) (Inside container32)
-    container36 <- container' "panel_3x1.png" (-319.0,129.0) (Inside container32)
-    container37 <- container' "panel_3x1.png" (-454.0,-125.0) (Inside container32)
-    label38 <- label' "sum" (-468.0,190.0) (Inside container32)
-    label39 <- label' "audio_triangle" (-87.0,171.0) (Inside container32)
-    label40 <- label' "audio_saw" (29.0,42.0) (Inside container32)
-    label41 <- label' "audio_sin" (-344.0,204.0) (Inside container32)
-    label42 <- label' "audio_square" (-479.0,-50.0) (Inside container32)
-    plugin43 <- plugin' (sum31 ! "signal2") (-464.0,90.0) (Inside container32)
-    setColour plugin43 "#sample"
-    plugin44 <- plugin' (sum31 ! "signal1") (-464.0,140.0) (Inside container32)
-    setColour plugin44 "#sample"
-    plugin45 <- plugin' (audio_triangle20 ! "freq") (-83.0,121.0) (Inside container32)
-    setColour plugin45 "#sample"
-    plugin46 <- plugin' (audio_triangle20 ! "sync") (-83.0,71.0) (Inside container32)
-    setColour plugin46 "#sample"
-    plugin47 <- plugin' (audio_saw17 ! "freq") (33.0,-8.0) (Inside container32)
-    setColour plugin47 "#sample"
-    plugin48 <- plugin' (audio_saw17 ! "sync") (33.0,-58.0) (Inside container32)
-    setColour plugin48 "#sample"
-    plugin49 <- plugin' (audio_sin18 ! "freq") (-340.0,154.0) (Inside container32)
-    setColour plugin49 "#sample"
-    plugin50 <- plugin' (audio_sin18 ! "sync") (-340.0,104.0) (Inside container32)
-    setColour plugin50 "#sample"
-    plugin51 <- plugin' (audio_square19 ! "pwm") (-475.0,-125.0) (Inside container32)
-    setColour plugin51 "#sample"
-    plugin52 <- plugin' (audio_square19 ! "sync") (-475.0,-175.0) (Inside container32)
-    setColour plugin52 "#sample"
-    plugin53 <- plugin' (audio_square19 ! "freq") (-475.0,-75.0) (Inside container32)
-    setColour plugin53 "#sample"
-    plugin54 <- plugin' (id27 ! "signal") (-381.0,-126.0) (Inside container32)
-    setColour plugin54 "#sample"
-    plugin55 <- plugin' (id28 ! "signal") (12.0,98.0) (Inside container32)
-    setColour plugin55 "#sample"
-    plugin56 <- plugin' (id21 ! "signal") (125.0,-32.0) (Inside container32)
-    setColour plugin56 "#sample"
-    plugin57 <- plugin' (id22 ! "signal") (-184.0,125.0) (Inside container32)
-    setColour plugin57 "#sample"
-    plugout58 <- plugout' (sum31 ! "result") (-423.0,115.0) (Inside container32)
-    setColour plugout58 "#sample"
-    plugout59 <- plugout' (audio_triangle20 ! "result") (-42.0,96.0) (Inside container32)
-    setColour plugout59 "#sample"
-    plugout60 <- plugout' (audio_saw17 ! "result") (74.0,-33.0) (Inside container32)
-    setColour plugout60 "#sample"
-    plugout61 <- plugout' (audio_sin18 ! "result") (-299.0,129.0) (Inside container32)
-    setColour plugout61 "#sample"
-    plugout62 <- plugout' (audio_square19 ! "result") (-434.0,-125.0) (Inside container32)
-    setColour plugout62 "#sample"
-    plugout63 <- plugout' (id23 ! "result") (-519.0,89.0) (Inside container32)
-    setColour plugout63 "#sample"
-    plugout64 <- plugout' (id24 ! "result") (-520.0,145.0) (Inside container32)
-    setColour plugout64 "#sample"
-    plugout65 <- plugout' (id25 ! "result") (-522.0,-125.0) (Inside container32)
-    setColour plugout65 "#sample"
-    plugout66 <- plugout' (id26 ! "result") (-521.0,-178.0) (Inside container32)
-    setColour plugout66 "#sample"
-    knob67 <- knob' (input30 ! "result") (-588.0,180.0) (Outside container32)
-    setLow knob67 (Just (0.0))
-    setHigh  knob67 (Just (1.0))
-    knob68 <- knob' (input29 ! "result") (-588.0,252.0) (Outside container32)
-    plugin69 <- plugin' (id23 ! "signal") (-588.0,216.0) (Outside container32)
-    setColour plugin69 "#control"
-    plugin70 <- plugin' (id24 ! "signal") (-588.0,252.0) (Outside container32)
-    setColour plugin70 "#sample"
-    hide plugin70
-    plugin71 <- plugin' (id25 ! "signal") (-588.0,180.0) (Outside container32)
-    setColour plugin71 "#sample"
-    hide plugin71
-    plugin72 <- plugin' (id26 ! "signal") (-588.0,144.0) (Outside container32)
-    setColour plugin72 "#control"
-    plugout73 <- plugout' (id22 ! "result") (-648.0,96.0) (Outside container32)
-    setColour plugout73 "#sample"
-    plugout74 <- plugout' (id27 ! "result") (-576.0,96.0) (Outside container32)
-    setColour plugout74 "#sample"
-    plugout75 <- plugout' (id28 ! "result") (-648.0,60.0) (Outside container32)
-    setColour plugout75 "#sample"
-    plugout76 <- plugout' (id21 ! "result") (-576.0,60.0) (Outside container32)
-    setColour plugout76 "#sample"
-    container342 <- container' "panel_vco2.png" (-204.0,-720.0) (Inside root)
-    container343 <- container' "panel_3x1.png" (-443.0,115.0) (Inside container342)
-    container344 <- container' "panel_3x1.png" (-62.0,96.0) (Inside container342)
-    container345 <- container' "panel_3x1.png" (54.0,-33.0) (Inside container342)
-    container346 <- container' "panel_3x1.png" (-319.0,129.0) (Inside container342)
-    container347 <- container' "panel_3x1.png" (-454.0,-125.0) (Inside container342)
-    label348 <- label' "sum" (-468.0,190.0) (Inside container342)
-    label349 <- label' "audio_triangle" (-87.0,171.0) (Inside container342)
-    label350 <- label' "audio_saw" (29.0,42.0) (Inside container342)
-    label351 <- label' "audio_sin" (-344.0,204.0) (Inside container342)
-    label352 <- label' "audio_square" (-479.0,-50.0) (Inside container342)
-    plugin353 <- plugin' (sum336 ! "signal2") (-464.0,90.0) (Inside container342)
-    setColour plugin353 "#sample"
-    plugin354 <- plugin' (sum336 ! "signal1") (-464.0,140.0) (Inside container342)
-    setColour plugin354 "#sample"
-    plugin355 <- plugin' (audio_triangle293 ! "freq") (-83.0,121.0) (Inside container342)
-    setColour plugin355 "#sample"
-    plugin356 <- plugin' (audio_triangle293 ! "sync") (-83.0,71.0) (Inside container342)
-    setColour plugin356 "#sample"
-    plugin357 <- plugin' (audio_saw281 ! "freq") (33.0,-8.0) (Inside container342)
-    setColour plugin357 "#sample"
-    plugin358 <- plugin' (audio_saw281 ! "sync") (33.0,-58.0) (Inside container342)
-    setColour plugin358 "#sample"
-    plugin359 <- plugin' (audio_sin285 ! "freq") (-340.0,154.0) (Inside container342)
-    setColour plugin359 "#sample"
-    plugin360 <- plugin' (audio_sin285 ! "sync") (-340.0,104.0) (Inside container342)
-    setColour plugin360 "#sample"
-    plugin361 <- plugin' (audio_square289 ! "pwm") (-475.0,-125.0) (Inside container342)
-    setColour plugin361 "#sample"
-    plugin362 <- plugin' (audio_square289 ! "sync") (-475.0,-175.0) (Inside container342)
-    setColour plugin362 "#sample"
-    plugin363 <- plugin' (audio_square289 ! "freq") (-475.0,-75.0) (Inside container342)
-    setColour plugin363 "#sample"
-    plugin364 <- plugin' (id310 ! "signal") (-381.0,-126.0) (Inside container342)
+    plugin278 <- plugin' (audio_triangle31 ! "sync") (-83.0,71.0) (Inside container264)
+    setColour plugin278 "#sample"
+    plugin279 <- plugin' (audio_saw28 ! "freq") (33.0,-8.0) (Inside container264)
+    setColour plugin279 "#sample"
+    plugin280 <- plugin' (audio_saw28 ! "sync") (33.0,-58.0) (Inside container264)
+    setColour plugin280 "#sample"
+    plugin281 <- plugin' (audio_sin29 ! "freq") (-340.0,154.0) (Inside container264)
+    setColour plugin281 "#sample"
+    plugin282 <- plugin' (audio_sin29 ! "sync") (-340.0,104.0) (Inside container264)
+    setColour plugin282 "#sample"
+    plugin283 <- plugin' (audio_square30 ! "pwm") (-475.0,-125.0) (Inside container264)
+    setColour plugin283 "#sample"
+    plugin284 <- plugin' (audio_square30 ! "sync") (-475.0,-175.0) (Inside container264)
+    setColour plugin284 "#sample"
+    plugin285 <- plugin' (audio_square30 ! "freq") (-475.0,-75.0) (Inside container264)
+    setColour plugin285 "#sample"
+    plugin286 <- plugin' (id64 ! "signal") (-381.0,-126.0) (Inside container264)
+    setColour plugin286 "#sample"
+    plugin287 <- plugin' (id65 ! "signal") (12.0,98.0) (Inside container264)
+    setColour plugin287 "#sample"
+    plugin288 <- plugin' (id66 ! "signal") (125.0,-32.0) (Inside container264)
+    setColour plugin288 "#sample"
+    plugin289 <- plugin' (id67 ! "signal") (-184.0,125.0) (Inside container264)
+    setColour plugin289 "#sample"
+    plugout290 <- plugout' (sum145 ! "result") (-423.0,115.0) (Inside container264)
+    setColour plugout290 "#sample"
+    plugout291 <- plugout' (audio_triangle31 ! "result") (-42.0,96.0) (Inside container264)
+    setColour plugout291 "#sample"
+    plugout292 <- plugout' (audio_saw28 ! "result") (74.0,-33.0) (Inside container264)
+    setColour plugout292 "#sample"
+    plugout293 <- plugout' (audio_sin29 ! "result") (-299.0,129.0) (Inside container264)
+    setColour plugout293 "#sample"
+    plugout294 <- plugout' (audio_square30 ! "result") (-434.0,-125.0) (Inside container264)
+    setColour plugout294 "#sample"
+    plugout295 <- plugout' (id68 ! "result") (-519.0,89.0) (Inside container264)
+    setColour plugout295 "#sample"
+    plugout296 <- plugout' (id69 ! "result") (-520.0,145.0) (Inside container264)
+    setColour plugout296 "#sample"
+    plugout297 <- plugout' (id70 ! "result") (-522.0,-125.0) (Inside container264)
+    setColour plugout297 "#sample"
+    plugout298 <- plugout' (id71 ! "result") (-521.0,-178.0) (Inside container264)
+    setColour plugout298 "#sample"
+    knob299 <- knob' (input84 ! "result") (-1824.0,-444.0) (Outside container264)
+    knob300 <- knob' (input120 ! "result") (-1824.0,-372.0) (Outside container264)
+    plugin301 <- plugin' (id68 ! "signal") (-1824.0,-408.0) (Outside container264)
+    setColour plugin301 "#control"
+    plugin302 <- plugin' (id69 ! "signal") (-1847.0,-364.0) (Outside container264)
+    setColour plugin302 "#sample"
+    hide plugin302
+    plugin303 <- plugin' (id70 ! "signal") (-1829.0,-441.0) (Outside container264)
+    setColour plugin303 "#sample"
+    hide plugin303
+    plugin304 <- plugin' (id71 ! "signal") (-1824.0,-480.0) (Outside container264)
+    setColour plugin304 "#control"
+    plugout305 <- plugout' (id67 ! "result") (-1884.0,-528.0) (Outside container264)
+    setColour plugout305 "#sample"
+    plugout306 <- plugout' (id64 ! "result") (-1812.0,-528.0) (Outside container264)
+    setColour plugout306 "#sample"
+    plugout307 <- plugout' (id65 ! "result") (-1884.0,-564.0) (Outside container264)
+    setColour plugout307 "#sample"
+    plugout308 <- plugout' (id66 ! "result") (-1812.0,-564.0) (Outside container264)
+    setColour plugout308 "#sample"
+    container309 <- container' "panel_lfo.png" (-2196.0,-216.0) (Inside root)
+    knob310 <- knob' (input87 ! "result") (-2184.0,-144.0) (Outside container309)
+    plugin311 <- plugin' (lfo122 ! "sync") (-2184.0,-192.0) (Outside container309)
+    setColour plugin311 "#control"
+    plugin312 <- plugin' (lfo122 ! "rate") (-2199.0,-161.0) (Outside container309)
+    setColour plugin312 "#control"
+    hide plugin312
+    plugout313 <- plugout' (lfo122 ! "triangle") (-2208.0,-336.0) (Outside container309)
+    setColour plugout313 "#control"
+    plugout314 <- plugout' (lfo122 ! "saw") (-2148.0,-336.0) (Outside container309)
+    setColour plugout314 "#control"
+    plugout315 <- plugout' (lfo122 ! "sin_result") (-2208.0,-300.0) (Outside container309)
+    setColour plugout315 "#control"
+    plugout316 <- plugout' (lfo122 ! "square_result") (-2148.0,-300.0) (Outside container309)
+    setColour plugout316 "#control"
+    container317 <- container' "panel_adsr.png" (-1872.0,-120.0) (Inside root)
+    knob318 <- knob' (input89 ! "result") (-1896.0,-60.0) (Outside container317)
+    setLow knob318 (Just (0.0))
+    knob319 <- knob' (input90 ! "result") (-1836.0,-60.0) (Outside container317)
+    setLow knob319 (Just (0.0))
+    knob320 <- knob' (input92 ! "result") (-1896.0,-108.0) (Outside container317)
+    setLow knob320 (Just (0.0))
+    knob321 <- knob' (input91 ! "result") (-1836.0,-108.0) (Outside container317)
+    setLow knob321 (Just (0.0))
+    plugin322 <- plugin' (adsr0 ! "attack") (-1900.0,-63.0) (Outside container317)
+    setColour plugin322 "#sample"
+    hide plugin322
+    plugin323 <- plugin' (adsr0 ! "decay") (-1847.0,-46.0) (Outside container317)
+    setColour plugin323 "#sample"
+    hide plugin323
+    plugin324 <- plugin' (adsr0 ! "sustain") (-1847.0,-96.0) (Outside container317)
+    setColour plugin324 "#sample"
+    hide plugin324
+    plugin325 <- plugin' (adsr0 ! "release") (-1847.0,-146.0) (Outside container317)
+    setColour plugin325 "#sample"
+    hide plugin325
+    plugin326 <- plugin' (adsr0 ! "gate") (-1836.0,-192.0) (Outside container317)
+    setColour plugin326 "#control"
+    plugout327 <- plugout' (adsr0 ! "result") (-1836.0,-228.0) (Outside container317)
+    setColour plugout327 "#control"
+    container328 <- container' "panel_3x1.png" (-1656.0,-168.0) (Inside root)
+    label329 <- label' "vca" (-1681.0,-93.0) (Outside container328)
+    plugin330 <- plugin' (vca147 ! "cv") (-1677.0,-143.0) (Outside container328)
+    setColour plugin330 "#control"
+    plugin331 <- plugin' (vca147 ! "signal") (-1677.0,-193.0) (Outside container328)
+    setColour plugin331 "#sample"
+    plugout332 <- plugout' (vca147 ! "result") (-1636.0,-168.0) (Outside container328)
+    setColour plugout332 "#sample"
+    container333 <- container' "panel_3x1.png" (-2016.0,84.0) (Inside root)
+    label334 <- label' "exp_decay" (-2041.0,159.0) (Outside container333)
+    plugin335 <- plugin' (exp_decay47 ! "decay_time") (-2037.0,109.0) (Outside container333)
+    setColour plugin335 "#control"
+    plugin336 <- plugin' (exp_decay47 ! "trigger") (-2037.0,59.0) (Outside container333)
+    setColour plugin336 "#control"
+    plugout337 <- plugout' (exp_decay47 ! "result") (-1996.0,84.0) (Outside container333)
+    setColour plugout337 "#control"
+    container338 <- container' "panel_knob.png" (-2292.0,60.0) (Inside root)
+    knob339 <- knob' (input95 ! "result") (-2304.0,60.0) (Outside container338)
+    plugin340 <- plugin' (id82 ! "signal") (-2304.0,60.0) (Outside container338)
+    setColour plugin340 "#control"
+    hide plugin340
+    plugout341 <- plugout' (id82 ! "result") (-2268.0,60.0) (Outside container338)
+    setColour plugout341 "#control"
+    container342 <- container' "panel_knobs.png" (-900.0,-1368.0) (Inside root)
+    knob343 <- knob' (input102 ! "result") (-1020.0,-1368.0) (Outside container342)
+    knob344 <- knob' (input98 ! "result") (-972.0,-1368.0) (Outside container342)
+    knob345 <- knob' (input97 ! "result") (-924.0,-1368.0) (Outside container342)
+    knob346 <- knob' (input99 ! "result") (-876.0,-1368.0) (Outside container342)
+    knob347 <- knob' (input100 ! "result") (-828.0,-1368.0) (Outside container342)
+    knob348 <- knob' (input101 ! "result") (-780.0,-1368.0) (Outside container342)
+    plugin349 <- plugin' (id55 ! "signal") (-924.0,-1404.0) (Outside container342)
+    setColour plugin349 "#control"
+    hide plugin349
+    plugin350 <- plugin' (id57 ! "signal") (-876.0,-1404.0) (Outside container342)
+    setColour plugin350 "#control"
+    hide plugin350
+    plugin351 <- plugin' (id58 ! "signal") (-828.0,-1404.0) (Outside container342)
+    setColour plugin351 "#control"
+    hide plugin351
+    plugin352 <- plugin' (id59 ! "signal") (-780.0,-1404.0) (Outside container342)
+    setColour plugin352 "#control"
+    hide plugin352
+    plugin353 <- plugin' (id60 ! "signal") (-1020.0,-1404.0) (Outside container342)
+    setColour plugin353 "#control"
+    hide plugin353
+    plugin354 <- plugin' (id56 ! "signal") (-972.0,-1404.0) (Outside container342)
+    setColour plugin354 "#control"
+    hide plugin354
+    plugout355 <- plugout' (id55 ! "result") (-924.0,-1404.0) (Outside container342)
+    setColour plugout355 "#control"
+    plugout356 <- plugout' (id57 ! "result") (-876.0,-1404.0) (Outside container342)
+    setColour plugout356 "#control"
+    plugout357 <- plugout' (id58 ! "result") (-828.0,-1404.0) (Outside container342)
+    setColour plugout357 "#control"
+    plugout358 <- plugout' (id59 ! "result") (-780.0,-1404.0) (Outside container342)
+    setColour plugout358 "#control"
+    plugout359 <- plugout' (id60 ! "result") (-1020.0,-1404.0) (Outside container342)
+    setColour plugout359 "#control"
+    plugout360 <- plugout' (id56 ! "result") (-972.0,-1404.0) (Outside container342)
+    setColour plugout360 "#control"
+    container361 <- container' "panel_2x1.png" (-312.0,-2196.0) (Inside root)
+    label362 <- label' "delay_int" (-337.0,-2133.0) (Outside container361)
+    plugin363 <- plugin' (delay_int33 ! "delay") (-333.0,-2171.0) (Outside container361)
+    setColour plugin363 "#control"
+    plugin364 <- plugin' (delay_int33 ! "signal") (-333.0,-2221.0) (Outside container361)
     setColour plugin364 "#sample"
-    plugin365 <- plugin' (id312 ! "signal") (12.0,98.0) (Inside container342)
-    setColour plugin365 "#sample"
-    plugin366 <- plugin' (id304 ! "signal") (125.0,-32.0) (Inside container342)
-    setColour plugin366 "#sample"
-    plugin367 <- plugin' (id305 ! "signal") (-184.0,125.0) (Inside container342)
-    setColour plugin367 "#sample"
-    plugout368 <- plugout' (sum336 ! "result") (-423.0,115.0) (Inside container342)
-    setColour plugout368 "#sample"
-    plugout369 <- plugout' (audio_triangle293 ! "result") (-42.0,96.0) (Inside container342)
-    setColour plugout369 "#sample"
-    plugout370 <- plugout' (audio_saw281 ! "result") (74.0,-33.0) (Inside container342)
+    plugout365 <- plugout' (delay_int33 ! "result") (-292.0,-2196.0) (Outside container361)
+    setColour plugout365 "#sample"
+    container366 <- container' "panel_2x1.png" (-312.0,-2424.0) (Inside root)
+    label367 <- label' "delay_int" (-337.0,-2349.0) (Outside container366)
+    plugin368 <- plugin' (delay_int34 ! "delay") (-333.0,-2399.0) (Outside container366)
+    setColour plugin368 "#control"
+    plugin369 <- plugin' (delay_int34 ! "signal") (-333.0,-2449.0) (Outside container366)
+    setColour plugin369 "#sample"
+    plugout370 <- plugout' (delay_int34 ! "result") (-292.0,-2424.0) (Outside container366)
     setColour plugout370 "#sample"
-    plugout371 <- plugout' (audio_sin285 ! "result") (-299.0,129.0) (Inside container342)
-    setColour plugout371 "#sample"
-    plugout372 <- plugout' (audio_square289 ! "result") (-434.0,-125.0) (Inside container342)
-    setColour plugout372 "#sample"
-    plugout373 <- plugout' (id306 ! "result") (-519.0,89.0) (Inside container342)
-    setColour plugout373 "#sample"
-    plugout374 <- plugout' (id307 ! "result") (-520.0,145.0) (Inside container342)
-    setColour plugout374 "#sample"
-    plugout375 <- plugout' (id308 ! "result") (-522.0,-125.0) (Inside container342)
+    container371 <- container' "panel_2x1.png" (-312.0,-2652.0) (Inside root)
+    label372 <- label' "delay_int" (-337.0,-2577.0) (Outside container371)
+    plugin373 <- plugin' (delay_int35 ! "delay") (-333.0,-2627.0) (Outside container371)
+    setColour plugin373 "#control"
+    plugin374 <- plugin' (delay_int35 ! "signal") (-333.0,-2677.0) (Outside container371)
+    setColour plugin374 "#sample"
+    plugout375 <- plugout' (delay_int35 ! "result") (-292.0,-2652.0) (Outside container371)
     setColour plugout375 "#sample"
-    plugout376 <- plugout' (id309 ! "result") (-521.0,-178.0) (Inside container342)
-    setColour plugout376 "#sample"
-    knob377 <- knob' (input330 ! "result") (-168.0,-720.0) (Outside container342)
-    setLow knob377 (Just (0.0))
-    setHigh  knob377 (Just (1.0))
-    knob378 <- knob' (input329 ! "result") (-168.0,-648.0) (Outside container342)
-    plugin379 <- plugin' (id306 ! "signal") (-168.0,-684.0) (Outside container342)
+    container376 <- container' "panel_2x1.png" (-312.0,-2880.0) (Inside root)
+    label377 <- label' "delay_int" (-337.0,-2805.0) (Outside container376)
+    plugin378 <- plugin' (delay_int44 ! "signal") (-333.0,-2905.0) (Outside container376)
+    setColour plugin378 "#sample"
+    plugin379 <- plugin' (delay_int44 ! "delay") (-333.0,-2855.0) (Outside container376)
     setColour plugin379 "#control"
-    plugin380 <- plugin' (id307 ! "signal") (-168.0,-648.0) (Outside container342)
-    setColour plugin380 "#sample"
-    hide plugin380
-    plugin381 <- plugin' (id308 ! "signal") (-168.0,-720.0) (Outside container342)
-    setColour plugin381 "#sample"
-    hide plugin381
-    plugin382 <- plugin' (id309 ! "signal") (-168.0,-756.0) (Outside container342)
-    setColour plugin382 "#control"
-    plugout383 <- plugout' (id305 ! "result") (-228.0,-804.0) (Outside container342)
-    setColour plugout383 "#sample"
-    plugout384 <- plugout' (id310 ! "result") (-156.0,-804.0) (Outside container342)
-    setColour plugout384 "#sample"
-    plugout385 <- plugout' (id312 ! "result") (-228.0,-840.0) (Outside container342)
-    setColour plugout385 "#sample"
-    plugout386 <- plugout' (id304 ! "result") (-156.0,-840.0) (Outside container342)
-    setColour plugout386 "#sample"
-    container387 <- container' "panel_int_add.png" (-60.0,-828.0) (Inside root)
-    plugin388 <- plugin' (sum338 ! "signal1") (-120.0,-804.0) (Outside container387)
-    setColour plugin388 "#sample"
-    plugin389 <- plugin' (sum338 ! "signal2") (-120.0,-852.0) (Outside container387)
-    setColour plugin389 "#sample"
-    plugout390 <- plugout' (sum338 ! "result") (0.0,-828.0) (Outside container387)
-    setColour plugout390 "#sample"
-    container391 <- container' "panel_int_add.png" (-60.0,-528.0) (Inside root)
-    plugin392 <- plugin' (sum337 ! "signal1") (-120.0,-504.0) (Outside container391)
-    setColour plugin392 "#sample"
-    plugin393 <- plugin' (sum337 ! "signal2") (-120.0,-552.0) (Outside container391)
-    setColour plugin393 "#sample"
-    plugout394 <- plugout' (sum337 ! "result") (0.0,-528.0) (Outside container391)
-    setColour plugout394 "#sample"
-    container395 <- container' "panel_int_add.png" (-60.0,-228.0) (Inside root)
-    plugin396 <- plugin' (sum340 ! "signal1") (-120.0,-204.0) (Outside container395)
-    setColour plugin396 "#sample"
-    plugin397 <- plugin' (sum340 ! "signal2") (-120.0,-252.0) (Outside container395)
-    setColour plugin397 "#sample"
-    plugout398 <- plugout' (sum340 ! "result") (0.0,-228.0) (Outside container395)
-    setColour plugout398 "#sample"
-    container399 <- container' "panel_vco2.png" (-204.0,-420.0) (Inside root)
-    container400 <- container' "panel_3x1.png" (-443.0,115.0) (Inside container399)
-    container401 <- container' "panel_3x1.png" (-62.0,96.0) (Inside container399)
-    container402 <- container' "panel_3x1.png" (54.0,-33.0) (Inside container399)
-    container403 <- container' "panel_3x1.png" (-319.0,129.0) (Inside container399)
-    container404 <- container' "panel_3x1.png" (-454.0,-125.0) (Inside container399)
-    label405 <- label' "sum" (-468.0,190.0) (Inside container399)
-    label406 <- label' "audio_triangle" (-87.0,171.0) (Inside container399)
-    label407 <- label' "audio_saw" (29.0,42.0) (Inside container399)
-    label408 <- label' "audio_sin" (-344.0,204.0) (Inside container399)
-    label409 <- label' "audio_square" (-479.0,-50.0) (Inside container399)
-    plugin410 <- plugin' (sum335 ! "signal2") (-464.0,90.0) (Inside container399)
+    plugout380 <- plugout' (delay_int44 ! "result") (-292.0,-2880.0) (Outside container376)
+    setColour plugout380 "#sample"
+    container381 <- container' "panel_knobs.png" (-900.0,-1884.0) (Inside root)
+    knob382 <- knob' (input110 ! "result") (-972.0,-1884.0) (Outside container381)
+    knob383 <- knob' (input109 ! "result") (-924.0,-1884.0) (Outside container381)
+    knob384 <- knob' (input111 ! "result") (-876.0,-1884.0) (Outside container381)
+    knob385 <- knob' (input112 ! "result") (-828.0,-1884.0) (Outside container381)
+    knob386 <- knob' (input113 ! "result") (-780.0,-1884.0) (Outside container381)
+    knob387 <- knob' (input114 ! "result") (-1020.0,-1884.0) (Outside container381)
+    plugin388 <- plugin' (id72 ! "signal") (-924.0,-1920.0) (Outside container381)
+    setColour plugin388 "#control"
+    hide plugin388
+    plugin389 <- plugin' (id74 ! "signal") (-876.0,-1920.0) (Outside container381)
+    setColour plugin389 "#control"
+    hide plugin389
+    plugin390 <- plugin' (id75 ! "signal") (-828.0,-1920.0) (Outside container381)
+    setColour plugin390 "#control"
+    hide plugin390
+    plugin391 <- plugin' (id76 ! "signal") (-780.0,-1920.0) (Outside container381)
+    setColour plugin391 "#control"
+    hide plugin391
+    plugin392 <- plugin' (id77 ! "signal") (-1020.0,-1920.0) (Outside container381)
+    setColour plugin392 "#control"
+    hide plugin392
+    plugin393 <- plugin' (id73 ! "signal") (-972.0,-1920.0) (Outside container381)
+    setColour plugin393 "#control"
+    hide plugin393
+    plugout394 <- plugout' (id73 ! "result") (-972.0,-1920.0) (Outside container381)
+    setColour plugout394 "#control"
+    plugout395 <- plugout' (id72 ! "result") (-924.0,-1920.0) (Outside container381)
+    setColour plugout395 "#control"
+    plugout396 <- plugout' (id74 ! "result") (-876.0,-1920.0) (Outside container381)
+    setColour plugout396 "#control"
+    plugout397 <- plugout' (id75 ! "result") (-828.0,-1920.0) (Outside container381)
+    setColour plugout397 "#control"
+    plugout398 <- plugout' (id76 ! "result") (-780.0,-1920.0) (Outside container381)
+    setColour plugout398 "#control"
+    plugout399 <- plugout' (id77 ! "result") (-1020.0,-1920.0) (Outside container381)
+    setColour plugout399 "#control"
+    container400 <- container' "panel_reverb.png" (888.0,-2640.0) (Inside root)
+    container401 <- container' "panel_3x1.png" (1428.0,-936.0) (Inside container400)
+    label402 <- label' "vca" (1403.0,-861.0) (Outside container401)
+    plugin403 <- plugin' (vca149 ! "cv") (1407.0,-911.0) (Outside container401)
+    setColour plugin403 "#control"
+    plugin404 <- plugin' (vca149 ! "signal") (1407.0,-961.0) (Outside container401)
+    setColour plugin404 "#sample"
+    plugout405 <- plugout' (vca149 ! "result") (1448.0,-936.0) (Outside container401)
+    setColour plugout405 "#sample"
+    container406 <- container' "panel_3x1.png" (1296.0,-768.0) (Inside container400)
+    label407 <- label' "fdn_reverb" (1271.0,-693.0) (Outside container406)
+    plugin408 <- plugin' (fdn_reverb48 ! "decay") (1275.0,-718.0) (Outside container406)
+    setColour plugin408 "#control"
+    hide plugin408
+    plugin409 <- plugin' (fdn_reverb48 ! "hf_decay") (1275.0,-768.0) (Outside container406)
+    setColour plugin409 "#control"
+    hide plugin409
+    plugin410 <- plugin' (fdn_reverb48 ! "signal") (1275.0,-818.0) (Outside container406)
     setColour plugin410 "#sample"
-    plugin411 <- plugin' (sum335 ! "signal1") (-464.0,140.0) (Inside container399)
-    setColour plugin411 "#sample"
-    plugin412 <- plugin' (audio_triangle291 ! "freq") (-83.0,121.0) (Inside container399)
-    setColour plugin412 "#sample"
-    plugin413 <- plugin' (audio_triangle291 ! "sync") (-83.0,71.0) (Inside container399)
-    setColour plugin413 "#sample"
-    plugin414 <- plugin' (audio_saw279 ! "freq") (33.0,-8.0) (Inside container399)
-    setColour plugin414 "#sample"
-    plugin415 <- plugin' (audio_saw279 ! "sync") (33.0,-58.0) (Inside container399)
+    plugout411 <- plugout' (fdn_reverb48 ! "result") (1316.0,-768.0) (Outside container406)
+    setColour plugout411 "#sample"
+    container412 <- container' "panel_3x1.png" (1524.0,-756.0) (Inside container400)
+    label413 <- label' "linear_mix" (1499.0,-681.0) (Outside container412)
+    plugin414 <- plugin' (linear_mix124 ! "gain") (1503.0,-706.0) (Outside container412)
+    setColour plugin414 "#control"
+    plugin415 <- plugin' (linear_mix124 ! "signal1") (1503.0,-756.0) (Outside container412)
     setColour plugin415 "#sample"
-    plugin416 <- plugin' (audio_sin283 ! "freq") (-340.0,154.0) (Inside container399)
+    plugin416 <- plugin' (linear_mix124 ! "signal2") (1503.0,-806.0) (Outside container412)
     setColour plugin416 "#sample"
-    plugin417 <- plugin' (audio_sin283 ! "sync") (-340.0,104.0) (Inside container399)
-    setColour plugin417 "#sample"
-    plugin418 <- plugin' (audio_square287 ! "pwm") (-475.0,-125.0) (Inside container399)
+    plugout417 <- plugout' (linear_mix124 ! "result") (1544.0,-756.0) (Outside container412)
+    setColour plugout417 "#sample"
+    plugin418 <- plugin' (audio_id1 ! "signal") (1593.0,-875.0) (Inside container400)
     setColour plugin418 "#sample"
-    plugin419 <- plugin' (audio_square287 ! "sync") (-475.0,-175.0) (Inside container399)
-    setColour plugin419 "#sample"
-    plugin420 <- plugin' (audio_square287 ! "freq") (-475.0,-75.0) (Inside container399)
-    setColour plugin420 "#sample"
-    plugin421 <- plugin' (id301 ! "signal") (-381.0,-126.0) (Inside container399)
-    setColour plugin421 "#sample"
-    plugin422 <- plugin' (id302 ! "signal") (12.0,98.0) (Inside container399)
-    setColour plugin422 "#sample"
-    plugin423 <- plugin' (id295 ! "signal") (125.0,-32.0) (Inside container399)
-    setColour plugin423 "#sample"
-    plugin424 <- plugin' (id296 ! "signal") (-184.0,125.0) (Inside container399)
-    setColour plugin424 "#sample"
-    plugout425 <- plugout' (sum335 ! "result") (-423.0,115.0) (Inside container399)
-    setColour plugout425 "#sample"
-    plugout426 <- plugout' (audio_triangle291 ! "result") (-42.0,96.0) (Inside container399)
-    setColour plugout426 "#sample"
-    plugout427 <- plugout' (audio_saw279 ! "result") (74.0,-33.0) (Inside container399)
-    setColour plugout427 "#sample"
-    plugout428 <- plugout' (audio_sin283 ! "result") (-299.0,129.0) (Inside container399)
-    setColour plugout428 "#sample"
-    plugout429 <- plugout' (audio_square287 ! "result") (-434.0,-125.0) (Inside container399)
-    setColour plugout429 "#sample"
-    plugout430 <- plugout' (id297 ! "result") (-519.0,89.0) (Inside container399)
-    setColour plugout430 "#sample"
-    plugout431 <- plugout' (id298 ! "result") (-520.0,145.0) (Inside container399)
-    setColour plugout431 "#sample"
-    plugout432 <- plugout' (id299 ! "result") (-522.0,-125.0) (Inside container399)
-    setColour plugout432 "#sample"
-    plugout433 <- plugout' (id300 ! "result") (-521.0,-178.0) (Inside container399)
+    plugout419 <- plugout' (audio_id26 ! "result") (1478.0,-611.0) (Inside container400)
+    setColour plugout419 "#sample"
+    plugout420 <- plugout' (id80 ! "result") (1333.0,-917.0) (Inside container400)
+    setColour plugout420 "#control"
+    plugout421 <- plugout' (id81 ! "result") (1165.0,-725.0) (Inside container400)
+    setColour plugout421 "#control"
+    plugout422 <- plugout' (id79 ! "result") (1165.0,-797.0) (Inside container400)
+    setColour plugout422 "#control"
+    plugout423 <- plugout' (audio_id27 ! "result") (1370.0,-635.0) (Inside container400)
+    setColour plugout423 "#sample"
+    knob424 <- knob' (input115 ! "result") (840.0,-2688.0) (Outside container400)
+    knob425 <- knob' (input118 ! "result") (840.0,-2736.0) (Outside container400)
+    setLow knob425 (Just (0.0))
+    setHigh  knob425 (Just (1.0))
+    knob426 <- knob' (input116 ! "result") (840.0,-2592.0) (Outside container400)
+    setLow knob426 (Just (0.0))
+    knob427 <- knob' (input117 ! "result") (840.0,-2640.0) (Outside container400)
+    setLow knob427 (Just (0.0))
+    plugin428 <- plugin' (audio_id26 ! "signal") (837.0,-2735.0) (Outside container400)
+    setColour plugin428 "#sample"
+    hide plugin428
+    plugin429 <- plugin' (id80 ! "signal") (840.0,-2688.0) (Outside container400)
+    setColour plugin429 "#control"
+    hide plugin429
+    plugin430 <- plugin' (id81 ! "signal") (888.0,-2580.0) (Outside container400)
+    setColour plugin430 "#control"
+    hide plugin430
+    plugin431 <- plugin' (id79 ! "signal") (840.0,-2640.0) (Outside container400)
+    setColour plugin431 "#control"
+    hide plugin431
+    plugin432 <- plugin' (audio_id27 ! "signal") (840.0,-2544.0) (Outside container400)
+    setColour plugin432 "#sample"
+    plugout433 <- plugout' (audio_id1 ! "result") (936.0,-2760.0) (Outside container400)
     setColour plugout433 "#sample"
-    knob434 <- knob' (input328 ! "result") (-168.0,-420.0) (Outside container399)
-    setLow knob434 (Just (0.0))
-    setHigh  knob434 (Just (1.0))
-    knob435 <- knob' (input327 ! "result") (-168.0,-348.0) (Outside container399)
-    plugin436 <- plugin' (id297 ! "signal") (-168.0,-384.0) (Outside container399)
+    container434 <- container' "panel_knob.png" (-1212.0,-1236.0) (Inside root)
+    knob435 <- knob' (input119 ! "result") (-1224.0,-1236.0) (Outside container434)
+    plugin436 <- plugin' (id83 ! "signal") (-1224.0,-1236.0) (Outside container434)
     setColour plugin436 "#control"
-    plugin437 <- plugin' (id298 ! "signal") (-168.0,-348.0) (Outside container399)
-    setColour plugin437 "#sample"
-    hide plugin437
-    plugin438 <- plugin' (id299 ! "signal") (-168.0,-420.0) (Outside container399)
-    setColour plugin438 "#sample"
-    hide plugin438
-    plugin439 <- plugin' (id300 ! "signal") (-168.0,-456.0) (Outside container399)
-    setColour plugin439 "#control"
-    plugout440 <- plugout' (id296 ! "result") (-228.0,-504.0) (Outside container399)
-    setColour plugout440 "#sample"
-    plugout441 <- plugout' (id301 ! "result") (-156.0,-504.0) (Outside container399)
-    setColour plugout441 "#sample"
-    plugout442 <- plugout' (id302 ! "result") (-228.0,-540.0) (Outside container399)
-    setColour plugout442 "#sample"
-    plugout443 <- plugout' (id295 ! "result") (-156.0,-540.0) (Outside container399)
-    setColour plugout443 "#sample"
-    container4 <- container' "panel_6x1.png" (180.0,-384.0) (Inside root)
-    label5 <- label' "switch" (144.0,-156.0) (Outside container4)
-    plugin10 <- plugin' (switch6 ! "signal3") (156.0,-336.0) (Outside container4)
-    setColour plugin10 "#sample"
-    plugin11 <- plugin' (switch6 ! "signal4") (156.0,-384.0) (Outside container4)
-    setColour plugin11 "#sample"
-    plugin12 <- plugin' (switch6 ! "signal5") (156.0,-432.0) (Outside container4)
-    setColour plugin12 "#sample"
-    plugin13 <- plugin' (switch6 ! "signal6") (156.0,-480.0) (Outside container4)
-    setColour plugin13 "#sample"
-    plugin14 <- plugin' (switch6 ! "signal7") (156.0,-528.0) (Outside container4)
-    setColour plugin14 "#sample"
-    plugin15 <- plugin' (switch6 ! "signal8") (156.0,-576.0) (Outside container4)
-    setColour plugin15 "#sample"
-    plugin7 <- plugin' (switch6 ! "select") (156.0,-192.0) (Outside container4)
-    setColour plugin7 "#control"
-    plugin8 <- plugin' (switch6 ! "signal1") (156.0,-240.0) (Outside container4)
-    setColour plugin8 "#sample"
-    plugin9 <- plugin' (switch6 ! "signal2") (156.0,-288.0) (Outside container4)
-    setColour plugin9 "#sample"
-    plugout16 <- plugout' (switch6 ! "result") (204.0,-384.0) (Outside container4)
-    setColour plugout16 "#sample"
-    container444 <- container' "panel_vco2.png" (-204.0,-120.0) (Inside root)
-    container445 <- container' "panel_3x1.png" (54.0,-33.0) (Inside container444)
-    container446 <- container' "panel_3x1.png" (-319.0,129.0) (Inside container444)
-    container447 <- container' "panel_3x1.png" (-454.0,-125.0) (Inside container444)
-    container448 <- container' "panel_3x1.png" (-443.0,115.0) (Inside container444)
-    container449 <- container' "panel_3x1.png" (-62.0,96.0) (Inside container444)
-    label450 <- label' "sum" (-468.0,190.0) (Inside container444)
-    label451 <- label' "audio_triangle" (-87.0,171.0) (Inside container444)
-    label452 <- label' "audio_saw" (29.0,42.0) (Inside container444)
-    label453 <- label' "audio_sin" (-344.0,204.0) (Inside container444)
-    label454 <- label' "audio_square" (-479.0,-50.0) (Inside container444)
-    plugin455 <- plugin' (sum341 ! "signal2") (-464.0,90.0) (Inside container444)
-    setColour plugin455 "#sample"
-    plugin456 <- plugin' (sum341 ! "signal1") (-464.0,140.0) (Inside container444)
-    setColour plugin456 "#sample"
-    plugin457 <- plugin' (audio_triangle294 ! "freq") (-83.0,121.0) (Inside container444)
-    setColour plugin457 "#sample"
-    plugin458 <- plugin' (audio_triangle294 ! "sync") (-83.0,71.0) (Inside container444)
-    setColour plugin458 "#sample"
-    plugin459 <- plugin' (audio_saw282 ! "freq") (33.0,-8.0) (Inside container444)
-    setColour plugin459 "#sample"
-    plugin460 <- plugin' (audio_saw282 ! "sync") (33.0,-58.0) (Inside container444)
-    setColour plugin460 "#sample"
-    plugin461 <- plugin' (audio_sin286 ! "freq") (-340.0,154.0) (Inside container444)
-    setColour plugin461 "#sample"
-    plugin462 <- plugin' (audio_sin286 ! "sync") (-340.0,104.0) (Inside container444)
-    setColour plugin462 "#sample"
-    plugin463 <- plugin' (audio_square290 ! "pwm") (-475.0,-125.0) (Inside container444)
-    setColour plugin463 "#sample"
-    plugin464 <- plugin' (audio_square290 ! "sync") (-475.0,-175.0) (Inside container444)
+    hide plugin436
+    plugout437 <- plugout' (id83 ! "result") (-1188.0,-1236.0) (Outside container434)
+    setColour plugout437 "#control"
+    container438 <- container' "householder12.png" (24.0,-2076.0) (Inside root)
+    plugin439 <- plugin' (householder1249 ! "signal1") (-36.0,-1812.0) (Outside container438)
+    setColour plugin439 "#sample"
+    plugin440 <- plugin' (householder1249 ! "signal2") (-36.0,-1860.0) (Outside container438)
+    setColour plugin440 "#sample"
+    plugin441 <- plugin' (householder1249 ! "signal3") (-36.0,-1908.0) (Outside container438)
+    setColour plugin441 "#sample"
+    plugin442 <- plugin' (householder1249 ! "signal4") (-36.0,-1956.0) (Outside container438)
+    setColour plugin442 "#sample"
+    plugin443 <- plugin' (householder1249 ! "signal5") (-36.0,-2004.0) (Outside container438)
+    setColour plugin443 "#sample"
+    plugin444 <- plugin' (householder1249 ! "signal6") (-36.0,-2052.0) (Outside container438)
+    setColour plugin444 "#sample"
+    plugin445 <- plugin' (householder1249 ! "signal7") (-36.0,-2100.0) (Outside container438)
+    setColour plugin445 "#sample"
+    plugin446 <- plugin' (householder1249 ! "signal8") (-36.0,-2148.0) (Outside container438)
+    setColour plugin446 "#sample"
+    plugin447 <- plugin' (householder1249 ! "signal9") (-36.0,-2196.0) (Outside container438)
+    setColour plugin447 "#sample"
+    plugin448 <- plugin' (householder1249 ! "signal10") (-36.0,-2244.0) (Outside container438)
+    setColour plugin448 "#sample"
+    plugin449 <- plugin' (householder1249 ! "signal11") (-36.0,-2292.0) (Outside container438)
+    setColour plugin449 "#sample"
+    plugin450 <- plugin' (householder1249 ! "signal12") (-36.0,-2340.0) (Outside container438)
+    setColour plugin450 "#sample"
+    plugout451 <- plugout' (householder1249 ! "result1") (84.0,-1812.0) (Outside container438)
+    setColour plugout451 "#sample"
+    plugout452 <- plugout' (householder1249 ! "result2") (84.0,-1860.0) (Outside container438)
+    setColour plugout452 "#sample"
+    plugout453 <- plugout' (householder1249 ! "result3") (84.0,-1908.0) (Outside container438)
+    setColour plugout453 "#sample"
+    plugout454 <- plugout' (householder1249 ! "result4") (84.0,-1956.0) (Outside container438)
+    setColour plugout454 "#sample"
+    plugout455 <- plugout' (householder1249 ! "result5") (84.0,-2004.0) (Outside container438)
+    setColour plugout455 "#sample"
+    plugout456 <- plugout' (householder1249 ! "result6") (84.0,-2052.0) (Outside container438)
+    setColour plugout456 "#sample"
+    plugout457 <- plugout' (householder1249 ! "result7") (84.0,-2100.0) (Outside container438)
+    setColour plugout457 "#sample"
+    plugout458 <- plugout' (householder1249 ! "result8") (84.0,-2148.0) (Outside container438)
+    setColour plugout458 "#sample"
+    plugout459 <- plugout' (householder1249 ! "result9") (84.0,-2196.0) (Outside container438)
+    setColour plugout459 "#sample"
+    plugout460 <- plugout' (householder1249 ! "result10") (84.0,-2244.0) (Outside container438)
+    setColour plugout460 "#sample"
+    plugout461 <- plugout' (householder1249 ! "result11") (84.0,-2292.0) (Outside container438)
+    setColour plugout461 "#sample"
+    plugout462 <- plugout' (householder1249 ! "result12") (84.0,-2340.0) (Outside container438)
+    setColour plugout462 "#sample"
+    container463 <- container' "warp12_in.png" (756.0,-2088.0) (Inside root)
+    plugin464 <- plugin' (audio_id3 ! "signal") (732.0,-1872.0) (Outside container463)
     setColour plugin464 "#sample"
-    plugin465 <- plugin' (audio_square290 ! "freq") (-475.0,-75.0) (Inside container444)
+    plugin465 <- plugin' (audio_id22 ! "signal") (732.0,-2016.0) (Outside container463)
     setColour plugin465 "#sample"
-    plugin466 <- plugin' (id325 ! "signal") (-381.0,-126.0) (Inside container444)
+    plugin466 <- plugin' (audio_id23 ! "signal") (732.0,-2064.0) (Outside container463)
     setColour plugin466 "#sample"
-    plugin467 <- plugin' (id326 ! "signal") (12.0,98.0) (Inside container444)
+    plugin467 <- plugin' (audio_id12 ! "signal") (732.0,-1920.0) (Outside container463)
     setColour plugin467 "#sample"
-    plugin468 <- plugin' (id319 ! "signal") (125.0,-32.0) (Inside container444)
+    plugin468 <- plugin' (audio_id21 ! "signal") (732.0,-1968.0) (Outside container463)
     setColour plugin468 "#sample"
-    plugin469 <- plugin' (id320 ! "signal") (-184.0,125.0) (Inside container444)
+    plugin469 <- plugin' (audio_id2 ! "signal") (732.0,-1824.0) (Outside container463)
     setColour plugin469 "#sample"
-    plugout470 <- plugout' (sum341 ! "result") (-423.0,115.0) (Inside container444)
-    setColour plugout470 "#sample"
-    plugout471 <- plugout' (audio_triangle294 ! "result") (-42.0,96.0) (Inside container444)
-    setColour plugout471 "#sample"
-    plugout472 <- plugout' (audio_saw282 ! "result") (74.0,-33.0) (Inside container444)
-    setColour plugout472 "#sample"
-    plugout473 <- plugout' (audio_sin286 ! "result") (-299.0,129.0) (Inside container444)
-    setColour plugout473 "#sample"
-    plugout474 <- plugout' (audio_square290 ! "result") (-434.0,-125.0) (Inside container444)
-    setColour plugout474 "#sample"
-    plugout475 <- plugout' (id321 ! "result") (-519.0,89.0) (Inside container444)
-    setColour plugout475 "#sample"
-    plugout476 <- plugout' (id322 ! "result") (-520.0,145.0) (Inside container444)
-    setColour plugout476 "#sample"
-    plugout477 <- plugout' (id323 ! "result") (-522.0,-125.0) (Inside container444)
+    plugin470 <- plugin' (audio_id25 ! "signal") (732.0,-2160.0) (Outside container463)
+    setColour plugin470 "#sample"
+    plugin471 <- plugin' (audio_id19 ! "signal") (732.0,-2304.0) (Outside container463)
+    setColour plugin471 "#sample"
+    plugin472 <- plugin' (audio_id20 ! "signal") (732.0,-2352.0) (Outside container463)
+    setColour plugin472 "#sample"
+    plugin473 <- plugin' (audio_id17 ! "signal") (732.0,-2208.0) (Outside container463)
+    setColour plugin473 "#sample"
+    plugin474 <- plugin' (audio_id18 ! "signal") (732.0,-2256.0) (Outside container463)
+    setColour plugin474 "#sample"
+    plugin475 <- plugin' (audio_id24 ! "signal") (732.0,-2112.0) (Outside container463)
+    setColour plugin475 "#sample"
+    container476 <- container' "warp12_out.png" (-948.0,-2460.0) (Inside root)
+    plugout477 <- plugout' (audio_id23 ! "result") (-924.0,-2436.0) (Outside container476)
     setColour plugout477 "#sample"
-    plugout478 <- plugout' (id324 ! "result") (-521.0,-178.0) (Inside container444)
+    plugout478 <- plugout' (audio_id22 ! "result") (-924.0,-2388.0) (Outside container476)
     setColour plugout478 "#sample"
-    knob479 <- knob' (input334 ! "result") (-168.0,-120.0) (Outside container444)
-    setLow knob479 (Just (0.0))
-    setHigh  knob479 (Just (1.0))
-    knob480 <- knob' (input333 ! "result") (-168.0,-48.0) (Outside container444)
-    plugin481 <- plugin' (id321 ! "signal") (-168.0,-84.0) (Outside container444)
-    setColour plugin481 "#control"
-    plugin482 <- plugin' (id322 ! "signal") (-168.0,-48.0) (Outside container444)
-    setColour plugin482 "#sample"
-    hide plugin482
-    plugin483 <- plugin' (id323 ! "signal") (-168.0,-120.0) (Outside container444)
-    setColour plugin483 "#sample"
-    hide plugin483
-    plugin484 <- plugin' (id324 ! "signal") (-168.0,-156.0) (Outside container444)
-    setColour plugin484 "#control"
-    plugout485 <- plugout' (id320 ! "result") (-228.0,-204.0) (Outside container444)
+    plugout479 <- plugout' (audio_id21 ! "result") (-924.0,-2340.0) (Outside container476)
+    setColour plugout479 "#sample"
+    plugout480 <- plugout' (audio_id12 ! "result") (-924.0,-2292.0) (Outside container476)
+    setColour plugout480 "#sample"
+    plugout481 <- plugout' (audio_id3 ! "result") (-924.0,-2244.0) (Outside container476)
+    setColour plugout481 "#sample"
+    plugout482 <- plugout' (audio_id2 ! "result") (-924.0,-2196.0) (Outside container476)
+    setColour plugout482 "#sample"
+    plugout483 <- plugout' (audio_id20 ! "result") (-924.0,-2724.0) (Outside container476)
+    setColour plugout483 "#sample"
+    plugout484 <- plugout' (audio_id19 ! "result") (-924.0,-2676.0) (Outside container476)
+    setColour plugout484 "#sample"
+    plugout485 <- plugout' (audio_id18 ! "result") (-924.0,-2628.0) (Outside container476)
     setColour plugout485 "#sample"
-    plugout486 <- plugout' (id325 ! "result") (-156.0,-204.0) (Outside container444)
+    plugout486 <- plugout' (audio_id17 ! "result") (-924.0,-2580.0) (Outside container476)
     setColour plugout486 "#sample"
-    plugout487 <- plugout' (id326 ! "result") (-228.0,-240.0) (Outside container444)
+    plugout487 <- plugout' (audio_id25 ! "result") (-924.0,-2532.0) (Outside container476)
     setColour plugout487 "#sample"
-    plugout488 <- plugout' (id319 ! "result") (-156.0,-240.0) (Outside container444)
+    plugout488 <- plugout' (audio_id24 ! "result") (-924.0,-2484.0) (Outside container476)
     setColour plugout488 "#sample"
-    container489 <- container' "panel_vco2.png" (-204.0,180.0) (Inside root)
-    container490 <- container' "panel_3x1.png" (-443.0,115.0) (Inside container489)
-    container491 <- container' "panel_3x1.png" (-62.0,96.0) (Inside container489)
-    container492 <- container' "panel_3x1.png" (54.0,-33.0) (Inside container489)
-    container493 <- container' "panel_3x1.png" (-319.0,129.0) (Inside container489)
-    container494 <- container' "panel_3x1.png" (-454.0,-125.0) (Inside container489)
-    label495 <- label' "sum" (-468.0,190.0) (Inside container489)
-    label496 <- label' "audio_triangle" (-87.0,171.0) (Inside container489)
-    label497 <- label' "audio_saw" (29.0,42.0) (Inside container489)
-    label498 <- label' "audio_sin" (-344.0,204.0) (Inside container489)
-    label499 <- label' "audio_square" (-479.0,-50.0) (Inside container489)
-    plugin500 <- plugin' (sum339 ! "signal2") (-464.0,90.0) (Inside container489)
-    setColour plugin500 "#sample"
-    plugin501 <- plugin' (sum339 ! "signal1") (-464.0,140.0) (Inside container489)
+    container489 <- container' "panel_linear_mix.png" (-588.0,-288.0) (Inside root)
+    plugin490 <- plugin' (linear_mix125 ! "gain") (-588.0,-228.0) (Outside container489)
+    setColour plugin490 "#control"
+    plugin491 <- plugin' (linear_mix125 ! "signal1") (-612.0,-288.0) (Outside container489)
+    setColour plugin491 "#sample"
+    plugin492 <- plugin' (linear_mix125 ! "signal2") (-612.0,-336.0) (Outside container489)
+    setColour plugin492 "#sample"
+    plugout493 <- plugout' (linear_mix125 ! "result") (-564.0,-312.0) (Outside container489)
+    setColour plugout493 "#sample"
+    container494 <- container' "panel_linear_mix.png" (-588.0,-516.0) (Inside root)
+    plugin495 <- plugin' (linear_mix126 ! "gain") (-588.0,-456.0) (Outside container494)
+    setColour plugin495 "#control"
+    plugin496 <- plugin' (linear_mix126 ! "signal1") (-612.0,-516.0) (Outside container494)
+    setColour plugin496 "#sample"
+    plugin497 <- plugin' (linear_mix126 ! "signal2") (-612.0,-564.0) (Outside container494)
+    setColour plugin497 "#sample"
+    plugout498 <- plugout' (linear_mix126 ! "result") (-564.0,-540.0) (Outside container494)
+    setColour plugout498 "#sample"
+    container499 <- container' "panel_linear_mix.png" (-588.0,-720.0) (Inside root)
+    plugin500 <- plugin' (linear_mix127 ! "gain") (-588.0,-660.0) (Outside container499)
+    setColour plugin500 "#control"
+    plugin501 <- plugin' (linear_mix127 ! "signal1") (-612.0,-720.0) (Outside container499)
     setColour plugin501 "#sample"
-    plugin502 <- plugin' (audio_triangle292 ! "freq") (-83.0,121.0) (Inside container489)
+    plugin502 <- plugin' (linear_mix127 ! "signal2") (-612.0,-768.0) (Outside container499)
     setColour plugin502 "#sample"
-    plugin503 <- plugin' (audio_triangle292 ! "sync") (-83.0,71.0) (Inside container489)
-    setColour plugin503 "#sample"
-    plugin504 <- plugin' (audio_saw280 ! "freq") (33.0,-8.0) (Inside container489)
-    setColour plugin504 "#sample"
-    plugin505 <- plugin' (audio_saw280 ! "sync") (33.0,-58.0) (Inside container489)
-    setColour plugin505 "#sample"
-    plugin506 <- plugin' (audio_sin284 ! "freq") (-340.0,154.0) (Inside container489)
+    plugout503 <- plugout' (linear_mix127 ! "result") (-564.0,-744.0) (Outside container499)
+    setColour plugout503 "#sample"
+    container504 <- container' "panel_linear_mix.png" (-588.0,-948.0) (Inside root)
+    plugin505 <- plugin' (linear_mix128 ! "gain") (-588.0,-888.0) (Outside container504)
+    setColour plugin505 "#control"
+    plugin506 <- plugin' (linear_mix128 ! "signal1") (-612.0,-948.0) (Outside container504)
     setColour plugin506 "#sample"
-    plugin507 <- plugin' (audio_sin284 ! "sync") (-340.0,104.0) (Inside container489)
+    plugin507 <- plugin' (linear_mix128 ! "signal2") (-612.0,-996.0) (Outside container504)
     setColour plugin507 "#sample"
-    plugin508 <- plugin' (audio_square288 ! "pwm") (-475.0,-125.0) (Inside container489)
-    setColour plugin508 "#sample"
-    plugin509 <- plugin' (audio_square288 ! "sync") (-475.0,-175.0) (Inside container489)
-    setColour plugin509 "#sample"
-    plugin510 <- plugin' (audio_square288 ! "freq") (-475.0,-75.0) (Inside container489)
-    setColour plugin510 "#sample"
-    plugin511 <- plugin' (id317 ! "signal") (-381.0,-126.0) (Inside container489)
+    plugout508 <- plugout' (linear_mix128 ! "result") (-564.0,-972.0) (Outside container504)
+    setColour plugout508 "#sample"
+    container509 <- container' "panel_linear_mix.png" (-588.0,-1176.0) (Inside root)
+    plugin510 <- plugin' (linear_mix129 ! "gain") (-588.0,-1116.0) (Outside container509)
+    setColour plugin510 "#control"
+    plugin511 <- plugin' (linear_mix129 ! "signal1") (-612.0,-1176.0) (Outside container509)
     setColour plugin511 "#sample"
-    plugin512 <- plugin' (id318 ! "signal") (12.0,98.0) (Inside container489)
+    plugin512 <- plugin' (linear_mix129 ! "signal2") (-612.0,-1224.0) (Outside container509)
     setColour plugin512 "#sample"
-    plugin513 <- plugin' (id303 ! "signal") (125.0,-32.0) (Inside container489)
-    setColour plugin513 "#sample"
-    plugin514 <- plugin' (id311 ! "signal") (-184.0,125.0) (Inside container489)
-    setColour plugin514 "#sample"
-    plugout515 <- plugout' (sum339 ! "result") (-423.0,115.0) (Inside container489)
-    setColour plugout515 "#sample"
-    plugout516 <- plugout' (audio_triangle292 ! "result") (-42.0,96.0) (Inside container489)
-    setColour plugout516 "#sample"
-    plugout517 <- plugout' (audio_saw280 ! "result") (74.0,-33.0) (Inside container489)
-    setColour plugout517 "#sample"
-    plugout518 <- plugout' (audio_sin284 ! "result") (-299.0,129.0) (Inside container489)
+    plugout513 <- plugout' (linear_mix129 ! "result") (-564.0,-1200.0) (Outside container509)
+    setColour plugout513 "#sample"
+    container514 <- container' "panel_linear_mix.png" (-588.0,-1452.0) (Inside root)
+    plugin515 <- plugin' (linear_mix130 ! "gain") (-588.0,-1392.0) (Outside container514)
+    setColour plugin515 "#control"
+    plugin516 <- plugin' (linear_mix130 ! "signal1") (-612.0,-1452.0) (Outside container514)
+    setColour plugin516 "#sample"
+    plugin517 <- plugin' (linear_mix130 ! "signal2") (-612.0,-1500.0) (Outside container514)
+    setColour plugin517 "#sample"
+    plugout518 <- plugout' (linear_mix130 ! "result") (-564.0,-1476.0) (Outside container514)
     setColour plugout518 "#sample"
-    plugout519 <- plugout' (audio_square288 ! "result") (-434.0,-125.0) (Inside container489)
-    setColour plugout519 "#sample"
-    plugout520 <- plugout' (id313 ! "result") (-519.0,89.0) (Inside container489)
-    setColour plugout520 "#sample"
-    plugout521 <- plugout' (id314 ! "result") (-520.0,145.0) (Inside container489)
-    setColour plugout521 "#sample"
-    plugout522 <- plugout' (id315 ! "result") (-522.0,-125.0) (Inside container489)
-    setColour plugout522 "#sample"
-    plugout523 <- plugout' (id316 ! "result") (-521.0,-178.0) (Inside container489)
+    container519 <- container' "panel_linear_mix.png" (-588.0,-2880.0) (Inside root)
+    plugin520 <- plugin' (linear_mix131 ! "gain") (-588.0,-2820.0) (Outside container519)
+    setColour plugin520 "#control"
+    plugin521 <- plugin' (linear_mix131 ! "signal1") (-612.0,-2880.0) (Outside container519)
+    setColour plugin521 "#sample"
+    plugin522 <- plugin' (linear_mix131 ! "signal2") (-612.0,-2928.0) (Outside container519)
+    setColour plugin522 "#sample"
+    plugout523 <- plugout' (linear_mix131 ! "result") (-564.0,-2904.0) (Outside container519)
     setColour plugout523 "#sample"
-    knob524 <- knob' (input332 ! "result") (-168.0,180.0) (Outside container489)
-    setLow knob524 (Just (0.0))
-    setHigh  knob524 (Just (1.0))
-    knob525 <- knob' (input331 ! "result") (-168.0,252.0) (Outside container489)
-    plugin526 <- plugin' (id313 ! "signal") (-168.0,216.0) (Outside container489)
-    setColour plugin526 "#control"
-    plugin527 <- plugin' (id314 ! "signal") (-168.0,252.0) (Outside container489)
+    container524 <- container' "panel_linear_mix.png" (-588.0,-2664.0) (Inside root)
+    plugin525 <- plugin' (linear_mix132 ! "gain") (-588.0,-2604.0) (Outside container524)
+    setColour plugin525 "#control"
+    plugin526 <- plugin' (linear_mix132 ! "signal1") (-612.0,-2664.0) (Outside container524)
+    setColour plugin526 "#sample"
+    plugin527 <- plugin' (linear_mix132 ! "signal2") (-612.0,-2712.0) (Outside container524)
     setColour plugin527 "#sample"
-    hide plugin527
-    plugin528 <- plugin' (id315 ! "signal") (-168.0,180.0) (Outside container489)
-    setColour plugin528 "#sample"
-    hide plugin528
-    plugin529 <- plugin' (id316 ! "signal") (-168.0,144.0) (Outside container489)
-    setColour plugin529 "#control"
-    plugout530 <- plugout' (id311 ! "result") (-228.0,96.0) (Outside container489)
-    setColour plugout530 "#sample"
-    plugout531 <- plugout' (id317 ! "result") (-156.0,96.0) (Outside container489)
-    setColour plugout531 "#sample"
-    plugout532 <- plugout' (id318 ! "result") (-228.0,60.0) (Outside container489)
-    setColour plugout532 "#sample"
-    plugout533 <- plugout' (id303 ! "result") (-156.0,60.0) (Outside container489)
+    plugout528 <- plugout' (linear_mix132 ! "result") (-564.0,-2688.0) (Outside container524)
+    setColour plugout528 "#sample"
+    container529 <- container' "panel_linear_mix.png" (-588.0,-2448.0) (Inside root)
+    plugin530 <- plugin' (linear_mix133 ! "gain") (-588.0,-2388.0) (Outside container529)
+    setColour plugin530 "#control"
+    plugin531 <- plugin' (linear_mix133 ! "signal1") (-612.0,-2448.0) (Outside container529)
+    setColour plugin531 "#sample"
+    plugin532 <- plugin' (linear_mix133 ! "signal2") (-612.0,-2496.0) (Outside container529)
+    setColour plugin532 "#sample"
+    plugout533 <- plugout' (linear_mix133 ! "result") (-564.0,-2472.0) (Outside container529)
     setColour plugout533 "#sample"
-    container535 <- container' "panel_int_add.png" (-60.0,72.0) (Inside root)
-    plugin536 <- plugin' (sum534 ! "signal1") (-120.0,96.0) (Outside container535)
+    container534 <- container' "panel_linear_mix.png" (-588.0,-2220.0) (Inside root)
+    plugin535 <- plugin' (linear_mix134 ! "gain") (-588.0,-2160.0) (Outside container534)
+    setColour plugin535 "#control"
+    plugin536 <- plugin' (linear_mix134 ! "signal1") (-612.0,-2220.0) (Outside container534)
     setColour plugin536 "#sample"
-    plugin537 <- plugin' (sum534 ! "signal2") (-120.0,48.0) (Outside container535)
+    plugin537 <- plugin' (linear_mix134 ! "signal2") (-612.0,-2268.0) (Outside container534)
     setColour plugin537 "#sample"
-    plugout538 <- plugout' (sum534 ! "result") (0.0,72.0) (Outside container535)
+    plugout538 <- plugout' (linear_mix134 ! "result") (-564.0,-2244.0) (Outside container534)
     setColour plugout538 "#sample"
-    container78 <- container' "panel_int_add.png" (-480.0,-228.0) (Inside root)
-    plugin79 <- plugin' (sum77 ! "signal1") (-540.0,-204.0) (Outside container78)
-    setColour plugin79 "#sample"
-    plugin80 <- plugin' (sum77 ! "signal2") (-540.0,-252.0) (Outside container78)
-    setColour plugin80 "#sample"
-    plugout81 <- plugout' (sum77 ! "result") (-420.0,-228.0) (Outside container78)
-    setColour plugout81 "#sample"
-    container97 <- container' "panel_vco2.png" (-624.0,-120.0) (Inside root)
-    container100 <- container' "panel_3x1.png" (54.0,-33.0) (Inside container97)
-    container101 <- container' "panel_3x1.png" (-319.0,129.0) (Inside container97)
-    container102 <- container' "panel_3x1.png" (-454.0,-125.0) (Inside container97)
-    container98 <- container' "panel_3x1.png" (-443.0,115.0) (Inside container97)
-    container99 <- container' "panel_3x1.png" (-62.0,96.0) (Inside container97)
-    label103 <- label' "sum" (-468.0,190.0) (Inside container97)
-    label104 <- label' "audio_triangle" (-87.0,171.0) (Inside container97)
-    label105 <- label' "audio_saw" (29.0,42.0) (Inside container97)
-    label106 <- label' "audio_sin" (-344.0,204.0) (Inside container97)
-    label107 <- label' "audio_square" (-479.0,-50.0) (Inside container97)
-    plugin108 <- plugin' (sum96 ! "signal2") (-464.0,90.0) (Inside container97)
-    setColour plugin108 "#sample"
-    plugin109 <- plugin' (sum96 ! "signal1") (-464.0,140.0) (Inside container97)
-    setColour plugin109 "#sample"
-    plugin110 <- plugin' (audio_triangle85 ! "freq") (-83.0,121.0) (Inside container97)
-    setColour plugin110 "#sample"
-    plugin111 <- plugin' (audio_triangle85 ! "sync") (-83.0,71.0) (Inside container97)
-    setColour plugin111 "#sample"
-    plugin112 <- plugin' (audio_saw82 ! "freq") (33.0,-8.0) (Inside container97)
-    setColour plugin112 "#sample"
-    plugin113 <- plugin' (audio_saw82 ! "sync") (33.0,-58.0) (Inside container97)
-    setColour plugin113 "#sample"
-    plugin114 <- plugin' (audio_sin83 ! "freq") (-340.0,154.0) (Inside container97)
-    setColour plugin114 "#sample"
-    plugin115 <- plugin' (audio_sin83 ! "sync") (-340.0,104.0) (Inside container97)
-    setColour plugin115 "#sample"
-    plugin116 <- plugin' (audio_square84 ! "pwm") (-475.0,-125.0) (Inside container97)
-    setColour plugin116 "#sample"
-    plugin117 <- plugin' (audio_square84 ! "sync") (-475.0,-175.0) (Inside container97)
-    setColour plugin117 "#sample"
-    plugin118 <- plugin' (audio_square84 ! "freq") (-475.0,-75.0) (Inside container97)
-    setColour plugin118 "#sample"
-    plugin119 <- plugin' (id92 ! "signal") (-381.0,-126.0) (Inside container97)
-    setColour plugin119 "#sample"
-    plugin120 <- plugin' (id93 ! "signal") (12.0,98.0) (Inside container97)
-    setColour plugin120 "#sample"
-    plugin121 <- plugin' (id86 ! "signal") (125.0,-32.0) (Inside container97)
-    setColour plugin121 "#sample"
-    plugin122 <- plugin' (id87 ! "signal") (-184.0,125.0) (Inside container97)
-    setColour plugin122 "#sample"
-    plugout123 <- plugout' (sum96 ! "result") (-423.0,115.0) (Inside container97)
-    setColour plugout123 "#sample"
-    plugout124 <- plugout' (audio_triangle85 ! "result") (-42.0,96.0) (Inside container97)
-    setColour plugout124 "#sample"
-    plugout125 <- plugout' (audio_saw82 ! "result") (74.0,-33.0) (Inside container97)
-    setColour plugout125 "#sample"
-    plugout126 <- plugout' (audio_sin83 ! "result") (-299.0,129.0) (Inside container97)
-    setColour plugout126 "#sample"
-    plugout127 <- plugout' (audio_square84 ! "result") (-434.0,-125.0) (Inside container97)
-    setColour plugout127 "#sample"
-    plugout128 <- plugout' (id88 ! "result") (-519.0,89.0) (Inside container97)
-    setColour plugout128 "#sample"
-    plugout129 <- plugout' (id89 ! "result") (-520.0,145.0) (Inside container97)
-    setColour plugout129 "#sample"
-    plugout130 <- plugout' (id90 ! "result") (-522.0,-125.0) (Inside container97)
-    setColour plugout130 "#sample"
-    plugout131 <- plugout' (id91 ! "result") (-521.0,-178.0) (Inside container97)
-    setColour plugout131 "#sample"
-    knob132 <- knob' (input95 ! "result") (-588.0,-120.0) (Outside container97)
-    setLow knob132 (Just (0.0))
-    setHigh  knob132 (Just (1.0))
-    knob133 <- knob' (input94 ! "result") (-588.0,-48.0) (Outside container97)
-    plugin134 <- plugin' (id88 ! "signal") (-588.0,-84.0) (Outside container97)
-    setColour plugin134 "#control"
-    plugin135 <- plugin' (id89 ! "signal") (-588.0,-48.0) (Outside container97)
-    setColour plugin135 "#sample"
-    hide plugin135
-    plugin136 <- plugin' (id90 ! "signal") (-588.0,-120.0) (Outside container97)
-    setColour plugin136 "#sample"
-    hide plugin136
-    plugin137 <- plugin' (id91 ! "signal") (-588.0,-156.0) (Outside container97)
-    setColour plugin137 "#control"
-    plugout138 <- plugout' (id87 ! "result") (-648.0,-204.0) (Outside container97)
-    setColour plugout138 "#sample"
-    plugout139 <- plugout' (id92 ! "result") (-576.0,-204.0) (Outside container97)
-    setColour plugout139 "#sample"
-    plugout140 <- plugout' (id93 ! "result") (-648.0,-240.0) (Outside container97)
-    setColour plugout140 "#sample"
-    plugout141 <- plugout' (id86 ! "result") (-576.0,-240.0) (Outside container97)
-    setColour plugout141 "#sample"
-    cable plugout188 plugin168
-    cable plugout189 plugin169
-    cable plugout183 plugin170
-    cable plugout191 plugin171
-    cable plugout183 plugin172
-    cable plugout191 plugin173
-    cable plugout183 plugin174
-    cable plugout191 plugin175
-    cable plugout190 plugin176
-    cable plugout191 plugin177
-    cable plugout183 plugin178
-    cable plugout187 plugin179
-    cable plugout184 plugin180
-    cable plugout185 plugin181
-    cable plugout186 plugin182
-    cable knob193 plugin195
-    cable knob192 plugin196
-    cable plugout255 plugin235
-    cable plugout256 plugin236
-    cable plugout250 plugin237
-    cable plugout258 plugin238
-    cable plugout250 plugin239
-    cable plugout258 plugin240
-    cable plugout250 plugin241
-    cable plugout258 plugin242
-    cable plugout257 plugin243
-    cable plugout258 plugin244
-    cable plugout250 plugin245
-    cable plugout254 plugin246
-    cable plugout251 plugin247
-    cable plugout252 plugin248
-    cable plugout253 plugin249
-    cable knob260 plugin262
-    cable knob259 plugin263
-    cable plugout81 plugin271
-    cable plugout201 plugin272
-    cable plugout273 plugin276
-    cable plugout268 plugin277
-    cable plugout63 plugin43
-    cable plugout64 plugin44
-    cable plugout58 plugin45
-    cable plugout66 plugin46
-    cable plugout58 plugin47
-    cable plugout66 plugin48
-    cable plugout58 plugin49
-    cable plugout66 plugin50
-    cable plugout65 plugin51
-    cable plugout66 plugin52
-    cable plugout58 plugin53
-    cable plugout62 plugin54
-    cable plugout59 plugin55
-    cable plugout60 plugin56
-    cable plugout61 plugin57
-    cable knob68 plugin70
-    cable knob67 plugin71
-    cable plugout373 plugin353
-    cable plugout374 plugin354
-    cable plugout368 plugin355
-    cable plugout376 plugin356
-    cable plugout368 plugin357
-    cable plugout376 plugin358
-    cable plugout368 plugin359
-    cable plugout376 plugin360
-    cable plugout375 plugin361
-    cable plugout376 plugin362
-    cable plugout368 plugin363
-    cable plugout372 plugin364
-    cable plugout369 plugin365
-    cable plugout370 plugin366
-    cable plugout371 plugin367
-    cable knob378 plugin380
-    cable knob377 plugin381
-    cable plugout394 plugin388
-    cable plugout386 plugin389
-    cable plugout398 plugin392
-    cable plugout443 plugin393
-    cable plugout538 plugin396
-    cable plugout488 plugin397
-    cable plugout430 plugin410
-    cable plugout431 plugin411
-    cable plugout425 plugin412
-    cable plugout433 plugin413
-    cable plugout425 plugin414
-    cable plugout433 plugin415
-    cable plugout425 plugin416
-    cable plugout433 plugin417
-    cable plugout432 plugin418
-    cable plugout433 plugin419
-    cable plugout425 plugin420
-    cable plugout429 plugin421
-    cable plugout426 plugin422
-    cable plugout427 plugin423
-    cable plugout428 plugin424
-    cable knob435 plugin437
-    cable knob434 plugin438
-    cable plugout273 plugin10
-    cable plugout278 plugin11
-    cable plugout538 plugin12
-    cable plugout398 plugin13
-    cable plugout394 plugin14
-    cable plugout390 plugin15
-    cable plugout76 plugin8
-    cable plugout81 plugin9
-    cable plugout475 plugin455
-    cable plugout476 plugin456
-    cable plugout470 plugin457
-    cable plugout478 plugin458
-    cable plugout470 plugin459
-    cable plugout478 plugin460
-    cable plugout470 plugin461
-    cable plugout478 plugin462
-    cable plugout477 plugin463
-    cable plugout478 plugin464
-    cable plugout470 plugin465
-    cable plugout474 plugin466
-    cable plugout471 plugin467
-    cable plugout472 plugin468
-    cable plugout473 plugin469
-    cable knob480 plugin482
-    cable knob479 plugin483
-    cable plugout520 plugin500
-    cable plugout521 plugin501
-    cable plugout515 plugin502
-    cable plugout523 plugin503
-    cable plugout515 plugin504
-    cable plugout523 plugin505
-    cable plugout515 plugin506
-    cable plugout523 plugin507
-    cable plugout522 plugin508
-    cable plugout523 plugin509
-    cable plugout515 plugin510
-    cable plugout519 plugin511
-    cable plugout516 plugin512
-    cable plugout517 plugin513
-    cable plugout518 plugin514
-    cable knob525 plugin527
-    cable knob524 plugin528
-    cable plugout278 plugin536
-    cable plugout533 plugin537
-    cable plugout76 plugin79
-    cable plugout141 plugin80
-    cable plugout128 plugin108
-    cable plugout129 plugin109
-    cable plugout123 plugin110
-    cable plugout131 plugin111
-    cable plugout123 plugin112
-    cable plugout131 plugin113
-    cable plugout123 plugin114
-    cable plugout131 plugin115
-    cable plugout130 plugin116
-    cable plugout131 plugin117
-    cable plugout123 plugin118
-    cable plugout127 plugin119
-    cable plugout124 plugin120
-    cable plugout125 plugin121
-    cable plugout126 plugin122
-    cable knob133 plugin135
-    cable knob132 plugin136
+    container539 <- container' "panel_linear_mix.png" (-588.0,-1992.0) (Inside root)
+    plugin540 <- plugin' (linear_mix135 ! "gain") (-588.0,-1932.0) (Outside container539)
+    setColour plugin540 "#control"
+    plugin541 <- plugin' (linear_mix135 ! "signal1") (-612.0,-1992.0) (Outside container539)
+    setColour plugin541 "#sample"
+    plugin542 <- plugin' (linear_mix135 ! "signal2") (-612.0,-2040.0) (Outside container539)
+    setColour plugin542 "#sample"
+    plugout543 <- plugout' (linear_mix135 ! "result") (-564.0,-2016.0) (Outside container539)
+    setColour plugout543 "#sample"
+    container544 <- container' "panel_linear_mix.png" (-588.0,-1716.0) (Inside root)
+    plugin545 <- plugin' (linear_mix136 ! "gain") (-588.0,-1656.0) (Outside container544)
+    setColour plugin545 "#control"
+    plugin546 <- plugin' (linear_mix136 ! "signal1") (-612.0,-1716.0) (Outside container544)
+    setColour plugin546 "#sample"
+    plugin547 <- plugin' (linear_mix136 ! "signal2") (-612.0,-1764.0) (Outside container544)
+    setColour plugin547 "#sample"
+    plugout548 <- plugout' (linear_mix136 ! "result") (-564.0,-1740.0) (Outside container544)
+    setColour plugout548 "#sample"
+    container549 <- container' "panel_1x1.png" (672.0,-1152.0) (Inside root)
+    label550 <- label' "negate" (636.0,-1104.0) (Outside container549)
+    plugin551 <- plugin' (negate138 ! "signal") (648.0,-1152.0) (Outside container549)
+    setColour plugin551 "#sample"
+    plugout552 <- plugout' (negate138 ! "result") (696.0,-1152.0) (Outside container549)
+    setColour plugout552 "#sample"
+    container553 <- container' "panel_1x1.png" (672.0,-1248.0) (Inside root)
+    label554 <- label' "negate" (636.0,-1200.0) (Outside container553)
+    plugin555 <- plugin' (negate139 ! "signal") (648.0,-1248.0) (Outside container553)
+    setColour plugin555 "#sample"
+    plugout556 <- plugout' (negate139 ! "result") (696.0,-1248.0) (Outside container553)
+    setColour plugout556 "#sample"
+    container557 <- container' "panel_1x1.png" (672.0,-1344.0) (Inside root)
+    label558 <- label' "negate" (636.0,-1296.0) (Outside container557)
+    plugin559 <- plugin' (negate140 ! "signal") (648.0,-1344.0) (Outside container557)
+    setColour plugin559 "#sample"
+    plugout560 <- plugout' (negate140 ! "result") (696.0,-1344.0) (Outside container557)
+    setColour plugout560 "#sample"
+    container561 <- container' "panel_1x1.png" (672.0,-1440.0) (Inside root)
+    label562 <- label' "negate" (636.0,-1392.0) (Outside container561)
+    plugin563 <- plugin' (negate141 ! "signal") (648.0,-1440.0) (Outside container561)
+    setColour plugin563 "#sample"
+    plugout564 <- plugout' (negate141 ! "result") (696.0,-1440.0) (Outside container561)
+    setColour plugout564 "#sample"
+    container565 <- container' "panel_1x1.png" (672.0,-1536.0) (Inside root)
+    label566 <- label' "negate" (636.0,-1488.0) (Outside container565)
+    plugin567 <- plugin' (negate142 ! "signal") (648.0,-1536.0) (Outside container565)
+    setColour plugin567 "#sample"
+    plugout568 <- plugout' (negate142 ! "result") (696.0,-1536.0) (Outside container565)
+    setColour plugout568 "#sample"
+    container569 <- container' "panel_1x1.png" (672.0,-1632.0) (Inside root)
+    label570 <- label' "negate" (636.0,-1584.0) (Outside container569)
+    plugin571 <- plugin' (negate143 ! "signal") (648.0,-1632.0) (Outside container569)
+    setColour plugin571 "#sample"
+    plugout572 <- plugout' (negate143 ! "result") (696.0,-1632.0) (Outside container569)
+    setColour plugout572 "#sample"
+    container573 <- container' "panel_sum12.png" (804.0,-1368.0) (Inside root)
+    plugin574 <- plugin' (sum12144 ! "signal1") (744.0,-1104.0) (Outside container573)
+    setColour plugin574 "#sample"
+    plugin575 <- plugin' (sum12144 ! "signal2") (744.0,-1152.0) (Outside container573)
+    setColour plugin575 "#sample"
+    plugin576 <- plugin' (sum12144 ! "signal3") (744.0,-1200.0) (Outside container573)
+    setColour plugin576 "#sample"
+    plugin577 <- plugin' (sum12144 ! "signal4") (744.0,-1248.0) (Outside container573)
+    setColour plugin577 "#sample"
+    plugin578 <- plugin' (sum12144 ! "signal5") (744.0,-1296.0) (Outside container573)
+    setColour plugin578 "#sample"
+    plugin579 <- plugin' (sum12144 ! "signal6") (744.0,-1344.0) (Outside container573)
+    setColour plugin579 "#sample"
+    plugin580 <- plugin' (sum12144 ! "signal7") (744.0,-1392.0) (Outside container573)
+    setColour plugin580 "#sample"
+    plugin581 <- plugin' (sum12144 ! "signal8") (744.0,-1440.0) (Outside container573)
+    setColour plugin581 "#sample"
+    plugin582 <- plugin' (sum12144 ! "signal9") (744.0,-1488.0) (Outside container573)
+    setColour plugin582 "#sample"
+    plugin583 <- plugin' (sum12144 ! "signal10") (744.0,-1536.0) (Outside container573)
+    setColour plugin583 "#sample"
+    plugin584 <- plugin' (sum12144 ! "signal11") (744.0,-1584.0) (Outside container573)
+    setColour plugin584 "#sample"
+    plugin585 <- plugin' (sum12144 ! "signal12") (744.0,-1632.0) (Outside container573)
+    setColour plugin585 "#sample"
+    plugout586 <- plugout' (sum12144 ! "result") (864.0,-1368.0) (Outside container573)
+    setColour plugout586 "#sample"
+    container587 <- container' "panel_linear_mix.png" (996.0,-1464.0) (Inside root)
+    plugin588 <- plugin' (linear_mix137 ! "gain") (996.0,-1404.0) (Outside container587)
+    setColour plugin588 "#control"
+    plugin589 <- plugin' (linear_mix137 ! "signal1") (972.0,-1464.0) (Outside container587)
+    setColour plugin589 "#sample"
+    plugin590 <- plugin' (linear_mix137 ! "signal2") (972.0,-1512.0) (Outside container587)
+    setColour plugin590 "#sample"
+    plugout591 <- plugout' (linear_mix137 ! "result") (1020.0,-1488.0) (Outside container587)
+    setColour plugout591 "#sample"
+    container592 <- container' "warp12_in.png" (372.0,-2076.0) (Inside root)
+    plugin593 <- plugin' (audio_id5 ! "signal") (348.0,-1860.0) (Outside container592)
+    setColour plugin593 "#sample"
+    plugin594 <- plugin' (audio_id13 ! "signal") (348.0,-2004.0) (Outside container592)
+    setColour plugin594 "#sample"
+    plugin595 <- plugin' (audio_id14 ! "signal") (348.0,-2052.0) (Outside container592)
+    setColour plugin595 "#sample"
+    plugin596 <- plugin' (audio_id10 ! "signal") (348.0,-1908.0) (Outside container592)
+    setColour plugin596 "#sample"
+    plugin597 <- plugin' (audio_id11 ! "signal") (348.0,-1956.0) (Outside container592)
+    setColour plugin597 "#sample"
+    plugin598 <- plugin' (audio_id4 ! "signal") (348.0,-1812.0) (Outside container592)
+    setColour plugin598 "#sample"
+    plugin599 <- plugin' (audio_id16 ! "signal") (348.0,-2148.0) (Outside container592)
+    setColour plugin599 "#sample"
+    plugin600 <- plugin' (audio_id8 ! "signal") (348.0,-2292.0) (Outside container592)
+    setColour plugin600 "#sample"
+    plugin601 <- plugin' (audio_id9 ! "signal") (348.0,-2340.0) (Outside container592)
+    setColour plugin601 "#sample"
+    plugin602 <- plugin' (audio_id6 ! "signal") (348.0,-2196.0) (Outside container592)
+    setColour plugin602 "#sample"
+    plugin603 <- plugin' (audio_id7 ! "signal") (348.0,-2244.0) (Outside container592)
+    setColour plugin603 "#sample"
+    plugin604 <- plugin' (audio_id15 ! "signal") (348.0,-2100.0) (Outside container592)
+    setColour plugin604 "#sample"
+    container605 <- container' "warp12_out.png" (600.0,-2088.0) (Inside root)
+    plugout606 <- plugout' (audio_id14 ! "result") (624.0,-2064.0) (Outside container605)
+    setColour plugout606 "#sample"
+    plugout607 <- plugout' (audio_id13 ! "result") (624.0,-2016.0) (Outside container605)
+    setColour plugout607 "#sample"
+    plugout608 <- plugout' (audio_id11 ! "result") (624.0,-1968.0) (Outside container605)
+    setColour plugout608 "#sample"
+    plugout609 <- plugout' (audio_id10 ! "result") (624.0,-1920.0) (Outside container605)
+    setColour plugout609 "#sample"
+    plugout610 <- plugout' (audio_id5 ! "result") (624.0,-1872.0) (Outside container605)
+    setColour plugout610 "#sample"
+    plugout611 <- plugout' (audio_id4 ! "result") (624.0,-1824.0) (Outside container605)
+    setColour plugout611 "#sample"
+    plugout612 <- plugout' (audio_id9 ! "result") (624.0,-2352.0) (Outside container605)
+    setColour plugout612 "#sample"
+    plugout613 <- plugout' (audio_id8 ! "result") (624.0,-2304.0) (Outside container605)
+    setColour plugout613 "#sample"
+    plugout614 <- plugout' (audio_id7 ! "result") (624.0,-2256.0) (Outside container605)
+    setColour plugout614 "#sample"
+    plugout615 <- plugout' (audio_id6 ! "result") (624.0,-2208.0) (Outside container605)
+    setColour plugout615 "#sample"
+    plugout616 <- plugout' (audio_id16 ! "result") (624.0,-2160.0) (Outside container605)
+    setColour plugout616 "#sample"
+    plugout617 <- plugout' (audio_id15 ! "result") (624.0,-2112.0) (Outside container605)
+    setColour plugout617 "#sample"
+    cable plugout212 plugin156
+    cable knob158 plugin159
+    cable knob162 plugin164
+    cable plugout543 plugin171
+    cable plugout260 plugin172
+    cable plugout259 plugin176
+    cable plugout548 plugin177
+    cable plugout258 plugin181
+    cable plugout518 plugin182
+    cable plugout192 plugin186
+    cable knob190 plugin191
+    cable knob195 plugin197
+    cable plugout202 plugin199
+    cable knob194 plugin200
+    cable plugout263 plugin205
+    cable plugout513 plugin206
+    cable knob209 plugin210
+    cable plugout591 plugin211
+    cable plugout493 plugin215
+    cable plugout359 plugin216
+    cable plugout168 plugin224
+    cable plugout360 plugin228
+    cable plugout498 plugin229
+    cable plugout355 plugin233
+    cable plugout503 plugin234
+    cable plugout508 plugin238
+    cable plugout356 plugin239
+    cable knob250 plugin252
+    cable knob251 plugin253
+    cable knob246 plugin254
+    cable knob247 plugin255
+    cable knob248 plugin256
+    cable knob249 plugin257
+    cable plugout295 plugin275
+    cable plugout296 plugin276
+    cable plugout290 plugin277
+    cable plugout298 plugin278
+    cable plugout290 plugin279
+    cable plugout298 plugin280
+    cable plugout290 plugin281
+    cable plugout298 plugin282
+    cable plugout297 plugin283
+    cable plugout298 plugin284
+    cable plugout290 plugin285
+    cable plugout294 plugin286
+    cable plugout291 plugin287
+    cable plugout292 plugin288
+    cable plugout293 plugin289
+    cable knob300 plugin302
+    cable knob299 plugin303
+    cable knob310 plugin312
+    cable knob318 plugin322
+    cable knob319 plugin323
+    cable knob320 plugin324
+    cable knob321 plugin325
+    cable plugout337 plugin330
+    cable plugout308 plugin331
+    cable plugout341 plugin335
+    cable plugout314 plugin336
+    cable knob339 plugin340
+    cable knob345 plugin349
+    cable knob346 plugin350
+    cable knob347 plugin351
+    cable knob348 plugin352
+    cable knob343 plugin353
+    cable knob344 plugin354
+    cable plugout399 plugin363
+    cable plugout538 plugin364
+    cable plugout394 plugin368
+    cable plugout533 plugin369
+    cable plugout395 plugin373
+    cable plugout528 plugin374
+    cable plugout523 plugin378
+    cable plugout396 plugin379
+    cable knob383 plugin388
+    cable knob384 plugin389
+    cable knob385 plugin390
+    cable knob386 plugin391
+    cable knob387 plugin392
+    cable knob382 plugin393
+    cable plugout420 plugin403
+    cable plugout411 plugin404
+    cable plugout421 plugin408
+    cable plugout422 plugin409
+    cable plugout423 plugin410
+    cable plugout419 plugin414
+    cable plugout423 plugin415
+    cable plugout405 plugin416
+    cable plugout417 plugin418
+    cable knob425 plugin428
+    cable knob424 plugin429
+    cable knob426 plugin430
+    cable knob427 plugin431
+    cable plugout168 plugin432
+    cable knob435 plugin436
+    cable plugout217 plugin439
+    cable plugout230 plugin440
+    cable plugout235 plugin441
+    cable plugout240 plugin442
+    cable plugout207 plugin443
+    cable plugout183 plugin444
+    cable plugout178 plugin445
+    cable plugout173 plugin446
+    cable plugout365 plugin447
+    cable plugout370 plugin448
+    cable plugout375 plugin449
+    cable plugout380 plugin450
+    cable plugout616 plugin464
+    cable plugout617 plugin465
+    cable plugout606 plugin466
+    cable plugout615 plugin467
+    cable plugout613 plugin468
+    cable plugout609 plugin469
+    cable plugout614 plugin470
+    cable plugout608 plugin471
+    cable plugout607 plugin472
+    cable plugout611 plugin473
+    cable plugout612 plugin474
+    cable plugout610 plugin475
+    cable plugout437 plugin490
+    cable plugout225 plugin491
+    cable plugout480 plugin492
+    cable plugout437 plugin495
+    cable plugout225 plugin496
+    cable plugout487 plugin497
+    cable plugout437 plugin500
+    cable plugout225 plugin501
+    cable plugout486 plugin502
+    cable plugout437 plugin505
+    cable plugout225 plugin506
+    cable plugout484 plugin507
+    cable plugout437 plugin510
+    cable plugout225 plugin511
+    cable plugout488 plugin512
+    cable plugout437 plugin515
+    cable plugout225 plugin516
+    cable plugout477 plugin517
+    cable plugout437 plugin520
+    cable plugout225 plugin521
+    cable plugout478 plugin522
+    cable plugout437 plugin525
+    cable plugout225 plugin526
+    cable plugout479 plugin527
+    cable plugout437 plugin530
+    cable plugout225 plugin531
+    cable plugout483 plugin532
+    cable plugout437 plugin535
+    cable plugout225 plugin536
+    cable plugout482 plugin537
+    cable plugout437 plugin540
+    cable plugout225 plugin541
+    cable plugout485 plugin542
+    cable plugout437 plugin545
+    cable plugout225 plugin546
+    cable plugout481 plugin547
+    cable plugout452 plugin551
+    cable plugout454 plugin555
+    cable plugout456 plugin559
+    cable plugout458 plugin563
+    cable plugout460 plugin567
+    cable plugout462 plugin571
+    cable plugout451 plugin574
+    cable plugout552 plugin575
+    cable plugout453 plugin576
+    cable plugout556 plugin577
+    cable plugout455 plugin578
+    cable plugout560 plugin579
+    cable plugout457 plugin580
+    cable plugout564 plugin581
+    cable plugout459 plugin582
+    cable plugout568 plugin583
+    cable plugout461 plugin584
+    cable plugout572 plugin585
+    cable plugout160 plugin588
+    cable plugout225 plugin589
+    cable plugout586 plugin590
+    cable plugout452 plugin593
+    cable plugout455 plugin594
+    cable plugout456 plugin595
+    cable plugout453 plugin596
+    cable plugout454 plugin597
+    cable plugout451 plugin598
+    cable plugout458 plugin599
+    cable plugout461 plugin600
+    cable plugout462 plugin601
+    cable plugout459 plugin602
+    cable plugout460 plugin603
+    cable plugout457 plugin604
     recompile
-    set knob192 (0.5)
-    set knob193 (0.0)
-    set knob259 (0.5)
-    set knob260 (0.0)
-    set knob67 (0.5)
-    set knob68 (0.0)
-    set knob377 (0.5)
-    set knob378 (0.0)
-    set knob434 (0.5)
-    set knob435 (0.0)
-    set knob479 (0.5)
-    set knob480 (0.0)
-    set knob524 (0.5)
-    set knob525 (0.0)
-    set knob132 (0.5)
-    set knob133 (0.0)
-    setOutput plugin2
+    set knob158 (1.0)
+    set knob162 (0.92617357)
+    set knob190 (37.068054)
+    set knob194 (2.9865866)
+    set knob195 (0.4365431)
+    set knob209 (1.9501084)
+    set knob246 (2.0770833e-2)
+    set knob247 (2.2104166e-2)
+    set knob248 (2.2770833e-2)
+    set knob249 (0.0)
+    set knob250 (0.0)
+    set knob251 (1.9145833e-2)
+    set knob299 (0.0)
+    set knob300 (0.0)
+    set knob310 (0.71494603)
+    set knob318 (1.0e-2)
+    set knob319 (0.14697655)
+    set knob320 (0.0)
+    set knob321 (0.2)
+    set knob339 (0.1)
+    set knob343 (1.2520833e-2)
+    set knob344 (1.4395833e-2)
+    set knob345 (1.6104167e-2)
+    set knob346 (1.7479166e-2)
+    set knob347 (0.0)
+    set knob348 (0.0)
+    set knob382 (2.3979167e-2)
+    set knob383 (2.4395833e-2)
+    set knob384 (2.4729166e-2)
+    set knob385 (0.0)
+    set knob386 (0.0)
+    set knob387 (2.3520833e-2)
+    set knob424 (4.4785204)
+    set knob425 (1.0)
+    set knob426 (0.2)
+    set knob427 (2.0e-2)
+    set knob435 (0.935)
     return ()

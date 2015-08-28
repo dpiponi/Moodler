@@ -52,10 +52,10 @@ void exec(in __attribute__((normal("abc"))) __attribute__((colour("(0, 0, 1)")))
     for (double octave = 0; np < 4; octave += 0.1) {
         note[np++] = root+octave;
         if (interval1 > -100.0) {
-            note[np++] = root+interval1+octave;
+            note[np++] = /*root+*/interval1+octave;
         }
         if (interval2 > -100.0) {
-            note[np++] = root+interval2+octave;
+            note[np++] = /*root+*/interval2+octave;
         }
     }
 
