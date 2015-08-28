@@ -1,0 +1,34 @@
+double result1;
+double result2;
+double result3;
+double result4;
+double result5;
+double result6;
+double result7;
+double result8;
+
+void init() {
+    result1 = 0.0;
+    result2 = 0.0;
+    result3 = 0.0;
+    result4 = 0.0;
+    result5 = 0.0;
+    result6 = 0.0;
+    result7 = 0.0;
+    result8 = 0.0;
+}
+
+void exec(
+          in sample signal1, in sample signal2, in sample signal3, in sample signal4,
+          in sample signal5, in sample signal6, in sample signal7, in sample signal8,
+          out sample result1, out sample result2, out sample result3, out sample result4,
+          out sample result5, out sample result6, out sample result7, out sample result8) {
+    result1 = signal1;
+    result2 = result1+signal2;
+    result3 = result2+signal3;
+    result4 = result3+signal4;
+    result5 = result4+signal5;
+    result6 = result5+signal6;
+    result7 = result6+signal7;
+    result8 = result7+signal8;
+}
