@@ -263,8 +263,12 @@ do
     input278 <- new' "input"
     lfo279 <- new' "lfo"
     lfo280 <- new' "lfo"
+    linear_split1405 <- new' "linear_split"
     one_pole284 <- new' "one_pole"
     one_pole285 <- new' "one_pole"
+    rescale1412 <- new' "rescale"
+    rescale1412_bias <- new' "input"
+    rescale1412_gain <- new' "input"
     select286 <- new' "select"
     select287 <- new' "select"
     sum1378 <- new' "sum"
@@ -326,6 +330,30 @@ do
     setColour plugin1381 "#sample"
     plugout1382 <- plugout' (sum1378 ! "result") (-360.0,276.0) (Outside container1379)
     setColour plugout1382 "#sample"
+    container1403 <- container' "panel_2x1.png" (12.0,-72.0) (Inside root)
+    label1404 <- label' "linear_split" (-24.0,12.0) (Outside container1403)
+    plugin1406 <- plugin' (linear_split1405 ! "gain") (-12.0,-48.0) (Outside container1403)
+    setColour plugin1406 "#control"
+    plugin1407 <- plugin' (linear_split1405 ! "signal") (-12.0,-96.0) (Outside container1403)
+    setColour plugin1407 "#sample"
+    plugout1408 <- plugout' (linear_split1405 ! "result1") (36.0,-48.0) (Outside container1403)
+    setColour plugout1408 "#sample"
+    plugout1409 <- plugout' (linear_split1405 ! "result2") (36.0,-96.0) (Outside container1403)
+    setColour plugout1409 "#sample"
+    container1410 <- container' "panel_3x1.png" (-72.0,-360.0) (Inside root)
+    knob1417 <- knob' (rescale1412_gain ! "result") (-96.0,-312.0) (Outside container1410)
+    knob1418 <- knob' (rescale1412_bias ! "result") (-96.0,-360.0) (Outside container1410)
+    label1411 <- label' "rescale" (-108.0,-240.0) (Outside container1410)
+    plugin1413 <- plugin' (rescale1412 ! "gain") (-96.0,-312.0) (Outside container1410)
+    setColour plugin1413 "#control"
+    hide plugin1413
+    plugin1414 <- plugin' (rescale1412 ! "bias") (-96.0,-360.0) (Outside container1410)
+    setColour plugin1414 "#control"
+    hide plugin1414
+    plugin1415 <- plugin' (rescale1412 ! "signal") (-96.0,-408.0) (Outside container1410)
+    setColour plugin1415 "#sample"
+    plugout1416 <- plugout' (rescale1412 ! "result") (-48.0,-360.0) (Outside container1410)
+    setColour plugout1416 "#sample"
     container341 <- container' "panel_knob.png" (-708.0,-96.0) (Inside root)
     container342 <- container' "panel_one_pole.png" (12.0,72.0) (Inside container341)
     knob343 <- knob' (input249 ! "result") (12.0,132.0) (Outside container342)
@@ -1268,12 +1296,12 @@ do
     hide plugin920
     plugout921 <- plugout' (id191 ! "result") (-684.0,-492.0) (Outside container911)
     setColour plugout921 "#control"
-    container922 <- container' "panel_int_add.png" (-600.0,-492.0) (Inside root)
-    plugin923 <- plugin' (sum295 ! "signal1") (-660.0,-468.0) (Outside container922)
+    container922 <- container' "panel_int_add.png" (-564.0,-540.0) (Inside root)
+    plugin923 <- plugin' (sum295 ! "signal1") (-624.0,-516.0) (Outside container922)
     setColour plugin923 "#sample"
-    plugin924 <- plugin' (sum295 ! "signal2") (-660.0,-516.0) (Outside container922)
+    plugin924 <- plugin' (sum295 ! "signal2") (-624.0,-564.0) (Outside container922)
     setColour plugin924 "#sample"
-    plugout925 <- plugout' (sum295 ! "result") (-540.0,-492.0) (Outside container922)
+    plugout925 <- plugout' (sum295 ! "result") (-504.0,-540.0) (Outside container922)
     setColour plugout925 "#sample"
     container926 <- container' "panel_out.png" (120.0,108.0) (Inside root)
     plugin927 <- plugin' (out ! "left") (96.0,156.0) (Outside container926)
@@ -2090,6 +2118,11 @@ do
     plugout1377 <- plugout' (id200 ! "result") (-492.0,0.0) (Outside container935)
     setColour plugout1377 "#control"
     cable plugout376 plugin1380
+    cable plugout1416 plugin1406
+    cable plugout934 plugin1407
+    cable knob1417 plugin1413
+    cable knob1418 plugin1414
+    cable plugout405 plugin1415
     cable knob343 plugin344
     cable plugout348 plugin345
     cable plugout346 plugin347
@@ -2296,7 +2329,7 @@ do
     cable knob898 plugin899
     cable plugout904 plugin900
     cable plugout725 plugin902
-    cable plugout1382 plugin907
+    cable plugout925 plugin907
     cable plugout351 plugin908
     cable knob906 plugin909
     cable knob913 plugin914
@@ -2305,7 +2338,8 @@ do
     cable knob919 plugin920
     cable plugout376 plugin923
     cable plugout921 plugin924
-    cable plugout934 plugin928
+    cable plugout1408 plugin927
+    cable plugout1409 plugin929
     cable knob931 plugin932
     cable plugout394 plugin933
     cable plugout1221 plugin1039
@@ -2496,15 +2530,17 @@ do
     cable plugout351 plugin1375
     cable knob1373 plugin1376
     recompile
+    set knob1417 (0.25)
+    set knob1418 (0.75)
     set knob343 (-0.31532654)
-    set knob349 (2.7009735e-2)
+    set knob349 (4.8911884e-2)
     set knob353 (4.0)
-    set knob361 (1.54470205e-2)
+    set knob361 (0.2745194)
     set knob362 (0.1)
     set knob363 (0.54594725)
     set knob364 (0.30927548)
-    set knob387 (4.0)
-    set knob400 (4.0)
+    set knob387 (6.0)
+    set knob400 (1.0)
     set knob504 (0.5)
     set knob505 (0.0)
     set knob549 (0.5)
