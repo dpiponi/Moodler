@@ -7,6 +7,8 @@
 //
 
 #include <stdlib.h>
+#include <limits.h>
+
 #include "oscilloscope.h"
 #include "OpenGL/gl.h"
 
@@ -32,7 +34,7 @@ const GLchar* fragmentSource =
 
 
 void oscilloscope_init(ssize_t count){
-    pointCount = (GLsizei)count;
+    pointCount = (GLsizei)count / 2;
     points = (PlotPoint *)calloc(sizeof(PlotPoint), pointCount);
 }
 
@@ -75,7 +77,7 @@ void set_sample_data(const short *data){
     
     for (GLsizei i = 0; i < pointCount; i++) {
         points[i].x = (i - middle) * 2.0f / (float)pointCount;
-        points[i].y = data[i] / 32768.0;  // XXX assumption
+        points[i].y = (float) data[i*2] / SHRT_MAX;  // XXX assumption
     }
 }
 
