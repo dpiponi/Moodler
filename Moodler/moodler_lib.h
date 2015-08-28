@@ -23,6 +23,12 @@ static inline double triangle_wave(double x) {
     return 2.0*(phase < 0.5 ? phase : 1.0-phase)-1.0;
 }
 
+static inline double asymmetric_triangle_wave(double rise_width, double x) {
+    double i;
+    double phase = modf(x*(1.0/(2*M_PI)), &i);
+    return 2.0*(phase < rise_width ? phase/rise_width : (1.0-phase)/(1.0-rise_width))-1.0;
+}
+
 static inline double saw_wave(double x) {
     double i;
     return 2.0*modf(x*(1.0/(2*M_PI)), &i)-1.0;
