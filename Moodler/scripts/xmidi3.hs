@@ -16,7 +16,7 @@ do
     bend3 <- new' "input"
     alias "bend3" bend3
 
-    container0 <- container' "panel_keyboard3.png" (x+456-456.0,y-36+36.0) (Inside root)
+    container0 <- container' "panel_xkeyboard3.png" (x+456-456.0,y-36+36.0) (Inside root)
     out1 <- plugout' (keyboard3 ! "result") (x+456-396.0,y-36+60.0+48) (Outside container0)
     setColour out1 "#control"
     out2 <- plugout' (trigger3 ! "result") (x+456-396.0,y-36+12.0+48) (Outside container0)
