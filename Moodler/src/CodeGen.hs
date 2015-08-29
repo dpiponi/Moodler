@@ -138,7 +138,7 @@ executeType =
     CFunDeclr (Right (
               [
                   cPtrTo (structType (cIdent "State") Nothing) (cIdent "state"),
-                  cPtrTo (CShortType undefNode) (cIdent "buffer")
+                  cPtrTo (CDoubleType undefNode) (cIdent "buffer")
               ], False))
               [] undefNode
 

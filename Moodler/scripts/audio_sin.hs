@@ -1,18 +1,14 @@
 do
-    plane <- currentPlane
+    root <- currentPlane
     (x, y) <- fmap (quantise2 quantum) mouse
-    panel <- container' "panel_3x1.png" (x, y) plane
-    lab <- label' "audio_sin" (x-25.0, y+75.0) plane
-    parent panel lab
+    panel <- container' "panel_3x1.png" (x, y) (Inside root)
+    lab <- label' "audio_sin" (x-25.0, y+75.0) (Outside panel)
     name <- new' "audio_sin"
-    inp <- plugin' (name ++ ".freq") (x-21, y+25) plane
+    inp <- plugin' (name ++ ".freq") (x-21, y+25) (Outside panel)
     setColour inp "#control"
-    parent panel inp
-    inp <- plugin' (name ++ ".sync") (x-21, y-25) plane
+    inp <- plugin' (name ++ ".sync") (x-21, y-25) (Outside panel)
     setColour inp "#sample"
-    parent panel inp
-    out <- plugout' (name ++  ".result") (x+20, y) plane
+    out <- plugout' (name ++  ".result") (x+20, y) (Outside panel)
     setColour out "#sample"
-    parent panel out
     recompile
     return ()

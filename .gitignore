@@ -1,2 +1,8 @@
 *.swp
 *.swo
+*~
+Moodler/.syntastic_c_config
+
+Oscilloscope/Oscilloscope
+
+Moodler/cbridge
