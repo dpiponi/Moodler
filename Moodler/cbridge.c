@@ -1,19 +1,3 @@
-//
-// Programmer:	Craig Stuart Sapp
-// Date:	Tue Jun  9 16:00:00 PDT 2009
-// Filename:	testin.c
-// Syntax:	C; Apple OSX CoreMIDI
-// $Smake:	gcc -o %b %f -framework CoreMIDI -framework CoreServices
-//              note: CoreServices needed for GetMacOSSStatusErrorString().
-//
-// Description:	This program reads in some MIDI data and the time stamps
-//              which are attached to the data.
-//
-// Derived from "Audio and MIDI on Mac OS X" Preliminary Documentation, 
-// May 2001 Apple Computer, Inc. found in PDF form on the developer.apple.com
-// website, as well as using links at the bottom of the file.
-//
-
 #include <CoreMIDI/CoreMIDI.h>  /* interface to MIDI in Macintosh OS X */
 #include <stdio.h>
 
@@ -33,13 +17,13 @@ int main(void) {
    MIDIClientRef midiclient;
    MIDIPortRef   midiin;
    OSStatus status;
-   if ((status = MIDIClientCreate(CFSTR("TeStInG"), NULL, NULL, &midiclient))) {
+   if (status = MIDIClientCreate(CFSTR("TeStInG"), NULL, NULL, &midiclient)) {
       printf("Error trying to create MIDI Client structure: %d\n", status);
       printf("%s\n", GetMacOSStatusErrorString(status));
       exit(status);
    }
-   if ((status = MIDIInputPortCreate(midiclient, CFSTR("InPuT"), myReadProc, 
-         NULL, &midiin))) {
+   if (status = MIDIInputPortCreate(midiclient, CFSTR("InPuT"), myReadProc, 
+         NULL, &midiin)) {
       printf("Error trying to create MIDI output port: %d\n", status);
       printf("%s\n", GetMacOSStatusErrorString(status));
       exit(status);
@@ -60,16 +44,6 @@ int main(void) {
    return 0;
 }
 
-
-/////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////
-//
-// myReadProc -- What to do when MIDI input packets are received.
-//      used as an input parameter to MIDIInputPortCreate() so that 
-//      MIDI input knows what to do with the MIDI messages after it
-//      receives them.
-
 void myReadProc(const MIDIPacketList *packetList, void* readProcRefCon,
       void* srcConnRefCon) {
    MIDIPacket *packet = (MIDIPacket*)packetList->packet;
@@ -80,11 +54,6 @@ void myReadProc(const MIDIPacketList *packetList, void* readProcRefCon,
       packet = MIDIPacketNext(packet);
    }
 }
-
-//////////////////////////////
-//
-// printPacketInfo --
-//
 
 void printPacketInfo(const MIDIPacket* packet) {
    double timeinsec = packet->timeStamp / (double)1e9;
@@ -135,6 +104,38 @@ void printPacketInfo(const MIDIPacket* packet) {
                printf("OSC error %d: %s\n", lo_address_errno(t),
                    lo_address_errstr(t));
            }
+       } else if ((packet->data[0] & 0xf0) == 0xe0) {
+           // Pitch bend
+           int channel = packet->data[0] & 0x0f;
+           int lo_byte = packet->data[1];
+           int hi_byte = packet->data[2];
+           printf("bend chan=%d value=%d %d\n", channel, hi_byte, lo_byte);
+           int value = hi_byte*0x80+lo_byte;
+           char bend[16];
+           if (!channel) {
+               sprintf(bend, "bend");
+           } else {
+               sprintf(bend, "bend%d", channel+1);
+           }
+           if (lo_send(t, "/set", "ssf", bend, "result", (float)value/0x4000) == -1) {
+               printf("OSC error %d: %s\n", lo_address_errno(t),
+                   lo_address_errstr(t));
+           }
+       } else if ((packet->data[0] & 0xf0) == 0xb0 && packet->data[1] == 1) {
+           // Pitch modulation
+           int channel = packet->data[0] & 0x0f;
+           int value = packet->data[2];
+           printf("modulation chan=%d value=%d\n", channel, value);
+           char modulation[16];
+           if (!channel) {
+               sprintf(modulation, "modulation");
+           } else {
+               sprintf(modulation, "modulation%d", channel+1);
+           }
+           if (lo_send(t, "/set", "ssf", modulation, "result", (float)value/0x80) == -1) {
+               printf("OSC error %d: %s\n", lo_address_errno(t),
+                   lo_address_errstr(t));
+           }
        }
    }
    for (i=0; i<packet->length; i++) {
@@ -146,63 +147,3 @@ void printPacketInfo(const MIDIPacket* packet) {
    }
    printf("\n");
 }
-
-/////////////////////////////////////////////////////////////////////////
-/*
-
-struct MIDIPacket { MIDITimeStamp timeStamp; UInt16 length; Byte data[256]; };
-      timeStamp = The time at which the events occurred (if receiving MIDI),
-                  or the time at which the events are to be played (if sending
-                  MIDI).  Zero means "now" when sending MIDI data.  The time
-                  stamp applies to the first MIDI byte in the packet.
-      length    = The number of valid MIDI bytes which follow in data[].
-                  It may be larger than 256 bytes if the packet is dynamically
-                  allocated.
-      data      = A variable-length stream of MIDI messages. Running status
-                  is not allowed.  In the case of system-exclusive messages,
-                  a packet may only contain a single message, or portion
-                  of one, with no other MIDI events.  The MIDI messages in 
-                  the packet must always be complete, except for 
-                  system-exclusive messages.  data[] is declared to be 256 
-                  bytes in length so clients don't have to create custom data
-                  structures in simple situations.
-
-OSStatus MIDIInputPortCreate(MIDIClientRef client, CFStringRef portName,
-      MIDIReadProc readProc, void* refCon, MIDIPortRef* outPort);
-      client   = The client to own the newly-created port.
-      portName = The name of the port.
-      readProc = The MIDIReadProc which will be called with incoming MIDI.
-      refCon   = The refCon passed to readHook.
-      outPort  = On successful return, points to the newly-create MIDIPort.
-   After creating a port, use MIDIPortConnectSource to establish an input
-   connection from any number of sources to your port.
-
-
-MIDIPortConnectSource(MIDIPortRef port, MIDIEndpointRef source, 
-      void* connRefCon);
-      port       = The port to which the create the connection.  This port's
-                   readProc is called with incomming MIDI from the source.
-      source     = The source from which to create the connection.
-      connRefCon = This refCon is passed to the MIDIReadProc, as a way to
-                   identify the source.
-   Establishes a connection from a source to a client's input port.
-
-
-typedef void (*MIDIReadProc)(const MIDIPacketList *pktlist, 
-      void *readProcRefCon, void *srcConnRefCon);
-    pktlist	    = The incoming MIDI message(s).
-    readProcRefCon  = The refCon you passed to MIDIInputPortCreate or 
-                      MIDIDestinationCreate
-    srcConnRefCon   = A refCon you passed to MIDIPortConnectSource, 
-                      which identifies the source of the data.
-   This is a callback function through which a client receives
-   incoming MIDI messages.  A MIDIReadProc function pointer is
-   passed to the MIDIInputPortCreate and MIDIDestinationCreate
-   functions. The CoreMIDI framework will create a high-priority
-   receive thread on your client's behalf, and from that thread,
-   your MIDIReadProc will be called when incoming MIDI messages
-   arrive. Because this function is called from a separate thread,
-   be aware of the synchronization issues when accessing data in
-   this callback.
-
-*/
