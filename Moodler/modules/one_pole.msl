@@ -6,7 +6,7 @@ void init() {
 }
 
 void exec(in control freq, in sample signal, out sample result) {
-    sample a = exp(-signal_to_frequency(freq)*dt);
+    double a = exp(-signal_to_frequency(freq)*dt);
     result = (1-a)*signal+a*y;
     y = result;
 }

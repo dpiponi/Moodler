@@ -18,6 +18,7 @@ import qualified Wiring as W
 import qualified Box as B
 import qualified Data.Foldable as F
 --import Control.Applicative
+import System.Hclip
 
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.Quantise
@@ -167,11 +168,13 @@ handleDefault (EventKey (Char 'q') Down Modifiers { alt = Down } _) = do
 handleDefault (EventKey (Char 'c') Down Modifiers { alt = Down } p) = do
     code <- saveSelection (Just (quantise2 quantum p))
     liftIO $ putStrLn code
-    clipboard .= code
+--     clipboard .= code
+    liftIO $ setClipboard code
     getEvent >>= handleDefault
 
 handleDefault (EventKey (Char 'v') Down Modifiers { alt = Down } p) = do
-    code <- use clipboard
+--     code <- use clipboard
+    code <- liftIO $ getClipboard
     execCommand code
     getEvent >>= handleDefault
 

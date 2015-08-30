@@ -4,5 +4,5 @@ void init() {
 }
 
 inline void exec(out sample result) {
-    result = drand48();
+    result = 2.0*(drand48()-0.5);
 }
