@@ -164,9 +164,20 @@ handleDefault (EventKey (Char 'q') Down Modifiers { alt = Down } _) = do
     liftIO $ exitImmediately ExitSuccess
     getEvent >>= handleDefault
 
+handleDefault (EventKey (Char 'c') Down Modifiers { alt = Down } p) = do
+    code <- saveSelection (Just (quantise2 quantum p))
+    liftIO $ putStrLn code
+    clipboard .= code
+    getEvent >>= handleDefault
+
+handleDefault (EventKey (Char 'v') Down Modifiers { alt = Down } p) = do
+    code <- use clipboard
+    execCommand code
+    getEvent >>= handleDefault
+
 -- Supposed to rotate cables.
 -- Probably doesn't work since introducing undo. XXX
-handleDefault (EventKey (Char 'c') Down _ p) = do
+handleDefault (EventKey (Char 'c') Down Modifiers { alt = Up} p) = do
     e <- selectPointOnCurrent p
     case e of
         Just i -> do

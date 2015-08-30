@@ -10,6 +10,7 @@ the interpreter.
 {-# LANGUAGE FlexibleContexts #-}
 
 module Command(execScript,
+               execCommand,
                evalUi) where
 
 import Control.Applicative

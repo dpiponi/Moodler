@@ -57,7 +57,7 @@ void myReadProc(const MIDIPacketList *packetList, void* readProcRefCon,
 
 void printPacketInfo(const MIDIPacket* packet) {
    double timeinsec = packet->timeStamp / (double)1e9;
-   printf("%9.3lf\t", timeinsec);
+//    printf("%9.3lf\t", timeinsec);
    int i;
    if (packet->length == 3) {
        if ((packet->data[0] & 0xf0) == 0x90) {
@@ -87,7 +87,7 @@ void printPacketInfo(const MIDIPacket* packet) {
            int channel = packet->data[0] & 0x0f;
            int note = packet->data[1];
            int velocity = 0;//packet->data[2];
-           printf("Down chan=%d %d vel=%d\n", channel, note, velocity);
+           printf("Up chan=%d %d vel=%d\n", channel, note, velocity);
            char keyboard[16], trigger[16];
            if (!channel) {
                sprintf(keyboard, "keyboard");
@@ -138,6 +138,7 @@ void printPacketInfo(const MIDIPacket* packet) {
            }
        }
    }
+#if 0
    for (i=0; i<packet->length; i++) {
       if (packet->data[i] < 0x7f) {
          printf("%d ", packet->data[i]);
@@ -146,4 +147,5 @@ void printPacketInfo(const MIDIPacket* packet) {
       }
    }
    printf("\n");
+#endif
 }
