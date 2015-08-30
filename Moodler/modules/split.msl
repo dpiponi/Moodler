@@ -1,0 +1,16 @@
+double result1;
+double result2;
+
+void init() {
+    result1 = 0.0;
+    result2 = 0.0;
+}
+
+inline void exec(in control threshold, in control input, in control signal,
+                 out control result1, out control result2) {
+    if (input < threshold) {
+        result1 = signal;
+    } else {
+        result2 = signal;
+    }
+}
