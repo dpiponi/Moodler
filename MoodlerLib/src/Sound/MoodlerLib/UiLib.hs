@@ -8,6 +8,7 @@ import Control.Monad
 
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.UiLibElement
+import Sound.MoodlerLib.Quantise
 
 data Ui a = Return a
           | Echo String (Ui a)
@@ -247,7 +248,7 @@ unCable :: UiId -> Ui ()
 unCable dest = UnCable dest (return ())
 
 mouse :: Ui (Float, Float)
-mouse = Mouse return
+mouse = quantise2 quantum <$> Mouse return
 
 -- args :: Ui [String]
 -- args = Args return

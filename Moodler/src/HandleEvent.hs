@@ -18,7 +18,9 @@ import qualified Wiring as W
 import qualified Box as B
 import qualified Data.Foldable as F
 --import Control.Applicative
+import Control.Monad.Error
 import System.Hclip
+import qualified NanoHaskell as N
 
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.Quantise
@@ -85,6 +87,13 @@ handleDefault (EventMotion p) = do
 handleDefault (EventKey (SpecialKey KeySpace) Down _ _) = do
     withJustM (use mouseLoc >>= selectPointOnCurrent) $ 
         listenOn <=< getElementById "HandleEvent.hs"
+    getEvent >>= handleDefault
+
+handleDefault (EventKey (Char ',') Down Modifiers { } _) = do
+    let a = runErrorT (N.interpret N.testScript) :: Ui (Either String ())
+    case a of
+        Left e -> liftIO $ putStrLn ("Error: " ++ e)
+        Right r -> evalUi r
     getEvent >>= handleDefault
 
 handleDefault (EventKey (Char 'z') Down Modifiers { alt = Down } _) = do
@@ -174,7 +183,7 @@ handleDefault (EventKey (Char 'c') Down Modifiers { alt = Down } p) = do
 
 handleDefault (EventKey (Char 'v') Down Modifiers { alt = Down } p) = do
 --     code <- use clipboard
-    code <- liftIO $ getClipboard
+    code <- liftIO getClipboard
     execCommand code
     getEvent >>= handleDefault
 
