@@ -103,7 +103,7 @@ execScript dir f = do -- use proper dir API XXX
 
 evalUi :: (Functor m, MonadIO m, MonadState World m,
           InputHandler m) =>
-          Ui () -> m ()
+          Ui a -> m a
 evalUi (Return a) = return a
 
 evalUi (CurrentPlane cfn) = do

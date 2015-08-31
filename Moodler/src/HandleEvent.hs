@@ -90,10 +90,11 @@ handleDefault (EventKey (SpecialKey KeySpace) Down _ _) = do
     getEvent >>= handleDefault
 
 handleDefault (EventKey (Char ',') Down Modifiers { } _) = do
-    let a = runErrorT (N.interpret N.testScript) :: Ui (Either String ())
-    case a of
+    let a = runErrorT (N.interpret N.testScript) :: U.Ui (Either String ())
+    b <- evalUi a
+    case b of
         Left e -> liftIO $ putStrLn ("Error: " ++ e)
-        Right r -> evalUi r
+        Right () -> return ()
     getEvent >>= handleDefault
 
 handleDefault (EventKey (Char 'z') Down Modifiers { alt = Down } _) = do

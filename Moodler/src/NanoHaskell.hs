@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+-- {-# LANGUAGE TemplateHaskell #-}
 
 module NanoHaskell where
 
@@ -17,14 +17,15 @@ data Nano = Do [Statement] deriving Show
 data StringExpr = SVar String | SLit String | StringExpr :! String deriving Show
 data PointExpr = PVar String | PLit Point | AddV PointExpr Point deriving Show
 data UiIdExpr = UVar String deriving Show
-data Dict = Dict { _strings :: M.Map String String, points :: M.Map String Point, _uiIds :: M.Map String S.UiId}
+data Value = Unit | P Point | S String | U S.UiId
+type Dict = M.Map String Value
 
 data Statement = Statement (Maybe String) Command deriving Show
 data LocationExpr = Inside UiIdExpr | Outside UiIdExpr deriving Show
 
 data Command = CurrentPlane 
              | Mouse 
-             | Container StringExpr Point LocationExpr
+             | Container StringExpr PointExpr LocationExpr
              | Label StringExpr PointExpr LocationExpr
              | New StringExpr
              | Plugin StringExpr PointExpr LocationExpr
@@ -43,11 +44,8 @@ data Command = CurrentPlane
              | SetOutput UiIdExpr
              deriving Show
 
-$(makeLenses ''Dict)
+-- $(makeLenses ''Dict)
 
--- data Value = Unit | P Point | S String | U S.UiId
-
-{-
 getPoint :: Value -> ErrorT String U.Ui Point
 getPoint (P x) = return x
 getPoint _ = throwError "Expected a point"
@@ -59,34 +57,45 @@ getString _ = throwError "Expected a string"
 getUiId :: Value -> ErrorT String U.Ui S.UiId
 getUiId (U x) = return x
 getUiId _ = throwError "Expected a UiId"
--}
 
-{-
-evalPoint :: M.Map String Value -> Expr -> ErrorT String U.Ui Point
-evalPoint dict e = do
-    x <- eval dict e
-    getPoint x
+evalPoint :: M.Map String Value -> PointExpr -> ErrorT String U.Ui Point
+evalPoint dict (PVar e) = do
+    let x = M.lookup e dict
+    case x of
+        Nothing -> throwError (e ++ " not defined")
+        Just y -> getPoint y
 
-evalString :: M.Map String Value -> Expr -> ErrorT String U.Ui String
-evalString dict e = do
-    x <- eval dict e
-    getString x
+evalPoint dict (AddV e p) = do
+    q <- evalPoint dict e
+    return (q + p)
 
-evalUiId :: M.Map String Value -> Expr -> ErrorT String U.Ui S.UiId
-evalUiId dict e = do
-    x <- eval dict e
-    getUiId x
+evalPoint _ x = error ("evalPoint Error: " ++ show x)
+
+evalString :: M.Map String Value -> StringExpr -> ErrorT String U.Ui String
+evalString dict (SVar e) = do
+    let x = M.lookup e dict
+    case x of
+        Nothing -> throwError (e ++ " not defined")
+        Just y -> getString y
+
+evalString dict (a :! b) = do
+    u <- evalString dict a
+    return (u S.! b)
+
+evalString _ (SLit s) = return s
+
+evalString _ x = error ("evalString Error: " ++ show x)
+
+evalUiId :: M.Map String Value -> UiIdExpr -> ErrorT String U.Ui S.UiId
+evalUiId dict (UVar e) = do
+    let x = M.lookup e dict
+    case x of
+        Nothing -> throwError (e ++ " not defined")
+        Just y -> getUiId y
 
 evalLocation :: M.Map String Value -> LocationExpr -> ErrorT String U.Ui S.Location
 evalLocation dict (Inside l) = S.Inside <$> evalUiId dict l
 evalLocation dict (Outside l) = S.Outside <$> evalUiId dict l
-    -}
-
-evalString :: Dict -> StringExpr -> ErrorT String String
-evalString dict (SVar s) =
-    case dict ^? strings . ix s of
-        Nothing -> throwError $ "Variable " ++ s ++ " not found"
-        Just x -> return x
 
 interpret :: Nano -> ErrorT String U.Ui ()
 interpret (Do ss) = interprets M.empty ss
@@ -97,9 +106,11 @@ interprets dict (Statement mv c : ss) = do
     let dict' = maybe dict (\v -> M.insert v x dict) mv
     interprets dict' ss
 
+interprets _ [] = return ()
+
 makeElt :: M.Map String Value
            -> (String -> Point -> S.Location -> U.Ui S.UiId)
-           -> Expr -> Expr -> LocationExpr
+           -> StringExpr -> PointExpr -> LocationExpr
            -> ErrorT String U.Ui Value
 makeElt dict c n p l = do
     n' <- evalString dict n
@@ -127,18 +138,24 @@ interpret1 _ Recompile = do
     lift U.recompile
     return Unit
 
+interpret1 _ Mouse = do
+    p <- lift U.mouse
+    return (P p)
+
+interpret1 _ x = error ("interpret1 Error: " ++ show x)
+
 testScript :: Nano
 testScript = Do [
     Statement (Just "plane") CurrentPlane,
     Statement (Just "p") Mouse,
-    Statement (Just "panel") (Container (SLit "panel_2x1.png") (Var "p") (Inside (Var "plane"))),
-    Statement (Just "lab") (Label (SLit "sum") (AddV (Var "p") (PLit (-36.0, 84.0))) (Outside (Var "panel"))),
+    Statement (Just "panel") (Container (SLit "panel_2x1.png") (PVar "p") (Inside (UVar "plane"))),
+    Statement (Just "lab") (Label (SLit "sum") (AddV (PVar "p") (-36.0, 84.0)) (Outside (UVar "panel"))),
     Statement (Just "name") (New (SLit "sum")),
-    Statement (Just "inp") (Plugin (Var "name" :! SLit ".signal1") (AddV (Var "p") (PLit (-24, 24))) (Outside (SLit "panel"))),
-    Statement Nothing (SetColour (Var "inp") (SLit "#sample")),
-    Statement (Just "inp") (Plugin (Var "name" :! SLit "signal2") (AddV (Var "p") (PLit (-24, -24))) (Outside (SLit "panel"))),
-    Statement Nothing (SetColour (Var "inp") (SLit "#sample")),
-    Statement (Just "out") (Plugout (Var "name" :! SLit "result") (AddV (Var "p") (PLit (24, 0))) (Outside (SLit "panel"))),
-    Statement Nothing (SetColour (Var "out") (SLit "#sample")),
+    Statement (Just "inp") (Plugin (SVar "name" :! ".signal1") (AddV (PVar "p") (-24, 24)) (Outside (UVar "panel"))),
+    Statement Nothing (SetColour (UVar "inp") (SLit "#sample")),
+    Statement (Just "inp") (Plugin (SVar "name" :! "signal2") (AddV (PVar "p") (-24, -24)) (Outside (UVar "panel"))),
+    Statement Nothing (SetColour (UVar "inp") (SLit "#sample")),
+    Statement (Just "out") (Plugout (SVar "name" :! "result") (AddV (PVar "p") (24, 0)) (Outside (UVar "panel"))),
+    Statement Nothing (SetColour (UVar "out") (SLit "#sample")),
     Statement Nothing Recompile
     ]
