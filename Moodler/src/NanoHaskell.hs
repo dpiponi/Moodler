@@ -22,7 +22,7 @@ import qualified Data.Map as M
 import Control.Monad.Error
 import Control.Applicative
 import Data.Attoparsec.Text
-import Data.Text hiding (takeWhile)
+import Data.Text hiding (takeWhile, unwords)
 import Data.Char
 
 data Nano = Do [Statement] deriving Show
@@ -57,6 +57,41 @@ data Command = CurrentPlane
              | SetOutput UiIdExpr
              | Bind StringExpr StringExpr
              deriving Show
+
+class UnParse a where
+    unParse :: a -> String
+
+instance UnParse UiIdExpr where
+    unParse (UVar u) = u
+
+instance UnParse LocationExpr where
+    unParse (Inside u) = "Inside " ++ unParse u
+    unParse (Outside u) = "Outside " ++ unParse u
+
+paren :: String -> String
+paren x = "(" ++ x ++ ")"
+
+instance UnParse PointExpr where
+    unParse (PVar p) = p
+    unParse (PLit p) = show p
+    unParse (AddV p q) = paren (unParse p ++ " + " ++ show q)
+
+instance UnParse StringExpr where
+    unParse (SVar p) = p
+    unParse (SLit p) = show p
+    unParse (p :! q) = paren (unParse p ++ " ! " ++ show q)
+
+instance UnParse Command where
+    unParse (Cable a b) = unwords ["cable", unParse a, unParse b]
+    unParse (Hide u) = unwords ["hide", unParse u]
+    unParse (SetColour u c) = unwords ["setColour", unParse u, unParse c]
+    unParse (Plugout s p l) = unwords ["plugout'", unParse s, unParse p, paren (unParse l)]
+    unParse (Plugin s p l) = unwords ["plugin'", unParse s, unParse p, paren (unParse l)]
+    unParse (Container s p l) = unwords ["container'", unParse s, unParse p, paren (unParse l)]
+
+instance UnParse Statement where
+    unParse (Statement Nothing s) = unParse s
+    unParse (Statement (Just a) s) = unwords [a, "<-", unParse s]
 
 -- $(makeLenses ''Dict)
 
