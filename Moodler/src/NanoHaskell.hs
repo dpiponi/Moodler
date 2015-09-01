@@ -93,6 +93,7 @@ instance UnParse Command where
     unParse (SetLow u l) = unwords ["setLow", unParse u, paren (showM l)]
     unParse (SetHigh u l) = unwords ["setHigh", unParse u, paren (showM l)]
     unParse (Plugout s p l) = unwords ["plugout'", unParse s, unParse p, paren (unParse l)]
+    unParse (Knob s p l) = unwords ["knob'", unParse s, unParse p, paren (unParse l)]
     unParse (Plugin s p l) = unwords ["plugin'", unParse s, unParse p, paren (unParse l)]
     unParse (Container s p l) = unwords ["container'", unParse s, unParse p, paren (unParse l)]
     unParse (Label s p l) = unwords ["label'", unParse s, unParse p, paren (unParse l)]

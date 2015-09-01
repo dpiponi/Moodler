@@ -87,9 +87,6 @@ elementLine :: (Functor m, MonadIO m, MonadState World m) =>
 
 elementLine _ parentId maybeMouseLocn eltName Label { _ur = UrElement { _name = n
                                                   , _loc = p } } =
---     multiTellLn "module" 4 $ unwords [unUiId eltName,
---                                       "<-", "label'", show n,
---                                       relativeShow maybeMouseLocn p, showParent parentId]
     multiTellLn "module" 4 $ N.unParse (N.Statement (Just (unUiId eltName))
                                                     (N.Label (N.SLit n) (relativeShow2 maybeMouseLocn p) (showParent2 parentId)))
 
@@ -99,11 +96,12 @@ elementLine _ parentId maybeMouseLocn eltName Knob { _ur = UrElement { _name = n
                                                  , _setting = s
                                                  , _knobMin = a
                                                  , _knobMax = b} = do
-    multiTellLn "module" 4 $ unwords [unUiId eltName,
-                             "<- knob'", rewriteConnection n,
-                             relativeShow maybeMouseLocn p, showParent parentId]
---     multiTellLn "settings" 4 $ unwords ["set", unUiId eltName,
---                                                   "(" ++ show s ++ ")"]
+--     multiTellLn "module" 4 $ unwords [unUiId eltName,
+--                              "<- knob'", rewriteConnection n,
+--                              relativeShow maybeMouseLocn p, showParent parentId]
+    multiTellLn "module" 4 $ N.unParse (N.Statement (Just (unUiId eltName))
+                                                    (N.Knob (rewriteConnection2 n) (relativeShow2 maybeMouseLocn p)
+                                                            (showParent2 parentId)))
     multiTellLn "settings" 4 $ N.unParse (N.Statement Nothing
                                                       (N.Set (uVar eltName) s))
     when (d /= n) $ multiTellLn "module" 4 $
@@ -138,7 +136,7 @@ elementLine _ parentId maybeMouseLocn eltName TextBox { _ur = UrElement { _name 
 
 elementLine everythingSaved parentId maybeMouseLocn eltId
     In { _ur = UrElement { _name = n
-       , _loc = p }
+                         , _loc = p }
        , _cablesIn = c
        , _displayName = d
        , _dataColour = col } = do
