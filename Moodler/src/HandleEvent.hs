@@ -22,7 +22,6 @@ import Control.Monad.Error
 import System.Hclip
 import qualified NanoHaskell as N
 import Data.Attoparsec.Text
-import qualified Data.Text as T
 import qualified Data.Text.IO as I
 
 import Sound.MoodlerLib.Symbols
@@ -189,7 +188,7 @@ handleDefault (EventKey (Char 'c') Down Modifiers { alt = Down } p) = do
     liftIO $ setClipboard code
     getEvent >>= handleDefault
 
-handleDefault (EventKey (Char 'v') Down Modifiers { alt = Down } p) = do
+handleDefault (EventKey (Char 'v') Down Modifiers { alt = Down } _) = do
 --     code <- use clipboard
     code <- liftIO getClipboard
     execCommand code

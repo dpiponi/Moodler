@@ -25,7 +25,6 @@ import qualified Data.Set as S
 import System.Directory
 import Data.Attoparsec.Text
 import qualified Data.Text as T
-import qualified Data.Text.IO as I
 import Control.Monad.Error
 
 import Sound.MoodlerLib.Symbols
@@ -81,7 +80,7 @@ execCommand cmd = case parseOnly N.nanoParser (T.pack cmd) of
             Right () -> return ()
     Left x -> do
         liftIO $ putStrLn ("not using nanoInterpreter: " ++ x)
-        liftIO $ putStrLn cmd
+--         liftIO $ putStrLn cmd
         commandResult <- liftIO $ I.runInterpreter $ do
             I.set [I.searchPath I.:= ["src"]]
             I.setImports commandImportList

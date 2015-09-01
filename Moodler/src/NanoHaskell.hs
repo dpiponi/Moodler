@@ -1,5 +1,16 @@
--- {-# LANGUAGE TemplateHaskell #-}
+{-|
+Module      : Nanohaskell
+Description : Interpreter for tiny fragment of Haskell
+Maintainer  : dpiponi@gmail.com
+
+The file format for saves is Haskell but it's slow to compile
+and run these as the files get large. So this is an absolutely
+minimal interpreter that can interpret the requires subset of
+Haskell.
+-}
+
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 
 module NanoHaskell where
 
@@ -8,15 +19,10 @@ import Graphics.Gloss.Interface.IO.Game
 import qualified Sound.MoodlerLib.UiLib as U
 import qualified Sound.MoodlerLib.Symbols as S
 import qualified Data.Map as M
---import Data.Maybe
---import Control.Monad
 import Control.Monad.Error
 import Control.Applicative
-import Control.Lens
 import Data.Attoparsec.Text
 import Data.Text hiding (takeWhile)
-import qualified Data.Text.IO as I
-import Debug.Trace
 import Data.Char
 
 data Nano = Do [Statement] deriving Show
@@ -78,8 +84,6 @@ evalPoint dict (AddV e p) = do
     q <- evalPoint dict e
     return (q + p)
 
-evalPoint _ x = error ("evalPoint Error: " ++ show x)
-
 evalString :: M.Map String Value -> StringExpr -> ErrorT String U.Ui String
 evalString dict (SVar e) = do
     let x = M.lookup e dict
@@ -93,8 +97,6 @@ evalString dict (a :! b) = do
 
 evalString _ (SLit s) = return s
 
-evalString _ x = error ("evalString Error: " ++ show x)
-
 evalUiId :: M.Map String Value -> UiIdExpr -> ErrorT String U.Ui S.UiId
 evalUiId dict (UVar e) =
     case M.lookup e dict of
@@ -106,18 +108,18 @@ evalLocation dict (Inside l) = S.Inside <$> evalUiId dict l
 evalLocation dict (Outside l) = S.Outside <$> evalUiId dict l
 
 interpret :: Nano -> ErrorT String U.Ui ()
-interpret (Do ss) = interprets M.empty ss
+interpret (Do ss) = interpretStatements M.empty ss
 
-interprets :: Dict -> [Statement] -> ErrorT String U.Ui ()
-interprets dict (Statement mv c : ss) = do
-    x <- interpret1 dict c
+interpretStatements :: Dict -> [Statement] -> ErrorT String U.Ui ()
+interpretStatements dict (Statement mv c : ss) = do
+    x <- interpretCommand dict c
     let dict' = maybe dict (\v -> M.insert v x dict) mv
-    interprets dict' ss
-interprets dict (Let v e : ss) = do
+    interpretStatements dict' ss
+interpretStatements dict (Let v e : ss) = do
     s <- evalString dict e
-    interprets (M.insert v (S s) dict) ss
+    interpretStatements (M.insert v (S s) dict) ss
 
-interprets _ [] = return ()
+interpretStatements _ [] = return ()
 
 makeElt :: M.Map String Value
            -> (String -> Point -> S.Location -> U.Ui S.UiId)
@@ -129,78 +131,70 @@ makeElt dict c n p l = do
     l' <- evalLocation dict l
     U <$> lift (c n' p' l')
 
-interpret1 :: M.Map String Value -> Command -> ErrorT String U.Ui Value
-interpret1 _ CurrentPlane = U <$> lift U.currentPlane
+interpretCommand :: M.Map String Value -> Command -> ErrorT String U.Ui Value
+interpretCommand _ CurrentPlane = U <$> lift U.currentPlane
 
-interpret1 dict (New s) = S <$> (evalString dict s >>= lift . U.new')
+interpretCommand dict (New s) = S <$> (evalString dict s >>= lift . U.new')
 
-interpret1 dict (Container n p l) = makeElt dict U.container' n p l
-interpret1 dict (Label n p l) = makeElt dict U.label' n p l
-interpret1 dict (Plugin n p l) = makeElt dict U.plugin' n p l
-interpret1 dict (Plugout n p l) = makeElt dict U.plugout' n p l
-interpret1 dict (Knob n p l) = makeElt dict U.knob' n p l
+interpretCommand dict (Container n p l) = makeElt dict U.container' n p l
+interpretCommand dict (Label n p l) = makeElt dict U.label' n p l
+interpretCommand dict (Plugin n p l) = makeElt dict U.plugin' n p l
+interpretCommand dict (Plugout n p l) = makeElt dict U.plugout' n p l
+interpretCommand dict (Knob n p l) = makeElt dict U.knob' n p l
 
-interpret1 dict (Bind s u) = do
+interpretCommand dict (Bind s u) = do
     s' <- evalString dict s
     u' <- evalString dict u
     lift (U.bind s' u')
     return Unit
 
-interpret1 dict (Alias s u) = do
+interpretCommand dict (Alias s u) = do
     s' <- evalString dict s
     u' <- evalString dict u
     lift (U.alias s' u')
     return Unit
 
-interpret1 dict (SetColour u c) = do
+interpretCommand dict (SetColour u c) = do
     u' <- evalUiId dict u
     c' <- evalString dict c
     lift (U.setColour u' c')
     return Unit
 
-interpret1 dict (Cable u v) = do
+interpretCommand dict (Cable u v) = do
     u' <- evalUiId dict u
     v' <- evalUiId dict v
     lift (U.cable u' v')
     return Unit
 
-interpret1 dict (Hide u) = do
+interpretCommand dict (Hide u) = do
     u' <- evalUiId dict u
     lift (U.hide u')
     return Unit
 
-interpret1 dict (SetOutput u) = do
+interpretCommand dict (SetOutput u) = do
     u' <- evalUiId dict u
     lift (U.setOutput u')
     return Unit
 
-interpret1 dict (Set u c) = do
+interpretCommand dict (Set u c) = do
     u' <- evalUiId dict u
     lift (U.set u' c)
     return Unit
 
-interpret1 dict (SetLow u c) = do
+interpretCommand dict (SetLow u c) = do
     u' <- evalUiId dict u
     lift (U.setLow u' c)
     return Unit
 
-interpret1 dict (SetHigh u c) = do
+interpretCommand dict (SetHigh u c) = do
     u' <- evalUiId dict u
     lift (U.setHigh u' c)
     return Unit
 
-interpret1 _ Recompile = lift U.recompile >> return Unit
-interpret1 _ Restart = lift U.restart >> return Unit
-
-interpret1 _ Mouse = do
-    p <- lift U.mouse
-    return (P p)
-
-interpret1 _ GetRoot = do
-    p <- lift U.getRoot
-    return (U p)
-
-interpret1 _ x = error ("interpret1 Error: " ++ show x)
+interpretCommand _ Recompile = lift U.recompile >> return Unit
+interpretCommand _ Restart = lift U.restart >> return Unit
+interpretCommand _ Mouse = P <$> lift U.mouse
+interpretCommand _ GetRoot = U <$> lift U.getRoot
 
 testScript :: Nano
 testScript = Do [
@@ -287,8 +281,7 @@ stringLitParser =
      *> (many escapedChar <* char '\"')
 
 stringExprParser :: Parser StringExpr
-stringExprParser = skipSpaceOrComment >> (do
-        parenParse stringExprParser')
+stringExprParser = skipSpaceOrComment >> parenParse stringExprParser'
     <|> (SVar <$> identifierParser)
     <|> (SLit <$> stringLitParser)
     where
@@ -469,33 +462,3 @@ commandParser = currentPlaneParser
                 <|> restartParser
                 <|> setOutputParser
                 <|> cableParser
-
-go s = case parseOnly nanoParser (pack s) of
-    Left x -> putStrLn ("fail: " ++ x)
-    Right r -> print r
-
-go'' s = print $ parse nanoParser (pack s)
-
-g = do
-    s <- I.readFile "test.hs"
-    case parseOnly nanoParser s of
-        Left x -> putStrLn ("fail: " ++ x)
-        Right r -> print r
-
-testSource =
-    "\
-    \do\n\
-    \    plane <- currentPlane\n\
-    \    p <- mouse\n\
-    \    panel <- container' \"panel_2x1.png\" p (Inside plane)\n\
-    \    lab <- label' \"sum\" (p+(-36.0,84.0)) (Outside panel)\n\
-    \    name <- new' \"sum\"\n\
-    \    inp <- plugin' (name ! \"signal1\") (p+(-24,24)) (Outside panel)\n\
-    \    setColour inp \"#sample\"\n\
-    \    inp <- plugin' (name ! \"signal2\") (p+(-24,-24)) (Outside panel)\n\
-    \    setColour inp \"#sample\"\n\
-    \    out <- plugout' (name ! \"result\") (p+(24,0)) (Outside panel)\n\
-    \    setColour out \"#sample\"\n\
-    \    recompile\n\
-    \    return ()\n\
-    \"
