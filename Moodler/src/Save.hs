@@ -85,12 +85,12 @@ elementLine :: (Functor m, MonadIO m, MonadState World m) =>
                Location ->
                Maybe Point -> UiId -> UIElement ->
                StateT (S.Set UiId) (WriterT (Multi String String) m) ()
-elementLine _ parentId maybeMouseLocn eltName
-    Image { _ur = UrElement { _loc = p }
-          , _pic = picture} =
-    multiTellLn "module" 4 $ unwords [unUiId eltName,
-                             "<- image'", show picture,
-                             relativeShow maybeMouseLocn p, showParent parentId]
+-- elementLine _ parentId maybeMouseLocn eltName
+--     Image { _ur = UrElement { _loc = p }
+--           , _pic = picture} =
+--     multiTellLn "module" 4 $ unwords [unUiId eltName,
+--                              "<- image'", show picture,
+--                              relativeShow maybeMouseLocn p, showParent parentId]
 
 elementLine _ parentId maybeMouseLocn eltName Label { _ur = UrElement { _name = n
                                                   , _loc = p } } =

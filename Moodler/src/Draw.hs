@@ -104,11 +104,11 @@ drawUIElement _ world (Proxy (UrElement _ wasSelected _ _ (x, y) n) _) =
               translate 15 (-5) (scale 0.1 0.1 (text n))
               -}
 
-drawUIElement _ world (Image (UrElement _ _ _ _ (x, y) _) picture _ _) =
-    below $ translate x y (
-        case M.lookup picture (world ^. pics) of
-            Nothing -> blank
-            Just (x', _, _) -> x')
+-- drawUIElement _ world (Image (UrElement _ _ _ _ (x, y) _) picture _ _) =
+--     below $ translate x y (
+--         case M.lookup picture (world ^. pics) of
+--             Nothing -> blank
+--             Just (x', _, _) -> x')
 
 drawUIElement _ _ (Out (UrElement _ wasSelected _ _ (x, y) _) col) =
     below $ translate x y (

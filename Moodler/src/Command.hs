@@ -201,16 +201,16 @@ evalUi (U.Proxy n proxyName p planeItsOn cfn) = do
     createdInParent n e planeItsOn
     evalUi (cfn n)
 
-evalUi (U.Image n bmpName p creationPlane cfn) = do
-    (_, hi) <- depthExtent
-    maybePic <- getPic bmpName
-    case maybePic of
-        Right (width, height) -> do
-            let e = UIElement.Image (UrElement creationPlane False (hi+1) False
-                    p bmpName) bmpName width height
-            createdInParent n e creationPlane
-        Left e -> doAlert e
-    evalUi (cfn n)
+-- evalUi (U.Image n bmpName p creationPlane cfn) = do
+--     (_, hi) <- depthExtent
+--     maybePic <- getPic bmpName
+--     case maybePic of
+--         Right (width, height) -> do
+--             let e = UIElement.Image (UrElement creationPlane False (hi+1) False
+--                     p bmpName) bmpName width height
+--             createdInParent n e creationPlane
+--         Left e -> doAlert e
+--     evalUi (cfn n)
 
 evalUi (U.Container n bmpName p creationPlane cfn) = do
     (_, hi) <- depthExtent

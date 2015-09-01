@@ -21,7 +21,7 @@ data Ui a = Return a
           | Knob UiId String (Float, Float) KnobStyle Location (UiId -> Ui a)
           | TextBox UiId String (Float, Float) Location (UiId -> Ui a)
           | Proxy UiId String (Float, Float) Location (UiId -> Ui a)
-          | Image UiId String (Float, Float) Location (UiId -> Ui a)
+--           | Image UiId String (Float, Float) Location (UiId -> Ui a)
           | Container UiId String (Float, Float) Location (UiId -> Ui a)
           | Label UiId String (Float, Float) Location (UiId -> Ui a)
           | Selector UiId String (Float, Float)
@@ -88,7 +88,7 @@ instance Monad Ui where
     Selector s1 s2 p opts q cont >>= f = Selector
                                 s1 s2 p opts q ((>>= f) . cont)
     Proxy s1 s2 p q cont >>= f = Proxy s1 s2 p q ((>>= f) . cont)
-    Image s1 s2 p q cont >>= f = Image s1 s2 p q ((>>= f) . cont)
+--     Image s1 s2 p q cont >>= f = Image s1 s2 p q ((>>= f) . cont)
     Container s1 s2 p q cont >>= f = Container s1 s2 p q ((>>= f) . cont)
     Label s1 s2 p q cont >>= f = Label s1 s2 p q ((>>= f) . cont)
     -- Connect s1 s2 cont >>= f = Connect s1 s2 (cont >>= f)
@@ -210,8 +210,8 @@ selector' s2 p opts creationParent = do
     s1 <- newId "selector"
     Selector s1 s2 p opts creationParent return
 
-image :: UiId -> String -> (Float, Float) -> Location -> Ui UiId
-image s1 s2 p creationParent = Image s1 s2 p creationParent return
+-- image :: UiId -> String -> (Float, Float) -> Location -> Ui UiId
+-- image s1 s2 p creationParent = Image s1 s2 p creationParent return
 
 parent :: Location -> UiId -> Ui ()
 parent s1 s2 = Parent s1 s2 (return ())
@@ -222,10 +222,10 @@ rename s1 s2 = Rename s1 s2 (return ())
 unparent :: UiId -> Ui ()
 unparent s1 = Unparent s1 (return ())
 
-image' :: String -> (Float, Float) -> Location -> Ui UiId
-image' s2 p creationParent = do
-    s1 <- newId "image"
-    Image s1 s2 p creationParent return
+-- image' :: String -> (Float, Float) -> Location -> Ui UiId
+-- image' s2 p creationParent = do
+--     s1 <- newId "image"
+--     Image s1 s2 p creationParent return
 
 container' :: String -> (Float, Float) -> Location -> Ui UiId
 container' bmpName p creationParent = do

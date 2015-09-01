@@ -87,10 +87,10 @@ data UIElement = Container { _ur :: UrElement
                           , _dataColour :: String
                           , _setting :: Float
                           , _options :: [String] }
-               | Image { _ur :: UrElement
+               {-| Image { _ur :: UrElement
                        , _pic :: String
                        , _imageWidth :: Int
-                       , _imageHeight :: Int } deriving Show
+                       , _imageHeight :: Int } -} deriving Show
 
 $(makeLenses ''UrElement)
 $(makeLenses ''UIElement)
@@ -106,7 +106,7 @@ elementRadius (Out {})   = 10
 elementRadius (Knob {})  = 18
 elementRadius (Label {}) = 20
 elementRadius (TextBox {}) = 20
-elementRadius (Image {}) = 0
+-- elementRadius (Image {}) = 0
 elementRadius (Selector {}) = 10
 
 elementType :: UIElement -> ElementType
@@ -116,14 +116,14 @@ elementType (Out {})   = OutType
 elementType (Knob {})  = KnobType
 elementType (Label {}) = LabelType
 elementType (TextBox {}) = TextBoxType
-elementType (Image {}) = ImageType
+-- elementType (Image {}) = ImageType
 elementType (Selector {}) = SelectorType
 
 pointNearUIElement :: Point -> UIElement -> Bool
-pointNearUIElement p Image { _ur = UrElement { _loc = q }
-                           , _imageWidth = w
-                           , _imageHeight = h } =
-    pointWithin p $ rectToBox q w h
+-- pointNearUIElement p Image { _ur = UrElement { _loc = q }
+--                            , _imageWidth = w
+--                            , _imageHeight = h } =
+--     pointWithin p $ rectToBox q w h
 pointNearUIElement p Container { _ur = UrElement { _loc = q }
                                , _imageWidth = w
                                , _imageHeight = h } =
@@ -134,9 +134,9 @@ pointNearUIElement p Knob { _ur = UrElement { _loc = q }
 pointNearUIElement p e = pointNear (elementRadius e) p (_loc (_ur e))
 
 bbox :: UIElement -> Box
-bbox Image { _ur = UrElement { _loc = p }
-           , _imageWidth = w
-           , _imageHeight = h} = rectToBox p w h
+-- bbox Image { _ur = UrElement { _loc = p }
+--            , _imageWidth = w
+--            , _imageHeight = h} = rectToBox p w h
 bbox e = let r = elementRadius e
              (x, y) = _loc (_ur e)
          in  ((x-r, y-r), (x+r, y+r))

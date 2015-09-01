@@ -8,5 +8,5 @@ data ElementType = ContainerType
                  | OutType
                  | KnobType
                  | LabelType
-                 | ImageType
+--                  | ImageType
                  | SelectorType deriving (Eq, Show)

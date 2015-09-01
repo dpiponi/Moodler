@@ -285,9 +285,9 @@ handleDefault (EventKey (MouseButton LeftButton) Down
                             doSelection selected
                             getEvent >>= handleDefault
 
-                        Image {} -> do
-                            doSelection selected
-                            getEvent >>= handleDefault
+--                         Image {} -> do
+--                             doSelection selected
+--                             getEvent >>= handleDefault
 
                         Selector { _setting = oldSetting
                                  , _options = opts } -> do
@@ -369,9 +369,9 @@ handleDefault (EventKey (MouseButton LeftButton) Down
                 Label {} -> do
                     doSelection i
                     getEvent >>= handleDefault
-                Image {} -> do
-                    doSelection i
-                    getEvent >>= handleDefault
+--                 Image {} -> do
+--                     doSelection i
+--                     getEvent >>= handleDefault
                 TextBox {} -> do
                     highlightJust i
                     getEvent >>= handleDraggingCable i p p >>= handleDefault
