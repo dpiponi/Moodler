@@ -81,10 +81,17 @@ instance UnParse StringExpr where
     unParse (SLit p) = show p
     unParse (p :! q) = paren (unParse p ++ " ! " ++ show q)
 
+showM :: Maybe Float -> String
+showM Nothing = "Nothing"
+showM (Just x) = "Just" ++ paren (show x)
+
 instance UnParse Command where
     unParse (Cable a b) = unwords ["cable", unParse a, unParse b]
     unParse (Hide u) = unwords ["hide", unParse u]
+    unParse (Set u s) = unwords ["set", unParse u, paren (show s)]
     unParse (SetColour u c) = unwords ["setColour", unParse u, unParse c]
+    unParse (SetLow u l) = unwords ["setLow", unParse u, paren (showM l)]
+    unParse (SetHigh u l) = unwords ["setHigh", unParse u, paren (showM l)]
     unParse (Plugout s p l) = unwords ["plugout'", unParse s, unParse p, paren (unParse l)]
     unParse (Plugin s p l) = unwords ["plugin'", unParse s, unParse p, paren (unParse l)]
     unParse (Container s p l) = unwords ["container'", unParse s, unParse p, paren (unParse l)]
@@ -497,3 +504,7 @@ commandParser = currentPlaneParser
                 <|> restartParser
                 <|> setOutputParser
                 <|> cableParser
+
+g = do
+    x <- readFile "test.hs"
+    parseTest nanoParser (pack x)

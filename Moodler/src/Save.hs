@@ -46,11 +46,6 @@ synthsUsedInItems items = do
     synthsUsed <- mapM synthUsedInItem items
     return $ S.toList $ foldr S.union S.empty synthsUsed
 
-{-
-functionApp :: String -> [String] -> String
-functionApp f xs = unwords (f : xs)
--}
-
 paren :: String -> String
 paren s = "(" ++ s ++ ")"
 
@@ -113,17 +108,18 @@ elementLine _ parentId maybeMouseLocn eltName Knob { _ur = UrElement { _name = n
     multiTellLn "module" 4 $ unwords [unUiId eltName,
                              if style == KnobStyle then "<- knob'" else "<- slider'", rewriteConnection n,
                              relativeShow maybeMouseLocn p, showParent parentId]
-    multiTellLn "settings" 4 $ unwords ["set", unUiId eltName,
-                                                  "(" ++ show s ++ ")"]
+--     multiTellLn "settings" 4 $ unwords ["set", unUiId eltName,
+--                                                   "(" ++ show s ++ ")"]
+    multiTellLn "settings" 4 $ N.unParse (N.Statement Nothing
+                                                      (N.Set (uVar eltName) s))
     when (d /= n) $ multiTellLn "module" 4 $
                         unwords ["rename", show d, unUiId eltName]
     withJust a $ \a' ->
-            multiTellLn "module" 4 $ "setLow " ++ unUiId eltName ++
-                                     " (Just (" ++ show a' ++ "))"
+            multiTellLn "module" 4 $ N.unParse (N.Statement Nothing
+                                                            (N.SetLow (uVar eltName) (Just a')))
     withJust b $ \b' ->
-            multiTellLn "module" 4 $
-                unwords ["setHigh ", unUiId eltName,
-                  paren (unwords ["Just", paren (show b')])]
+            multiTellLn "module" 4 $ N.unParse (N.Statement Nothing
+                                                            (N.SetHigh (uVar eltName) (Just b')))
 
 elementLine _ parentId maybeMouseLocn eltName Selector { _ur = UrElement { _name = n
                                                      , _loc = p }
@@ -269,11 +265,8 @@ codeWorld' ::
 codeWorld' everythingSaved synths needsSaving aliasesToSave = do
         multiTellLn "preamble" 0 "do"
         multiTellLn "preamble" 4 "restart"
-        --multiTellLn "preamble" 4 "let (x, y) = (0, 0)"
         multiTellLn "preamble" 4 "root <- getRoot"
         multiTellLn "preamble" 4 "let out = \"out\""
-        --multiTellLn "preamble" 4 "let keyboard = \"keyboard\""
-        --multiTellLn "preamble" 4 "let trigger = \"trigger\""
 
         sList <- lift $ use (serverState . synthList)
 
@@ -282,28 +275,12 @@ codeWorld' everythingSaved synths needsSaving aliasesToSave = do
             let synthType = unJust ("Don't know synth " ++ show synthName)
                                         maybeSynthType
 
---             if synthName `elem` ["keyboard", "trigger"]
---                 then do
---                     multiTellLn "synth" 4 $
---                         unwords ["new", show synthType,
---                                  show synthName]
---                     multiTellLn "synth" 4 $
---                         unwords ["let", synthName, "=", show synthName]
---                 else unless (synthName == "out") $
---                      multiTellLn "synth" 4 $
---                         unwords [synthName, "<-", "new'",
---                                  show synthType]
-
             unless (synthName == "out") $
                 multiTellLn "synth" 4 $
                     unwords [synthName, "<-", "new'", show synthType]
 
         outId <- lift $ use outputId
         saveSelection' everythingSaved Nothing needsSaving aliasesToSave (Just outId)
-        --saveBindings
---         forM_ (M.toList aliasesToSave) $ \(aliasName, synthName) ->
---             multiTellLn "aliases" 4 $
---                 unwords ["alias", show aliasName, synthName]
 
 codeSections :: [String]
 codeSections = ["preamble", "synth", "module",
@@ -332,16 +309,6 @@ codeWorld = do
             codeWorld' everythingSavedSet synths needsSaving aliasesToSave
         ) S.empty)
     return $ collate codeSections sections
-
-{-
-saveBindings :: (Functor m, MonadIO m, MonadState World m) =>
-                StateT (S.Set UiId) (WriterT (Multi String String) m) ()
-saveBindings = do
-    bs <- lift $ use keyMatcher
-    forM_ (M.toList (bs ^. dict)) $ \(keys, cmd) ->
-        multiTellLn "bindings" 4 $
-                unwords ["bind", show (unInterpretKeys keys), show cmd]
--}
 
 rewriteConnection :: String -> String
 rewriteConnection s1 =
