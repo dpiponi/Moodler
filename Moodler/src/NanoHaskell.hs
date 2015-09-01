@@ -189,16 +189,10 @@ interpret1 dict (SetHigh u c) = do
     lift (U.setHigh u' c)
     return Unit
 
-interpret1 _ Recompile = lift U.recompile >> return Unit
-interpret1 _ Restart = lift U.restart >> return Unit
-
-interpret1 _ Mouse = do
-    p <- lift U.mouse
-    return (P p)
-
-interpret1 _ GetRoot = do
-    p <- lift U.getRoot
-    return (U p)
+interpret1 _ Recompile = lift U.recompile *> return Unit
+interpret1 _ Restart = lift U.restart *> return Unit
+interpret1 _ Mouse = P <$> lift U.mouse
+interpret1 _ GetRoot = U <$> lift U.getRoot
 
 interpret1 _ x = error ("interpret1 Error: " ++ show x)
 
@@ -287,8 +281,7 @@ stringLitParser =
      *> (many escapedChar <* char '\"')
 
 stringExprParser :: Parser StringExpr
-stringExprParser = skipSpaceOrComment >> (do
-        parenParse stringExprParser')
+stringExprParser = skipSpaceOrComment >> parenParse stringExprParser'
     <|> (SVar <$> identifierParser)
     <|> (SLit <$> stringLitParser)
     where
