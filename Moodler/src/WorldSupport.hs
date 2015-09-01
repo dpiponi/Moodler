@@ -216,7 +216,7 @@ imageDimensions (P.ImageCMYK16 (P.Image { P.imageWidth = w, P.imageHeight = h })
 
 getPic :: (MonadIO m, MonadState World m) => String -> m (Either String (Int, Int))
 getPic bmpName = do
-    liftIO $ putStrLn $ "Loading: " ++ show bmpName
+--     liftIO $ putStrLn $ "Loading: " ++ show bmpName
     let imageFileName = "assets/" ++ bmpName
     mImage <- liftIO $ readImage imageFileName
     case mImage of

@@ -5,6 +5,7 @@ module Sound.MoodlerLib.UiLib where
 import Data.Typeable hiding (Proxy)
 import Control.Applicative
 import Control.Monad
+import Graphics.Gloss.Data.Point
 
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.UiLibElement

@@ -23,11 +23,16 @@ import qualified Language.Haskell.Interpreter as I
 import qualified Data.Map as M
 import qualified Data.Set as S
 import System.Directory
+import Data.Attoparsec.Text
+import qualified Data.Text as T
+import qualified Data.Text.IO as I
+import Control.Monad.Error
 
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.Quantise
 import Sound.MoodlerLib.UiLib as U
 
+import qualified NanoHaskell as N
 import Check
 import Wiring
 import ContainerTree
@@ -66,18 +71,28 @@ commandImportList =
 execCommand :: (InputHandler m, Functor m, MonadIO m,
                 MonadState World m) =>
                String -> m ()
-execCommand cmd = do
-    commandResult <- liftIO $ I.runInterpreter $ do
-        I.set [I.searchPath I.:= ["src"]]
-        I.setImports commandImportList
-        I.interpret cmd (I.as :: Ui ())
-    case commandResult of
-        Left err -> doAlert $ case err of
-            I.UnknownError e -> "Unknown error: " ++ e
-            I.WontCompile es -> show (map I.errMsg es)
-            I.NotAllowed e   -> "Not allowed: " ++ e
-            I.GhcException e -> "GHC exception: " ++ e
-        Right commandTree -> evalUi commandTree
+execCommand cmd = case parseOnly N.nanoParser (T.pack cmd) of
+    Right r -> do
+        liftIO $ putStrLn "Using nanoInterpreter"
+        let a = runErrorT (N.interpret r)
+        b <- evalUi a
+        case b of
+            Left e -> liftIO $ putStrLn ("Error: " ++ e)
+            Right () -> return ()
+    Left x -> do
+        liftIO $ putStrLn ("not using nanoInterpreter: " ++ x)
+        liftIO $ putStrLn cmd
+        commandResult <- liftIO $ I.runInterpreter $ do
+            I.set [I.searchPath I.:= ["src"]]
+            I.setImports commandImportList
+            I.interpret cmd (I.as :: Ui ())
+        case commandResult of
+            Left err -> doAlert $ case err of
+                I.UnknownError e -> "Unknown error: " ++ e
+                I.WontCompile es -> show (map I.errMsg es)
+                I.NotAllowed e   -> "Not allowed: " ++ e
+                I.GhcException e -> "GHC exception: " ++ e
+            Right commandTree -> evalUi commandTree
 
 safeReadFile :: String -> IO (Either String String)
 safeReadFile f = 

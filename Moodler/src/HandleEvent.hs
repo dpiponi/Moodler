@@ -21,6 +21,9 @@ import qualified Data.Foldable as F
 import Control.Monad.Error
 import System.Hclip
 import qualified NanoHaskell as N
+import Data.Attoparsec.Text
+import qualified Data.Text as T
+import qualified Data.Text.IO as I
 
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.Quantise
@@ -90,11 +93,15 @@ handleDefault (EventKey (SpecialKey KeySpace) Down _ _) = do
     getEvent >>= handleDefault
 
 handleDefault (EventKey (Char ',') Down Modifiers { } _) = do
-    let a = runErrorT (N.interpret N.testScript) :: U.Ui (Either String ())
-    b <- evalUi a
-    case b of
-        Left e -> liftIO $ putStrLn ("Error: " ++ e)
-        Right () -> return ()
+    s <- liftIO $ I.readFile "test.hs"
+    case parseOnly N.nanoParser s of
+        Left x -> liftIO $ putStrLn ("fail: " ++ x)
+        Right r -> do
+            let a = runErrorT (N.interpret r)
+            b <- evalUi a
+            case b of
+                Left e -> liftIO $ putStrLn ("Error: " ++ e)
+                Right () -> return ()
     getEvent >>= handleDefault
 
 handleDefault (EventKey (Char 'z') Down Modifiers { alt = Down } _) = do

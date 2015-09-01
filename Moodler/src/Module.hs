@@ -50,7 +50,7 @@ varoffset var x | x == 0  = var
                 | otherwise = var ++ "+(" ++ show x ++ ")"
 
 xyoffset :: (Eq a, Ord a, Num a, Show a) => (a, a) -> String
-xyoffset (x, y) = "(" ++ varoffset "x" x ++ ", " ++ varoffset "y" y ++ ")"
+xyoffset p = "(p+" ++ show p ++ ")"
 
 indent :: Int -> String
 indent n = replicate n ' '
@@ -60,10 +60,11 @@ synthPreamble :: MonadWriter String m =>
 synthPreamble panelName synthName topOffset = do
     tellLn "do"
     tellInd 4 "plane <- currentPlane"
-    tellInd 4 "(x, y) <- fmap (quantise2 quantum) mouse"
+--     tellInd 4 "p <- fmap (quantise2 quantum) mouse"
+    tellInd 4 "p <- mouse"
     tellInd 4 $ unwords ["panel <- container'",
                          show panelName,
-                         "(x, y) (Inside plane)"]
+                         "p (Inside plane)"]
     tellInd 4 $ unwords ["lab <- label'",
                           show synthName,
                           xyoffset topOffset,
@@ -75,8 +76,8 @@ genScriptPlugs name command xoffset outOffset outs =
     forM_ (zip [outOffset, outOffset+48 ..] outs) $
                                 \(offset, (outputType, eachOutput)) -> do
          tellInd 4 $ unwords
-                [ name, "<-", command, "(name ++ ",
-                  show ("." ++ eachOutput) ++ ")",
+                [ name, "<-", command, "(name !",
+                  show eachOutput ++ ")",
                   xyoffset (xoffset, -offset),
                   "(Outside panel)" ] -- XXX Create in place
          let outCol = getColourFromCDecl outputType

@@ -49,7 +49,7 @@ recordUndo :: (MonadIO m, MonadState World m) =>
 recordUndo undoCmd redoCmd = do
     undoInfo . undoHistory . _head . _1 %= pushSend undoCmd
     undoInfo . undoHistory . _head . _2 %= reversePushSend redoCmd
-    liftIO $ putStrLn $ "undo: " ++ show (undoCmd, redoCmd)
+--     liftIO $ putStrLn $ "undo: " ++ show (undoCmd, redoCmd)
 
 sendOSCMsg :: (MonadIO m, MonadState World m) => Message -> m ()
 sendOSCMsg m = do

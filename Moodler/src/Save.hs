@@ -55,8 +55,7 @@ paren s = "(" ++ s ++ ")"
 
 relativeShow :: Maybe Point -> Point -> String
 relativeShow Nothing p = show p
-relativeShow (Just (x0, y0)) (x, y) =
-        "(x+(" ++ show (x-x0) ++ "), y+(" ++ show (y-y0) ++ "))"
+relativeShow (Just r) s = "(p+" ++ show (s-r) ++ ")"
 
 saveCable :: MonadWriter (Multi String String) m =>
                             S.Set UiId -> UiId -> Cable -> m ()
@@ -219,8 +218,8 @@ selectionCode :: (Functor m, MonadIO m, MonadState World m) =>
                                       WriterT (Multi String String) m) ()
 selectionCode maybeMouseLocn sel = do
     multiTellLn "preamble" 0 "do"
-    multiTellLn "preamble" 4 "(x0, y0) <- mouse"
-    multiTellLn "preamble" 4 "let (x, y) = quantise2 quantum (x0, y0)"
+    multiTellLn "preamble" 4 "p <- mouse"
+--     multiTellLn "preamble" 4 "let (x, y) = quantise2 quantum (x0, y0)"
     multiTellLn "preamble" 4 "root <- currentPlane" -- XXX getPlane ??
     everythingSaved <- lift $ getAllContainerProxyDescendants sel
     needsSaving <- lift $ getMinimalParents everythingSaved sel
