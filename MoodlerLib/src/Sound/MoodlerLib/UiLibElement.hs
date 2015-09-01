@@ -1,6 +1,6 @@
 module Sound.MoodlerLib.UiLibElement where
 
-data KnobStyle = KnobStyle | SliderStyle deriving (Eq, Show)
+--data KnobStyle = KnobStyle | SliderStyle deriving (Eq, Show)
 
 data ElementType = ContainerType
                  | TextBoxType

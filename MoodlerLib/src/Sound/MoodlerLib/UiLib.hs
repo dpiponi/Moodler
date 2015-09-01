@@ -18,7 +18,7 @@ data Ui a = Return a
           | Load String String (Ui a)
           | PlugIn UiId String (Float, Float) Location (UiId -> Ui a)
           | PlugOut UiId String (Float, Float) Location (UiId -> Ui a)
-          | Knob UiId String (Float, Float) KnobStyle Location (UiId -> Ui a)
+          | Knob UiId String (Float, Float) Location (UiId -> Ui a)
           | TextBox UiId String (Float, Float) Location (UiId -> Ui a)
           | Proxy UiId String (Float, Float) Location (UiId -> Ui a)
 --           | Image UiId String (Float, Float) Location (UiId -> Ui a)
@@ -83,7 +83,7 @@ instance Monad Ui where
     Load dir t cont >>= f = Load dir t (cont >>= f)
     PlugIn s1 s2 p q cont >>= f = PlugIn s1 s2 p q ((>>= f) . cont)
     PlugOut s1 s2 p q cont >>= f = PlugOut s1 s2 p q ((>>= f) . cont)
-    Knob s1 s2 p knobStyle q cont >>= f = Knob s1 s2 p knobStyle q ((>>= f) . cont)
+    Knob s1 s2 p q cont >>= f = Knob s1 s2 p q ((>>= f) . cont)
     TextBox s1 s2 p q cont >>= f = TextBox s1 s2 p q ((>>= f) . cont)
     Selector s1 s2 p opts q cont >>= f = Selector
                                 s1 s2 p opts q ((>>= f) . cont)
@@ -182,8 +182,8 @@ plugout' s2 p creationParent = do
     s1 <- newId "plugout"
     PlugOut s1 s2 p creationParent return
 
-knob :: UiId -> String -> (Float, Float) -> KnobStyle -> Location -> Ui UiId
-knob s1 s2 p knobStyle creationParent = Knob s1 s2 p knobStyle creationParent return
+knob :: UiId -> String -> (Float, Float) -> Location -> Ui UiId
+knob s1 s2 p creationParent = Knob s1 s2 p creationParent return
 
 proxy' :: (Float, Float) -> Location -> Ui UiId
 proxy' pos creationParent = do
@@ -193,17 +193,12 @@ proxy' pos creationParent = do
 knob' :: String -> (Float, Float) -> Location -> Ui UiId
 knob' s2 p creationParent = do
     s1 <- newId "knob"
-    Knob s1 s2 p KnobStyle creationParent return
+    Knob s1 s2 p creationParent return
 
 textBox' :: String -> (Float, Float) -> Location -> Ui UiId
 textBox' s2 p creationParent = do
     s1 <- newId "textBox"
     TextBox s1 s2 p creationParent return
-
-slider' :: String -> (Float, Float) -> Location -> Ui UiId
-slider' s2 p creationParent = do
-    s1 <- newId "slider"
-    Knob s1 s2 p SliderStyle creationParent return
 
 selector' :: String -> (Float, Float) -> [String] -> Location -> Ui UiId
 selector' s2 p opts creationParent = do

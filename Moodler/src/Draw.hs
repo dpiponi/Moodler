@@ -11,8 +11,6 @@ import Control.Lens hiding (below)
 import Data.Monoid
 import Control.Monad.State
 
-import Sound.MoodlerLib.UiLibElement
-
 import Cable
 import UIElement
 import World
@@ -137,19 +135,13 @@ drawUIElement _ _ (Selector (UrElement _ _wasSelected _ _ (x, y) _) col v opts) 
             color (interpretColour col) (circleSolid 6.5 <>
             write (10, -5) 0.15 black (opts!!floor v)))
 
-drawUIElement _ _ (Knob (UrElement _ wasSelected _ _ (x, y) _) col _ KnobStyle v lo hi) =
+drawUIElement _ _ (Knob (UrElement _ wasSelected _ _ (x, y) _) col _ v lo hi) =
         below $ translate x y $
                     color (selectColor wasSelected knobColour) $
             circle 16 <> circleSolid 12 <>
             color (interpretColour col) (circleSolid 2) <>
             let angle = 3.0*uiAngle lo hi v
             in color white $ line [(0, 0), (16*sin angle, 16*cos angle)]
-
-drawUIElement _ _ (Knob (UrElement _ wasSelected _ _ (x, y) _) col _ SliderStyle v lo hi) =
-        below $ translate x y $
-                    color (selectColor wasSelected knobColour) $
-            let angle = 3.0*uiAngle lo hi v
-            in color (interpretColour col) $ polygon [(-6,-15), (6,-15), (6,5*angle), (-6,5*angle), (-6,-15)]
 
 drawUIElement _ _ (TextBox (UrElement _ _wasSelected _ _ (x, y) _) col txt) =
         below $ translate x y (

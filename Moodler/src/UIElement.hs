@@ -21,7 +21,6 @@ module UIElement(uiElementWithinBox,
                  ur,
                  pic,
                  options,
-                 knobStyle,
                  knobMin,
                  knobMax,
                  imageWidth,
@@ -79,7 +78,6 @@ data UIElement = Container { _ur :: UrElement
                | Knob { _ur :: UrElement 
                       , _dataColour :: String
                       , _displayName :: String
-                      , _knobStyle :: KnobStyle
                       , _setting :: Float
                       , _knobMin :: Maybe Float
                       , _knobMax :: Maybe Float }
@@ -128,9 +126,6 @@ pointNearUIElement p Container { _ur = UrElement { _loc = q }
                                , _imageWidth = w
                                , _imageHeight = h } =
     pointWithin p $ rectToBox q w h
-pointNearUIElement p Knob { _ur = UrElement { _loc = q }
-                                , _knobStyle = SliderStyle } =
-    pointWithin p $ rectToBox q 12 30
 pointNearUIElement p e = pointNear (elementRadius e) p (_loc (_ur e))
 
 bbox :: UIElement -> Box

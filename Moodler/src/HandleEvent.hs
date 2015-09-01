@@ -27,7 +27,7 @@ import qualified Data.Text.IO as I
 import Sound.MoodlerLib.Symbols
 import Sound.MoodlerLib.Quantise
 import qualified Sound.MoodlerLib.UiLib as U
-import Sound.MoodlerLib.UiLibElement
+-- import Sound.MoodlerLib.UiLibElement
 
 import ContainerTree
 import Draw
@@ -35,9 +35,9 @@ import Cable
 import WorldSupport
 import ServerState
 import Command
-import Music
+-- import Music
 --import Text
-import Numeric
+-- import Numeric
 import UIElement
 import UISupport
 import Utils
@@ -271,15 +271,10 @@ handleDefault (EventKey (MouseButton LeftButton) Down
                             W.undoPoint
                             clickOnIn' selected
 
-                        Knob { _knobStyle = KnobStyle } -> do
+                        Knob {} -> do
                             highlightJust selected
                             W.undoPoint
                             getEvent >>= handleDraggingKnob selected (_setting elt) p >>= handleDefault
-
-                        Knob { _knobStyle = SliderStyle } -> do
-                            highlightJust selected
-                            W.undoPoint
-                            handleDraggingSlider selected p
 
                         Label {} -> do
                             doSelection selected
@@ -406,42 +401,42 @@ handleTextBox selectedTextBox = do
         W.synthSetString selectedTextBox txt
     getEvent >>= handleDefault
 
-handleDraggingSlider :: UiId -> Point ->
-                        MoodlerM Zero
-handleDraggingSlider selectedSlider (_, y0) = do
-    elt <- getElementById "handleDraggingSlider" selectedSlider
-    let sliderLoc = elt ^. ur . loc . _2 :: Float
-    let v = unUiAngle (_knobMin elt) (_knobMax elt) ((y0-sliderLoc)/15.0) :: Float
-    void $ W.synthSet selectedSlider v
-    getEvent >>= handleDraggingSlider' selectedSlider
-
-sliderGadget :: (Float, Float) -> Float -> B.Transform -> Picture
-sliderGadget sliderLoc v1 = 
-     flip pictureTransformer $
-        translate (fst sliderLoc+150) (snd sliderLoc) (
-        color (B.transparentBlack 0.8) (rectangleSolid 250 100) <>
-        translate (-80) (-40) (scale 0.27 0.27 $
-            color green $ text (showFFloat (Just 4) v1 "")) <>
-        translate (-80) 0 (scale 0.27 0.27 $
-                color red $ text (showNote v1)))
-
-handleDraggingSlider' :: UiId -> Event -> MoodlerM Zero
-handleDraggingSlider' selectedSlider (EventMotion p) = do
-    -- Use zoom?
-    elt <- getElementById "handleDraggingSlider'" selectedSlider
-    let sliderLoc = elt ^. ur . loc
-    let newV = unUiAngle (_knobMin elt) (_knobMax elt) ((snd p-snd sliderLoc)/15.0) :: Float
-    let lowLimit = _knobMin elt
-    let highLimit = _knobMax elt
-    let v1 = clampToRange (lowLimit, highLimit) newV
-    gadget .= sliderGadget sliderLoc v1
-    void $ W.synthSet selectedSlider v1
-    handleDraggingSlider selectedSlider p
-
-handleDraggingSlider' selectedSlider
-    (EventKey (MouseButton LeftButton) Up _ _) = do
-    gadget .= const blank
-    doSelection selectedSlider
-    getEvent >>= handleDefault
-
-handleDraggingSlider' _ e = handleDefault e
+-- handleDraggingSlider :: UiId -> Point ->
+--                         MoodlerM Zero
+-- handleDraggingSlider selectedSlider (_, y0) = do
+--     elt <- getElementById "handleDraggingSlider" selectedSlider
+--     let sliderLoc = elt ^. ur . loc . _2 :: Float
+--     let v = unUiAngle (_knobMin elt) (_knobMax elt) ((y0-sliderLoc)/15.0) :: Float
+--     void $ W.synthSet selectedSlider v
+--     getEvent >>= handleDraggingSlider' selectedSlider
+-- 
+-- sliderGadget :: (Float, Float) -> Float -> B.Transform -> Picture
+-- sliderGadget sliderLoc v1 = 
+--      flip pictureTransformer $
+--         translate (fst sliderLoc+150) (snd sliderLoc) (
+--         color (B.transparentBlack 0.8) (rectangleSolid 250 100) <>
+--         translate (-80) (-40) (scale 0.27 0.27 $
+--             color green $ text (showFFloat (Just 4) v1 "")) <>
+--         translate (-80) 0 (scale 0.27 0.27 $
+--                 color red $ text (showNote v1)))
+-- 
+-- handleDraggingSlider' :: UiId -> Event -> MoodlerM Zero
+-- handleDraggingSlider' selectedSlider (EventMotion p) = do
+--     -- Use zoom?
+--     elt <- getElementById "handleDraggingSlider'" selectedSlider
+--     let sliderLoc = elt ^. ur . loc
+--     let newV = unUiAngle (_knobMin elt) (_knobMax elt) ((snd p-snd sliderLoc)/15.0) :: Float
+--     let lowLimit = _knobMin elt
+--     let highLimit = _knobMax elt
+--     let v1 = clampToRange (lowLimit, highLimit) newV
+--     gadget .= sliderGadget sliderLoc v1
+--     void $ W.synthSet selectedSlider v1
+--     handleDraggingSlider selectedSlider p
+-- 
+-- handleDraggingSlider' selectedSlider
+--     (EventKey (MouseButton LeftButton) Up _ _) = do
+--     gadget .= const blank
+--     doSelection selectedSlider
+--     getEvent >>= handleDefault
+-- 
+-- handleDraggingSlider' _ e = handleDefault e

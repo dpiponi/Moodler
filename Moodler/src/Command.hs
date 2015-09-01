@@ -168,10 +168,10 @@ evalUi (PlugOut n t p creationPlane cfn) = do
     createdInParent n e creationPlane
     evalUi (cfn n)
 
-evalUi (U.Knob n t p style creationParent cfn) = do
+evalUi (U.Knob n t p creationParent cfn) = do
     (_, hi) <- depthExtent
     let e = UIElement.Knob (UrElement creationParent False (hi+1) False
-                                p t) "#control" t style 0.0 Nothing Nothing
+                                p t) "#control" t 0.0 Nothing Nothing
     createdInParent n e creationParent
     evalUi (cfn n)
 
