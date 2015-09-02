@@ -40,6 +40,7 @@ data LocationExpr = Inside UiIdExpr | Outside UiIdExpr deriving Show
 -- selector691 <- selector' (input111 ++ "." ++ "result") (-432.0,660.0) ["1","2","3","4","5","6","7","8"] (Outside container636)
 data Command = CurrentPlane 
              | Mouse 
+             | Selector StringExpr PointExpr [String] LocationExpr
              | Container StringExpr PointExpr LocationExpr
              | Label StringExpr PointExpr LocationExpr
              | New StringExpr
@@ -107,6 +108,7 @@ instance UnParse Command where
     unParse (TextBox s p l) = unwords ["textBox'", unParse s, unParse p, paren (unParse l)]
     unParse (Plugin s p l) = unwords ["plugin'", unParse s, unParse p, paren (unParse l)]
     unParse (Container s p l) = unwords ["container'", unParse s, unParse p, paren (unParse l)]
+    unParse (Selector s p ns l) = unwords ["selector'", unParse s, unParse p, show ns, paren (unParse l)]
     unParse (Label s p l) = unwords ["label'", unParse s, unParse p, paren (unParse l)]
     unParse (Bind s t) = unwords ["bind", unParse s, unParse t]
     unParse CurrentPlane = "currentPlane"
@@ -204,6 +206,12 @@ interpretCommand dict (Plugin n p l) = makeElt dict U.plugin' n p l
 interpretCommand dict (Plugout n p l) = makeElt dict U.plugout' n p l
 interpretCommand dict (Knob n p l) = makeElt dict U.knob' n p l
 interpretCommand dict (TextBox n p l) = makeElt dict U.textBox' n p l
+
+interpretCommand dict (Selector n p ns l) = do
+    n' <- evalString dict n
+    p' <- evalPoint dict p
+    l' <- evalLocation dict l
+    U <$> lift (U.selector' n' p' ns l')
 
 interpretCommand dict (Rename s u) = do
     s' <- evalString dict s
@@ -342,6 +350,7 @@ pointLitParse = do
     skipSpaceOrComment *> char ',' *> skipSpaceOrComment
     y <- double
     char ')'
+    skipSpaceOrComment
     return (realToFrac x, realToFrac y)
 
 escapedChar :: Parser Char
@@ -429,6 +438,7 @@ elementParser =
     <|> ("plugout'" *> splCommandParser Plugout)
     <|> ("knob'" *> splCommandParser Knob)
     <|> ("textBox'" *> splCommandParser TextBox)
+    <|> selectorParser
 
 newParser :: Parser Command
 newParser = do
@@ -437,13 +447,69 @@ newParser = do
     skipSpaceOrComment
     return (New n)
 
+sCommandParser :: (StringExpr -> Command) -> Parser Command
+sCommandParser c = do
+    skipSpaceOrComment
+    m <- stringExprParser
+    skipSpaceOrComment
+    return (c m)
+
+uCommandParser :: (UiIdExpr -> Command) -> Parser Command
+uCommandParser c = do
+    skipSpaceOrComment
+    u <- uiIdParser
+    skipSpaceOrComment
+    return (c u)
+
 usCommandParser :: (UiIdExpr -> StringExpr -> Command) -> Parser Command
 usCommandParser c = do
     skipSpaceOrComment
     m <- uiIdParser
-    n <- stringExprParser
+    sCommandParser (c m)
+
+ssCommandParser :: (StringExpr -> StringExpr -> Command) -> Parser Command
+ssCommandParser c = do
     skipSpaceOrComment
-    return (c m n)
+    m <- stringExprParser
+    sCommandParser (c m)
+
+splCommandParser :: (StringExpr -> PointExpr -> LocationExpr -> Command) -> Parser Command
+splCommandParser c = do
+    skipSpaceOrComment
+    s <- stringExprParser
+    p <- pointExprParser
+    l <- locationExprParser
+    skipSpaceOrComment
+    return (c s p l)
+
+ufCommandParser :: (UiIdExpr -> Float -> Command) -> Parser Command
+ufCommandParser c = do
+    skipSpaceOrComment
+    u <- uiIdParser
+    f <- parenParse double
+    skipSpaceOrComment
+    return (c u (realToFrac f))
+
+umfCommandParser :: (UiIdExpr -> Maybe Float -> Command) -> Parser Command
+umfCommandParser c = do
+    skipSpaceOrComment
+    u <- uiIdParser
+    mf <- maybeFloatParser
+    skipSpaceOrComment
+    return (c u mf)
+
+selectorParser :: Parser Command
+selectorParser = do
+    "selector'"
+    skipSpaceOrComment
+    s <- stringExprParser
+    p <- pointExprParser
+    skipSpaceOrComment
+    n <- char '[' *> ((stringLitParser `sepBy` char ',') <* char ']') -- ws?
+    skipSpaceOrComment
+    l <- locationExprParser
+    skipSpaceOrComment
+    return (Selector s p n l)
 
 setColourParser :: Parser Command
 setColourParser = "setColour" *> usCommandParser SetColour
@@ -459,13 +525,6 @@ renameParser = do
     skipSpaceOrComment
     return (Rename s u)
 
-uCommandParser :: (UiIdExpr -> Command) -> Parser Command
-uCommandParser c = do
-    skipSpaceOrComment
-    u <- uiIdParser
-    skipSpaceOrComment
-    return (c u)
-
 setOutputParser :: Parser Command
 setOutputParser = "setOutput" *> uCommandParser SetOutput
 
@@ -480,23 +539,6 @@ cableParser = do
     skipSpaceOrComment
     return (Cable m n)
 
-ssCommandParser :: (StringExpr -> StringExpr -> Command) -> Parser Command
-ssCommandParser c = do
-    skipSpaceOrComment
-    m <- stringExprParser
-    n <- stringExprParser
-    skipSpaceOrComment
-    return (c m n)
-
-splCommandParser :: (StringExpr -> PointExpr -> LocationExpr -> Command) -> Parser Command
-splCommandParser c = do
-    skipSpaceOrComment
-    s <- stringExprParser
-    p <- pointExprParser
-    l <- locationExprParser
-    skipSpaceOrComment
-    return (c s p l)
-
 aliasParser :: Parser Command
 aliasParser = "alias" *> ssCommandParser Alias
 
@@ -509,27 +551,11 @@ maybeFloatParser = ("Nothing" *> return Nothing) <|>
         "Just" *> skipSpaceOrComment
         Just <$> realToFrac <$> (parenParse double <* skipSpaceOrComment))
 
-umfCommandParser :: (UiIdExpr -> Maybe Float -> Command) -> Parser Command
-umfCommandParser c = do
-    skipSpaceOrComment
-    u <- uiIdParser
-    mf <- maybeFloatParser
-    skipSpaceOrComment
-    return (c u mf)
-
 setLowParser :: Parser Command
 setLowParser = "setLow" *> umfCommandParser SetLow
 
 setHighParser :: Parser Command
 setHighParser = "setHigh" *> umfCommandParser SetHigh
-
-ufCommandParser :: (UiIdExpr -> Float -> Command) -> Parser Command
-ufCommandParser c = do
-    skipSpaceOrComment
-    u <- uiIdParser
-    f <- parenParse double
-    skipSpaceOrComment
-    return (c u (realToFrac f))
 
 setParser :: Parser Command
 setParser = "set" *> ufCommandParser Set

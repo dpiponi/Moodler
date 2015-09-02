@@ -114,10 +114,9 @@ elementLine _ parentId maybeMouseLocn eltName Selector { _ur = UrElement { _name
                                                      , _loc = p }
                                                      , _options = opts
                                                      , _setting = s} = do
-    multiTellLn "module" 4 $ unwords [unUiId eltName, "<-", "selector'",
-                             rewriteConnection n,
-                             relativeShow maybeMouseLocn p, show opts,
-                             showParent parentId]
+    multiTellLn2 "module" 4 $ N.Statement (Just (unUiId eltName))
+                                          (N.Selector (rewriteConnection2 n) (relativeShow2 maybeMouseLocn p)
+                                                     opts (showParent2 parentId))
     multiTellLn2 "settings" 4 $ N.Statement Nothing (N.Set (uVar eltName) s)
 
 elementLine _ parentId maybeMouseLocn eltName TextBox { _ur = UrElement { _name = n
