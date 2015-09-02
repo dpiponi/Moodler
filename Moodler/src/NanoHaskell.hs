@@ -24,6 +24,7 @@ import Control.Applicative
 import Data.Attoparsec.Text
 import Data.Text hiding (takeWhile, unwords, unlines, map)
 import Data.Char
+import GHC.Exts(IsString(..))
 
 data Nano = Do [Statement] deriving Show
 
@@ -126,6 +127,9 @@ instance UnParse Statement where
     unParse (Let a b) = unwords ["let", a, "=", unParse b]
 
 -- $(makeLenses ''Dict)
+
+instance IsString StringExpr where
+    fromString = SLit
 
 getPoint :: Value -> ErrorT String U.Ui Point
 getPoint (P x) = return x
