@@ -36,6 +36,8 @@ type Dict = M.Map String Value
 data Statement = Statement (Maybe String) Command | Let String StringExpr deriving Show
 data LocationExpr = Inside UiIdExpr | Outside UiIdExpr deriving Show
 
+-- Here's a selector line
+-- selector691 <- selector' (input111 ++ "." ++ "result") (-432.0,660.0) ["1","2","3","4","5","6","7","8"] (Outside container636)
 data Command = CurrentPlane 
              | Mouse 
              | Container StringExpr PointExpr LocationExpr
@@ -44,6 +46,7 @@ data Command = CurrentPlane
              | Plugin StringExpr PointExpr LocationExpr
              | Plugout StringExpr PointExpr LocationExpr
              | SetColour UiIdExpr StringExpr
+             | SetString UiIdExpr StringExpr
              | Recompile 
              | GetRoot 
              | Restart
@@ -51,11 +54,13 @@ data Command = CurrentPlane
              | SetHigh UiIdExpr (Maybe Float)
              | Hide UiIdExpr
              | Knob StringExpr PointExpr LocationExpr
+             | TextBox StringExpr PointExpr LocationExpr
              | Cable UiIdExpr UiIdExpr
              | Set UiIdExpr Float
              | Alias StringExpr StringExpr
              | SetOutput UiIdExpr
              | Bind StringExpr StringExpr
+             | Rename StringExpr UiIdExpr
              deriving Show
 
 class UnParse a where
@@ -86,21 +91,34 @@ showM Nothing = "Nothing"
 showM (Just x) = "Just" ++ paren (show x)
 
 instance UnParse Command where
+    unParse (New s) = unwords ["new'", unParse s]
     unParse (Cable a b) = unwords ["cable", unParse a, unParse b]
     unParse (Hide u) = unwords ["hide", unParse u]
     unParse (Set u s) = unwords ["set", unParse u, paren (show s)]
+    unParse (Rename s u) = unwords ["rename", unParse s, unParse u]
+    unParse (Alias s t) = unwords ["alias", unParse s, unParse t]
     unParse (SetColour u c) = unwords ["setColour", unParse u, unParse c]
+    unParse (SetString u s) = unwords ["setString", unParse u, unParse s]
+    unParse (SetOutput u) = unwords ["setOutput", unParse u]
     unParse (SetLow u l) = unwords ["setLow", unParse u, paren (showM l)]
     unParse (SetHigh u l) = unwords ["setHigh", unParse u, paren (showM l)]
     unParse (Plugout s p l) = unwords ["plugout'", unParse s, unParse p, paren (unParse l)]
     unParse (Knob s p l) = unwords ["knob'", unParse s, unParse p, paren (unParse l)]
+    unParse (TextBox s p l) = unwords ["textBox'", unParse s, unParse p, paren (unParse l)]
     unParse (Plugin s p l) = unwords ["plugin'", unParse s, unParse p, paren (unParse l)]
     unParse (Container s p l) = unwords ["container'", unParse s, unParse p, paren (unParse l)]
     unParse (Label s p l) = unwords ["label'", unParse s, unParse p, paren (unParse l)]
+    unParse (Bind s t) = unwords ["bind", unParse s, unParse t]
+    unParse CurrentPlane = "currentPlane"
+    unParse Mouse = "mouse"
+    unParse Recompile = "recompile"
+    unParse Restart = "restart"
+    unParse GetRoot = "getRoot"
 
 instance UnParse Statement where
     unParse (Statement Nothing s) = unParse s
     unParse (Statement (Just a) s) = unwords [a, "<-", unParse s]
+    unParse (Let a b) = unwords ["let", a, "=", unParse b]
 
 -- $(makeLenses ''Dict)
 
@@ -185,6 +203,13 @@ interpretCommand dict (Label n p l) = makeElt dict U.label' n p l
 interpretCommand dict (Plugin n p l) = makeElt dict U.plugin' n p l
 interpretCommand dict (Plugout n p l) = makeElt dict U.plugout' n p l
 interpretCommand dict (Knob n p l) = makeElt dict U.knob' n p l
+interpretCommand dict (TextBox n p l) = makeElt dict U.textBox' n p l
+
+interpretCommand dict (Rename s u) = do
+    s' <- evalString dict s
+    u' <- evalUiId dict u
+    lift (U.rename s' u')
+    return Unit
 
 interpretCommand dict (Bind s u) = do
     s' <- evalString dict s
@@ -202,6 +227,12 @@ interpretCommand dict (SetColour u c) = do
     u' <- evalUiId dict u
     c' <- evalString dict c
     lift (U.setColour u' c')
+    return Unit
+
+interpretCommand dict (SetString u c) = do
+    u' <- evalUiId dict u
+    c' <- evalString dict c
+    lift (U.setString u' c')
     return Unit
 
 interpretCommand dict (Cable u v) = do
@@ -240,21 +271,21 @@ interpretCommand _ Restart = lift U.restart >> return Unit
 interpretCommand _ Mouse = P <$> lift U.mouse
 interpretCommand _ GetRoot = U <$> lift U.getRoot
 
-testScript :: Nano
-testScript = Do [
-    Statement (Just "plane") CurrentPlane,
-    Statement (Just "p") Mouse,
-    Statement (Just "panel") (Container (SLit "panel_2x1.png") (PVar "p") (Inside (UVar "plane"))),
-    Statement (Just "lab") (Label (SLit "sum") (AddV (PVar "p") (-36.0, 84.0)) (Outside (UVar "panel"))),
-    Statement (Just "name") (New (SLit "sum")),
-    Statement (Just "inp") (Plugin (SVar "name" :! ".signal1") (AddV (PVar "p") (-24, 24)) (Outside (UVar "panel"))),
-    Statement Nothing (SetColour (UVar "inp") (SLit "#sample")),
-    Statement (Just "inp") (Plugin (SVar "name" :! "signal2") (AddV (PVar "p") (-24, -24)) (Outside (UVar "panel"))),
-    Statement Nothing (SetColour (UVar "inp") (SLit "#sample")),
-    Statement (Just "out") (Plugout (SVar "name" :! "result") (AddV (PVar "p") (24, 0)) (Outside (UVar "panel"))),
-    Statement Nothing (SetColour (UVar "out") (SLit "#sample")),
-    Statement Nothing Recompile
-    ]
+-- testScript :: Nano
+-- testScript = Do [
+--     Statement (Just "plane") CurrentPlane,
+--     Statement (Just "p") Mouse,
+--     Statement (Just "panel") (Container (SLit "panel_2x1.png") (PVar "p") (Inside (UVar "plane"))),
+--     Statement (Just "lab") (Label (SLit "sum") (AddV (PVar "p") (-36.0, 84.0)) (Outside (UVar "panel"))),
+--     Statement (Just "name") (New (SLit "sum")),
+--     Statement (Just "inp") (Plugin (SVar "name" :! ".signal1") (AddV (PVar "p") (-24, 24)) (Outside (UVar "panel"))),
+--     Statement Nothing (SetColour (UVar "inp") (SLit "#sample")),
+--     Statement (Just "inp") (Plugin (SVar "name" :! "signal2") (AddV (PVar "p") (-24, -24)) (Outside (UVar "panel"))),
+--     Statement Nothing (SetColour (UVar "inp") (SLit "#sample")),
+--     Statement (Just "out") (Plugout (SVar "name" :! "result") (AddV (PVar "p") (24, 0)) (Outside (UVar "panel"))),
+--     Statement Nothing (SetColour (UVar "out") (SLit "#sample")),
+--     Statement Nothing Recompile
+--     ]
 
 --
 -- Parser starts here
@@ -320,9 +351,8 @@ escapedChar =
     <|> satisfy ('\"' /=)
 
 stringLitParser :: Parser String
-stringLitParser =
-    (skipSpaceOrComment *> char '\"')
-     *> (many escapedChar <* char '\"')
+stringLitParser = (skipSpaceOrComment *> char '\"')
+                  *> (many escapedChar <* char '\"')
 
 stringExprParser :: Parser StringExpr
 stringExprParser = skipSpaceOrComment >> parenParse stringExprParser'
@@ -398,6 +428,7 @@ elementParser =
     <|> ("plugin'" *> splCommandParser Plugin)
     <|> ("plugout'" *> splCommandParser Plugout)
     <|> ("knob'" *> splCommandParser Knob)
+    <|> ("textBox'" *> splCommandParser TextBox)
 
 newParser :: Parser Command
 newParser = do
@@ -406,13 +437,27 @@ newParser = do
     skipSpaceOrComment
     return (New n)
 
-setColourParser :: Parser Command
-setColourParser = do
-    "setColour"
-    n <- uiIdParser
-    c <- stringExprParser
+usCommandParser :: (UiIdExpr -> StringExpr -> Command) -> Parser Command
+usCommandParser c = do
     skipSpaceOrComment
-    return (SetColour n c)
+    m <- uiIdParser
+    n <- stringExprParser
+    skipSpaceOrComment
+    return (c m n)
+
+setColourParser :: Parser Command
+setColourParser = "setColour" *> usCommandParser SetColour
+
+setStringParser :: Parser Command
+setStringParser = "setString" *> usCommandParser SetString
+
+renameParser :: Parser Command
+renameParser = do
+    "rename"
+    s <- stringExprParser
+    u <- uiIdParser
+    skipSpaceOrComment
+    return (Rename s u)
 
 uCommandParser :: (UiIdExpr -> Command) -> Parser Command
 uCommandParser c = do
@@ -493,6 +538,7 @@ commandParser :: Parser Command
 commandParser = currentPlaneParser
                 <|> aliasParser
                 <|> bindParser
+                <|> renameParser
                 <|> setLowParser
                 <|> setHighParser
                 <|> mouseParser
@@ -502,6 +548,7 @@ commandParser = currentPlaneParser
                 <|> newParser
                 <|> setParser
                 <|> setColourParser
+                <|> setStringParser
                 <|> getRootParser
                 <|> restartParser
                 <|> setOutputParser
