@@ -5,6 +5,7 @@ module Multi where
 import Data.Monoid
 import qualified Data.Map as M
 import Control.Monad.Writer
+import qualified NanoHaskell as N
 
 data Multi s a = Multi (M.Map s a) deriving Show
 
@@ -26,3 +27,7 @@ multiTell k a = tell (multi k a)
 multiTellLn :: MonadWriter (Multi s String) m =>
                s -> Int -> String -> m ()
 multiTellLn k n a = tell (multi k (replicate n ' ' ++ a ++ "\n"))
+
+multiTellLn2 :: MonadWriter (Multi s [N.Statement]) m =>
+               s -> [N.Statement] -> m ()
+multiTellLn2 k a = tell (multi k a)

@@ -22,7 +22,7 @@ import qualified Data.Map as M
 import Control.Monad.Error
 import Control.Applicative
 import Data.Attoparsec.Text
-import Data.Text hiding (takeWhile, unwords)
+import Data.Text hiding (takeWhile, unwords, unlines, map)
 import Data.Char
 
 data Nano = Do [Statement] deriving Show
@@ -66,6 +66,9 @@ data Command = CurrentPlane
 
 class UnParse a where
     unParse :: a -> String
+
+instance UnParse Nano where
+    unParse (Do ss) = unlines (["do"] ++ map (("    " ++) . unParse) ss ++ ["    return ()"])
 
 instance UnParse UiIdExpr where
     unParse (UVar u) = u

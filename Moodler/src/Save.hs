@@ -45,34 +45,30 @@ synthsUsedInItems items = do
     synthsUsed <- mapM synthUsedInItem items
     return $ S.toList $ foldr S.union S.empty synthsUsed
 
-paren :: String -> String
-paren s = "(" ++ s ++ ")"
+-- paren :: String -> String
+-- paren s = "(" ++ s ++ ")"
 
 uVar :: UiId -> N.UiIdExpr
 uVar = N.UVar . unUiId
 
-relativeShow :: Maybe Point -> Point -> String
-relativeShow Nothing p = N.unParse (N.PLit p)
-relativeShow (Just r) s = N.unParse (N.AddV (N.PVar "p") (s-r))
+-- relativeShow :: Maybe Point -> Point -> String
+-- relativeShow Nothing p = N.unParse (N.PLit p)
+-- relativeShow (Just r) s = N.unParse (N.AddV (N.PVar "p") (s-r))
 
 relativeShow2 :: Maybe Point -> Point -> N.PointExpr
 relativeShow2 Nothing p = N.PLit p
 relativeShow2 (Just r) s = N.AddV (N.PVar "p") (s-r)
 
-multiTellLn2 :: MonadWriter (Multi s String) m =>
-                 s -> Int -> N.Statement -> m ()
-multiTellLn2 k n a = multiTellLn k n (N.unParse a)
-
-saveCable :: MonadWriter (Multi String String) m =>
+saveCable :: MonadWriter (Multi String [N.Statement]) m =>
                             S.Set UiId -> UiId -> Cable -> m ()
 saveCable everythingSaved dst (Cable src) = 
     when (src `S.member` everythingSaved &&
           dst `S.member` everythingSaved) $
-            multiTellLn2 "cables" 4 $ N.Statement Nothing (N.Cable (uVar src) (uVar dst))
+            multiTellLn2 "cables" [N.Statement Nothing (N.Cable (uVar src) (uVar dst))]
 
-showParent :: Location -> String
-showParent (Inside i) = paren (N.unParse (N.Inside (N.UVar (unUiId i))))
-showParent (Outside i) = paren (N.unParse (N.Outside (N.UVar (unUiId i))))
+-- showParent :: Location -> String
+-- showParent (Inside i) = paren (N.unParse (N.Inside (N.UVar (unUiId i))))
+-- showParent (Outside i) = paren (N.unParse (N.Outside (N.UVar (unUiId i))))
 
 rewriteConnection2 :: String -> N.StringExpr
 rewriteConnection2 s1 =
@@ -87,12 +83,12 @@ elementLine :: (Functor m, MonadIO m, MonadState World m) =>
                S.Set UiId ->
                Location ->
                Maybe Point -> UiId -> UIElement ->
-               StateT (S.Set UiId) (WriterT (Multi String String) m) ()
+               StateT (S.Set UiId) (WriterT (Multi String [N.Statement]) m) ()
 
 elementLine _ parentId maybeMouseLocn eltName Label { _ur = UrElement { _name = n
                                                   , _loc = p } } =
-    multiTellLn2 "module" 4 $ N.Statement (Just (unUiId eltName))
-                                                    (N.Label (N.SLit n) (relativeShow2 maybeMouseLocn p) (showParent2 parentId))
+    multiTellLn2 "module" [N.Statement (Just (unUiId eltName))
+                                                    (N.Label (N.SLit n) (relativeShow2 maybeMouseLocn p) (showParent2 parentId))]
 
 elementLine _ parentId maybeMouseLocn eltName Knob { _ur = UrElement { _name = n
                                                  , _loc = p }
@@ -100,32 +96,32 @@ elementLine _ parentId maybeMouseLocn eltName Knob { _ur = UrElement { _name = n
                                                  , _setting = s
                                                  , _knobMin = a
                                                  , _knobMax = b} = do
-    multiTellLn2 "module" 4 $ N.Statement (Just (unUiId eltName))
+    multiTellLn2 "module" [N.Statement (Just (unUiId eltName))
                                                     (N.Knob (rewriteConnection2 n) (relativeShow2 maybeMouseLocn p)
-                                                            (showParent2 parentId))
-    multiTellLn2 "settings" 4 $ N.Statement Nothing (N.Set (uVar eltName) s)
-    when (d /= n) $ multiTellLn2 "module" 4 $ N.Statement Nothing (N.Rename (N.SLit d) (uVar eltName))
+                                                            (showParent2 parentId))]
+    multiTellLn2 "settings" [N.Statement Nothing (N.Set (uVar eltName) s)]
+    when (d /= n) $ multiTellLn2 "module" [N.Statement Nothing (N.Rename (N.SLit d) (uVar eltName))]
     withJust a $ \a' ->
-            multiTellLn2 "module" 4 $ N.Statement Nothing (N.SetLow (uVar eltName) (Just a'))
+            multiTellLn2 "module" [N.Statement Nothing (N.SetLow (uVar eltName) (Just a'))]
     withJust b $ \b' ->
-            multiTellLn2 "module" 4 $ N.Statement Nothing (N.SetHigh (uVar eltName) (Just b'))
+            multiTellLn2 "module" [N.Statement Nothing (N.SetHigh (uVar eltName) (Just b'))]
 
 elementLine _ parentId maybeMouseLocn eltName Selector { _ur = UrElement { _name = n
                                                      , _loc = p }
                                                      , _options = opts
                                                      , _setting = s} = do
-    multiTellLn2 "module" 4 $ N.Statement (Just (unUiId eltName))
+    multiTellLn2 "module" [N.Statement (Just (unUiId eltName))
                                           (N.Selector (rewriteConnection2 n) (relativeShow2 maybeMouseLocn p)
-                                                     opts (showParent2 parentId))
-    multiTellLn2 "settings" 4 $ N.Statement Nothing (N.Set (uVar eltName) s)
+                                                     opts (showParent2 parentId))]
+    multiTellLn2 "settings" [N.Statement Nothing (N.Set (uVar eltName) s)]
 
 elementLine _ parentId maybeMouseLocn eltName TextBox { _ur = UrElement { _name = n
                                                      , _loc = p }
                                                      , _boxText = txt} = do
-    multiTellLn2 "module" 4 $ N.Statement (Just (unUiId eltName))
+    multiTellLn2 "module" [N.Statement (Just (unUiId eltName))
                                                     (N.TextBox (rewriteConnection2 n) (relativeShow2 maybeMouseLocn p)
-                                                              (showParent2 parentId))
-    multiTellLn2 "settings" 4 $ N.Statement Nothing (N.SetString (uVar eltName) (N.SLit txt))
+                                                              (showParent2 parentId))]
+    multiTellLn2 "settings" [N.Statement Nothing (N.SetString (uVar eltName) (N.SLit txt))]
 
 elementLine everythingSaved parentId maybeMouseLocn eltId
     In { _ur = UrElement { _name = n
@@ -133,43 +129,42 @@ elementLine everythingSaved parentId maybeMouseLocn eltId
        , _cablesIn = c
        , _displayName = d
        , _dataColour = col } = do
-    multiTellLn2 "module" 4 $ N.Statement (Just (unUiId eltId))
+    multiTellLn2 "module" [N.Statement (Just (unUiId eltId))
                                                     (N.Plugin (rewriteConnection2 n) (relativeShow2 maybeMouseLocn p)
-                                                              (showParent2 parentId))
-    multiTellLn2 "module" 4 $ N.Statement Nothing
-                                                    (N.SetColour (uVar eltId) (N.SLit col))
-    when (d /= n) $ multiTellLn2 "module" 4 $ N.Statement Nothing (N.Rename (N.SLit d) (uVar eltId))
+                                                              (showParent2 parentId))]
+    multiTellLn2 "module" [N.Statement Nothing (N.SetColour (uVar eltId) (N.SLit col))]
+    when (d /= n) $ multiTellLn2 "module" [N.Statement Nothing (N.Rename (N.SLit d) (uVar eltId))]
     unless (null c) $ saveCable everythingSaved eltId (head c)
 
 elementLine _ parentId maybeMouseLocn eltName
     Out { _ur = UrElement { _name = n
         , _loc = p }
         , _dataColour = col } = do
-    multiTellLn2 "module" 4 $ N.Statement (Just (unUiId eltName))
+    multiTellLn2 "module" [N.Statement (Just (unUiId eltName))
                                                     (N.Plugout (rewriteConnection2 n) (relativeShow2 maybeMouseLocn p)
-                                                               (showParent2 parentId))
-    multiTellLn2 "module" 4 $ N.Statement Nothing (N.SetColour (uVar eltName) (N.SLit col))
+                                                               (showParent2 parentId))]
+    multiTellLn2 "module" [N.Statement Nothing (N.SetColour (uVar eltName) (N.SLit col))]
                                                   
 
 elementLine _ parentId maybeMouseLocn eltName Container { _ur = UrElement { _loc = p }
                                                       , _pic = picture} =
-    multiTellLn2 "module" 4 $ N.Statement (Just (unUiId eltName))
+    multiTellLn2 "module" [N.Statement (Just (unUiId eltName))
                                                     (N.Container (N.SLit picture) (relativeShow2 maybeMouseLocn p)
-                                                                 (showParent2 parentId))
+                                                                 (showParent2 parentId))]
 
 saveElement :: (Functor m, MonadIO m, MonadState World m)
                   => Location -> S.Set UiId -> Maybe Point ->
                      UiId -> UIElement ->
                      StateT (S.Set UiId)
-                            (WriterT (Multi String String) m) ()
+                            (WriterT (Multi String [N.Statement]) m) ()
 saveElement parentId everythingSaved maybeMouseLocn eltName elt = do
     elementLine everythingSaved parentId maybeMouseLocn eltName elt
-    when (elt ^. ur . hidden) $ multiTellLn2 "module" 4 $ N.Statement Nothing (N.Hide (uVar eltName))
+    when (elt ^. ur . hidden) $ multiTellLn2 "module" [N.Statement Nothing (N.Hide (uVar eltName))]
 
 saveItem :: (Functor m, MonadIO m, MonadState World m)
                   => Location -> S.Set UiId -> Maybe Point -> UiId ->
                                         StateT (S.Set UiId) (
-                                          WriterT (Multi String String) m) ()
+                                          WriterT (Multi String [N.Statement]) m) ()
 saveItem parentId everythingSaved maybeMouseLocn item = do
 --     liftIO $ putStrLn $ "Saving: " ++ show item
     modify (S.insert item)
@@ -185,7 +180,7 @@ saveItem parentId everythingSaved maybeMouseLocn item = do
 saveItems :: (Functor m, MonadIO m, MonadState World m)
                   => Location -> S.Set UiId -> Maybe Point -> [UiId] ->
                                 StateT (S.Set UiId) (
-                                      WriterT (Multi String String) m) ()
+                                      WriterT (Multi String [N.Statement]) m) ()
 saveItems parentId everythingSaved mouseLocn curSel =
     forM_ curSel $ \item -> do
         doneAlready <- get
@@ -195,25 +190,24 @@ saveItems parentId everythingSaved mouseLocn curSel =
 saveSelection' :: (Functor m, MonadIO m, MonadState World m)
                   => S.Set UiId -> Maybe Point -> [UiId] ->
                       M.Map String String -> Maybe UiId ->
-                      StateT (S.Set UiId) ( WriterT (Multi String String) m) ()
+                      StateT (S.Set UiId) ( WriterT (Multi String [N.Statement]) m) ()
 saveSelection' everythingSaved maybeMouseLocn curSel aliasesToSave mOutId = do
-    multiTellLn "postamble" 4 "return ()"
-    multiTellLn2 "midamble" 4 $ N.Statement Nothing N.Recompile
+--     multiTellLn "postamble" 4 "return ()"
+    multiTellLn2 "midamble" [N.Statement Nothing N.Recompile]
     saveItems (Inside (UiId "root")) everythingSaved maybeMouseLocn curSel
     forM_ (M.toList aliasesToSave) $ \(aliasName, synthName) ->
-        multiTellLn2 "aliases" 4 $
-            N.Statement Nothing (N.Alias (N.SLit aliasName) (N.SLit synthName))
+        multiTellLn2 "aliases" [N.Statement Nothing (N.Alias (N.SLit aliasName) (N.SLit synthName))]
     case mOutId of
         Nothing -> return ()
-        Just outId -> multiTellLn2 "output" 4 $ N.Statement Nothing (N.SetOutput (uVar outId))
+        Just outId -> multiTellLn2 "output" [N.Statement Nothing (N.SetOutput (uVar outId))]
 
 selectionCode :: (Functor m, MonadIO m, MonadState World m) =>
                  Maybe Point -> [UiId] -> StateT (S.Set UiId) (
-                                      WriterT (Multi String String) m) ()
+                                      WriterT (Multi String [N.Statement]) m) ()
 selectionCode maybeMouseLocn sel = do
-    multiTellLn "preamble" 0 "do"
-    multiTellLn2 "preamble" 4 $ N.Statement (Just "p") N.Mouse
-    multiTellLn2 "preamble" 4 $ N.Statement (Just "root") N.CurrentPlane
+--     multiTellLn "preamble" 0 "do"
+    multiTellLn2 "preamble" [N.Statement (Just "p") N.Mouse]
+    multiTellLn2 "preamble" [N.Statement (Just "root") N.CurrentPlane]
     everythingSaved <- lift $ getAllContainerProxyDescendants sel
     needsSaving <- lift $ getMinimalParents everythingSaved sel
     synths <- lift $ synthsUsedInItems everythingSaved
@@ -223,7 +217,7 @@ selectionCode maybeMouseLocn sel = do
 
     forM_ synths $ \synthName -> do
         let synthType = unJust ("saveSelection: " ++ synthName) $ lookup synthName (map swap sList)
-        multiTellLn2 "synth" 4 $ N.Statement (Just synthName) (N.New (N.SLit synthType))
+        multiTellLn2 "synth" [N.Statement (Just synthName) (N.New (N.SLit synthType))]
     saveSelection' (S.fromList everythingSaved) maybeMouseLocn needsSaving aliasesToSave Nothing
 
 saveSelection :: (Functor m, MonadIO m, MonadState World m)
@@ -233,17 +227,17 @@ saveSelection maybeMouseLocn = do
     sections <- execWriterT (evalStateT (
             selectionCode maybeMouseLocn curSel
         ) S.empty)
-    return $ collate codeSections sections
+    return $ N.unParse (N.Do (collate codeSections sections))
 
 codeWorld' ::
     (Functor m, MonadIO m, MonadState World m) =>
     S.Set UiId -> [String] -> [UiId] -> M.Map String String
-    -> StateT (S.Set UiId) (WriterT (Multi String String) m) ()
+    -> StateT (S.Set UiId) (WriterT (Multi String [N.Statement]) m) ()
 codeWorld' everythingSaved synths needsSaving aliasesToSave = do
-        multiTellLn "preamble" 0 "do"
-        multiTellLn2 "preamble" 4 $ N.Statement Nothing N.Restart
-        multiTellLn2 "preamble" 4 $ N.Statement (Just "root") N.GetRoot
-        multiTellLn2 "preamble" 4 $ N.Let "out" (N.SLit "out")
+--         multiTellLn "preamble" 0 "do"
+        multiTellLn2 "preamble" [N.Statement Nothing N.Restart]
+        multiTellLn2 "preamble" [N.Statement (Just "root") N.GetRoot]
+        multiTellLn2 "preamble" [N.Let "out" (N.SLit "out")]
 
         sList <- lift $ use (serverState . synthList)
 
@@ -253,7 +247,7 @@ codeWorld' everythingSaved synths needsSaving aliasesToSave = do
                                         maybeSynthType
 
             unless (synthName == "out") $
-                multiTellLn2 "synth" 4 $ N.Statement (Just synthName) (N.New (N.SLit synthType))
+                multiTellLn2 "synth" [N.Statement (Just synthName) (N.New (N.SLit synthType))]
 
         outId <- lift $ use outputId
         saveSelection' everythingSaved Nothing needsSaving aliasesToSave (Just outId)
@@ -284,12 +278,12 @@ codeWorld = do
     sections <- execWriterT (evalStateT (
             codeWorld' everythingSavedSet synths needsSaving aliasesToSave
         ) S.empty)
-    return $ collate codeSections sections
+    return $ N.unParse (N.Do (collate codeSections sections))
 
-rewriteConnection :: String -> String
-rewriteConnection s1 =
-    let (a, b) = splitDot s1
-    in paren (unwords [a, "!", show b])
+-- rewriteConnection :: String -> String
+-- rewriteConnection s1 =
+--     let (a, b) = splitDot s1
+--     in paren (unwords [a, "!", show b])
 
 saveWorld :: (Functor m, MonadIO m, MonadState World m) =>
              String -> m ()
