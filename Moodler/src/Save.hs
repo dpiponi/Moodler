@@ -45,15 +45,8 @@ synthsUsedInItems items = do
     synthsUsed <- mapM synthUsedInItem items
     return $ S.toList $ foldr S.union S.empty synthsUsed
 
--- paren :: String -> String
--- paren s = "(" ++ s ++ ")"
-
 uVar :: UiId -> N.UiIdExpr
 uVar = N.UVar . unUiId
-
--- relativeShow :: Maybe Point -> Point -> String
--- relativeShow Nothing p = N.unParse (N.PLit p)
--- relativeShow (Just r) s = N.unParse (N.AddV (N.PVar "p") (s-r))
 
 relativeShow2 :: Maybe Point -> Point -> N.PointExpr
 relativeShow2 Nothing p = N.PLit p
@@ -66,10 +59,6 @@ saveCable everythingSaved dst (Cable src) =
           dst `S.member` everythingSaved) $
             multiTellLn2 "cables" [N.Statement Nothing (N.Cable (uVar src) (uVar dst))]
 
--- showParent :: Location -> String
--- showParent (Inside i) = paren (N.unParse (N.Inside (N.UVar (unUiId i))))
--- showParent (Outside i) = paren (N.unParse (N.Outside (N.UVar (unUiId i))))
-
 rewriteConnection2 :: String -> N.StringExpr
 rewriteConnection2 s1 =
     let (a, b) = splitDot s1
@@ -79,26 +68,34 @@ showParent2 :: Location -> N.LocationExpr
 showParent2 (Inside i) = N.Inside (N.UVar (unUiId i))
 showParent2 (Outside i) = N.Outside (N.UVar (unUiId i))
 
+commonLine :: (Functor m, MonadIO m, MonadState World m) =>
+               Location ->
+               Maybe Point -> UiId -> UIElement ->
+               (N.StringExpr -> N.PointExpr -> N.LocationExpr -> N.Command)
+               -> StateT (S.Set UiId) (WriterT (Multi String [N.Statement]) m) ()
+commonLine parentId maybeMouseLocn eltName elt c =
+    let p = elt ^. ur . loc
+        n = elt ^. ur . name
+    in multiTellLn2 "module" [N.Statement (Just (unUiId eltName))
+                                          (c (N.SLit n)
+                                             (relativeShow2 maybeMouseLocn p)
+                                             (showParent2 parentId))]
+
 elementLine :: (Functor m, MonadIO m, MonadState World m) =>
                S.Set UiId ->
                Location ->
                Maybe Point -> UiId -> UIElement ->
                StateT (S.Set UiId) (WriterT (Multi String [N.Statement]) m) ()
 
-elementLine _ parentId maybeMouseLocn eltName Label { _ur = UrElement { _name = n
-                                                  , _loc = p } } =
-    multiTellLn2 "module" [N.Statement (Just (unUiId eltName))
-                                                    (N.Label (N.SLit n) (relativeShow2 maybeMouseLocn p) (showParent2 parentId))]
+elementLine _ parentId maybeMouseLocn eltName elt@Label {} =
+    commonLine parentId maybeMouseLocn eltName elt N.Label
 
-elementLine _ parentId maybeMouseLocn eltName Knob { _ur = UrElement { _name = n
-                                                 , _loc = p }
-                                                 , _displayName = d
-                                                 , _setting = s
-                                                 , _knobMin = a
-                                                 , _knobMax = b} = do
-    multiTellLn2 "module" [N.Statement (Just (unUiId eltName))
-                                                    (N.Knob (rewriteConnection2 n) (relativeShow2 maybeMouseLocn p)
-                                                            (showParent2 parentId))]
+elementLine _ parentId maybeMouseLocn eltName elt@Knob { _ur = UrElement { _name = n }
+                                                       , _displayName = d
+                                                       , _setting = s
+                                                       , _knobMin = a
+                                                       , _knobMax = b} = do
+    commonLine parentId maybeMouseLocn eltName elt N.Knob
     multiTellLn2 "settings" [N.Statement Nothing (N.Set (uVar eltName) s)]
     when (d /= n) $ multiTellLn2 "module" [N.Statement Nothing (N.Rename (N.SLit d) (uVar eltName))]
     withJust a $ \a' ->
@@ -279,11 +276,6 @@ codeWorld = do
             codeWorld' everythingSavedSet synths needsSaving aliasesToSave
         ) S.empty)
     return $ N.unParse (N.Do (collate codeSections sections))
-
--- rewriteConnection :: String -> String
--- rewriteConnection s1 =
---     let (a, b) = splitDot s1
---     in paren (unwords [a, "!", show b])
 
 saveWorld :: (Functor m, MonadIO m, MonadState World m) =>
              String -> m ()

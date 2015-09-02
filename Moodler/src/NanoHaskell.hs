@@ -188,6 +188,14 @@ interpretStatements dict (Let v e : ss) = do
 
 interpretStatements _ [] = return ()
 
+lCommand :: M.Map String Value
+           -> (S.Location -> U.Ui S.UiId)
+           -> LocationExpr
+           -> ErrorT String U.Ui Value
+lCommand dict c l = do
+    l' <- evalLocation dict l
+    U <$> lift (c l')
+
 makeElt :: M.Map String Value
            -> (String -> Point -> S.Location -> U.Ui S.UiId)
            -> StringExpr -> PointExpr -> LocationExpr
@@ -195,8 +203,9 @@ makeElt :: M.Map String Value
 makeElt dict c n p l = do
     n' <- evalString dict n
     p' <- evalPoint dict p
-    l' <- evalLocation dict l
-    U <$> lift (c n' p' l')
+    lCommand dict (c n' p') l
+--     l' <- evalLocation dict l
+--     U <$> lift (c n' p' l')
 
 interpretCommand :: M.Map String Value -> Command -> ErrorT String U.Ui Value
 interpretCommand _ CurrentPlane = U <$> lift U.currentPlane
@@ -213,8 +222,9 @@ interpretCommand dict (TextBox n p l) = makeElt dict U.textBox' n p l
 interpretCommand dict (Selector n p ns l) = do
     n' <- evalString dict n
     p' <- evalPoint dict p
-    l' <- evalLocation dict l
-    U <$> lift (U.selector' n' p' ns l')
+    lCommand dict (U.selector' n' p' ns) l
+--     l' <- evalLocation dict l
+--     U <$> lift (U.selector' n' p' ns l')
 
 interpretCommand dict (Rename s u) = do
     s' <- evalString dict s
