@@ -22,7 +22,7 @@ module World(World(..),
              ipAddr,
              newName,
              showHidden,
-             clipboard,
+--              clipboard,
              pics,
              undoHistory,
              undoInfo,
@@ -89,7 +89,7 @@ data World = World { -- | The 'serverState' field is a 'ServerState' record
                                     (FreeT MoodlerF (StateT World IO) Zero)
                    , _undoInfo :: UndoInfo
                    , _outputId :: UiId
-                   , _clipboard :: String
+--                    , _clipboard :: String
                    }
 
 data UndoInfo = UndoInfo { _serverStateHistory :: [ServerState]

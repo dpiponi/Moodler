@@ -1,15 +1,25 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Synth where
+module Synth(Module(..),
+             Out(..),
+             Synth,
+             connect,
+             disconnect,
+             loadSynthTypes,
+             getNodeName,
+             getNodeType,
+             moduleNumber,
+             addSynth,
+             getSynth) where
 
 import Control.Lens
 import qualified Data.Map as M
 import Control.Monad.State
---import Data.Maybe
 import Data.List
 import Control.Applicative
 import System.Directory
 import Control.Monad.Trans.Error
+import System.FilePath.Posix
 
 import Module
 import Text
@@ -26,7 +36,7 @@ data Out = Disconnected
 instance Show Out where
     show Disconnected = "<0>"
     show Out { _outModuleName = a, _outModuleOut = c} =
-            _getModuleName a ++ "." ++ _getOutName c
+               _getModuleName a ++ "." ++ _getOutName c
 
 -- _moduleNumber used to maintain consistent ordering
 -- as modules are added
@@ -35,18 +45,18 @@ data Module = Module { _getNodeName :: ModuleName
                      , _inputNodes :: M.Map InName Out
                      , _moduleNumber :: Int
                      } deriving Show
-$(makeLenses ''Out)
+-- $(makeLenses ''Out)
 $(makeLenses ''Module)
 
 type Synth = M.Map ModuleName Module
 
-dumpSynth :: Synth -> IO ()
-dumpSynth synth = do
-    putStrLn "Synth:"
-    let underlyingList = M.toList synth
-    forM_ underlyingList $ \(modName, modl) -> do
-        putStrLn $ _getModuleName modName ++ ":"
-        print $ _inputNodes modl
+-- dumpSynth :: Synth -> IO ()
+-- dumpSynth synth = do
+--     putStrLn "Synth:"
+--     let underlyingList = M.toList synth
+--     forM_ underlyingList $ \(modName, modl) -> do
+--         putStrLn $ _getModuleName modName ++ ":"
+--         print $ _inputNodes modl
 
 connect :: ModuleName -> OutName -> ModuleName -> InName -> Synth -> Synth
 connect outNodeName outField inNode inField synth =
@@ -59,12 +69,13 @@ disconnect :: ModuleName -> InName -> Synth -> Synth
 disconnect inNode inField synth =
     ix inNode . inputNodes . ix inField .~ Disconnected $ synth 
 
-getSynth :: M.Map String NodeType -> String ->
-            ErrorT String Identity NodeType
+getSynth :: M.Map String NodeType
+            -> String
+            -> ErrorT String Identity NodeType
 getSynth synths t = maybe (error $ "no synth " ++ t) return $
                             M.lookup t synths
 
-type SynthBuilder a = State Synth a
+--type SynthBuilder a = State Synth a
 
 loadSynthTypes :: String ->
                   ErrorT String IO (M.Map String NodeType)
@@ -74,12 +85,9 @@ loadSynthTypes dir = do
     moduleSpecList <- forM moduleSpecs $ \moduleSpec -> do
         liftIO $ putStrLn $ "Compiling " ++ show moduleSpec
         let primTypeName = fst $ splitDot moduleSpec
-        loadedModule <- loadNodeType primTypeName dir moduleSpec
+        loadedModule <- loadNodeType primTypeName (dir `combine` moduleSpec)
         return (primTypeName, loadedModule)
     return $ M.fromList moduleSpecList
 
 addSynth :: ModuleName -> (Int -> Module) -> State Synth ()
-addSynth name synthMaker = do
-    types <- get
-    let n = M.size types
-    put $ M.insert name (synthMaker n) types
+addSynth name synthMaker = modify $ \types -> M.insert name (synthMaker (M.size types)) types

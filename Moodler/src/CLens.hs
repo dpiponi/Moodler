@@ -18,12 +18,6 @@ identString :: Lens' Ident String
 identString = lens identToString
                    (\(Ident _ b c) a' -> Ident a' b c)
 
-{-
-identName :: Lens' Ident String
-identName = lens (\(Ident name _ _) -> name)
-                 (\(Ident _ num info) name -> Ident name num info)
-                 -}
-
 -- Dangerous, doesn't cover every case XXX
 -- But name makes clear what argument should be.
 funDeclrParams :: Lens' CDerivedDeclr (Either [Ident] ([CDecl], Bool))

@@ -51,8 +51,7 @@ main = do
 
         liftIO $ do
             audioStateList <- replicateM numVoices (createFn dso)
-            let audioStates = 
-                    listArray (0, numVoices-1) audioStateList
+            let audioStates = listArray (0, numVoices-1) audioStateList
 
             audioPlayer <- liftIO loadAudioDSO
             setNumStates audioPlayer numVoices

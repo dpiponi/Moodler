@@ -12,7 +12,16 @@ Haskell.
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 
-module NanoHaskell where
+module NanoHaskell(Nano(..),
+                   Statement(..),
+                   UnParse(..),
+                   StringExpr(..),
+                   PointExpr(..),
+                   UiIdExpr(..),
+                   LocationExpr(..),
+                   Command(..),
+                   nanoParser,
+                   interpret) where
 
 import Prelude hiding (takeWhile)
 import Graphics.Gloss.Interface.IO.Game
@@ -227,8 +236,6 @@ interpretCommand dict (Selector n p ns l) = do
     n' <- evalString dict n
     p' <- evalPoint dict p
     lCommand dict (U.selector' n' p' ns) l
---     l' <- evalLocation dict l
---     U <$> lift (U.selector' n' p' ns l')
 
 interpretCommand dict (Rename s u) = do
     s' <- evalString dict s
@@ -296,28 +303,11 @@ interpretCommand _ Restart = lift U.restart >> return Unit
 interpretCommand _ Mouse = P <$> lift U.mouse
 interpretCommand _ GetRoot = U <$> lift U.getRoot
 
--- testScript :: Nano
--- testScript = Do [
---     Statement (Just "plane") CurrentPlane,
---     Statement (Just "p") Mouse,
---     Statement (Just "panel") (Container (SLit "panel_2x1.png") (PVar "p") (Inside (UVar "plane"))),
---     Statement (Just "lab") (Label (SLit "sum") (AddV (PVar "p") (-36.0, 84.0)) (Outside (UVar "panel"))),
---     Statement (Just "name") (New (SLit "sum")),
---     Statement (Just "inp") (Plugin (SVar "name" :! ".signal1") (AddV (PVar "p") (-24, 24)) (Outside (UVar "panel"))),
---     Statement Nothing (SetColour (UVar "inp") (SLit "#sample")),
---     Statement (Just "inp") (Plugin (SVar "name" :! "signal2") (AddV (PVar "p") (-24, -24)) (Outside (UVar "panel"))),
---     Statement Nothing (SetColour (UVar "inp") (SLit "#sample")),
---     Statement (Just "out") (Plugout (SVar "name" :! "result") (AddV (PVar "p") (24, 0)) (Outside (UVar "panel"))),
---     Statement Nothing (SetColour (UVar "out") (SLit "#sample")),
---     Statement Nothing Recompile
---     ]
-
 --
 -- Parser starts here
 --
 
 skipSpaceOrComment :: Parser ()
--- skipSpaceOrComment = skipSpace
 skipSpaceOrComment = do
     skipSpace `sepBy` ("--" *> skipWhile (not . isEndOfLine))
     skipSpace
@@ -597,6 +587,8 @@ commandParser = currentPlaneParser
                 <|> setOutputParser
                 <|> cableParser
 
+{-
 g = do
     x <- readFile "test.hs"
     parseTest nanoParser (pack x)
+-}

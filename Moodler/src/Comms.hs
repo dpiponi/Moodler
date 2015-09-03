@@ -49,7 +49,6 @@ recordUndo :: (MonadIO m, MonadState World m) =>
 recordUndo undoCmd redoCmd = do
     undoInfo . undoHistory . _head . _1 %= pushSend undoCmd
     undoInfo . undoHistory . _head . _2 %= reversePushSend redoCmd
---     liftIO $ putStrLn $ "undo: " ++ show (undoCmd, redoCmd)
 
 sendOSCMsg :: (MonadIO m, MonadState World m) => Message -> m ()
 sendOSCMsg m = do
@@ -71,32 +70,32 @@ sendSetMessage :: (MonadIO m, MonadState World m) =>
 sendSetMessage knobName value =
     sendOSCMsg (message "/set" ((string <$> splitDot' knobName) ++ [float value]))
 
-sendSetStringMessage :: (MonadIO m, MonadState World m) =>
-                        String -> String -> m ()
+sendSetStringMessage :: (MonadIO m, MonadState World m)
+                        => String -> String -> m ()
 sendSetStringMessage textBoxName value =
     sendOSCMsg (message "/set" ((string <$> splitDot' textBoxName) ++ [string value]))
 
-sendNewInputMessage :: (MonadIO m, MonadState World m) =>
-                       String -> m ()
+sendNewInputMessage :: (MonadIO m, MonadState World m)
+                       => String -> m ()
 sendNewInputMessage knobName = do
     let (a, _) = splitDot knobName
     sendOSCMsg (message "/input" [string a])
 
-sendConnectMessage :: (Functor m, MonadIO m, MonadState World m) =>
-                      String -> String -> m ()
+sendConnectMessage :: (Functor m, MonadIO m, MonadState World m)
+                      => String -> String -> m ()
 sendConnectMessage = sendConnectMessage'
 
-sendNewSynthMessage :: (MonadIO m, MonadState World m) =>
-                       String -> String -> m ()
+sendNewSynthMessage :: (MonadIO m, MonadState World m)
+                       => String -> String -> m ()
 sendNewSynthMessage synthType synthName =
     sendOSCMsg (message "/synth" [string synthType, string synthName])
 
-sendRecompileMessage :: (MonadIO m, MonadState World m) =>
-                        String -> m ()
+sendRecompileMessage :: (MonadIO m, MonadState World m)
+                        => String -> m ()
 sendRecompileMessage _ = sendOSCMsg (message "/recompile" [])
 
-sendResetMessage :: (MonadIO m, MonadState World m) =>
-                        String -> m ()
+sendResetMessage :: (MonadIO m, MonadState World m)
+                    => String -> m ()
 sendResetMessage _ = sendOSCMsg (message "/reset" [])
 
 sendQuitMessage :: (MonadIO m, MonadState World m) => m ()

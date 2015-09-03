@@ -1,6 +1,19 @@
 {-# LANGUAGE TemplateHaskell, FlexibleContexts #-}
 
-module Module where
+module Module(NodeType(..),
+              inNames,
+               loadNodeType,
+               execCode,
+               inList,
+               initCode,
+               isInlined,
+               nodeInclude,
+               nodeLink,
+               nodeTypeName,
+               outNames,
+               stateDecls,
+               stateNames,
+               varoffset) where
 
 import Control.Monad.State
 import Control.Monad.Trans.Error
@@ -8,20 +21,15 @@ import Control.Lens
 import Control.Monad.Writer
 import Data.Maybe
 import qualified Data.Foldable as F
---import Language.C.Data.Ident
 import Language.C.Data.Name
 import Language.C.Data.Position
 import Language.C.Parser
 import Language.C.Syntax.AST
 import Parser
 import qualified Data.ByteString.Char8 as B
---import qualified Data.Set as S
 import qualified Data.Map as M
 import Language.Preprocessor.Cpphs
 import Data.Tuple
-import System.FilePath.Posix
---import qualified Data.Traversable as T
---import Language.C.Pretty
 
 import Text
 import MoodlerSymbols
@@ -52,9 +60,10 @@ varoffset var x | x == 0  = var
 xyoffset :: (Eq a, Ord a, Num a, Show a) => (a, a) -> String
 xyoffset p = "(p+" ++ show p ++ ")"
 
-indent :: Int -> String
-indent n = replicate n ' '
+-- indent :: Int -> String
+-- indent n = replicate n ' '
 
+-- XXX Switch to generating NanoHaskell
 synthPreamble :: MonadWriter String m =>
                  String -> String -> (Float, Float) -> m ()
 synthPreamble panelName synthName topOffset = do
@@ -135,9 +144,11 @@ preprocessFile fileName = do
                      } fileName rawCode
     return (B.pack code, include, link)
 
-loadNodeType :: String -> String -> String -> ErrorT String IO NodeType
-loadNodeType primTypeName dir fileName' = do
-    let fileName = combine dir fileName'
+-- | Loads a module from a .msl file
+loadNodeType :: String                       -- ^ Load module with this name...
+                -> String                    -- ^ ...from this file...
+                -> ErrorT String IO NodeType -- ^ ...possibly returning a NodeType describing it.
+loadNodeType primTypeName fileName = do
     (input, include, link) <- preprocessFile fileName
     let pos = position 0 "" 0 0
     let x = either (Left . show) Right $
@@ -146,13 +157,13 @@ loadNodeType primTypeName dir fileName' = do
     (ast, _) <- case x of
         Left e -> throwError e
         Right v -> return v
-    (_, Extracted { _initFn = i, _execFn = execFunction, _vars = vs }) <- liftIO $ runStateT
-                (extractModuleParts ast) (Extracted Nothing Nothing [] M.empty)
+    (_, Extracted { _initFn = i, _execFn = execFunction, _vars = vs }) <- liftIO $
+            extractModuleParts ast `runStateT` Extracted Nothing Nothing [] M.empty
     let states = map varDefinedInDeclaration vs
     let (ins, outs) = getInsAndOuts (fromJust execFunction)
 
-    let synthName = fst (splitDot fileName')
-    let script = synthScript synthName ins outs
+    let synthName = primTypeName -- fst (splitDot fileName')
+    let script = synthScript primTypeName ins outs
     liftIO $ writeFile ("scripts/_" ++ synthName ++ ".hs") script
 
     fromMaybe (throwError "loadNodeType failed") $ do

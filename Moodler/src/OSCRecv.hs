@@ -29,9 +29,6 @@ import qualified Data.ByteString.Char8 as C
 import qualified Data.Map as M
 import qualified Data.Set as S
 import Control.Monad.Morph
---import Control.Monad.Reader
---import Data.Functor.Identity
---import StandardSynth
 import Data.Maybe
 
 import CodeGen
@@ -63,7 +60,7 @@ recompile' :: MonadIO m => Int ->
 recompile' numVoices dataPtrs set_fill_buffer = do
     newSynth <- use moodlerSynth
     -- We know "out" exists so maybe not look it up but store globally XXX
-    let output' = unJust "recompile" $ M.lookup (ModuleName "out") newSynth
+    let output' = unsafeLookupM "recompile" (ModuleName "out") newSynth
     newDso <- hoist liftIO $ makeDSOFromSynth newSynth output'
     -- XXX Need to kill old DSO when appropriate.
     -- Can't unload immediately because exec() may still
@@ -87,7 +84,7 @@ dumpC = do
     synth <- use moodlerSynth
     currentDirectory <- liftIO getCurrentDirectory
     liftIO $ putStrLn $ execWriter $ gen currentDirectory synth $
-                        unJust "dumpC" $ M.lookup (ModuleName "out") synth
+                        unsafeLookupM "dumpC" (ModuleName "out") synth
 
 reset :: MonadIO m =>
          Synth -> Int -> ErrorT String (StateT Moodler m) ()
@@ -134,8 +131,7 @@ addNewModule synthType synthName synthTypes = do
             "Adding synth " ++ synthType ++ " " ++ synthName
     oldSynth <- use moodlerSynth
     let newNumber = M.size oldSynth
-    let ins = _inNames $ unJust "addNewModule" $
-                         M.lookup synthType synthTypes
+    let ins = _inNames $ unsafeLookupM "addNewModule" synthType synthTypes
     -- Throws away CDecl
     let inputs = M.fromList $
             zip (map fst $ M.toList ins) (repeat Disconnected)
@@ -213,8 +209,7 @@ handleMessage theStandard numVoices dataPtrs set_fill_buffer
                 let [a', b'] = (C.unpack . d_ascii_string) <$> [a, b]
                 let a'' = redirect aliasMap a'
                 dso' <- use moodlerDSO
-                liftIO $
-                    forM_ [0..numVoices-1] $ \v ->
+                liftIO $ forM_ [0..numVoices-1] $ \v ->
                         setStateVar (dsoSetFn dso') (dataPtrs!v) a'' b' f
 
             Just (Message "/set" [a, b, ASCII_String f]) ->  do

@@ -6,7 +6,18 @@ Maintainer  : dpiponi@gmail.com
 Various functions with no obvious home.
 -}
 
-module Utils where
+module Utils(dezip',
+             dezip,
+             unique,
+             uniqBy,
+             uniq,
+             partitionM,
+             unsafeLookup,
+             unsafeLookupM,
+             clampToRange,
+             unJust,
+             withJustM,
+             withJust) where
 
 import qualified Data.Map as M
 import qualified Data.Set as S
@@ -92,8 +103,8 @@ unJust :: String -> Maybe a -> a
 unJust msg Nothing = error ("Failed in unJust: " ++ msg)
 unJust _ (Just a) = a
 
-uniqueValues :: (Ord a, Ord b) => M.Map a b -> [b]
-uniqueValues = map snd . S.toList . S.fromList . M.toList
+-- uniqueValues :: (Ord a, Ord b) => M.Map a b -> [b]
+-- uniqueValues = map snd . S.toList . S.fromList . M.toList
 
 unique :: (Ord b) => [b] -> [b]
 unique = S.toList . S.fromList
@@ -120,3 +131,9 @@ withJustM ma f = do
 withJust :: Monad m => Maybe a -> (a -> m ()) -> m ()
 withJust Nothing _ = return ()
 withJust (Just a) f = f a
+
+unsafeLookup :: Ord k => String -> k -> [(k, a)] -> a
+unsafeLookup s k m = unJust s (lookup k m)
+
+unsafeLookupM :: Ord k => String -> k -> M.Map k a -> a
+unsafeLookupM s k m = unJust s (M.lookup k m)

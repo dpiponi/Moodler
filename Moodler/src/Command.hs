@@ -67,31 +67,43 @@ commandImportList =
           "Sound.MoodlerLib.UiLibElement",
           "Sound.MoodlerLib.Quantise"]
 
-execCommand :: (InputHandler m, Functor m, MonadIO m,
-                MonadState World m) =>
-               String -> m ()
-execCommand cmd = case parseOnly N.nanoParser (T.pack cmd) of
-    Right r -> do
-        liftIO $ putStrLn "Using nanoInterpreter"
+execNanoCommand :: (InputHandler m, MonadIO m, MonadState World m, Functor m)
+                   => N.Nano -> m ()
+execNanoCommand r = do
         let a = runErrorT (N.interpret r)
         b <- evalUi a
         case b of
             Left e -> liftIO $ putStrLn ("Error: " ++ e)
             Right () -> return ()
+
+execGHCCommand :: (InputHandler m, Functor m, MonadIO m, MonadState World m)
+                  => String -> m ()
+execGHCCommand cmd = do
+    commandResult <- liftIO $ I.runInterpreter $ do
+        I.set [I.searchPath I.:= ["src"]]
+        I.setImports commandImportList
+        I.interpret cmd (I.as :: Ui ())
+    case commandResult of
+        Left err -> doAlert $ case err of
+            I.UnknownError e -> "Unknown error: " ++ e
+            I.WontCompile es -> show (map I.errMsg es)
+            I.NotAllowed e   -> "Not allowed: " ++ e
+            I.GhcException e -> "GHC exception: " ++ e
+        Right commandTree -> evalUi commandTree
+
+--
+-- XXX Work on error message display!
+
+-- | Execute plugin commands from a 'String'.
+execCommand :: (InputHandler m, Functor m, MonadIO m, MonadState World m)
+               => String -> m ()
+execCommand cmd = case parseOnly N.nanoParser (T.pack cmd) of
+    Right r -> do
+        liftIO $ putStrLn "Using nanoInterpreter"
+        execNanoCommand r
     Left x -> do
-        liftIO $ putStrLn ("not using nanoInterpreter: " ++ x)
---         liftIO $ putStrLn cmd
-        commandResult <- liftIO $ I.runInterpreter $ do
-            I.set [I.searchPath I.:= ["src"]]
-            I.setImports commandImportList
-            I.interpret cmd (I.as :: Ui ())
-        case commandResult of
-            Left err -> doAlert $ case err of
-                I.UnknownError e -> "Unknown error: " ++ e
-                I.WontCompile es -> show (map I.errMsg es)
-                I.NotAllowed e   -> "Not allowed: " ++ e
-                I.GhcException e -> "GHC exception: " ++ e
-            Right commandTree -> evalUi commandTree
+        liftIO $ putStrLn ("Not using nanoInterpreter: " ++ x)
+        execGHCCommand cmd
 
 safeReadFile :: String -> IO (Either String String)
 safeReadFile f = 
@@ -127,70 +139,62 @@ evalUi (CurrentPlane cfn) = do
 evalUi (Switch p cfn) =
     planeInfo . planes .= p >> evalUi cfn
 
-evalUi (Echo t cfn) =
-    doAlert t >> evalUi cfn
+evalUi (Echo t cfn) = doAlert t >> evalUi cfn
 
 evalUi (Hide t h cfn) =
     serverState . uiElements . ix t . ur . hidden .= h >> evalUi cfn
 
-evalUi (ToggleHidden cfn) =
-    showHidden %= not >> evalUi cfn
+evalUi (ToggleHidden cfn) = showHidden %= not >> evalUi cfn
 
-evalUi (Delete t cfn) =
-    T.deleteElement t >> evalUi cfn
+evalUi (Delete t cfn) = T.deleteElement t >> evalUi cfn
 
-evalUi (New s1 s2 cfn) =
-    synthNew s1 s2 >> evalUi cfn
+evalUi (New s1 s2 cfn) = synthNew s1 s2 >> evalUi cfn
 
-evalUi (Run dir t cfn) =
-    execScript dir t >> evalUi cfn
+evalUi (Run dir t cfn) = execScript dir t >> evalUi cfn
 
 evalUi (Load dir t cfn) = do
     fileName <- execScript dir t
     projectFile .= fileName
     evalUi cfn
 
-evalUi (SendBack t cfn) =
-    sendToBack t >> evalUi cfn
+evalUi (SendBack t cfn) = sendToBack t >> evalUi cfn
 
-evalUi (BringFront t cfn) =
-    bringToFront t >> evalUi cfn
+evalUi (BringFront t cfn) = bringToFront t >> evalUi cfn
 
 evalUi (PlugIn n t p creationParent cfn) = do
     (_, hi) <- depthExtent
-    let e = In (UrElement creationParent False (hi+1) False p t) "#sample" t []
+    let e = In (UrElement creationParent False (hi+1) False p t)
+               "#sample" t []
     createdInParent n e creationParent
     evalUi (cfn n)
 
 evalUi (PlugOut n t p creationPlane cfn) = do
     (_, hi) <- depthExtent
-    let e = Out (UrElement creationPlane False (hi+1) False p t) "#sample"
+    let e = Out (UrElement creationPlane False (hi+1) False p t)
+                "#sample"
     createdInParent n e creationPlane
     evalUi (cfn n)
 
 evalUi (U.Knob n t p creationParent cfn) = do
     (_, hi) <- depthExtent
-    let e = UIElement.Knob (UrElement creationParent False (hi+1) False
-                                p t) "#control" t 0.0 Nothing Nothing
+    let e = UIElement.Knob (UrElement creationParent False (hi+1) False p t)
+                           "#control" t 0.0 Nothing Nothing
     createdInParent n e creationParent
     evalUi (cfn n)
 
 evalUi (U.Selector n t p opts creationParent cfn) = do
-    --liftIO $ print "Selector"
     (_, hi) <- depthExtent
     let e = UIElement.Selector (UrElement creationParent False (hi+1) False p t) "#control" 0.0 opts
     createdInParent n e creationParent
     evalUi (cfn n)
 
 evalUi (U.TextBox n t p creationParent cfn) = do
-    --liftIO $ print "Selector"
     (_, hi) <- depthExtent
     let e = UIElement.TextBox (UrElement creationParent False (hi+1) False p t) "(0, 0, 1)" ""
     createdInParent n e creationParent
     evalUi (cfn n)
 
 evalUi (U.Proxy n proxyName p planeItsOn cfn) = do
-    --liftIO $ print "Proxy"
     (_, hi) <- depthExtent
     let e = UIElement.Container { _ur = UrElement planeItsOn False (hi+1) False p proxyName
                                 , _pic = "panel_proxy.png"
@@ -200,17 +204,6 @@ evalUi (U.Proxy n proxyName p planeItsOn cfn) = do
                                 , _outside = S.empty }
     createdInParent n e planeItsOn
     evalUi (cfn n)
-
--- evalUi (U.Image n bmpName p creationPlane cfn) = do
---     (_, hi) <- depthExtent
---     maybePic <- getPic bmpName
---     case maybePic of
---         Right (width, height) -> do
---             let e = UIElement.Image (UrElement creationPlane False (hi+1) False
---                     p bmpName) bmpName width height
---             createdInParent n e creationPlane
---         Left e -> doAlert e
---     evalUi (cfn n)
 
 evalUi (U.Container n bmpName p creationPlane cfn) = do
     (_, hi) <- depthExtent
@@ -290,12 +283,6 @@ evalUi (Mouse cfn) = do
     p <- use mouseLoc
     evalUi (cfn p)
 
-{-
-evalUi (Args cfn) = do
-    a <- use cmdArgs
-    evalUi (cfn a)
--}
-
 evalUi (GetValue s1 cfn) = do
     elts <- use (serverState . uiElements)
     let a = case M.lookup s1 elts of
@@ -322,19 +309,6 @@ evalUi (GetRoot cfn) = do
     root <- use (planeInfo . rootPlane)
     evalUi (cfn (root::UiId))
 
-{-
--- Should use current project name
-evalUi (Save t cfn) = do
-    if null t
-        then do
-            fileName <- use projectFile
-            saveWorld fileName
-        else do
-            projectFile .= "saves/" + t + ".hs"
-            saveWorld t
-    evalUi cfn
--}
-
 evalUi (Parent s1 s2 cfn) =
     T.reparent s1 s2 >> evalUi cfn
 
@@ -345,13 +319,9 @@ evalUi (Unparent s1 cfn) =
     T.unparent s1 >> evalUi cfn
 
 evalUi (Write t cfn) = do
-    --liftIO $ print "Write selection"
     p <- use mouseLoc
     code <- saveSelection (Just (quantise2 quantum p))
     liftIO $ writeFile ("scripts/" ++ t ++ ".hs") code
-    --liftIO $ putStrLn $ "----- save selection: " ++ t
-    --liftIO $ putStrLn code
-    --liftIO $ putStrLn "-----"
     evalUi cfn
 
 -- XXX
@@ -366,7 +336,6 @@ evalUi (NewId s1 cfn) = do
 
 evalUi (Selection cfn) = do
     a <- use currentSelection
-    --liftIO $ putStrLn $ "selection = " ++ show a
     evalUi (cfn a)
 
 evalUi (Bind c t cfn) =
