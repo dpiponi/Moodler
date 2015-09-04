@@ -155,7 +155,7 @@ getUiId _ = throwError "Expected a UiId"
 evalPoint :: M.Map String Value -> PointExpr -> ErrorT String U.Ui Point
 evalPoint dict (PVar e) =
     case M.lookup e dict of
-        Nothing -> throwError (e ++ " not defined")
+        Nothing -> throwError ("Point " ++ e ++ " not defined in NanoHaskell")
         Just y -> getPoint y
 
 evalPoint _ (PLit p) = return p

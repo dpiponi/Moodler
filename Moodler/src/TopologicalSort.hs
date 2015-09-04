@@ -10,6 +10,7 @@ import qualified Data.Set as S
 import MoodlerSymbols
 import Synth
 import Utils
+import Debug.Trace
 
 inputSource :: Out -> Maybe ModuleName
 inputSource Disconnected = Nothing
@@ -19,11 +20,11 @@ inputSource (Out src _) = Just src
 -- output.
 topologicalSort :: Synth -> Module -> [Module]
 topologicalSort synth out =
-    fst $ execState (orderNodes out) ([], S.empty) where
+    trace("!!! " ++ show (M.keys synth)) $ fst $ execState (orderNodes out) ([], S.empty) where
     orderNodes modl@Module { _getNodeName = name , _inputNodes = inputs} = do
         (orderedNodes, visited) <- get
 
-        unless (name `S.member` visited) $ do
+        trace ("Visiting " ++ show name ++ "inps = " ++ show inputs) $ unless (name `S.member` visited) $ do
              put (modl : orderedNodes, S.insert name visited)
 
              forM_ (unique (mapMaybe inputSource (M.elems inputs))) $

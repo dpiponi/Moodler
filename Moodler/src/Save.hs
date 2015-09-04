@@ -90,9 +90,21 @@ commonLine :: (Functor m, MonadIO m, MonadState World m)
 commonLine parentId mMouse eltName elt c =
     let p = elt ^. ur . loc
         n = elt ^. ur . name
+    in saveCommand "module" [store eltName (c (rewriteConnection2 n)
+                                              (mouseExpr mMouse p)
+                                              (locExpr parentId))]
+
+labelLine :: (Functor m, MonadIO m, MonadState World m)
+              => Location
+              -> Maybe Point -> UiId -> UIElement
+              -> (N.StringExpr -> N.PointExpr -> N.LocationExpr -> N.Command)
+              -> SaverT m ()
+labelLine parentId mMouse eltName elt c =
+    let p = elt ^. ur . loc
+        n = elt ^. ur . name
     in saveCommand "module" [store eltName (c (N.SLit n)
-                                               (mouseExpr mMouse p)
-                                               (locExpr parentId))]
+                                              (mouseExpr mMouse p)
+                                              (locExpr parentId))]
 
 elementLine :: (Functor m, MonadIO m, MonadState World m)
                => S.Set UiId
@@ -101,7 +113,7 @@ elementLine :: (Functor m, MonadIO m, MonadState World m)
                -> SaverT m ()
 
 elementLine _ parentId mMouse eltName elt@Label {} =
-    commonLine parentId mMouse eltName elt N.Label
+    labelLine parentId mMouse eltName elt N.Label
 
 elementLine _ parentId mMouse eltName elt@Knob { _ur = UrElement { _name = n }
                                                , _displayName = d
@@ -187,7 +199,7 @@ saveSelection' everythingSaved mMouse curSel aliasesToSave mOutId = do
     saveCommand "midamble" [discard N.Recompile]
     saveItems (Inside (UiId "root")) everythingSaved mMouse curSel
     forM_ (M.toList aliasesToSave) $ \(aliasName, synthName) ->
-        saveCommand "aliases" [discard (N.Alias (N.SLit aliasName) (N.SLit synthName))]
+        saveCommand "aliases" [discard (N.Alias (N.SLit aliasName) (N.SVar synthName))]
     case mOutId of
         Nothing -> return ()
         Just outId -> saveCommand "output" [discard (N.SetOutput (uVar outId))]
