@@ -29,4 +29,4 @@
 #define QUANTISE_AUGMENTED 28
 #define QUANTISE_ENIGMATIC 29
 
-int quantise(int scale, int note);
+int quantise_scale(int scale, int note);

@@ -6,6 +6,9 @@ void init() {
     result = 0.0;
 }
 
+void fini() {
+}
+
 inline void exec(in control trigger, in control signal, out control result) {
     if (last_trigger <= 0 && trigger > 0) {
         result = signal;

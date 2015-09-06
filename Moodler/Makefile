@@ -10,7 +10,7 @@ ifdef LIBLO_DIR
 LIBLO_CFLAGS = -I$(LIBLO_DIR)/include -L$(LIBLO_DIR)/lib
 endif
 
-TARGETS = audio.so moodler_lib.o delay_line.o delay_int_line.o reverb.o hilbert.o progression.o audio_square.o band_limited.o audio_sin.o ladder.o cbridge
+TARGETS = audio.so moodler_lib.o delay_line.o delay_int_line.o reverb.o hilbert.o progression.o audio_square.o band_limited.o audio_sin.o ladder.o cbridge quantise_scale.o
 
 all: $(TARGETS)
 
@@ -49,6 +49,9 @@ band_limited.o: band_limited.h band_limited.c
 
 ladder.o: ladder.h ladder.c
 	clang -ffast-math -O3 -c ladder.c
+
+quantise_scale.o: quantise_scale.h quantise_scale.c
+	clang -ffast-math -O3 -c quantise_scale.c
 
 clean:
 	rm -f $(TARGETS)

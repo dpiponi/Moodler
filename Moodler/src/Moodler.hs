@@ -27,7 +27,7 @@ modulesDirectory :: String
 modulesDirectory = "modules"
 
 numVoices :: Int
-numVoices = 4
+numVoices = 1
 
 -- Write code using the State monad but use it with
 -- IORef instead.
